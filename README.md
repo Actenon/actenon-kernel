@@ -13,8 +13,6 @@ Your AI agent can try to delete your production database. When that action is ro
 
 ## 60-Second Quickstart
 
-## 60-Second Quickstart
-
 ```bash
 git clone https://github.com/Actenon/Actenon.git
 cd Actenon
@@ -25,31 +23,10 @@ source .venv/bin/activate
 python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[asymmetric]"
 
-bash scripts/demo_hero.sh```
-
-This is a safe local simulation. It does not contact a cloud account, use
-external secrets, or perform a real destructive action.
-
-Expected output excerpt:
-
-```text
-Actenon hero demo
-No valid proof, no execution. Every consequential AI action leaves a verifiable receipt.
-
-Phase 1/3: Without execution-edge proof binding
-Outcome: WOULD_EXECUTE
-
-Phase 2/3: With Actenon, but no matching proof
-Outcome: REFUSED
-Reason code: ACTION_HASH_MISMATCH
-Side effect executed: false
-
-Phase 3/3: With valid proof
-Outcome: EXECUTED
-Receipt artifact: artifacts/hero_demo_runtime/simulations/replay-refused/execution_receipt.json
+bash scripts/demo_hero.sh
 ```
 
-Full transcript: [docs/assets/ACTENON_HERO_DEMO_TRANSCRIPT.md](docs/assets/ACTENON_HERO_DEMO_TRANSCRIPT.md)
+This is a safe local simulation. It does not contact a cloud account, use external secrets, or perform a real destructive action.
 
 ## Artifact Snippet
 
