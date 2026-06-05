@@ -6,141 +6,139 @@ if [[ "${1:-}" == "--details" ]]; then
   DETAILS=true
 fi
 
-clear
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${ROOT_DIR}"
 
-BLUE="\033[1;36m"
-GREEN="\033[1;32m"
-RED="\033[1;31m"
-YELLOW="\033[1;33m"
-WHITE="\033[1;37m"
-DIM="\033[2m"
-RESET="\033[0m"
+RUNTIME_DIR="${ACTENON_HERO_RUNTIME_DIR:-artifacts/hero_demo_runtime/live}"
+LOCAL_SIGNER_WARNING="ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY"
 
-line() {
-  echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+run_simulation() {
+  local log_file
+  log_file="$(mktemp)"
+  if ! PYTHONWARNINGS="ignore:${LOCAL_SIGNER_WARNING}:RuntimeWarning" \
+    python3 -m actenon.cli simulate --runtime-dir "${RUNTIME_DIR}" "$@" --json >"${log_file}" 2>&1; then
+    cat "${log_file}" >&2
+    rm -f "${log_file}"
+    exit 1
+  fi
+  rm -f "${log_file}"
 }
 
-pause() {
-  sleep "${1:-1}"
+run_simulation --incident replit
+run_simulation --scenario replay-refused
+
+python3 - "${ROOT_DIR}" "${RUNTIME_DIR}" "${DETAILS}" <<'PY'
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from actenon.models.serialization import build_artifact_digest
+
+
+root = Path(sys.argv[1]).resolve()
+runtime_dir = Path(sys.argv[2])
+details = sys.argv[3].lower() == "true"
+
+
+def artifact_path(*parts: str) -> Path:
+    return root / runtime_dir / "simulations" / Path(*parts)
+
+
+def relative(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(root))
+    except ValueError:
+        return str(path)
+
+
+def load_required(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        print(f"missing expected demo artifact: {relative(path)}", file=sys.stderr)
+        sys.exit(1)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        print(f"expected JSON object artifact: {relative(path)}", file=sys.stderr)
+        sys.exit(1)
+    return payload
+
+
+def digest(payload: dict[str, Any]) -> str:
+    artifact_digest = build_artifact_digest(payload)
+    return f"{artifact_digest.algorithm}:{artifact_digest.value}"
+
+
+counterfactual_path = artifact_path("replit", "counterfactual_unprotected_execution.json")
+refusal_path = artifact_path("replit", "refusal.json")
+receipt_path = artifact_path("replay-refused", "execution_receipt.json")
+replay_refusal_path = artifact_path("replay-refused", "replay_refusal.json")
+
+counterfactual = load_required(counterfactual_path)
+refusal = load_required(refusal_path)
+receipt = load_required(receipt_path)
+replay_refusal = load_required(replay_refusal_path)
+
+reason_code = refusal.get("refusal_code") or refusal.get("reason_code")
+if not reason_code:
+    print(f"refusal artifact has no refusal_code/reason_code: {relative(refusal_path)}", file=sys.stderr)
+    sys.exit(1)
+
+if receipt.get("outcome") != "executed":
+    print(f"receipt artifact was not executed: {relative(receipt_path)}", file=sys.stderr)
+    sys.exit(1)
+
+snapshot = {
+    "refusal": {
+        "reason_code": reason_code,
+        "side_effect_executed": False,
+        "artifact": relative(refusal_path),
+        "pccb_id": refusal.get("correlation", {}).get("pccb_id"),
+        "artifact_digest": digest(refusal),
+    },
+    "receipt": {
+        "outcome": receipt.get("outcome"),
+        "side_effect_executed": True,
+        "artifact": relative(receipt_path),
+        "receipt_id": receipt.get("receipt_id"),
+        "pccb_id": receipt.get("correlation", {}).get("pccb_id"),
+        "artifact_digest": digest(receipt),
+    },
 }
 
-echo ""
-echo -e "${WHITE}ACTENON HERO DEMO${RESET}"
-echo -e "${BLUE}No valid proof, no execution.${RESET}"
-echo ""
-echo "Every consequential AI action leaves a verifiable receipt."
-echo ""
-echo -e "${DIM}Safe local simulation. No real database, payment, email, or cloud action is performed.${RESET}"
-echo ""
-pause 2
+print("ACTENON")
+print("No valid proof, no execution.")
+print()
+print("Agent attempts:")
+print("  database.delete_table production_customers")
+print()
+print("WITHOUT proof gate:")
+print("  WOULD EXECUTE")
+print("  side_effect_executed: true")
+print("  consequence: destructive action reaches side effect path")
+print()
+print("WITH ACTENON:")
+print("  REFUSED")
+print(f"  reason_code: {reason_code}")
+print("  side_effect_executed: false")
+print(f"  refusal artifact: {relative(refusal_path)}")
+print()
+print("VALID PROOF:")
+print("  EXECUTED ONCE")
+print("  side_effect_executed: true")
+print(f"  receipt artifact: {relative(receipt_path)}")
+print()
+print("SNAPSHOT:")
+print(json.dumps(snapshot, indent=2))
+print()
+print("Done: unproven action refused; valid proof executed once.")
 
-clear
-line
-echo -e "${RED}WITHOUT ACTENON${RESET}"
-line
-echo ""
-echo -e "${WHITE}Agent attempts:${RESET}"
-echo "  DROP TABLE production;"
-echo ""
-pause 0.8
-echo -e "${RED}Outcome:${RESET}"
-echo -e "  ${RED}WOULD_EXECUTE${RESET}"
-echo ""
-echo -e "${RED}Side effect:${RESET}"
-echo "  Data would be deleted."
-echo ""
-pause 2
-
-clear
-line
-echo -e "${BLUE}WITH ACTENON${RESET}"
-line
-echo ""
-echo -e "${WHITE}Same action:${RESET}"
-echo "  DROP TABLE production;"
-echo ""
-pause 0.8
-echo -e "${YELLOW}Proof check:${RESET}"
-echo "  No valid proof for this exact action."
-echo ""
-pause 0.8
-echo -e "${RED}Outcome:${RESET}"
-echo -e "  ${RED}REFUSED${RESET}"
-echo ""
-echo -e "${GREEN}Side effect executed:${RESET}"
-echo "  false"
-echo ""
-echo -e "${GREEN}Refusal receipt:${RESET}"
-echo "  emitted"
-echo ""
-pause 2.2
-
-clear
-line
-echo -e "${GREEN}WITH VALID PROOF${RESET}"
-line
-echo ""
-echo -e "${WHITE}Legitimate approved action:${RESET}"
-echo "  archive_old_demo_records;"
-echo ""
-pause 0.8
-echo -e "${GREEN}Proof check:${RESET}"
-echo "  valid"
-echo ""
-echo -e "${GREEN}Outcome:${RESET}"
-echo "  EXECUTED ONCE"
-echo ""
-echo -e "${GREEN}Receipt:${RESET}"
-echo "  emitted and verifiable"
-echo ""
-pause 2
-
-clear
-line
-echo -e "${WHITE}RECEIPT SNAPSHOT${RESET}"
-line
-echo ""
-echo -e "${RED}Refusal:${RESET}"
-cat <<'JSON'
-{
-  "outcome": "refused",
-  "reason_code": "ACTION_HASH_MISMATCH",
-  "side_effect_executed": false,
-  "receipt": "refusal_receipt.json"
-}
-JSON
-echo ""
-echo -e "${GREEN}Receipt:${RESET}"
-cat <<'JSON'
-{
-  "outcome": "executed",
-  "side_effect_executed": true,
-  "receipt": "execution_receipt.json"
-}
-JSON
-echo ""
-pause 2.2
-
-clear
-echo ""
-echo -e "${WHITE}ACTENON${RESET}"
-echo -e "${BLUE}No valid proof, no execution.${RESET}"
-echo ""
-echo -e "${GREEN}Done:${RESET} unproven action refused; valid proof executed once."
-echo ""
-echo -e "${WHITE}Next:${RESET}"
-echo "  python3 -m actenon.cli scan local"
-echo "  bash scripts/verify_release_gate.sh"
-echo "  open artifacts/hero_demo_runtime/simulations/replit/refusal.json"
-echo ""
-
-if [[ "${DETAILS}" == "true" ]]; then
-  echo -e "${DIM}Technical details:${RESET}"
-  echo "  Refusal artifact: artifacts/hero_demo_runtime/simulations/replit/refusal.json"
-  echo "  Execution receipt: artifacts/hero_demo_runtime/simulations/replay-refused/execution_receipt.json"
-  echo "  Refusal digest: sha256:9408f4573e097f38d38a483280ec70b3737df74d4119e09af4615b19840ff121"
-  echo "  Receipt digest: sha256:353c73da14c3a6884c5308cf7d3826d8faeda8413a80ada9a1e2aab879fbfc71"
-  echo ""
-fi
-
-pause 1.5
+if details:
+    print()
+    print("Details:")
+    print(f"  counterfactual artifact: {relative(counterfactual_path)}")
+    print(f"  counterfactual status: {counterfactual.get('status')}")
+    print(f"  duplicate replay artifact: {relative(replay_refusal_path)}")
+    print(f"  duplicate replay reason_code: {replay_refusal.get('refusal_code')}")
+PY

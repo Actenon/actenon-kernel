@@ -27,11 +27,36 @@ bash scripts/demo_hero.sh
 
 This is a safe local simulation. It does not contact any cloud account, use external secrets, or perform a real destructive action.
 
-You will see an unproven consequential action refused before the side effect, followed by a valid proof-bound action executing once:
+You will see the side effect path that would be reached without a proof gate, the Actenon refusal, and the local Receipt artifact for a valid proof-bound action:
 
 ```text
 ACTENON
 No valid proof, no execution.
+
+Agent attempts:
+  database.delete_table production_customers
+
+WITHOUT proof gate:
+  WOULD EXECUTE
+  side_effect_executed: true
+  consequence: destructive action reaches side effect path
+
+WITH ACTENON:
+  REFUSED
+  reason_code: ACTION_HASH_MISMATCH
+  side_effect_executed: false
+  refusal artifact: artifacts/hero_demo_runtime/live/simulations/replit/refusal.json
+
+VALID PROOF:
+  EXECUTED ONCE
+  side_effect_executed: true
+  receipt artifact: artifacts/hero_demo_runtime/live/simulations/replay-refused/execution_receipt.json
+
+SNAPSHOT:
+{
+  "refusal": {"reason_code": "ACTION_HASH_MISMATCH", "side_effect_executed": false, "...": "..."},
+  "receipt": {"outcome": "executed", "side_effect_executed": true, "...": "..."}
+}
 
 Done: unproven action refused; valid proof executed once.
 ```
