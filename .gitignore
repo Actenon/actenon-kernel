@@ -45,3 +45,6 @@ AI Agent Execution Control Layer/
 artifacts/*
 !artifacts/hero_demo_runtime/
 !artifacts/hero_demo_runtime/**
+
+# Python virtual environments
+.venv/
