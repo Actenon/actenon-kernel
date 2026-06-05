@@ -251,6 +251,7 @@ The MCP client, agent, or model may request the action, but the protected endpoi
 
 Start with:
 
+- [examples/hello_protected_endpoint/](examples/hello_protected_endpoint/) — smallest plain protected-endpoint example
 - [MCP_HERO_PATH.md](MCP_HERO_PATH.md)
 - [examples/mcp_protected_tool/](examples/mcp_protected_tool/)
 - [examples/mcp_server_protected_tool/README.md](examples/mcp_server_protected_tool/README.md)
