@@ -63,6 +63,12 @@ bash scripts/demo_hero.sh --details
 
 ---
 
+## Expected Local Warnings
+
+The local demo and conformance commands may print warnings about the local HMAC signer. These warnings are expected in demo mode and are intentionally explicit.
+
+The default local proof secret is public and must not be used for production. Production deployments should use asymmetric well-known verification material, KMS, or HSM-backed signing custody.
+
 ## Choose Your Path
 
 | If you are... | Start here |
@@ -307,6 +313,14 @@ Actenon is built for the execution gap exposed by real AI-agent failure patterns
 Actenon does not claim every historical incident would automatically have been prevented in every deployment. The claim is narrower and testable: **if a consequential action is routed through a protected endpoint, it cannot execute without valid proof bound to that exact action.**
 
 ---
+
+## How Actenon Can Be Bypassed
+
+Actenon only protects actions routed through the protected execution boundary.
+
+It cannot protect an action if the agent still has direct standing credentials, if the provider API can be called outside the protected endpoint, if replay is not enforced at the endpoint, or if proof verification happens only upstream.
+
+The strongest deployment pattern removes standing production credentials from the agent path and requires the protected endpoint to verify proof before brokering a single-use credential or performing the side effect.
 
 ## Artifact Snippet
 
