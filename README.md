@@ -1,13 +1,12 @@
 # Actenon
 
-No valid proof, no execution. Every consequential AI action leaves a verifiable receipt.
+**No valid proof, no execution.**
+
+Stop AI agents from taking consequential actions without proof, approval, and a verifiable receipt.
 
 ![Actenon demo: unproven agent action refused before side effect](docs/assets/actenon-hero-devops.gif)
 
-
-Actenon is the open proof gate and receipt standard for consequential AI actions. It sits at the execution boundary, refuses unproven actions before side effects happen, and emits verifiable Receipt/Refusal artifacts for audit, compliance, and trust.
-
-Your AI agent can try to delete your production database. When that action is routed through a protected endpoint, Actenon makes sure it cannot execute without valid proof and a verifiable Receipt or Refusal.
+Actenon is an open proof gate and receipt standard for consequential AI actions. It sits at the execution boundary, refuses unproven actions before side effects happen, and emits verifiable Receipt/Refusal artifacts for audit, compliance, and trust.
 
 [Release gate: local command](scripts/verify_release_gate.sh) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python: 3.9-3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance tests](CONFORMANCE.md) · [Adversarial tests](docs/security/SECURITY_TESTING.md)
 
@@ -27,6 +26,18 @@ bash scripts/demo_hero.sh
 ```
 
 This is a safe local simulation. It does not contact a cloud account, use external secrets, or perform a real destructive action.
+
+
+## Choose Your Path
+
+| I want to... | Start here |
+| --- | --- |
+| See the idea in 60 seconds | `bash scripts/demo_hero.sh` |
+| See technical artifact details | `bash scripts/demo_hero.sh --details` |
+| Protect an MCP tool | [`examples/mcp_protected_tool/`](examples/mcp_protected_tool/) |
+| Scan an agent repo | `python3 -m actenon.cli scan repo --path ./my-agent` |
+| Understand the security model | [`THREAT_MODEL.md`](THREAT_MODEL.md) |
+| Verify conformance | [`CONFORMANCE.md`](CONFORMANCE.md) |
 
 ## Artifact Snippet
 
