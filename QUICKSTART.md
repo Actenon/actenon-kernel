@@ -32,8 +32,8 @@ python3 -m actenon.cli up
 In another terminal:
 
 ```bash
-actenon doctor
-actenon simulate --incident replit
+python3 -m actenon.cli doctor
+python3 -m actenon.cli simulate --incident replit
 ```
 
 Then protect a real endpoint:
@@ -59,8 +59,8 @@ Then follow [examples/refund_guard_local/README.md](examples/refund_guard_local/
 Then prove the runtime is portable:
 
 ```bash
-actenon bundle export --runtime-dir artifacts/local_runtime
-actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
+python3 -m actenon.cli bundle export --runtime-dir artifacts/local_runtime
+python3 -m actenon.cli bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
 ```
 
 The old compact proof-demo path is still available if you specifically want the original seeded lab flow:
@@ -114,14 +114,14 @@ and [ACTENON_V2_KEYSTONE_ACCEPTANCE.md](ACTENON_V2_KEYSTONE_ACCEPTANCE.md).
 - the runtime exposes `POST /v1/intents`, `GET /healthz`, and local key-discovery routes on `http://127.0.0.1:8787/`
 - when available, the local read-only trace viewer starts on `http://127.0.0.1:8421`
 - startup output tells you exactly where local artifacts, replay state, escrow state, and the publishable key-discovery file live
-- `actenon doctor` is fast by default and checks signer usability, replay and escrow access, writable artifact paths, runtime-server reachability, key-discovery response, and trace-viewer readiness
-- `actenon doctor --deep` adds slower lab, portable verifier, evidence-query, and scanner checks
-- `actenon simulate --incident replit` is the fastest memorable path: it names the execution gap directly and shows weak control, proof-bound control, the remaining proof-only gap, and how bounded intent changes the outcome
-- `actenon simulate --incident all` runs the named `replit`, `openai-eggs`, and `amazon-kiro` simulations
-- `actenon simulate --scenario all` still runs the lower-level technical cases for audience mismatch, action-hash mismatch, expiry, and replay refusal
+- `python3 -m actenon.cli doctor` is fast by default and checks signer usability, replay and escrow access, writable artifact paths, runtime-server reachability, key-discovery response, and trace-viewer readiness
+- `python3 -m actenon.cli doctor --deep` adds slower lab, portable verifier, evidence-query, and scanner checks
+- `python3 -m actenon.cli simulate --incident replit` is the fastest memorable path: it names the execution gap directly and shows weak control, proof-bound control, the remaining proof-only gap, and how bounded intent changes the outcome
+- `python3 -m actenon.cli simulate --incident all` runs the named `replit`, `openai-eggs`, and `amazon-kiro` simulations
+- `python3 -m actenon.cli simulate --scenario all` still runs the lower-level technical cases for audience mismatch, action-hash mismatch, expiry, and replay refusal
 - the refund endpoint example proves this is not just simulator theater: you can protect a consequential endpoint immediately
-- `actenon bundle export` emits a `.actenon` portable execution evidence bundle
-- `actenon bundle verify` checks that bundle hashes and chain metadata still match the contained artifacts
+- `python3 -m actenon.cli bundle export` emits a `.actenon` portable execution evidence bundle
+- `python3 -m actenon.cli bundle verify` checks that bundle hashes and chain metadata still match the contained artifacts
 - `python3 -m pip install -e ".[asymmetric]"` installs the repo in editable mode
 - `bash ./scripts/first_run.sh` gives you the fastest end-to-end protected-endpoint proof run
 - `make public-verify` runs the same gate as `bash scripts/verify_release_gate.sh`: keystone tests, full kernel tests, Ruff, public boundary validation, and public archive validation
@@ -141,11 +141,11 @@ That first run is doing more than a demo happy path. It shows the missing bounda
 If you are evaluating whether the kernel feels complete now, this is the shortest honest sequence:
 
 1. `python3 -m actenon.cli up`: start the local issuer, verifier-adjacent runtime surfaces, persistence, and viewer
-2. `actenon doctor`: confirm the local trust machine is healthy
-3. `actenon simulate --incident replit`: make the execution gap unforgettable
+2. `python3 -m actenon.cli doctor`: confirm the local trust machine is healthy
+3. `python3 -m actenon.cli simulate --incident replit`: make the execution gap unforgettable
 4. `python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runtime`: protect a real consequential endpoint
-5. `actenon bundle export --runtime-dir artifacts/local_runtime`: export the runtime without relying on any paid service
-6. `actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon`: verify the portable artifact class you just created
+5. `python3 -m actenon.cli bundle export --runtime-dir artifacts/local_runtime`: export the runtime without relying on any paid service
+6. `python3 -m actenon.cli bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon`: verify the portable artifact class you just created
 
 ## Recommended Sequence After The First Run
 
@@ -194,14 +194,14 @@ Protected-endpoint reference files:
 
 ## Verify The Emitted Artifacts With The CLI
 
-`actenon verify-proof` requires explicit local audience context. It does not treat the PCCB's own audience as sufficient verifier input.
+`python3 -m actenon.cli verify-proof` requires explicit local audience context. It does not treat the PCCB's own audience as sufficient verifier input.
 
 Verifier time checks are strict by default: the PCCB must be within its `not_before` / `expires_at` window at the supplied verification time. In production integrations, use short proof windows and only configure clock skew tolerance in code for small, expected distributed-clock drift.
 
 Verify a proof artifact from the local refund proof run:
 
 ```bash
-actenon verify-proof \
+python3 -m actenon.cli verify-proof \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json \
   --audience service:local-refund-endpoint \
@@ -211,7 +211,7 @@ actenon verify-proof \
 Ask for structured failure details instead of human-readable output:
 
 ```bash
-actenon verify-proof \
+python3 -m actenon.cli verify-proof \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json \
   --audience service:wrong-endpoint \
@@ -222,7 +222,7 @@ actenon verify-proof \
 Verify a receipt from the refund local proof run:
 
 ```bash
-actenon verify-receipt \
+python3 -m actenon.cli verify-receipt \
   --receipt artifacts/local_proof/scenarios/allow/execution_receipt.json \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json
@@ -242,7 +242,7 @@ Query the local evidence chain for the executed allow path:
 Point `--artifacts-dir` at the local proof artifact root, such as `artifacts/local_proof`, or directly at an `outcomes/` directory.
 
 ```bash
-actenon evidence query \
+python3 -m actenon.cli evidence query \
   --intent-id intent_allow \
   --artifacts-dir artifacts/local_proof
 ```
@@ -250,7 +250,7 @@ actenon evidence query \
 Ask for machine-readable evidence verdict output:
 
 ```bash
-actenon evidence query \
+python3 -m actenon.cli evidence query \
   --pccb-id pccb_0001 \
   --artifacts-dir artifacts/local_proof \
   --json
@@ -259,14 +259,14 @@ actenon evidence query \
 Run the single-node runtime doctor:
 
 ```bash
-actenon doctor \
+python3 -m actenon.cli doctor \
   --runtime-dir artifacts/local_runtime
 ```
 
 Run the built-in local incident simulations:
 
 ```bash
-actenon simulate \
+python3 -m actenon.cli simulate \
   --runtime-dir artifacts/local_runtime \
   --scenario all
 ```
@@ -278,14 +278,14 @@ If you want the fastest route from this runtime into a real consequential endpoi
 Export the local runtime as a portable bundle:
 
 ```bash
-actenon bundle export \
+python3 -m actenon.cli bundle export \
   --runtime-dir artifacts/local_runtime
 ```
 
 Verify the exported `.actenon` bundle:
 
 ```bash
-actenon bundle verify \
+python3 -m actenon.cli bundle verify \
   artifacts/local_runtime/bundles/actenon-local-runtime.actenon
 ```
 
@@ -314,7 +314,7 @@ Local runtime state lives on disk:
 
 If you only want the files and labs without starting the HTTP services, use `python3 -m actenon.cli up --bootstrap-only`.
 
-That bootstrap-only path is intentionally not a fully serving local trust runtime. `actenon doctor` will report `needs_attention` until the foreground runtime process is actually running.
+That bootstrap-only path is intentionally not a fully serving local trust runtime. `python3 -m actenon.cli doctor` will report `needs_attention` until the foreground runtime process is actually running.
 
 In default local `HS256` mode, the startup banner also tells you where the runtime would serve a publishable key-discovery document, while staying explicit that the local symmetric trust key is not public verifier material.
 
@@ -328,7 +328,7 @@ Reset options:
 Create a local execution anchor from the executed refund receipt:
 
 ```bash
-actenon graph anchor \
+python3 -m actenon.cli graph anchor \
   --receipt artifacts/local_proof/scenarios/allow/execution_receipt.json \
   --dry-run
 ```

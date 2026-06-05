@@ -604,21 +604,21 @@ The shortest credible first run is:
 ```bash
 python3 -m pip install -e ".[asymmetric]"
 python3 -m actenon.cli up
-actenon doctor
-actenon simulate --incident replit
+python3 -m actenon.cli doctor
+python3 -m actenon.cli simulate --incident replit
 python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runtime
-actenon bundle export --runtime-dir artifacts/local_runtime
-actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
+python3 -m actenon.cli bundle export --runtime-dir artifacts/local_runtime
+python3 -m actenon.cli bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
 ```
 
 That path is intentionally product-shaped:
 
 - `python3 -m actenon.cli up` starts a complete local trust machine
-- `actenon doctor` tells you whether it is healthy
-- `actenon simulate --incident replit` makes the execution gap memorable
+- `python3 -m actenon.cli doctor` tells you whether it is healthy
+- `python3 -m actenon.cli simulate --incident replit` makes the execution gap memorable
 - the protected refund endpoint proves you can guard a dangerous endpoint now
-- `actenon bundle export` creates a `.actenon` portable execution evidence bundle
-- `actenon bundle verify` proves the bundle is internally consistent and tamper-evident relative to its manifest, while staying explicit that v1 is not attestation-of-origin
+- `python3 -m actenon.cli bundle export` creates a `.actenon` portable execution evidence bundle
+- `python3 -m actenon.cli bundle verify` proves the bundle is internally consistent and tamper-evident relative to its manifest, while staying explicit that v1 is not attestation-of-origin
 
 If you want the exact walkthrough, start with [QUICKSTART.md](QUICKSTART.md) and then [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md).
 
@@ -636,8 +636,8 @@ python3 -m actenon.cli up
 In another terminal:
 
 ```bash
-actenon doctor
-actenon simulate --incident replit
+python3 -m actenon.cli doctor
+python3 -m actenon.cli simulate --incident replit
 ```
 
 `python3 -m actenon.cli up` starts the local single-node trust runtime. By default it serves:
@@ -649,10 +649,10 @@ actenon simulate --incident replit
 
 In default local `HS256` trust mode, the key-discovery URLs are present but return an explicit unavailable response until you place a publishable key-discovery document at `artifacts/local_runtime/keys/actenon-keys.json`.
 
-`actenon simulate` is the fastest way to make the execution gap legible:
+`python3 -m actenon.cli simulate` is the fastest way to make the execution gap legible:
 
 ```bash
-actenon simulate --incident replit
+python3 -m actenon.cli simulate --incident replit
 ```
 
 Each incident run is an educational simulation inspired by public incidents, not an exact forensic reconstruction. The simulator writes an `INCIDENT_SUMMARY.md` into each incident or scenario directory and shows:
