@@ -39,6 +39,23 @@ This is a safe local simulation. It does not contact a cloud account, use extern
 | Understand the security model | [`THREAT_MODEL.md`](THREAT_MODEL.md) |
 | Verify conformance | [`CONFORMANCE.md`](CONFORMANCE.md) |
 
+
+## Where Actenon Would Have Changed the Outcome
+
+Actenon is built for the execution gap exposed by real AI-agent failure patterns: the moment an agent moves from suggesting an action to actually causing one.
+
+| Failure pattern | Consequential action | What Actenon would enforce |
+| --- | --- | --- |
+| [Production database deletion](docs/incidents/REPLIT_STYLE_DATABASE_DELETE.md) | Agent attempts a destructive database action | No exact signed proof → refused before execution; Refusal receipt emitted |
+| [Destructive production action](docs/incidents/PRODUCTION_DESTRUCTIVE_ACTION.md) | Agent reaches a high-impact production side effect | Proof must bind the exact action, subject, tenant, audience, and expiry |
+| [Data export / exfiltration](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) | Agent attempts to export sensitive data | Export requires scoped proof, policy approval, audience binding, and receipt |
+| [IAM privilege escalation](docs/incidents/IAM_PRIVILEGE_ESCALATION_PATTERN.md) | Agent attempts access, role, or permission changes | Access mutation requires proof-bound approval and credential brokering |
+| [MCP/tool proof laundering](docs/incidents/MCP_TOOL_PROOF_LAUNDERING.md) | Agent routes a consequential action through a tool boundary | Tool execution requires proof at the protected endpoint |
+| Browser / computer-use form submission | Agent clicks, submits, updates, uploads, or exports through a UI | Submit/update/export actions require proof before side effect |
+
+Actenon does not claim every historical incident would automatically have been prevented in every deployment. The claim is narrower and testable: **if a consequential action is routed through a protected endpoint, it cannot execute without valid proof bound to that exact action.**
+
+
 ## Artifact Snippet
 
 The demo writes real local artifacts under `artifacts/hero_demo_runtime/`. Here is the refused-action summary from the current deterministic run:
