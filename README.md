@@ -91,6 +91,19 @@ The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST
 | Considering contributing | [Contributing](#contributing) |
 
 ---
+
+## The execution gap
+
+AI systems no longer just choose words. They call tools, hit provider APIs, change state, and initiate irreversible actions.
+
+Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they don't guarantee that the *execution edge* performs the *exact approved action, exactly once*. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice.
+
+That missing boundary is the **execution gap**, and Actenon closes it with **proof-bound execution**: the protected endpoint independently verifies a proof bound to the exact action, audience, tenant, subject, target, scope, expiry, and replay identity *before* any side effect happens.
+
+Read the full problem statement in [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md).
+
+---
+
 ## Find your execution gap
 
 Actenon includes a local advisory scanner that maps candidate AI-controlled consequential action paths in your repo.
@@ -125,18 +138,6 @@ The scanner is a map, not a verdict. It helps maintainers identify where a prote
 Scanner is the discovery layer. The protected endpoint is the control. Receipt and Refusal artifacts are the evidence.
 
 Read more: [Execution Gap Scanner Methodology](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md)
-
----
-
-## The execution gap
-
-AI systems no longer just choose words. They call tools, hit provider APIs, change state, and initiate irreversible actions.
-
-Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they don't guarantee that the *execution edge* performs the *exact approved action, exactly once*. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice.
-
-That missing boundary is the **execution gap**, and Actenon closes it with **proof-bound execution**: the protected endpoint independently verifies a proof bound to the exact action, audience, tenant, subject, target, scope, expiry, and replay identity *before* any side effect happens.
-
-Read the full problem statement in [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md).
 
 ---
 
