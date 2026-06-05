@@ -515,7 +515,7 @@ It owns:
 - conformance tests and reusable examples
 - local advisory scanner for candidate AI-controlled consequential action paths
 
-This repository is meant to be the default developer product for the category. It should read like serious execution infrastructure, not like an internal implementation dump and not like a thin open wrapper around a closed service.
+
 
 ---
 
