@@ -67,7 +67,8 @@ def load_required(path: Path) -> dict[str, Any]:
 
 def digest(payload: dict[str, Any]) -> str:
     artifact_digest = build_artifact_digest(payload)
-    return f"{artifact_digest.algorithm}:{artifact_digest.value}"
+    algorithm = "sha256" if artifact_digest.algorithm == "sha-256" else artifact_digest.algorithm
+    return f"{algorithm}:{artifact_digest.value}"
 
 
 counterfactual_path = artifact_path("replit", "counterfactual_unprotected_execution.json")

@@ -54,8 +54,8 @@ VALID PROOF:
 
 SNAPSHOT:
 {
-  "refusal": {"reason_code": "ACTION_HASH_MISMATCH", "side_effect_executed": false, "...": "..."},
-  "receipt": {"outcome": "executed", "side_effect_executed": true, "...": "..."}
+  "refusal": {"reason_code": "ACTION_HASH_MISMATCH", "side_effect_executed": false, "artifact_digest": "sha256:..."},
+  "receipt": {"outcome": "executed", "side_effect_executed": true, "artifact_digest": "sha256:..."}
 }
 
 Done: unproven action refused; valid proof executed once.

@@ -251,6 +251,7 @@ from pathlib import Path
 archive_path = Path(sys.argv[1]).resolve()
 
 allowed_top_level_dirs = {
+    ".github",
     "actenon",
     "sdk",
     "examples",

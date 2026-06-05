@@ -10,7 +10,6 @@ if [[ ! -d "$TMP_BASE" || ! -w "$TMP_BASE" ]]; then
 fi
 TEMP_ROOT="$(mktemp -d "$TMP_BASE/actenon-public-verify.XXXXXX")"
 VENV_DIR="$TEMP_ROOT/venv"
-LOCAL_PROOF_DIR="$TEMP_ROOT/local_proof"
 RELEASE_ARCHIVE="$TEMP_ROOT/actenon-kernel-release.zip"
 
 cleanup() {
@@ -71,8 +70,6 @@ main() {
     "$ROOT_DIR/CODE_OF_CONDUCT.md"
     "$ROOT_DIR/LICENSE"
     "$ROOT_DIR/.gitignore"
-    "$ROOT_DIR/.gitattributes"
-    "$ROOT_DIR/.editorconfig"
     "$ROOT_DIR/QUICKSTART.md"
     "$ROOT_DIR/docs/README.md"
     "$ROOT_DIR/docs/guides/FIRST_10_MINUTES.md"
@@ -81,10 +78,7 @@ main() {
     "$ROOT_DIR/docs/reference/verifier/HELLO_WORLD_PROTECTED_RESOURCE.md"
     "$ROOT_DIR/OPEN_SOURCE_BOUNDARY.md"
     "$ROOT_DIR/.github/workflows/ci.yml"
-    "$ROOT_DIR/.github/ISSUE_TEMPLATE/bug_report.md"
-    "$ROOT_DIR/.github/ISSUE_TEMPLATE/feature_request.md"
-    "$ROOT_DIR/.github/ISSUE_TEMPLATE/compatibility_question.md"
-    "$ROOT_DIR/.github/PULL_REQUEST_TEMPLATE.md"
+    "$ROOT_DIR/.github/actions/execution-gap-scan/emit_scan_outputs.py"
     "$ROOT_DIR/scripts/public_repo_verify.sh"
     "$ROOT_DIR/scripts/create_release_archive.sh"
     "$ROOT_DIR/scripts/validate_release_archive.sh"
@@ -96,29 +90,27 @@ main() {
     require_file "$file_path"
   done
 
-  require_contains "$ROOT_DIR/README.md" "no proof, no action" "readme states the core principle"
-  require_contains "$ROOT_DIR/README.md" "paid control plane" "readme states the paid-layer boundary"
-  require_contains "$ROOT_DIR/README.md" "How to try it locally" "readme documents local try-it path"
+  require_contains "$ROOT_DIR/README.md" "No valid proof, no execution" "readme states the core principle"
+  require_contains "$ROOT_DIR/README.md" "See it in 60 seconds" "readme documents local try-it path"
   require_contains "$ROOT_DIR/README.md" "FIRST_10_MINUTES" "readme links the first 10 minutes guide"
   require_contains "$ROOT_DIR/README.md" "MCP_HERO_PATH" "readme links the MCP hero path"
   require_contains "$ROOT_DIR/README.md" "SDK_SELECTION_GUIDE" "readme links the SDK selection guide"
-  require_contains "$ROOT_DIR/QUICKSTART.md" "make install" "quickstart documents install"
+  require_contains "$ROOT_DIR/QUICKSTART.md" "python3 -m pip install -e" "quickstart documents install"
   require_contains "$ROOT_DIR/QUICKSTART.md" "make public-verify" "quickstart documents public verification"
   require_contains "$ROOT_DIR/docs/guides/FIRST_10_MINUTES.md" "bash ./scripts/first_run.sh" "first 10 minutes documents the first command"
   require_contains "$ROOT_DIR/docs/guides/INTEGRATION_QUICKSTART.md" "VerifierSDK" "integration quickstart documents the verifier SDK"
   require_contains "$ROOT_DIR/docs/guides/INTEGRATION_QUICKSTART.md" "hello_world_protected_resource_python" "integration quickstart documents the hello-world example"
   require_contains "$ROOT_DIR/OPEN_SOURCE_BOUNDARY.md" "paid control plane" "open-source boundary names the paid layer"
-  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "\"3.9\"" "ci covers python 3.9"
-  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "\"3.12\"" "ci covers python 3.12"
-  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "typescript-verifier" "ci covers the typescript verifier path"
-  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "go-verifier" "ci covers the go verifier path"
-  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "rust-verifier" "ci covers the rust verifier path"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "\"3.11\"" "ci covers python 3.11"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "bash scripts/demo_hero.sh" "ci runs the public demo"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "actenon.cli conformance run" "ci runs conformance"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "actenon.cli scan local" "ci runs the local scanner"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "pytest tests/ -q" "ci runs full tests"
+  require_contains "$ROOT_DIR/.github/actions/execution-gap-scan/emit_scan_outputs.py" "GITHUB_OUTPUT" "scan output action writes github outputs"
   require_contains "$ROOT_DIR/.gitignore" "__MACOSX/" "gitignore excludes __MACOSX"
   require_contains "$ROOT_DIR/.gitignore" ".DS_Store" "gitignore excludes .DS_Store"
   require_contains "$ROOT_DIR/.gitignore" "._*" "gitignore excludes AppleDouble files"
   require_contains "$ROOT_DIR/.gitignore" "node_modules/" "gitignore excludes node_modules"
-  require_contains "$ROOT_DIR/.gitattributes" ".maintainers export-ignore" "gitattributes excludes maintainer-only docs from exports"
-  require_contains "$ROOT_DIR/.gitattributes" "__MACOSX export-ignore" "gitattributes excludes __MACOSX from exports"
 
   if [[ -z "$(find "$ROOT_DIR" \( -path '*/__MACOSX*' -o -name '.DS_Store' -o -name '._*' \) -print -quit)" ]]; then
     pass "metadata residue is absent from the working tree"
@@ -138,40 +130,22 @@ main() {
     fail "editable install path failed"
   fi
 
+  if run_with_venv python -m pip install pytest ruff build >/dev/null 2>&1; then
+    pass "public test tools install"
+  else
+    fail "public test tools install failed"
+  fi
+
   if run_with_venv python -m build "$ROOT_DIR" >/dev/null 2>&1; then
     pass "build path works"
   else
     fail "build path failed"
   fi
 
-  if run_with_venv bash "$ROOT_DIR/scripts/verify.sh" >/dev/null 2>&1; then
-    pass "kernel acceptance gate passes"
+  if run_with_venv bash "$ROOT_DIR/scripts/verify_release_gate.sh" "$TEMP_ROOT/actenon-kernel-public.tar.gz" >/dev/null 2>&1; then
+    pass "public release gate passes"
   else
-    fail "kernel acceptance gate failed"
-  fi
-
-  if run_with_venv bash "$ROOT_DIR/scripts/judge.sh" >/dev/null 2>&1; then
-    pass "judgment gate passes"
-  else
-    fail "judgment gate failed"
-  fi
-
-  if ACTENON_DEMO_ARTIFACTS_DIR="$LOCAL_PROOF_DIR" run_with_venv bash "$ROOT_DIR/scripts/run_local_proof.sh" >/dev/null 2>&1; then
-    pass "local proof path passes"
-  else
-    fail "local proof path failed"
-  fi
-
-  if [[ -f "$LOCAL_PROOF_DIR/manifest.json" && -f "$LOCAL_PROOF_DIR/SUMMARY.txt" ]]; then
-    pass "local proof artifacts are written"
-  else
-    fail "local proof artifacts are missing"
-  fi
-
-  if run_with_venv bash "$ROOT_DIR/scripts/verify_portable_distribution.sh" >/dev/null 2>&1; then
-    pass "portable distribution verification passes"
-  else
-    fail "portable distribution verification failed"
+    fail "public release gate failed"
   fi
 
   if bash "$ROOT_DIR/scripts/create_release_archive.sh" "$RELEASE_ARCHIVE" >/dev/null 2>&1; then

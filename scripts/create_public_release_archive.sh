@@ -28,6 +28,7 @@ root_dir = Path(sys.argv[1]).resolve()
 output_path = Path(sys.argv[2]).resolve()
 
 allowed_dirs = (
+    ".github",
     "actenon",
     "sdk",
     "examples",
@@ -75,7 +76,6 @@ forbidden_dir_parts = {
     ".actenon",
     ".actenon-scan",
     ".git",
-    ".github",  # public release archives use scripts, not workflow metadata
     ".maintainers",
     ".mypy_cache",
     ".pytest_cache",

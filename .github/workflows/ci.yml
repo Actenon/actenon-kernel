@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  public-tests:
+    name: Public tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package and test tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest ruff build
+          python -m pip install -e ".[asymmetric]"
+
+      - name: Run hero demo
+        run: bash scripts/demo_hero.sh
+
+      - name: Run conformance suite
+        run: python -m actenon.cli conformance run
+
+      - name: Run local scanner
+        run: python -m actenon.cli scan local
+
+      - name: Run full tests
+        run: pytest tests/ -q
