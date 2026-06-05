@@ -443,7 +443,7 @@ Actenon provides verifiable evidence that a specific consequential action was ap
 
 The standards doctrine is simple:
 
-> Neutralize the standard, monetize the operation.
+> The standard should remain open. Operational services can be built around it.
 
 You do not need Actenon Cloud to issue, verify, or test compatible receipts. You do not need to ask Actenon's permission to implement the neutral Verifiable Action Receipt surface or verify artifacts that conform to the open specs.
 
