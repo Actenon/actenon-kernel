@@ -40,3 +40,8 @@ __MACOSX/
 # Private/commercial trees must never be committed
 Actenon Cloud Control Layer/
 AI Agent Execution Control Layer/
+
+# Local runtime/demo artifacts
+artifacts/*
+!artifacts/hero_demo_runtime/
+!artifacts/hero_demo_runtime/**
