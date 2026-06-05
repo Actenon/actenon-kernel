@@ -1,83 +1,18 @@
 # Actenon
 
-**Find where AI agents can act without proof — then stop them before side effects happen.**
+**The open proof gate and receipt standard for consequential AI actions.**
 
 > **No valid proof, no execution.**
 
-Actenon is the open-source execution diagnostic, proof gate, and receipt standard for consequential AI actions.
-
-It helps teams find candidate execution gaps in agent-connected systems — places where AI agents, MCP tools, browser agents, coding agents, or workflow automations may be able to delete data, move money, change access, deploy code, submit forms, or export records without proof-bound execution.
-
-Then it shows the control: route consequential actions through a protected endpoint that verifies cryptographic proof bound to the *exact* action being attempted before the side effect happens.
-
-Every decision leaves a structured **Receipt** or **Refusal** artifact for audit, compliance, and trust.
-
-```text
-Scan the repo  →  find candidate execution gaps
-Protect action →  require exact-action proof before side effect
-Verify outcome →  Receipt or Refusal artifact
-```
+Actenon sits at the execution boundary and stops AI agents, MCP tools, browser agents, coding agents, and workflow automations from taking consequential actions — deleting data, moving money, changing access, deploying code, exporting records — unless the endpoint can verify a cryptographic proof bound to the *exact* action being attempted. Every decision leaves a verifiable **Receipt** or **Refusal** artifact for audit, compliance, and trust.
 
 [![Actenon demo: an unproven agent action is refused before the side effect](docs/assets/actenon-hero-devops.gif)](docs/assets/actenon-hero-devops.gif)
 
-[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
 
 ---
 
-## Find your execution gap
-
-Run the scanner from the root of a repository you want to inspect:
-
-```bash
-cd /path/to/your/repo
-python3 -m actenon.cli scan repo --path .
-```
-
-Actenon maps candidate AI-controlled consequential action paths: places where an agent, tool, browser workflow, coding assistant, MCP server, or automation may be able to trigger a real side effect.
-
-It looks for surfaces such as:
-
-```text
-browser.submit       database.delete       file.write
-deploy               data.export           email.send
-payment.refund       iam.grant             shell.execute
-mcp.tool.side_effect
-```
-
-The scanner does **not** accuse your repo of being vulnerable.
-
-It asks a narrower question:
-
-> If an agent can reach this path, could it cause a consequential side effect without proof-bound execution?
-
-Example output shape:
-
-```text
-Candidate consequential action path:
-  database.delete / deploy / export / browser.submit
-
-Consequence class:
-  Critical-impact candidate, if reachable and ungated
-
-Vulnerability claim:
-  no
-
-Runtime reachability:
-  not proven
-
-Suggested control:
-  require proof before submit/delete/export/update/deploy
-```
-
-The scanner is the discovery layer. The protected endpoint is the control. Receipt and Refusal artifacts are the evidence.
-
-Do not run the scanner from your home directory unless you intentionally want to scan everything under it.
-
-Read more: [Execution Gap Scanner Methodology](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md)
-
----
-
-## See Actenon stop a destructive action
+## See it in 60 seconds
 
 ```bash
 git clone https://github.com/Actenon/actenon.git
@@ -92,36 +27,11 @@ bash scripts/demo_hero.sh
 
 This is a safe local simulation. It does not contact any cloud account, use external secrets, or perform a real destructive action.
 
-You will see the side-effect path that would be reached without a proof gate, the Actenon refusal, and the local Receipt artifact for a valid proof-bound action:
+You will see an unproven consequential action refused before the side effect, followed by a valid proof-bound action executing once:
 
 ```text
 ACTENON
 No valid proof, no execution.
-
-Agent attempts:
-  database.delete_table production_customers
-
-WITHOUT proof gate:
-  WOULD EXECUTE
-  side_effect_executed: true
-  consequence: destructive action reaches side effect path
-
-WITH ACTENON:
-  REFUSED
-  reason_code: ACTION_HASH_MISMATCH
-  side_effect_executed: false
-  refusal artifact: artifacts/hero_demo_runtime/live/simulations/replit/refusal.json
-
-VALID PROOF:
-  EXECUTED ONCE
-  side_effect_executed: true
-  receipt artifact: artifacts/hero_demo_runtime/live/simulations/replay-refused/execution_receipt.json
-
-SNAPSHOT:
-{
-  "refusal": {"reason_code": "ACTION_HASH_MISMATCH", "side_effect_executed": false, "artifact_digest": "sha256:..."},
-  "receipt": {"outcome": "executed", "side_effect_executed": true, "artifact_digest": "sha256:..."}
-}
 
 Done: unproven action refused; valid proof executed once.
 ```
@@ -132,11 +42,11 @@ For the incident-style walkthrough:
 python3 -m actenon.cli simulate --incident replit
 ```
 
-For the local runtime and trace viewer, run these without the comments:
+For the local runtime and trace viewer:
 
 ```bash
-python3 -m actenon.cli up
-python3 -m actenon.cli doctor
+python3 -m actenon.cli up          # local proof gate + trace viewer on http://127.0.0.1:8421
+python3 -m actenon.cli doctor      # health check
 ```
 
 The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md).
@@ -147,11 +57,11 @@ The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST
 
 | If you are… | Start here |
 | --- | --- |
-| Just curious | Scan a repo, then watch Actenon block a destructive action |
+| Just curious | Watch the GIF, run `bash scripts/demo_hero.sh` |
 | Building agents or MCP tools | [Protect an MCP tool in 3 steps](#protect-an-mcp-tool-in-3-steps) · [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
 | Reviewing security | [Why this isn't just middleware](#why-this-isnt-just-middleware) · [THREAT_MODEL.md](THREAT_MODEL.md) · [Security testing](docs/security/SECURITY_TESTING.md) |
 | Designing enterprise architecture | [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md) · [docs/architecture/DEPLOYMENT_ARCHITECTURES.md](docs/architecture/DEPLOYMENT_ARCHITECTURES.md) |
-| Maintaining an open-source agent repo | [Find your execution gap](#find-your-execution-gap) with the advisory scanner — no vulnerability claim |
+| Maintaining an open-source agent repo | [The advisory scanner](#the-advisory-scanner) |
 | Evaluating governance or standards | [An open standard, not lock-in](#an-open-standard-not-lock-in) · [CONFORMANCE.md](CONFORMANCE.md) · [GOVERNANCE.md](GOVERNANCE.md) |
 | Considering contributing | [Contributing](#contributing) |
 
@@ -161,7 +71,7 @@ The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST
 
 AI systems no longer just choose words. They call tools, hit provider APIs, change state, and initiate irreversible actions.
 
-Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they do not guarantee that the *execution edge* performs the *exact approved action, exactly once*. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice.
+Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they don't guarantee that the *execution edge* performs the *exact approved action, exactly once*. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice.
 
 That missing boundary is the **execution gap**, and Actenon closes it with **proof-bound execution**: the protected endpoint independently verifies a proof bound to the exact action, audience, tenant, subject, target, scope, expiry, and replay identity *before* any side effect happens.
 
@@ -296,7 +206,7 @@ The claim is narrow and testable: **if a consequential action is routed through 
 
 ---
 
-## What Actenon does, and does not do
+## What Actenon does — and does not do
 
 Actenon **does**:
 
@@ -348,27 +258,6 @@ You do **not** need Actenon Cloud — or anyone's permission — to issue, verif
 A hosted control plane may add enterprise policy management, approvals, dashboards, credential brokering, audit storage, and tenant administration — but receipt verification and conformance testing remain open. The exact public/commercial line is in [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md).
 
 Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPEC_INDEX.md](SPEC_INDEX.md) · [VERSIONING_POLICY.md](VERSIONING_POLICY.md)
-
----
-
-## Where Actenon Cloud fits
-
-This repository is the open kernel: scanner, proof-gate pattern, verifier, public specs, schemas, conformance suite, SDKs, examples, and local Receipt/Refusal artifacts.
-
-You do **not** need Actenon Cloud to scan a repo, run the local demo, verify compatible artifacts, implement protected endpoints, or test conformance.
-
-Actenon Cloud is the operational control plane for teams that need hosted execution governance around the open kernel:
-
-- approval workflows and policy routing
-- hosted evidence review and audit trails
-- credential brokering and tenant administration
-- dashboards for Receipt and Refusal artifacts
-- long-term evidence storage
-- enterprise operations around consequential AI actions
-
-The standard stays open. Operational services can be built around it.
-
-The public/commercial boundary is documented in [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md).
 
 ---
 
