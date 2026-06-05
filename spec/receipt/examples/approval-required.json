@@ -1,0 +1,41 @@
+{
+  "contract": {
+    "name": "receipt",
+    "version": "v1"
+  },
+  "receipt_id": "rcpt_approval_0001",
+  "intent_id": "intent_approval_required",
+  "occurred_at": "2026-01-01T12:02:00Z",
+  "outcome": "approval-required",
+  "phase": "approval",
+  "tenant": {
+    "tenant_id": "tenant_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "demo_actor",
+    "display_name": "Local Proof Demo"
+  },
+  "action": {
+    "name": "refund.create",
+    "capability": "refund.execute",
+    "parameters": {
+      "amount_minor": 2200,
+      "currency": "USD"
+    }
+  },
+  "target": {
+    "resource_type": "payment",
+    "resource_id": "payment_demo_001"
+  },
+  "summary": "Refund requires finance operator approval before proof can be minted.",
+  "reason_codes": [
+    "APPROVAL_REQUIRED"
+  ],
+  "follow_up": {
+    "instructions": "Obtain finance operator approval before retrying the request.",
+    "approver_types": [
+      "finance-operator"
+    ]
+  }
+}

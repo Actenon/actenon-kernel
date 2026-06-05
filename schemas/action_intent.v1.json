@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:protected-execution:contracts:action_intent:v1",
+  "title": "Action Intent v1",
+  "description": "External, transport-agnostic contract for requesting a consequential action.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "intent_id",
+    "issued_at",
+    "expires_at",
+    "tenant",
+    "requester",
+    "action",
+    "target"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "action_intent"
+        },
+        "version": {
+          "const": "v1"
+        }
+      }
+    },
+    "intent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "idempotency_key": {
+      "$ref": "#/$defs/identifier"
+    },
+    "issued_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "expires_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "tenant": {
+      "$ref": "#/$defs/tenant_ref"
+    },
+    "requester": {
+      "$ref": "#/$defs/party_ref"
+    },
+    "action": {
+      "$ref": "#/$defs/action_ref"
+    },
+    "target": {
+      "$ref": "#/$defs/target_ref"
+    },
+    "justification": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "context": {
+      "type": "object",
+      "description": "Portable caller-supplied context facts.",
+      "additionalProperties": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence_ref"
+      },
+      "uniqueItems": true,
+      "maxItems": 64
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Portable annotations that do not alter core semantics.",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Vendor-specific extension bag. Consumers must not derive core authorization semantics from this object.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "party_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "action_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "capability",
+        "parameters"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "target_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_type",
+        "resource_id"
+      ],
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 128
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri-reference",
+          "maxLength": 2048
+        },
+        "selectors": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "uri",
+            "hash",
+            "external_id"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "digest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 64
+            },
+            "value": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 512
+            }
+          }
+        }
+      }
+    }
+  }
+}

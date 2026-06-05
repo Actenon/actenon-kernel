@@ -1,0 +1,58 @@
+{
+  "cache": {
+    "max_age_seconds": 300
+  },
+  "contract": {
+    "name": "key_discovery",
+    "version": "v1"
+  },
+  "issuer": {
+    "display_name": "Actenon Cloud",
+    "id": "https://actenon-cloud.local/issuer",
+    "type": "service"
+  },
+  "keys": [
+    {
+      "algorithm": "EdDSA",
+      "key_id": "kid_cloud_invoice_v1_proof_001",
+      "not_before": "2026-01-15T11:55:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "kid_cloud_invoice_v1_proof_001",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "-x7B2jzJOKDzVP8fW1RiF2rMPgi5aZEqxNOgH_1Mbfs"
+      },
+      "revocation_reason": {
+        "code": "other",
+        "detail": "conformance vector"
+      },
+      "status": "active",
+      "use": "proof_issuance"
+    },
+    {
+      "algorithm": "EdDSA",
+      "hard_revoked_at": "2026-01-15T12:03:00Z",
+      "key_id": "kid_cloud_invoice_v1_outcome_001",
+      "kid": "kid_cloud_invoice_v1_outcome_001",
+      "not_before": "2026-01-15T11:55:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "kid_cloud_invoice_v1_outcome_001",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "bzdsOEalMN9opf-uSUehYMB_RYPcaB2Ilt1Obdap02Q"
+      },
+      "revocation_reason": {
+        "code": "timestamp_trust_loss",
+        "detail": "conformance hard revoke vector"
+      },
+      "status": "hard_revoked",
+      "use": "outcome_attestation"
+    }
+  ],
+  "origin": "https://actenon-cloud.local",
+  "published_at": "2026-01-15T11:55:00Z"
+}

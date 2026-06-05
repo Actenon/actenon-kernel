@@ -1,0 +1,48 @@
+{
+  "contract": {
+    "name": "refusal",
+    "version": "v1"
+  },
+  "refusal_id": "rfsl_0001",
+  "intent_id": "intent_deny",
+  "category": "policy",
+  "refusal_code": "WORKFLOW_DENY",
+  "message": "The refund workflow denies blocked refund requests.",
+  "retryable": false,
+  "refused_at": "2026-01-01T12:01:00Z",
+  "tenant": {
+    "tenant_id": "tenant_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "demo_actor",
+    "display_name": "Local Proof Demo"
+  },
+  "audience": {
+    "type": "service",
+    "id": "local-refund-endpoint"
+  },
+  "action": {
+    "name": "refund.create",
+    "capability": "refund.execute",
+    "parameters": {
+      "amount_minor": 1500,
+      "currency": "USD"
+    }
+  },
+  "target": {
+    "resource_type": "payment",
+    "resource_id": "payment_demo_001"
+  },
+  "correlation": {
+    "request_id": "req_deny"
+  },
+  "rule_refs": [
+    "tenant_demo.refund.deny"
+  ],
+  "details": {
+    "reason_codes": [
+      "WORKFLOW_DENY"
+    ]
+  }
+}

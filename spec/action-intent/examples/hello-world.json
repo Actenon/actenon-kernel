@@ -1,0 +1,41 @@
+{
+  "contract": {
+    "name": "action_intent",
+    "version": "v1"
+  },
+  "intent_id": "intent_portable_hello_world_001",
+  "issued_at": "2026-01-01T12:00:00Z",
+  "expires_at": "2026-01-01T12:05:00Z",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "requester": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    },
+    "constraints": {
+      "exact_message": "portable hello world"
+    },
+    "scope": {
+      "single_use": true,
+      "target_resource_type": "hello_resource"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "context": {
+    "demo": "portable_local_proof"
+  },
+  "metadata": {
+    "distribution": "portable-open-layer"
+  }
+}

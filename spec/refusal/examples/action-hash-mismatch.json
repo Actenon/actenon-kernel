@@ -1,0 +1,66 @@
+{
+  "contract": {
+    "name": "refusal",
+    "version": "v1"
+  },
+  "refusal_id": "rfsl_portable_hello_world_action_hash_mismatch_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "category": "proof",
+  "refusal_code": "ACTION_HASH_MISMATCH",
+  "message": "The proof action hash does not match the action intent.",
+  "retryable": false,
+  "refused_at": "2026-01-01T12:00:12Z",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "audience": {
+    "type": "service",
+    "id": "portable-hello-world-endpoint"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_portable_hello_world_001",
+    "request_id": "req_portable_hello_world_001",
+    "action_hash": {
+      "algorithm": "sha-256",
+      "canonicalization": "RFC8785-JCS",
+      "value": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b"
+    }
+  },
+  "violations": [
+    {
+      "code": "INTENT_VALIDITY_WINDOW_MISMATCH",
+      "field_path": "intent.expires_at",
+      "message": "The supplied Action Intent validity window does not match the proof-bound Action Intent.",
+      "expected": "2026-01-01T12:05:00Z",
+      "observed": "2026-01-01T12:10:00Z"
+    },
+    {
+      "code": "ACTION_HASH_VALUE_MISMATCH",
+      "field_path": "correlation.action_hash.value",
+      "message": "The PCCB action hash does not match the recomputed hash for the supplied Action Intent.",
+      "expected": "9b6f8dfb463b1b84abafdaddc1b81d16e80f7690b4c02eed4ba2a0c79428781c",
+      "observed": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b"
+    }
+  ],
+  "details": {
+    "proof_action_hash": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b",
+    "expected_action_hash": "9b6f8dfb463b1b84abafdaddc1b81d16e80f7690b4c02eed4ba2a0c79428781c",
+    "supplied_intent_expires_at": "2026-01-01T12:10:00Z"
+  }
+}

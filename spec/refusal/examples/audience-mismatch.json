@@ -1,0 +1,64 @@
+{
+  "contract": {
+    "name": "refusal",
+    "version": "v1"
+  },
+  "refusal_id": "rfsl_portable_hello_world_audience_mismatch_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "category": "proof",
+  "refusal_code": "AUDIENCE_MISMATCH",
+  "message": "The proof audience does not match this endpoint.",
+  "retryable": false,
+  "refused_at": "2026-01-01T12:00:10Z",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "audience": {
+    "type": "service",
+    "id": "portable-hello-world-endpoint"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_portable_hello_world_wrong_audience_001",
+    "request_id": "req_portable_hello_world_001",
+    "action_hash": {
+      "algorithm": "sha-256",
+      "canonicalization": "RFC8785-JCS",
+      "value": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b"
+    }
+  },
+  "violations": [
+    {
+      "code": "AUDIENCE_ID_MISMATCH",
+      "field_path": "audience.id",
+      "message": "The protected endpoint audience does not match the PCCB audience binding.",
+      "expected": "portable-hello-world-endpoint",
+      "observed": "portable-hello-world-admin-endpoint"
+    }
+  ],
+  "details": {
+    "endpoint_audience": {
+      "type": "service",
+      "id": "portable-hello-world-endpoint"
+    },
+    "proof_audience": {
+      "type": "service",
+      "id": "portable-hello-world-admin-endpoint"
+    }
+  }
+}

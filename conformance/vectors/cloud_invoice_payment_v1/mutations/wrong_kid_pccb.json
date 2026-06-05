@@ -1,0 +1,78 @@
+{
+  "action": {
+    "capability": "finance.transfer.release",
+    "constraints": {
+      "contract_version_ref": "open_execution_kernel.action_intent.finance.v1alpha1",
+      "workflow_key": "payments.standard"
+    },
+    "name": "invoice_payment.transfer",
+    "parameters": {
+      "action_type": "transfer",
+      "amount_minor": 800000,
+      "currency": "USD",
+      "destination_account_ref": "acct-destination-cloud-v1",
+      "destination_country": "GB",
+      "source_account_ref": "acct-source-cloud-v1",
+      "workflow_key": "payments.standard"
+    }
+  },
+  "action_hash": {
+    "algorithm": "sha-256",
+    "canonicalization": "RFC8785-JCS",
+    "value": "ff83a7e14dfbc6e2b361e8a9a4a802b5ba5a96ba26aa19f76bb23230da8ced24"
+  },
+  "audience": {
+    "id": "finance-ops.internal",
+    "type": "service"
+  },
+  "contract": {
+    "name": "pccb",
+    "version": "v1"
+  },
+  "expires_at": "2026-01-15T12:15:00Z",
+  "extensions": {
+    "cloud": {
+      "action_intent_digest": "640fa5e8c02282f67c30255276fc97536e281385d41580b170fb7190544c0010",
+      "issued_proof_id": "proof_cloud_invoice_v1",
+      "proof_kind": "pccb"
+    }
+  },
+  "intent_id": "intent_cloud_invoice_v1",
+  "issued_at": "2026-01-15T12:00:00Z",
+  "issuer": {
+    "display_name": "Actenon Cloud",
+    "id": "https://actenon-cloud.local/issuer",
+    "type": "service"
+  },
+  "nonce": "nonce_cloud_invoice_v1",
+  "not_before": "2026-01-15T12:00:00Z",
+  "pccb_id": "pccb_proof_cloud_invoice_v1",
+  "scope": {
+    "capabilities": [
+      "finance.transfer.audit",
+      "finance.transfer.release"
+    ],
+    "mode": "exact",
+    "single_use": true
+  },
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "kid_cloud_invoice_v1_missing",
+    "value": "WGMFHCTVahgdsBxmMMA0zf7J9Zqr79wD6-xYGajuGMbl-8GSjbPth8PGz9o7liKBMRNZHx5reeEJbrm88LduBw"
+  },
+  "subject": {
+    "id": "requester_cloud_invoice_v1",
+    "type": "user"
+  },
+  "target": {
+    "resource_id": "acct-destination-cloud-v1",
+    "resource_type": "finance_destination_account",
+    "selectors": {
+      "destination_country": "GB"
+    }
+  },
+  "tenant": {
+    "tenant_id": "tenant_cloud_invoice_v1"
+  }
+}

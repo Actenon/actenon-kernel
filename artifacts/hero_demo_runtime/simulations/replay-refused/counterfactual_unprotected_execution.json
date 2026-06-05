@@ -1,0 +1,14 @@
+{
+  "status": "would_execute_twice",
+  "summary": "Counterfactual unprotected execution: without replay enforcement at the protected endpoint, the same proof-bearing request could drive two side effects.",
+  "unprotected_side_effects": [
+    {
+      "external_reference": "exec_sim_001",
+      "sequence": 1
+    },
+    {
+      "external_reference": "exec_sim_002",
+      "sequence": 2
+    }
+  ]
+}

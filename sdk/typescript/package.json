@@ -1,0 +1,41 @@
+{
+  "name": "@actenon/verifier-sdk",
+  "version": "0.1.0",
+  "description": "Minimal TypeScript verifier SDK for proof-bound protected endpoints.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test ./tests/**/*.test.ts",
+    "example": "node --import tsx ./examples/protected-endpoint.ts"
+  },
+  "keywords": [
+    "proof",
+    "verification",
+    "security",
+    "typescript",
+    "protected-endpoint"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
+  }
+}

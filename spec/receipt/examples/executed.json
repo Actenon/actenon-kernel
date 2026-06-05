@@ -1,0 +1,51 @@
+{
+  "contract": {
+    "name": "receipt",
+    "version": "v1"
+  },
+  "receipt_id": "rcpt_0002",
+  "intent_id": "intent_allow",
+  "occurred_at": "2026-01-01T12:00:00Z",
+  "outcome": "executed",
+  "phase": "execution",
+  "tenant": {
+    "tenant_id": "tenant_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "demo_actor",
+    "display_name": "Local Proof Demo"
+  },
+  "action": {
+    "name": "refund.create",
+    "capability": "refund.execute",
+    "parameters": {
+      "amount_minor": 1500,
+      "currency": "USD"
+    }
+  },
+  "target": {
+    "resource_type": "payment",
+    "resource_id": "payment_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_0001",
+    "escrow_id": "esc_0001",
+    "request_id": "req_allow"
+  },
+  "summary": "Refund of 1500 USD against payment payment_demo_001 executed successfully with local reference refund_local_0001.",
+  "side_effects": {
+    "state": "completed",
+    "external_reference": "refund_local_0001",
+    "resource_version": "1"
+  },
+  "details": {
+    "wedge": "refund",
+    "payment_id": "payment_demo_001",
+    "amount_minor": 1500,
+    "currency": "USD",
+    "remaining_refundable_minor": 3500,
+    "external_reference": "refund_local_0001",
+    "resource_version": "1"
+  }
+}

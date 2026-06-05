@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Actenon Kernel Trace Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Actenon Kernel</p>
+        <h1>OSS Trace Viewer</h1>
+        <p class="subtitle">
+          Read-only local viewer for Action Intent, PCCB, Receipt, Refusal, replay and protected-endpoint state, and execution flow artifacts.
+        </p>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge badge-neutral">Local only</span>
+        <span class="badge badge-neutral">Read-only</span>
+        <button id="refresh-button" class="button" type="button">Reload Artifacts</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Boundary</h2>
+          <p>Kernel artifact viewer only.</p>
+          <ul class="list compact">
+            <li>Not approvals, evidence, policy, or reconciliation UI.</li>
+            <li>Not audit operations, tenant admin, or the operational product.</li>
+          </ul>
+        </section>
+        <section class="panel">
+          <h2>Artifact Roots</h2>
+          <ul id="artifact-roots" class="list compact"></ul>
+        </section>
+        <section class="panel">
+          <h2>Inspect First</h2>
+          <ul class="list compact">
+            <li>Action Intent and PCCB</li>
+            <li>Receipt or Refusal</li>
+            <li>Replay and protected-endpoint state</li>
+            <li>Execution flow timeline</li>
+          </ul>
+        </section>
+        <section class="panel">
+          <h2>Runs</h2>
+          <ul id="run-list" class="list"></ul>
+        </section>
+        <section class="panel">
+          <h2>Scenarios</h2>
+          <ul id="scenario-list" class="list"></ul>
+        </section>
+      </aside>
+
+      <section class="content">
+        <section id="empty-state" class="panel empty-state hidden">
+          <h2>No local artifacts found</h2>
+          <p>Generate local artifacts first with:</p>
+          <pre><code>bash ./scripts/first_run.sh</code></pre>
+          <p>Optional second artifact root:</p>
+          <pre><code>python3 -m actenon.demo.portable_local_proof --artifacts-dir artifacts/portable_local_proof</code></pre>
+        </section>
+
+        <section id="run-overview" class="panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Run</p>
+              <h2 id="run-title"></h2>
+            </div>
+            <div id="run-stats" class="badge-row"></div>
+          </div>
+          <p id="run-root" class="path"></p>
+          <ul id="run-summary" class="list compact"></ul>
+        </section>
+
+        <section id="scenario-overview" class="panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Scenario</p>
+              <h2 id="scenario-title"></h2>
+            </div>
+            <div id="scenario-badges" class="badge-row"></div>
+          </div>
+          <p id="scenario-description"></p>
+          <div class="overview-grid">
+            <article class="card">
+              <h3>What Happened</h3>
+              <p id="what-happened"></p>
+            </article>
+            <article class="card">
+              <h3>Why It Succeeded Or Failed</h3>
+              <p id="why-result"></p>
+            </article>
+          </div>
+        </section>
+
+        <section id="verification-section" class="panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Verification</p>
+              <h2>What Was Verified</h2>
+            </div>
+          </div>
+          <div id="verification-checks" class="check-grid"></div>
+        </section>
+
+        <section id="flow-section" class="panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Execution Flow</p>
+              <h2>What Happened In Order</h2>
+            </div>
+          </div>
+          <ol id="flow-list" class="timeline"></ol>
+        </section>
+
+        <section id="artifact-section" class="panel hidden">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Artifacts</p>
+              <h2>Rendered Artifact Details</h2>
+            </div>
+          </div>
+          <div id="artifact-tabs" class="tab-row"></div>
+          <div id="artifact-meta" class="artifact-meta"></div>
+          <pre id="artifact-json" class="json-viewer"></pre>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

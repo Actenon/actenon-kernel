@@ -1,0 +1,77 @@
+{
+  "contract": {
+    "name": "action_intent",
+    "version": "v1"
+  },
+  "intent_id": "intent_invoice_payment_standard_001",
+  "idempotency_key": "ipy_03ee6edbba40f0cb283c9b216c52a9def0488f10fd549ff058a30afdafe08917",
+  "issued_at": "2026-01-15T09:30:00Z",
+  "expires_at": "2026-01-15T09:35:00Z",
+  "tenant": {
+    "tenant_id": "tenant_demo_ap"
+  },
+  "requester": {
+    "type": "service",
+    "id": "ap_workflow_service"
+  },
+  "action": {
+    "name": "invoice_payment.execute",
+    "capability": "invoice_payment.execute",
+    "parameters": {
+      "payer_entity_id": "entity_demo_ap",
+      "supplier_id": "supplier_demo_001",
+      "bank_account_reference": "bank_demo_main",
+      "invoice_ids": [
+        "inv_2026_00041",
+        "inv_2026_00042"
+      ],
+      "amount_minor": 6500,
+      "currency": "USD",
+      "payment_date": "2026-01-20",
+      "payment_batch_id": "batch_payables_2026_01_20_001",
+      "batch_hash": "batch_f3adc5f6eb4073fb726b547e6042f0abe4e646dfd54517454b33b7c62651a952",
+      "proposer_id": "user_ap_manager_007"
+    },
+    "constraints": {
+      "exact_payer_entity_id": "entity_demo_ap",
+      "exact_supplier_id": "supplier_demo_001",
+      "exact_bank_account_reference": "bank_demo_main",
+      "exact_invoice_ids": [
+        "inv_2026_00041",
+        "inv_2026_00042"
+      ],
+      "exact_amount_minor": 6500,
+      "exact_currency": "USD",
+      "exact_payment_date": "2026-01-20",
+      "exact_payment_batch_id": "batch_payables_2026_01_20_001",
+      "exact_batch_hash": "batch_f3adc5f6eb4073fb726b547e6042f0abe4e646dfd54517454b33b7c62651a952"
+    },
+    "scope": {
+      "target_resource_type": "payment_batch",
+      "single_use": true
+    }
+  },
+  "target": {
+    "resource_type": "payment_batch",
+    "resource_id": "batch_payables_2026_01_20_001"
+  },
+  "justification": "Release approved supplier invoices in the scheduled payables batch.",
+  "context": {
+    "workflow_id": "wf_ap_weekly_payables",
+    "risk_tier": "standard"
+  },
+  "evidence_refs": [
+    {
+      "type": "external_id",
+      "value": "approval_chain_2026_01_20_001",
+      "digest": {
+        "algorithm": "sha-256",
+        "value": "9f1c7b55e6c53af56b0f3e4c6d0a9d66415d9e8f2b58cf1d8e63522f7f7af9c3"
+      }
+    }
+  ],
+  "metadata": {
+    "wedge": "invoice_payment",
+    "example": "public-spec"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "contract": {
+    "name": "refusal",
+    "version": "v1"
+  },
+  "refusal_id": "rfsl_portable_hello_world_action_mismatch_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "category": "proof",
+  "refusal_code": "ACTION_MISMATCH",
+  "message": "The proof action does not exactly match the action intent.",
+  "retryable": false,
+  "refused_at": "2026-01-01T12:00:15Z",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "audience": {
+    "type": "service",
+    "id": "portable-hello-world-endpoint"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_portable_hello_world_action_mutation_001",
+    "request_id": "req_portable_hello_world_action_mismatch_001"
+  },
+  "violations": [
+    {
+      "code": "ACTION_PARAMETER_MISMATCH",
+      "field_path": "action.parameters.message",
+      "message": "The PCCB action parameter does not match the Action Intent parameter.",
+      "expected": "portable hello world",
+      "observed": "portable hello world from attacker"
+    }
+  ],
+  "details": {
+    "intent_action_parameters": {
+      "message": "portable hello world"
+    },
+    "proof_action_parameters": {
+      "message": "portable hello world from attacker"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "artifact_dir": "/Users/ross/actenon-github-launch/artifacts/hero_demo_runtime/simulations/replit",
+  "available": false,
+  "run_title": "Incident Simulator",
+  "scenario_label": "Replit-Style Destructive Drift",
+  "summary": "Start `actenon up` if you want a local trace viewer after the simulation finishes.",
+  "url": null
+}

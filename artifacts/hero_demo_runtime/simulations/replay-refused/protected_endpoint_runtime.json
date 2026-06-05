@@ -1,0 +1,6 @@
+{
+  "basis": "observed",
+  "key": "protected_endpoint_runtime",
+  "status": "first_execution_then_refused",
+  "summary": "Observed: the protected endpoint executed once and refused the duplicate with DUPLICATE_REPLAY."
+}

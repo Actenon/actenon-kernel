@@ -1,0 +1,80 @@
+{
+  "badge_labels": [
+    "Actenon Scan: Review required",
+    "Gating: Not verified",
+    "Action Surface: Review required",
+    "Consequence Map: High-impact candidate, if reachable and ungated"
+  ],
+  "badge_markdown": "![Actenon Scan: Review required](https://img.shields.io/badge/Actenon_Scan-review_required-yellow)",
+  "candidate_consequential_action_paths": 5,
+  "categories_detected": [
+    "FILE_MUTATION_SIDE_EFFECT",
+    "MCP_TOOL_SIDE_EFFECT"
+  ],
+  "confidence": "High",
+  "consequence_class": "high_impact_candidate",
+  "consequence_class_label": "High-impact candidate, if reachable and ungated",
+  "findings": [
+    {
+      "actenon_implementation": "ActionIntent/PCCB proof gate; ProtectedExecutor; Receipt/Refusal; replay/escrow protection.",
+      "agent_control_context": "yes",
+      "category": "MCP_TOOL_SIDE_EFFECT",
+      "caveat": "Static advisory execution-surface finding; runtime reachability, exploitability, production exposure, and business impact are not proven.",
+      "confidence": "high",
+      "consequence_class": "high_impact_candidate",
+      "consequence_class_label": "High-impact candidate, if reachable and ungated",
+      "control_gaps": [
+        "missing proof gate",
+        "missing Receipt/Refusal emission",
+        "missing replay/idempotency protection"
+      ],
+      "detected_primitive": "tool_invocation",
+      "evidence_lines": [
+        40,
+        41,
+        42,
+        43,
+        44
+      ],
+      "finding_id": "aa-001",
+      "finding_type": "Static advisory execution-surface finding",
+      "function_name": "write_file",
+      "gating_status": "Not verified",
+      "generic_control": "add a proof/authorization check before execution; emit an audit receipt/log for allowed and refused decisions; add replay/idempotency protection.",
+      "line": 42,
+      "missing_controls": [
+        "missing proof gate",
+        "missing Receipt/Refusal emission",
+        "missing replay/idempotency protection"
+      ],
+      "nearby_controls_found": [],
+      "path": "src/server/filesystem.ts",
+      "primitive": "tool_invocation",
+      "runtime_reachability": "Not proven",
+      "side_effect_type": "file mutation",
+      "source_context": "runtime_source",
+      "surface_id": "S10",
+      "surface_name": "AGENT_ORCHESTRATION_AND_DELEGATION",
+      "title": "MCP tool may reach file mutation",
+      "vulnerability_claim": false,
+      "vulnerability_severity": null,
+      "why_this_matters": "This appears to be an MCP/tool-exposed handler where a model-selected tool call may reach file mutation via `tool_invocation`. Static analysis did not find a visible proof gate, Receipt/Refusal emission, or replay/idempotency protection between the decision source and the side effect. This is the scanner's model/agent decision -> side effect -> no visible proof gate shape. Runtime reachability, exploitability, production exposure, and business impact are not proven by this scan."
+    }
+  ],
+  "gating_status": "Not verified",
+  "highest_overall_consequence_class": "High-impact candidate, if reachable and ungated",
+  "manual_review_required": true,
+  "mode": "mcp",
+  "not_vulnerability_severity_explanation": "This is not a vulnerability severity rating. It is a consequence-class map of candidate action surfaces found by static analysis.",
+  "registry_version": "capability_registry.v1",
+  "runtime_proof_status": "Not Verified",
+  "runtime_reachability": "Not proven",
+  "runtime_source_candidate_paths": 2,
+  "scanner_version": "2.1.0",
+  "status": "EXECUTION_GAP_PRESENT",
+  "target": "example-mcp-filesystem",
+  "test_context_count": 3,
+  "additional_test_example_context_findings": 3,
+  "vulnerability_claim": false,
+  "vulnerability_severity": null
+}

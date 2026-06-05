@@ -1,0 +1,68 @@
+{
+  "contract": {
+    "name": "key_discovery",
+    "version": "v1"
+  },
+  "issuer": {
+    "type": "service",
+    "id": "acme-proof-issuer",
+    "display_name": "Acme Proof Issuer"
+  },
+  "origin": "https://trust.acme.example",
+  "published_at": "2026-04-11T12:00:00Z",
+  "cache": {
+    "max_age_seconds": 300
+  },
+  "keys": [
+    {
+      "key_id": "acme-proof-ed25519-2026-04",
+      "algorithm": "EdDSA",
+      "use": "verify",
+      "status": "active",
+      "not_before": "2026-04-01T00:00:00Z",
+      "expires_at": "2027-04-01T00:00:00Z",
+      "public_key_jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "acme-proof-ed25519-2026-04",
+        "alg": "EdDSA",
+        "use": "sig",
+        "x": "11qYAYLef1YF8TtN4b4x2zZC7FQ5a0jvL7vG64F8S4M"
+      }
+    },
+    {
+      "key_id": "acme-proof-ed25519-2025-10",
+      "algorithm": "EdDSA",
+      "use": "verify",
+      "status": "retired",
+      "not_before": "2025-10-01T00:00:00Z",
+      "expires_at": "2026-06-01T00:00:00Z",
+      "replaced_by": "acme-proof-ed25519-2026-04",
+      "public_key_jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "acme-proof-ed25519-2025-10",
+        "alg": "EdDSA",
+        "use": "sig",
+        "x": "D75a98bz2Vj83Xk6d8Q2K7RZ4v8mR7P0iXJqZ6G8K9Q"
+      }
+    },
+    {
+      "key_id": "acme-proof-ed25519-2025-03",
+      "algorithm": "EdDSA",
+      "use": "verify",
+      "status": "revoked",
+      "not_before": "2025-03-01T00:00:00Z",
+      "revoked_at": "2025-07-15T13:00:00Z",
+      "revocation_reason": "signing-service-compromise",
+      "public_key_jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "acme-proof-ed25519-2025-03",
+        "alg": "EdDSA",
+        "use": "sig",
+        "x": "nWGxne_9WmXo7vBvV9Y3h9kJ4q8gY5sM2y6N3sR8v1U"
+      }
+    }
+  ]
+}

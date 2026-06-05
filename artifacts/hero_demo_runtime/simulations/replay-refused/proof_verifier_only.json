@@ -1,0 +1,6 @@
+{
+  "basis": "observed",
+  "key": "proof_verifier_only",
+  "status": "would_verify_twice",
+  "summary": "Observed: proof verification alone accepted the same PCCB twice. Replay defense is not a signature property."
+}

@@ -1,0 +1,41 @@
+{
+  "contract": {
+    "name": "receipt",
+    "version": "v1"
+  },
+  "receipt_id": "rcpt_portable_hello_world_refused_expired_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "occurred_at": "2026-01-01T12:00:12Z",
+  "outcome": "refused",
+  "phase": "execution",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "correlation": {
+    "refusal_id": "rfsl_portable_hello_world_expired_001",
+    "request_id": "req_portable_hello_world_expired_001"
+  },
+  "summary": "The proof has expired.",
+  "reason_codes": [
+    "PROOF_EXPIRED"
+  ],
+  "side_effects": {
+    "state": "none"
+  }
+}

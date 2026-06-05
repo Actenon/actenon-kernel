@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:protected-execution:contracts:receipt:v1",
+  "title": "Receipt v1",
+  "description": "Portable outcome receipt for consequential-action admission, decision, approval, evidence, execution, and refusal states.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "receipt_id",
+    "intent_id",
+    "occurred_at",
+    "outcome",
+    "tenant",
+    "subject",
+    "action",
+    "target",
+    "summary"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "receipt"
+        },
+        "version": {
+          "const": "v1"
+        }
+      }
+    },
+    "receipt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "intent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "occurred_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny",
+        "approval-required",
+        "needs-evidence",
+        "executed",
+        "refused"
+      ]
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "admission",
+        "decision",
+        "approval",
+        "execution",
+        "finalization"
+      ]
+    },
+    "tenant": {
+      "$ref": "#/$defs/tenant_ref"
+    },
+    "subject": {
+      "$ref": "#/$defs/party_ref"
+    },
+    "action": {
+      "$ref": "#/$defs/action_ref"
+    },
+    "target": {
+      "$ref": "#/$defs/target_ref"
+    },
+    "correlation": {
+      "$ref": "#/$defs/correlation_ref"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 128
+      },
+      "uniqueItems": true,
+      "maxItems": 64
+    },
+    "follow_up": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "required_by": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "required_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "uniqueItems": true,
+          "maxItems": 64
+        },
+        "approver_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "uniqueItems": true,
+          "maxItems": 16
+        }
+      }
+    },
+    "side_effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "none",
+            "reserved",
+            "pending",
+            "completed",
+            "partial",
+            "unknown"
+          ]
+        },
+        "external_reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "provider_reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reconciliation_status": {
+          "type": "string",
+          "enum": [
+            "recorded-local",
+            "provider-pending",
+            "provider-confirmed",
+            "provider-failed",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "resource_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "party_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "action_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "capability",
+        "parameters"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "target_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_type",
+        "resource_id"
+      ],
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 128
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri-reference",
+          "maxLength": 2048
+        },
+        "selectors": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "correlation_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pccb_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "escrow_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "refusal_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "action_hash": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "canonicalization",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "const": "sha-256"
+            },
+            "canonicalization": {
+              "const": "RFC8785-JCS"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

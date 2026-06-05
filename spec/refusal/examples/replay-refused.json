@@ -1,0 +1,50 @@
+{
+  "contract": {
+    "name": "refusal",
+    "version": "v1"
+  },
+  "refusal_id": "rfsl_portable_hello_world_duplicate_replay_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "category": "replay",
+  "refusal_code": "DUPLICATE_REPLAY",
+  "message": "The protected action has already been claimed for execution.",
+  "retryable": false,
+  "refused_at": "2026-01-01T12:00:20Z",
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_actor",
+    "display_name": "Portable Demo Actor"
+  },
+  "audience": {
+    "type": "service",
+    "id": "portable-hello-world-endpoint"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_portable_hello_world_001",
+    "request_id": "req_portable_hello_world_002",
+    "action_hash": {
+      "algorithm": "sha-256",
+      "canonicalization": "RFC8785-JCS",
+      "value": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b"
+    }
+  },
+  "details": {
+    "replay_key": "rpk_c88c10cb9f6d06549b394795ea7ff97a463da5828ad4b659fa44550fc381b112",
+    "existing_status": "consumed",
+    "pccb_id": "pccb_portable_hello_world_001"
+  }
+}

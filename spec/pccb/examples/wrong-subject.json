@@ -1,0 +1,66 @@
+{
+  "contract": {
+    "name": "pccb",
+    "version": "v1"
+  },
+  "pccb_id": "pccb_portable_hello_world_wrong_subject_001",
+  "intent_id": "intent_portable_hello_world_001",
+  "issued_at": "2026-01-01T12:00:00Z",
+  "not_before": "2026-01-01T12:00:00Z",
+  "expires_at": "2026-01-01T12:05:00Z",
+  "issuer": {
+    "type": "service",
+    "id": "portable_local_issuer",
+    "display_name": "Portable Local Issuer"
+  },
+  "subject": {
+    "type": "service",
+    "id": "portable_demo_other_actor",
+    "display_name": "Portable Other Actor"
+  },
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  },
+  "audience": {
+    "type": "service",
+    "id": "portable-hello-world-endpoint"
+  },
+  "action": {
+    "name": "hello_world.read",
+    "capability": "protected_resource.read",
+    "parameters": {
+      "message": "portable hello world"
+    }
+  },
+  "target": {
+    "resource_type": "hello_resource",
+    "resource_id": "hello_resource_demo_001"
+  },
+  "scope": {
+    "mode": "exact",
+    "capabilities": [
+      "protected_resource.read"
+    ],
+    "resource_selectors": [
+      {
+        "resource_id": "hello_resource_demo_001"
+      }
+    ],
+    "parameter_constraints": {
+      "exact_message": "portable hello world"
+    },
+    "single_use": true
+  },
+  "nonce": "nonce-portable-hello-world-wrong-subject-0001",
+  "action_hash": {
+    "algorithm": "sha-256",
+    "canonicalization": "RFC8785-JCS",
+    "value": "88fb6753c1a2f74e1236869f85b8acd8de12f82f504de829c1b1f7a84ba6b9aa"
+  },
+  "signature": {
+    "algorithm": "HS256",
+    "key_id": "local-proof-v1",
+    "encoding": "base64url",
+    "value": "_QQRQ4lSJO6HnwAPY_3UaKuWxAtOT0A1LFy4UiQyYes"
+  }
+}

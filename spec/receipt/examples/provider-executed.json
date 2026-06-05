@@ -1,0 +1,51 @@
+{
+  "contract": {
+    "name": "receipt",
+    "version": "v1"
+  },
+  "receipt_id": "rcpt_invoice_0002",
+  "intent_id": "intent_invoice_payment_allow",
+  "occurred_at": "2026-01-01T12:10:00Z",
+  "outcome": "executed",
+  "phase": "execution",
+  "tenant": {
+    "tenant_id": "tenant_demo"
+  },
+  "subject": {
+    "type": "service",
+    "id": "demo_actor",
+    "display_name": "Local Proof Demo"
+  },
+  "action": {
+    "name": "invoice_payment.execute",
+    "capability": "invoice_payment.execute",
+    "parameters": {
+      "amount_minor": 2400,
+      "currency": "USD"
+    }
+  },
+  "target": {
+    "resource_type": "payment_batch",
+    "resource_id": "batch_demo_001"
+  },
+  "correlation": {
+    "pccb_id": "pccb_invoice_0001",
+    "escrow_id": "esc_invoice_0001",
+    "request_id": "req_invoice_allow"
+  },
+  "summary": "Invoice payment executed and a local reconciliation record was created.",
+  "side_effects": {
+    "state": "completed",
+    "external_reference": "provider_local_0001",
+    "provider_reference": "provider_local_0001",
+    "reconciliation_status": "recorded-local",
+    "resource_version": "3"
+  },
+  "details": {
+    "wedge": "invoice_payment",
+    "payment_execution_id": "payment_local_0001",
+    "reconciliation_id": "recon_local_0001",
+    "reconciliation_status": "recorded-local",
+    "supplier_id": "supplier_demo_001"
+  }
+}

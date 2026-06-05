@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:protected-execution:contracts:pccb:v1",
+  "title": "PCCB v1",
+  "description": "Portable proof-carrying contract that binds an allowed action to audience, scope, expiry, nonce, and action hash.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "pccb_id",
+    "issued_at",
+    "not_before",
+    "expires_at",
+    "issuer",
+    "subject",
+    "tenant",
+    "audience",
+    "action",
+    "target",
+    "scope",
+    "nonce",
+    "action_hash",
+    "signature"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "pccb"
+        },
+        "version": {
+          "const": "v1"
+        }
+      }
+    },
+    "pccb_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "intent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "issued_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "not_before": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "expires_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "issuer": {
+      "$ref": "#/$defs/party_ref"
+    },
+    "subject": {
+      "$ref": "#/$defs/party_ref"
+    },
+    "tenant": {
+      "$ref": "#/$defs/tenant_ref"
+    },
+    "audience": {
+      "$ref": "#/$defs/audience_ref"
+    },
+    "action": {
+      "$ref": "#/$defs/action_ref"
+    },
+    "target": {
+      "$ref": "#/$defs/target_ref"
+    },
+    "scope": {
+      "$ref": "#/$defs/scope_ref"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9._~:-]{16,256}$"
+    },
+    "action_hash": {
+      "$ref": "#/$defs/action_hash_ref"
+    },
+    "escrow_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "escrow_id"
+      ],
+      "properties": {
+        "escrow_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "single_use": {
+          "type": "boolean"
+        }
+      }
+    },
+    "signature": {
+      "$ref": "#/$defs/signature_ref"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "party_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "audience_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri-reference",
+          "maxLength": 2048
+        }
+      }
+    },
+    "action_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "capability",
+        "parameters"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "target_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_type",
+        "resource_id"
+      ],
+      "properties": {
+        "resource_type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 128
+        },
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri-reference",
+          "maxLength": 2048
+        },
+        "selectors": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "scope_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "capabilities",
+        "single_use"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "exact"
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+          }
+        },
+        "resource_selectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "parameter_constraints": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "single_use": {
+          "type": "boolean"
+        }
+      }
+    },
+    "action_hash_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha-256"
+        },
+        "canonicalization": {
+          "const": "RFC8785-JCS"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "signature_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "key_id",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "base64url"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 8192
+        }
+      }
+    }
+  }
+}

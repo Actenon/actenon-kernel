@@ -1,0 +1,6 @@
+{
+  "basis": "generalized-runtime-gap",
+  "key": "proof_only_gap",
+  "status": "still_needs_runtime_state",
+  "summary": "Even a correctly signed destructive action would still need protected-endpoint replay and runtime controls. Signature alone does not make repeated or misrouted execution safe."
+}

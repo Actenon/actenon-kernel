@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:refusal_attestation:v2alpha1",
+  "title": "Refusal Attestation v2alpha1",
+  "description": "Signed outcome attestation envelope for a refusal artifact. The issuer signature covers only unsigned_payload; external_anchors are sibling post-signing durability material.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "unsigned_payload",
+    "signature",
+    "external_anchors"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "refusal_attestation"
+        },
+        "version": {
+          "const": "v2alpha1"
+        }
+      }
+    },
+    "unsigned_payload": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/unsigned_payload"
+        },
+        {
+          "properties": {
+            "artifact_type": {
+              "const": "refusal"
+            }
+          }
+        }
+      ]
+    },
+    "signature": {
+      "$ref": "#/$defs/signature_spec"
+    },
+    "external_anchors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/external_anchor"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "party_ref": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "digest_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha-256"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        }
+      }
+    },
+    "proof_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intent_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "pccb_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "action_hash": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        }
+      }
+    },
+    "unsigned_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attestation_id",
+        "issued_at",
+        "issuer",
+        "artifact_type",
+        "artifact_digest",
+        "outcome_artifact",
+        "proof_binding",
+        "metadata"
+      ],
+      "properties": {
+        "attestation_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "issuer": {
+          "$ref": "#/$defs/party_ref"
+        },
+        "artifact_type": {
+          "type": "string"
+        },
+        "artifact_digest": {
+          "$ref": "#/$defs/digest_spec"
+        },
+        "outcome_artifact": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "proof_binding": {
+          "$ref": "#/$defs/proof_binding"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "signature_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "key_id",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "key_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "encoding": {
+          "const": "base64url"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 4096
+        }
+      }
+    },
+    "external_anchor": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "anchor_id",
+        "anchored_at",
+        "artifact_digest",
+        "trust_root",
+        "proof",
+        "metadata"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "anchor_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "anchored_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "artifact_digest": {
+          "$ref": "#/$defs/digest_spec"
+        },
+        "trust_root": {
+          "type": "object"
+        },
+        "proof": {
+          "type": "object"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

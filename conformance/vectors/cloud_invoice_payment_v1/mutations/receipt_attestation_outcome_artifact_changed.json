@@ -1,0 +1,55 @@
+{
+  "contract": {
+    "name": "receipt_attestation",
+    "version": "v2alpha1"
+  },
+  "external_anchors": [],
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "kid_cloud_invoice_v1_outcome_001",
+    "value": "nzVeRpF9GMIVFx1YrfeXdIdDY6Iiry8iuAxdhl2FggHis7xScymKGaYcysqo6noOdJwWiR8wa7qIo0ezwZjrBw"
+  },
+  "unsigned_payload": {
+    "artifact_digest": {
+      "algorithm": "sha-256",
+      "value": "47dbb2e07068f0f5459d0ad4c2ca425c721962b89ff9c29f3305c3b77bacfb1c"
+    },
+    "artifact_type": "receipt",
+    "attestation_id": "att_receipt_cloud_invoice_v1",
+    "issued_at": "2026-01-15T12:02:00Z",
+    "issuer": {
+      "display_name": "Actenon Cloud",
+      "id": "https://actenon-cloud.local/issuer",
+      "type": "service"
+    },
+    "metadata": {
+      "pass": "keystone_pass_4",
+      "vector_id": "cloud_invoice_payment_v1"
+    },
+    "outcome_artifact": {
+      "capability": "finance.transfer.release",
+      "contract": {
+        "name": "receipt",
+        "version": "v1"
+      },
+      "issued_at": "2026-01-15T12:01:00Z",
+      "metadata": {
+        "pass": "keystone_pass_4",
+        "vector_id": "cloud_invoice_payment_v1"
+      },
+      "outcome": "tampered",
+      "proof_binding": {
+        "action_hash": "ff83a7e14dfbc6e2b361e8a9a4a802b5ba5a96ba26aa19f76bb23230da8ced24",
+        "intent_id": "intent_cloud_invoice_v1",
+        "pccb_id": "pccb_proof_cloud_invoice_v1"
+      },
+      "receipt_id": "receipt_cloud_invoice_v1"
+    },
+    "proof_binding": {
+      "action_hash": "ff83a7e14dfbc6e2b361e8a9a4a802b5ba5a96ba26aa19f76bb23230da8ced24",
+      "intent_id": "intent_cloud_invoice_v1",
+      "pccb_id": "pccb_proof_cloud_invoice_v1"
+    }
+  }
+}
