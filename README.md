@@ -13,10 +13,19 @@ Your AI agent can try to delete your production database. When that action is ro
 
 ## 60-Second Quickstart
 
+## 60-Second Quickstart
+
 ```bash
+git clone https://github.com/Actenon/Actenon.git
+cd Actenon
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[asymmetric]"
-bash scripts/demo_hero.sh
-```
+
+bash scripts/demo_hero.sh```
 
 This is a safe local simulation. It does not contact a cloud account, use
 external secrets, or perform a real destructive action.
