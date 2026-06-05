@@ -55,6 +55,27 @@ Actenon is built for the execution gap exposed by real AI-agent failure patterns
 
 Actenon does not claim every historical incident would automatically have been prevented in every deployment. The claim is narrower and testable: **if a consequential action is routed through a protected endpoint, it cannot execute without valid proof bound to that exact action.**
 
+## Why This Is Not Just Middleware
+
+Actenon is not a client-side safety wrapper.
+
+The agent and SDK are not the trust boundary. **The protected endpoint is the enforcement boundary.**
+
+A consequential action is only allowed when the endpoint verifies proof bound to the exact action parameters, tenant, subject, audience, expiry, and replay/escrow state. If the proof is missing, expired, replayed, audience-mismatched, or action-mismatched, the endpoint refuses before the side effect and emits a Refusal artifact.
+
+```text
+
+Untrusted agent
+
+  → SDK/client
+
+  → Protected endpoint
+
+  → Verify proof / policy / replay / credential broker
+
+  → Side effect
+
+  → Receipt or Refusal artifact
 
 ## Artifact Snippet
 
