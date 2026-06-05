@@ -15,16 +15,16 @@ This is not a vulnerability severity rating. It is a consequence-class map of ca
 ## Commands
 
 ```bash
-actenon scan local
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
-actenon scan endpoint --path examples/fastapi_protected_route
+python3 -m actenon.cli scan local
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan endpoint --path examples/fastapi_protected_route
 ```
 
 Reports can be emitted as terminal text, JSON, Markdown, and badge Markdown:
 
 ```bash
-actenon scan repo \
+python3 -m actenon.cli scan repo \
   --path . \
   --report-json .actenon-scan/report.json \
   --report-markdown .actenon-scan/report.md \
@@ -41,7 +41,7 @@ For a public-safe sample of the intended scanner UX, see
 Large repositories can be scanned with practical controls:
 
 ```bash
-actenon scan repo \
+python3 -m actenon.cli scan repo \
   --path ../target-agent \
   --exclude node_modules \
   --exclude dist \
@@ -267,12 +267,12 @@ Legacy `--target artifact-pair` and `--target replay-harness` remain supported.
 When these repositories are available locally, run private reports only:
 
 ```bash
-actenon scan repo --path ../skyvern --report-json PRIVATE_SCANNER_FIELD_TEST_SKYVERN.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_SKYVERN.md
-actenon scan repo --path ../browser-use --report-json PRIVATE_SCANNER_FIELD_TEST_BROWSER_USE.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_BROWSER_USE.md
-actenon scan repo --path ../stagehand --report-json PRIVATE_SCANNER_FIELD_TEST_STAGEHAND.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_STAGEHAND.md
-actenon scan repo --path ../OpenHands --report-json PRIVATE_SCANNER_FIELD_TEST_OPENHANDS.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_OPENHANDS.md
-actenon scan repo --path ../AutoGPT --report-json PRIVATE_SCANNER_FIELD_TEST_AUTOGPT.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_AUTOGPT.md
-actenon scan mcp --path ../example-mcp-server --report-json PRIVATE_SCANNER_FIELD_TEST_MCP_SERVER.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_MCP_SERVER.md
+python3 -m actenon.cli scan repo --path ../skyvern --report-json PRIVATE_SCANNER_FIELD_TEST_SKYVERN.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_SKYVERN.md
+python3 -m actenon.cli scan repo --path ../browser-use --report-json PRIVATE_SCANNER_FIELD_TEST_BROWSER_USE.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_BROWSER_USE.md
+python3 -m actenon.cli scan repo --path ../stagehand --report-json PRIVATE_SCANNER_FIELD_TEST_STAGEHAND.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_STAGEHAND.md
+python3 -m actenon.cli scan repo --path ../OpenHands --report-json PRIVATE_SCANNER_FIELD_TEST_OPENHANDS.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_OPENHANDS.md
+python3 -m actenon.cli scan repo --path ../AutoGPT --report-json PRIVATE_SCANNER_FIELD_TEST_AUTOGPT.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_AUTOGPT.md
+python3 -m actenon.cli scan mcp --path ../example-mcp-server --report-json PRIVATE_SCANNER_FIELD_TEST_MCP_SERVER.json --report-markdown PRIVATE_SCANNER_FIELD_TEST_MCP_SERVER.md
 ```
 
 Classify each private field-test finding as true signal, weak signal, false positive, or scanner improvement needed. Do not publish target grades without maintainer consent.

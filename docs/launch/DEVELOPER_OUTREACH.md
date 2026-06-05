@@ -29,7 +29,7 @@ Local demo:
 python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 
 Scanner:
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 
 The scanner is private and advisory. It maps candidate action surfaces and missing visible controls; it does not claim vulnerabilities or publish grades.
 
@@ -71,7 +71,7 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 
 There is also an advisory scanner:
 
-actenon scan mcp --path <your-mcp-server>
+python3 -m actenon.cli scan mcp --path <your-mcp-server>
 
 The scanner maps candidate MCP tool side effects and missing visible controls. It is not a vulnerability accusation, does not prove runtime exploitability, and does not publish grades.
 
@@ -112,7 +112,7 @@ Local demo:
 python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 
 Scanner:
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 
 The scanner output is deliberately worded as a consequence-class map, not a vulnerability severity report. Runtime reachability, exploitability, production exposure, and business impact are not proven by a static scan.
 

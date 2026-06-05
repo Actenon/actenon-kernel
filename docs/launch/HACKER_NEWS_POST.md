@@ -41,8 +41,8 @@ The demo is local-only. It simulates an agent trying a consequential action, sho
 There is also a local scanner:
 
 ```bash
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
 The scanner maps candidate agent-controlled action surfaces. It does not accuse a repo of being vulnerable. It is meant to help maintainers find places where proof gates, approval/evidence policy, credential brokering, replay protection, and Receipt/Refusal logging may be useful.

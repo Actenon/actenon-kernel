@@ -30,7 +30,7 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 
 Try the scanner:
 
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 
 The scanner maps agent authority. It does not accuse a repo of being vulnerable. It gives maintainers a practical map of candidate action surfaces where proof gates, approval/evidence policy, replay protection, credential boundaries, and receipts may be needed.
 
@@ -83,8 +83,8 @@ docs/assets/actenon-hero-demo.gif
 ```text
 5/ Scanner CTA:
 
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 
 The scanner maps agent authority. It does not accuse your repo of being vulnerable.
 ```
@@ -115,7 +115,7 @@ Local demo:
 python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 
 Scanner:
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 
 No valid proof, no execution. Every consequential action leaves a verifiable receipt.
 

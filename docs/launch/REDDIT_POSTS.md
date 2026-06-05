@@ -19,8 +19,8 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 Scanner CTA:
 
 ```bash
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
 Core line:
@@ -59,7 +59,7 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 There is also a local scanner that maps candidate agent-controlled action surfaces:
 
 ```bash
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 ```
 
 The scanner is advisory. It does not claim your repo is vulnerable and it does not prove runtime reachability. The goal is to help maintainers find tool handlers, workflow runners, shell/API paths, and credential boundaries that deserve proof, approval, replay/idempotency, and audit controls.
@@ -103,8 +103,8 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 Scanner:
 
 ```bash
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
 Limitations, explicitly:
@@ -151,7 +151,7 @@ python3 -m pip install -e ".[asymmetric]" && bash scripts/demo_hero.sh
 Try the local scanner:
 
 ```bash
-actenon scan repo --path .
+python3 -m actenon.cli scan repo --path .
 ```
 
 The scanner maps agent authority. It does not accuse a repo of being vulnerable. It is a practical way to find browser actions, tool handlers, MCP tools, shell paths, API calls, workflow runners, or credential-backed paths that might need a proof or approval boundary before autonomous execution.
@@ -203,7 +203,7 @@ python3 -m examples.mcp_protected_tool.demo --scenario allow
 Scanner:
 
 ```bash
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
 The scanner is advisory and private by default. It maps candidate consequential action surfaces and recommends controls; it does not publish grades or claim vulnerabilities.

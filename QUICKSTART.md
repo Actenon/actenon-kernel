@@ -25,8 +25,8 @@ pip install -e ".[asymmetric]"
 This is the shortest product-shaped path through the kernel:
 
 ```bash
-make install
-actenon up
+python3 -m pip install -e ".[asymmetric]"
+python3 -m actenon.cli up
 ```
 
 In another terminal:
@@ -66,7 +66,7 @@ actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.acte
 The old compact proof-demo path is still available if you specifically want the original seeded lab flow:
 
 ```bash
-make install
+python3 -m pip install -e ".[asymmetric]"
 bash ./scripts/first_run.sh
 make public-verify
 ```
@@ -110,7 +110,7 @@ and [ACTENON_V2_KEYSTONE_ACCEPTANCE.md](ACTENON_V2_KEYSTONE_ACCEPTANCE.md).
 
 ## Why This Path Works
 
-- `actenon up` bootstraps and starts a complete local single-node trust runtime under `artifacts/local_runtime/`
+- `python3 -m actenon.cli up` bootstraps and starts a complete local single-node trust runtime under `artifacts/local_runtime/`
 - the runtime exposes `POST /v1/intents`, `GET /healthz`, and local key-discovery routes on `http://127.0.0.1:8787/`
 - when available, the local read-only trace viewer starts on `http://127.0.0.1:8421`
 - startup output tells you exactly where local artifacts, replay state, escrow state, and the publishable key-discovery file live
@@ -122,7 +122,7 @@ and [ACTENON_V2_KEYSTONE_ACCEPTANCE.md](ACTENON_V2_KEYSTONE_ACCEPTANCE.md).
 - the refund endpoint example proves this is not just simulator theater: you can protect a consequential endpoint immediately
 - `actenon bundle export` emits a `.actenon` portable execution evidence bundle
 - `actenon bundle verify` checks that bundle hashes and chain metadata still match the contained artifacts
-- `make install` installs the repo in editable mode
+- `python3 -m pip install -e ".[asymmetric]"` installs the repo in editable mode
 - `bash ./scripts/first_run.sh` gives you the fastest end-to-end protected-endpoint proof run
 - `make public-verify` runs the same gate as `bash scripts/verify_release_gate.sh`: keystone tests, full kernel tests, Ruff, public boundary validation, and public archive validation
 
@@ -140,7 +140,7 @@ That first run is doing more than a demo happy path. It shows the missing bounda
 
 If you are evaluating whether the kernel feels complete now, this is the shortest honest sequence:
 
-1. `actenon up`: start the local issuer, verifier-adjacent runtime surfaces, persistence, and viewer
+1. `python3 -m actenon.cli up`: start the local issuer, verifier-adjacent runtime surfaces, persistence, and viewer
 2. `actenon doctor`: confirm the local trust machine is healthy
 3. `actenon simulate --incident replit`: make the execution gap unforgettable
 4. `python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runtime`: protect a real consequential endpoint
@@ -156,7 +156,7 @@ Use this order if you want the cleanest adoption path after the first five comma
 3. open the read-only [TRACE_VIEWER.md](TRACE_VIEWER.md) at `http://127.0.0.1:8421` to inspect Action Intent, Intent Record, PCCB, Receipt, Refusal, replay entries, and protected-endpoint state
 4. read [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md) for the exact first-run flow
 5. move to [MCP_HERO_PATH.md](MCP_HERO_PATH.md) for the strongest agent-tool integration path
-6. run `actenon conformance run`
+6. run `python3 -m actenon.cli conformance run`
 
 ## What Success Looks Like
 
@@ -312,7 +312,7 @@ Local runtime state lives on disk:
 - local keys: `artifacts/local_runtime/keys/`
 - runtime service manifest: `artifacts/local_runtime/service_manifest.json`
 
-If you only want the files and labs without starting the HTTP services, use `actenon up --bootstrap-only`.
+If you only want the files and labs without starting the HTTP services, use `python3 -m actenon.cli up --bootstrap-only`.
 
 That bootstrap-only path is intentionally not a fully serving local trust runtime. `actenon doctor` will report `needs_attention` until the foreground runtime process is actually running.
 
@@ -320,7 +320,7 @@ In default local `HS256` mode, the startup banner also tells you where the runti
 
 Reset options:
 
-- full reset: remove `artifacts/local_runtime/` and run `actenon up` again
+- full reset: remove `artifacts/local_runtime/` and run `python3 -m actenon.cli up` again
 - live execution reset while keeping seeded labs: remove `artifacts/local_runtime/artifacts/`, `artifacts/local_runtime/state/`, and `artifacts/local_runtime/service_manifest.json`
 - simulation cleanup only: remove `artifacts/local_runtime/simulations/`
 - bundle cleanup only: remove `artifacts/local_runtime/bundles/`
@@ -336,7 +336,7 @@ actenon graph anchor \
 Run conformance:
 
 ```bash
-actenon conformance run
+python3 -m actenon.cli conformance run
 ```
 
 Open the read-only local trace viewer:

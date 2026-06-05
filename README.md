@@ -386,14 +386,14 @@ Start with:
 
 - [docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md)
 - [docs/examples/scanner-report-example.md](docs/examples/scanner-report-example.md)
-- [EXECUTION_GAP_SCANNER.md](EXECUTION_GAP_SCANNER.md)
+- [Execution Gap Scanner Methodology](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md)
 
 Quick scanner path:
 
 ```bash
-actenon scan --target replay-harness
-actenon scan repo --path .
-actenon scan mcp --path examples/mcp_server_protected_tool
+python3 -m actenon.cli scan --target replay-harness
+python3 -m actenon.cli scan repo --path .
+python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
 ---
@@ -588,8 +588,8 @@ The normative behavior for that edge lives in:
 The shortest credible first run is:
 
 ```bash
-make install
-actenon up
+python3 -m pip install -e ".[asymmetric]"
+python3 -m actenon.cli up
 actenon doctor
 actenon simulate --incident replit
 python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runtime
@@ -599,7 +599,7 @@ actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.acte
 
 That path is intentionally product-shaped:
 
-- `actenon up` starts a complete local trust machine
+- `python3 -m actenon.cli up` starts a complete local trust machine
 - `actenon doctor` tells you whether it is healthy
 - `actenon simulate --incident replit` makes the execution gap memorable
 - the protected refund endpoint proves you can guard a dangerous endpoint now
@@ -615,8 +615,8 @@ If you want the exact walkthrough, start with [QUICKSTART.md](QUICKSTART.md) and
 Single-node runtime path:
 
 ```bash
-make install
-actenon up
+python3 -m pip install -e ".[asymmetric]"
+python3 -m actenon.cli up
 ```
 
 In another terminal:
@@ -626,7 +626,7 @@ actenon doctor
 actenon simulate --incident replit
 ```
 
-`actenon up` starts the local single-node trust runtime. By default it serves:
+`python3 -m actenon.cli up` starts the local single-node trust runtime. By default it serves:
 
 - `POST /v1/intents` on `http://127.0.0.1:8787/v1/intents`
 - `GET /.well-known/actenon/keys.json` and `GET /.well-known/actenon-keys.json`
@@ -687,8 +687,8 @@ The Protected Endpoint is the central behavioral compatibility surface. A system
 Fastest compatibility path:
 
 ```bash
-make install
-actenon conformance run
+python3 -m pip install -e ".[asymmetric]"
+python3 -m actenon.cli conformance run
 ```
 
 Start here:
