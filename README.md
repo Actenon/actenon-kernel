@@ -17,8 +17,8 @@ It sits at the execution boundary, refuses unproven actions before side effects 
 ## See It In 60 Seconds
 
 ```bash
-git clone https://github.com/Actenon/Actenon.git
-cd Actenon
+git clone https://github.com/Actenon/actenon.git
+cd actenon
 
 python3 -m venv .venv
 source .venv/bin/activate

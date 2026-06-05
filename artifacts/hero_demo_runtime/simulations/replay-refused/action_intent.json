@@ -1,0 +1,28 @@
+{
+  "action": {
+    "capability": "refund.execute",
+    "name": "refund.create",
+    "parameters": {
+      "amount_minor": 1000,
+      "currency": "USD"
+    }
+  },
+  "contract": {
+    "name": "action_intent",
+    "version": "v1"
+  },
+  "expires_at": "2026-01-01T12:05:00Z",
+  "intent_id": "intent_sim_replay_001",
+  "issued_at": "2026-01-01T12:00:00Z",
+  "requester": {
+    "id": "actor_123",
+    "type": "service"
+  },
+  "target": {
+    "resource_id": "pay_001",
+    "resource_type": "payment"
+  },
+  "tenant": {
+    "tenant_id": "tenant_alpha"
+  }
+}

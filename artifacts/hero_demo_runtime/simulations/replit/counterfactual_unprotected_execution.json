@@ -1,0 +1,12 @@
+{
+  "effect": {
+    "operator_story": "The tool already had the power, so the widened action would reach the database anyway.",
+    "target": {
+      "resource_id": "customer_prod_primary",
+      "resource_type": "database"
+    },
+    "would_have_executed": "database destructive action"
+  },
+  "status": "would_execute",
+  "summary": "Counterfactual weak control path: a broadly trusted development agent turns an intended schema migration into a destructive database action and the execution edge never rechecks the exact action."
+}

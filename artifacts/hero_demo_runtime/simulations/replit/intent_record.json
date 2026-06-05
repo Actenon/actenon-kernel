@@ -1,0 +1,79 @@
+{
+  "action": {
+    "capability": "database.migration.execute",
+    "constraints": {
+      "exact_change_set_sha256": "mig_2026_01_add_projects_index",
+      "exact_environment": "production",
+      "exact_migration_id": "2026_01_add_projects_index"
+    },
+    "name": "database.schema.apply",
+    "parameters": {
+      "change_set_sha256": "mig_2026_01_add_projects_index",
+      "environment": "production",
+      "migration_id": "2026_01_add_projects_index"
+    },
+    "scope": {
+      "single_use": true,
+      "target_resource_type": "database"
+    }
+  },
+  "audience": {
+    "id": "local-db-admin-endpoint",
+    "type": "service"
+  },
+  "boundaries": {
+    "abort_conditions": [
+      "change_set_hash_mismatch",
+      "unexpected_table_drop_detected"
+    ],
+    "blast_radius_limits": [
+      {
+        "name": "max_database_targets",
+        "summary": "A delegated migration may target only one database.",
+        "value": 1
+      },
+      {
+        "name": "max_change_sets",
+        "summary": "A delegated migration may apply only one reviewed change set.",
+        "value": 1
+      }
+    ],
+    "prohibited_actions": [
+      "database.drop",
+      "database.reset",
+      "database.bulk_delete"
+    ]
+  },
+  "contract": {
+    "name": "intent_record",
+    "version": "v1alpha1"
+  },
+  "created_at": "2026-01-01T12:00:00Z",
+  "decision": {
+    "outcome": "allow",
+    "reason_codes": [
+      "INCIDENT_SIMULATION_ALLOW"
+    ],
+    "summary": "Replit-Style Destructive Drift delegates a bounded machine action for protected execution."
+  },
+  "execution_evidence": {},
+  "intent_id": "intent_incident_replit_001",
+  "intent_record_id": "ir_incident_simulator_intent_incident_replit_001",
+  "proof": {
+    "pccb_id": "pccb_incident_replit",
+    "required_for_execution": true,
+    "status": "issued"
+  },
+  "source": "incident-simulator",
+  "subject": {
+    "id": "simulator_agent",
+    "type": "service"
+  },
+  "target": {
+    "resource_id": "customer_prod_primary",
+    "resource_type": "database"
+  },
+  "tenant": {
+    "tenant_id": "tenant_demo"
+  }
+}
