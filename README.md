@@ -8,7 +8,7 @@ Actenon sits at the execution boundary and stops AI agents, MCP tools, browser a
 
 [![Actenon demo: an unproven agent action is refused before the side effect](docs/assets/actenon-hero-devops.gif)](docs/assets/actenon-hero-devops.gif)
 
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
+[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
 
 ---
 
@@ -89,6 +89,42 @@ The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST
 | Maintaining an open-source agent repo | [The advisory scanner](#the-advisory-scanner) |
 | Evaluating governance or standards | [An open standard, not lock-in](#an-open-standard-not-lock-in) · [CONFORMANCE.md](CONFORMANCE.md) · [GOVERNANCE.md](GOVERNANCE.md) |
 | Considering contributing | [Contributing](#contributing) |
+
+---
+## Find your execution gap
+
+Actenon includes a local advisory scanner that maps candidate AI-controlled consequential action paths in your repo.
+
+It does not accuse your repo of being vulnerable. It asks a narrower question:
+
+> If an agent can reach this action path, could it cause a consequential side effect without proof-bound execution?
+
+Run it locally:
+
+    python3 -m actenon.cli scan repo --path .
+
+Example output shape:
+
+    Candidate consequential action path:
+      browser.submit / database.delete / file.write / deploy / export
+
+    Consequence class:
+      Critical-impact candidate, if reachable and ungated
+
+    Vulnerability claim:
+      no
+
+    Runtime reachability:
+      not proven
+
+    Suggested control:
+      require proof before submit/delete/export/update/deploy
+
+The scanner is a map, not a verdict. It helps maintainers identify where a protected endpoint, approval gate, credential broker, or proof-bound execution boundary may be needed.
+
+Scanner is the discovery layer. The protected endpoint is the control. Receipt and Refusal artifacts are the evidence.
+
+Read more: [Execution Gap Scanner Methodology](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md)
 
 ---
 
