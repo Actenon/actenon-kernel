@@ -63,12 +63,6 @@ bash scripts/demo_hero.sh --details
 
 ---
 
-## Expected Local Warnings
-
-The local demo and conformance commands may print warnings about the local HMAC signer. These warnings are expected in demo mode and are intentionally explicit.
-
-The default local proof secret is public and must not be used for production. Production deployments should use asymmetric well-known verification material, KMS, or HSM-backed signing custody.
-
 ## Choose Your Path
 
 | If you are... | Start here |

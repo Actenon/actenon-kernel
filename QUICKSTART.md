@@ -1,5 +1,9 @@
 # Quickstart
 
+## Local Demo Trust Mode
+
+The quickstart uses local demo signing only. If warnings mention the local HMAC signer, that is expected for this demo path. Production deployments should use asymmetric verification material or managed signing custody.
+
 ## Goal
 
 Get from clone to a complete local trust runtime, a memorable execution-gap simulation, and a first proof-bound protected-endpoint success in a few minutes, with no external accounts, provider sandboxes, or API keys.
