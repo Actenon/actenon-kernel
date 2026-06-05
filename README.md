@@ -267,7 +267,7 @@ The claim is narrow and testable: **if a consequential action is routed through 
 
 ---
 
-## What Actenon does — and does not do
+## What Actenon does, and does not do
 
 Actenon **does**:
 
