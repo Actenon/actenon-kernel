@@ -1,6 +1,0 @@
-{
-  "basis": "observed",
-  "key": "proof_bound_path",
-  "status": "refused",
-  "summary": "Observed: the protected endpoint refused the mutated action because the presented PCCB no longer matched the Action Intent hash."
-}

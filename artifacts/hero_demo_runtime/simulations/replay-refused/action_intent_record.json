@@ -1,6 +1,0 @@
-{
-  "basis": "observed",
-  "key": "action_intent_record",
-  "status": "recorded_refusal",
-  "summary": "Observed: the Action Intent, first execution Receipt, and replay Refusal show exactly which attempt succeeded and which duplicate was blocked."
-}

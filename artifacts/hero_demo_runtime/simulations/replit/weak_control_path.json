@@ -1,6 +1,0 @@
-{
-  "basis": "counterfactual",
-  "key": "weak_control_path",
-  "status": "would_execute",
-  "summary": "Counterfactual weak control path: a broadly trusted development agent turns an intended schema migration into a destructive database action and the execution edge never rechecks the exact action."
-}

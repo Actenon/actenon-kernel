@@ -1,6 +1,0 @@
-{
-  "basis": "counterfactual",
-  "key": "without_execution_edge",
-  "status": "would_execute_twice",
-  "summary": "Counterfactual: without execution-edge replay enforcement, the same proof-bearing request could drive two side effects."
-}
