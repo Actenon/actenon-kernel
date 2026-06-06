@@ -70,7 +70,7 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: "1.81"
+          toolchain: "1.88"
 
       - name: Test TypeScript verifier
         working-directory: sdk/typescript

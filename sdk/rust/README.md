@@ -4,6 +4,8 @@ Minimal protected-endpoint verifier SDK for Rust, aligned to the Python kernel's
 
 This crate is intentionally narrow. It focuses on verifier-side proof checking at the protected execution edge and offline verification of Receipt counter-signatures. It does not issue counter-signatures or contain private-key custody or service code.
 
+Minimum supported Rust version: 1.88.
+
 Choosing between Python, TypeScript, Go, and Rust paths? Start with [`../../SDK_SELECTION_GUIDE.md`](../../SDK_SELECTION_GUIDE.md).
 
 ## Current Scope

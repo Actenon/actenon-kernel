@@ -4,6 +4,9 @@
 
 ### Changed
 
+- The Rust verifier SDK now pins `time` 0.3.47, resolving
+  CVE-2026-25727 / GHSA-r6v5-fh4h-64xc, and declares Rust 1.88 as its minimum
+  supported toolchain to match the patched dependency.
 - Replay-store claim and consume failures now refuse before side effects by
   default. Durable relational stores use an atomic conditional claim, record
   consumption before handler execution, and track a monotonic mutation
