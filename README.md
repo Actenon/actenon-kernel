@@ -1,25 +1,32 @@
 # Actenon
 
-**The open proof gate and receipt standard for consequential AI actions.**
+**The open proof gate and receipt standard that protects your systems from any agent's actions.**
 
 > **No valid proof, no execution.**
 
-Actenon provides deterministic action authorization at the execution boundary.
-AI agents, MCP tools, browser agents, coding agents, and workflow automations
-can execute a consequential action through a protected endpoint only when it
-verifies cryptographic proof bound to the *exact* action being attempted. Every
-protected decision leaves a verifiable **Receipt** or **Refusal** artifact.
+Actenon sits at your execution boundary — your database, your payments rail, your cloud control plane, your internal APIs, your deploy pipeline — and refuses any consequential action unless the caller presents a cryptographic proof bound to the exact action being attempted.
 
-**Actenon gates explicit execution-edge actions; it does not inspect or filter
-prompts, model output, or in-band response content.**
+It doesn't matter whether the action comes from your own AI agent, a third-party agent, an MCP tool, a browser or coding agent, a workflow automation, or a compromised one: if the proof is missing, expired, replayed, or bound to a different action, the action is refused before the side effect, and every decision leaves a verifiable **Receipt** or **Refusal** artifact.
 
-**It can require proof for an explicit export or transmit action, but it does
-not stop data disclosed inside ordinary output unless that disclosure is itself
-modeled and routed as a protected action.**
+**You protect your boundary. The agent does not have to cooperate, trust you, or even know Actenon exists.**
 
 [![Actenon demo: an unproven agent action is refused before the side effect](docs/assets/actenon-hero-devops.gif)](docs/assets/actenon-hero-devops.gif)
 
-[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Scope and guarantees](docs/SCOPE_AND_GUARANTEES.md) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
+[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
+
+---
+
+## The shift: agents now touch systems you don't control
+
+AI agents no longer just produce text. They call your APIs, hit your provider endpoints, change your state, and trigger irreversible actions — deleting data, moving money, changing access, deploying code, exporting records.
+
+And increasingly, the agent reaching your system was not built by you. It's a partner's agent, a customer's agent, an autonomous workflow, an open-source tool, or an agent that has been prompt-injected or otherwise compromised. You cannot make every agent that touches your systems adopt your safety library. You cannot review their prompts. You cannot trust their reasoning.
+
+So the only place you can enforce safety is your own boundary — the endpoint, gateway, or resource the action actually hits. That is what Actenon protects: it lets the resource owner demand proof from any agent, and refuse anything unproven, before a single side effect occurs.
+
+This is the edge-protection model: like a WAF or an API gateway, you adopt it once at your boundary and you are protected against the entire agent ecosystem — cooperative, third-party, or hostile.
+
+Read the full problem statement in [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md).
 
 ---
 
@@ -36,8 +43,7 @@ python3 -m pip install -e ".[asymmetric]"
 python examples/quickstart_min.py
 ```
 
-This local-only quickstart uses the packaged `ActenonGate` API. It executes the
-valid exact action once, refuses a mismatched action, and refuses replay:
+This local-only quickstart uses the packaged `ActenonGate` API. It executes the valid exact action once, refuses a mismatched action, and refuses replay:
 
 ```text
 ACTENON QUICKSTART
@@ -45,11 +51,13 @@ valid: EXECUTED
 mismatch: REFUSED (INTENT_MISMATCH)
 replay: REFUSED (DUPLICATE_REPLAY)
 side_effects: 1
+
 No valid proof, no execution.
 ```
 
-It does not contact a cloud account, use external secrets, or perform a real
-destructive action. The local HMAC signer is for development only.
+It does not contact a cloud account, use external secrets, or perform a real destructive action. The local HMAC signer is for development only.
+
+---
 
 ## See it in 60 seconds
 
@@ -86,11 +94,145 @@ VALID PROOF:
 Done: unproven action refused; valid proof executed once.
 ```
 
+For the incident-style walkthrough and local runtime:
+
+```bash
+python3 -m actenon.cli simulate --incident replit
+python3 -m actenon.cli up
+python3 -m actenon.cli doctor
+```
+
+The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md).
+
+---
+
+## Choose your path
+
+| If you are… | Start here |
+| --- | --- |
+| Protecting a system agents can reach | [The resource-side edge model](#protect-your-resource-boundary) |
+| Just curious | Watch the GIF, run `bash scripts/demo_hero.sh` |
+| Building agents or MCP tools | [Protect an MCP tool in 3 steps](#protect-an-mcp-tool-in-3-steps) · [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
+| Reviewing security | [Why this isn't just middleware](#why-this-isnt-just-middleware) · [THREAT_MODEL.md](THREAT_MODEL.md) · [Security testing](docs/security/SECURITY_TESTING.md) |
+| Designing enterprise architecture | [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md) · [docs/architecture/DEPLOYMENT_ARCHITECTURES.md](docs/architecture/DEPLOYMENT_ARCHITECTURES.md) |
+| Maintaining an open-source agent repo | [The advisory scanner](#the-advisory-scanner) |
+| Evaluating governance or standards | [An open standard, not lock-in](#an-open-standard-not-lock-in) · [CONFORMANCE.md](CONFORMANCE.md) · [GOVERNANCE.md](GOVERNANCE.md) |
+| Considering contributing | [Contributing](#contributing) |
+
+---
+
+## The execution gap
+
+Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they don't guarantee that the execution edge performs the exact approved action, exactly once. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice. And none of them stop an action arriving from an agent you never authorized in the first place.
+
+That missing boundary is the execution gap, and Actenon closes it with proof-bound execution: the protected endpoint independently verifies a proof bound to the exact action, audience, tenant, subject, target, scope, expiry, and replay identity before any side effect happens — regardless of who or what sent the request.
+
+---
+
+## Why this isn't just middleware
+
+Actenon is not a client-side safety wrapper. The agent and the SDK are not the trust boundary — the protected endpoint is. This is what makes it work against agents you don't control: enforcement lives on your side.
+
+```text
+   Untrusted agent  (yours, a third party's, or hostile — doesn't matter)
+        │  wants to act
+        ▼
+   SDK / tool client
+        │  sends action + proof
+        ▼
+┌─────────────────────────┐
+│   Protected endpoint    │  ← enforcement boundary (you own this)
+└─────────────────────────┘
+        │  verifies proof before any side effect
+        ▼
+   Proof verifier · policy · replay/escrow · credential broker
+        │  allowed only if valid, exact-action proof
+        ▼
+   Consequential action
+        ▼
+   Receipt or Refusal artifact
+```
+
+A consequential action executes only when the endpoint verifies proof bound to the exact action parameters, tenant, subject, audience, expiry, and replay state. If the proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, tenant-mismatched, or policy-denied, the endpoint refuses before the side effect and emits a Refusal.
+
+**This is why prompt injection can make an agent want to act, but it should not make a protected action execute without valid proof.**
+
+The strongest deployment removes standing production credentials from the agent path entirely:
+
+```text
+agent → protected endpoint → brokered single-use credential → production system
+(no standing agent credential)
+```
+
+If an agent still holds a raw production credential that reaches the provider directly, Actenon can still produce proof, receipts, and refusals for the protected path — but it cannot stop side-door execution on an unprotected one. The guarantee holds only when your resource is reachable solely through the protected edge.
+
+See [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md), [docs/architecture/BYPASS_RESISTANCE.md](docs/architecture/BYPASS_RESISTANCE.md), and [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md).
+
+---
+
+## Protect your resource boundary
+
+You adopt Actenon at the boundary you own, and require proof from every caller. The edge builds the intended action from the incoming request and requires the proof to bind that exact request — so a proof issued for a harmless action cannot be reused to authorize a harmful one.
+
+| Resource boundary you own | Protected against |
+| --- | --- |
+| Database / data store | An agent dropping, deleting, or mutating production data |
+| Payments / financial rails | An agent inflating, redirecting, or duplicating a payout |
+| Cloud / infrastructure control plane | An agent terminating fleets or deleting resources |
+| IAM / access control | An agent escalating privilege or granting access |
+| Object storage / filesystem | An agent deleting backups or exfiltrating objects |
+| CI/CD / deploy / source control | An agent shipping untested code or deleting repos |
+| Communications / messaging | An agent blasting customers or sending on your behalf |
+| Internal / provider APIs | Any consequential call arriving without bound proof |
+
+---
+
+## Protect an MCP tool in 3 steps
+
+If you also build agents or MCP tools, you protect the tool's side effect the same way.
+
+**1. Identify the side effect.** This tool executes whenever the MCP server receives the call:
+
+```python
+@mcp.tool()
+def delete_customer(customer_id: str):
+    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
+    return {"status": "deleted"}
+```
+
+**2. Require proof at the endpoint.** Keep proof out of the model-facing tool schema. FastMCP injects `Context`; the runtime attaches proof metadata there:
+
+```python
+from actenon import ActenonGate
+from actenon.adapters.mcp import protected_mcp_tool
+from mcp.server.fastmcp import Context
+
+gate = ActenonGate(
+    verifier=proof_verifier,
+    audience="service:customer-admin-delete",
+    issuer="service:proof-issuer",
+)
+
+@mcp.tool()
+@protected_mcp_tool(
+    gate,
+    action_builder=build_delete_customer_intent,
+    audience="service:customer-admin-delete",
+)
+def delete_customer(customer_id: str, ctx: Context):
+    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
+    return {"status": "deleted"}
+```
+
+**3. Test the refusal path.** A protected tool must refuse when proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, or issued for a different tenant, subject, or policy boundary.
+
+Run [`examples/quickstart_min.py`](examples/quickstart_min.py) for the smallest high-level API example, then see [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool/) and [INTEGRATIONS.md](INTEGRATIONS.md).
+
+---
+
 ## Consequential Action Coverage Matrix
 
-Actenon ships a fast local coverage matrix for representative consequential action surfaces.
-
-It exercises hundreds of deterministic local scenarios across DevOps, Fintech, IAM, Database, Browser, MCP, Data Export, Email, and Code Agent operations.
+Actenon ships a fast local coverage matrix for representative consequential action surfaces. It exercises hundreds of deterministic local scenarios across DevOps, Fintech, IAM, Database, Browser, MCP, Data Export, Email, and Code Agent operations.
 
 ```bash
 python3 -m actenon.cli coverage run
@@ -120,138 +262,7 @@ Result: PASS
 No valid proof, no execution.
 ```
 
-These are representative local simulations, not live provider integration tests.
-
-Read more: [Consequential Action Coverage Matrix](docs/coverage/CONSEQUENTIAL_ACTION_COVERAGE_MATRIX.md)
-
-For the incident-style walkthrough:
-
-```bash
-python3 -m actenon.cli simulate --incident replit
-```
-
-For the local runtime and trace viewer:
-
-```bash
-python3 -m actenon.cli up          # local proof gate + trace viewer on http://127.0.0.1:8421
-python3 -m actenon.cli doctor      # health check
-```
-
-The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md).
-
----
-
-## Choose your path
-
-| If you are… | Start here |
-| --- | --- |
-| Just curious | Watch the GIF, run `bash scripts/demo_hero.sh` |
-| Building agents or MCP tools | [Protect an MCP tool in 3 steps](#protect-an-mcp-tool-in-3-steps) · [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
-| Reviewing security | [Why this isn't just middleware](#why-this-isnt-just-middleware) · [THREAT_MODEL.md](THREAT_MODEL.md) · [Security testing](docs/security/SECURITY_TESTING.md) |
-| Designing enterprise architecture | [Scope and guarantees](docs/SCOPE_AND_GUARANTEES.md) · [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md) · [docs/architecture/DEPLOYMENT_ARCHITECTURES.md](docs/architecture/DEPLOYMENT_ARCHITECTURES.md) |
-| Maintaining an open-source agent repo | [The advisory scanner](#the-advisory-scanner) |
-| Evaluating governance or standards | [An open standard, not lock-in](#an-open-standard-not-lock-in) · [CONFORMANCE.md](CONFORMANCE.md) · [GOVERNANCE.md](GOVERNANCE.md) |
-| Considering contributing | [Contributing](#contributing) |
-
----
-
-## The execution gap
-
-AI systems no longer just choose words. They call tools, hit provider APIs, change state, and initiate irreversible actions.
-
-Most stacks already have authentication, policy, approval, or workflow state. Those matter — but they don't guarantee that the *execution edge* performs the *exact approved action, exactly once*. An action can be approved upstream and then executed with the wrong parameters, the wrong target, the wrong tenant, or executed twice.
-
-That missing boundary is the **execution gap**, and Actenon closes it with **proof-bound execution**: the protected endpoint independently verifies a proof bound to the exact action, audience, tenant, subject, target, scope, expiry, and replay identity *before* any side effect happens.
-
-Read the full problem statement in [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md).
-
----
-
-## Why this isn't just middleware
-
-Actenon is not a client-side safety wrapper. The agent and the SDK are **not** the trust boundary — the **protected endpoint** is.
-
-```text
-   Untrusted agent
-        │  wants to act
-        ▼
-   SDK / tool client
-        │  sends action + proof
-        ▼
-┌─────────────────────────┐
-│   Protected endpoint    │  ← enforcement boundary
-└─────────────────────────┘
-        │  verifies proof before any side effect
-        ▼
-   Proof verifier · policy · replay/escrow · credential broker
-        │  allowed only if valid, exact-action proof
-        ▼
-   Consequential action
-        ▼
-   Receipt or Refusal artifact
-```
-
-A consequential action executes only when the endpoint verifies proof bound to the exact action parameters, tenant, subject, audience, expiry, and replay state. If the proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, tenant-mismatched, or policy-denied, the endpoint refuses *before* the side effect and emits a Refusal.
-
-Prompt injection can make an agent *want* to act. It does not bypass exact
-proof verification at a correctly deployed protected endpoint. Actenon does
-not detect or remove the prompt injection itself, and it does not inspect model
-output.
-
-The strongest deployment removes standing production credentials from the agent path entirely:
-
-```text
-agent → protected endpoint → brokered single-use credential → production system
-(no standing agent credential)
-```
-
-If the agent still holds a raw production credential that reaches the provider directly, Actenon can still produce proof, receipts, and refusals for the protected path — but it cannot stop side-door execution on an unprotected one. See [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md), [docs/architecture/BYPASS_RESISTANCE.md](docs/architecture/BYPASS_RESISTANCE.md), and [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md).
-
-**The edge guarantee applies only when the protected edge is the only path to
-the resource, the backend accepts only brokered credentials issued after
-verification, and the agent has no standing credential or alternate route.**
-
----
-
-## Protect an MCP tool in 3 steps
-
-**1. Identify the side effect.** This tool executes whenever the MCP server receives the call:
-
-```python
-@mcp.tool()
-def delete_customer(customer_id: str):
-    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
-    return {"status": "deleted"}
-```
-
-**2. Require proof at the endpoint.** Keep proof out of the model-facing tool
-schema. FastMCP injects `Context`; the runtime attaches proof metadata there:
-
-```python
-from actenon import ActenonGate
-from actenon.adapters.mcp import protected_mcp_tool
-from mcp.server.fastmcp import Context
-
-gate = ActenonGate(
-    verifier=proof_verifier,
-    audience="service:customer-admin-delete",
-    issuer="service:proof-issuer",
-)
-
-@mcp.tool()
-@protected_mcp_tool(
-    gate,
-    action_builder=build_delete_customer_intent,
-    audience="service:customer-admin-delete",
-)
-def delete_customer(customer_id: str, ctx: Context):
-    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
-    return {"status": "deleted"}
-```
-
-**3. Test the refusal path.** A protected tool must refuse when proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, or issued for a different tenant, subject, or policy boundary.
-
-Run [`examples/quickstart_min.py`](examples/quickstart_min.py) for the smallest high-level API example, then see the [native framework adapters](docs/guides/FRAMEWORK_ADAPTERS.md), [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool), and [INTEGRATIONS.md](INTEGRATIONS.md).
+These are representative local simulations, not live provider integration tests. Read more: [Consequential Action Coverage Matrix](docs/coverage/CONSEQUENTIAL_ACTION_COVERAGE_MATRIX.md).
 
 ---
 
@@ -288,13 +299,13 @@ These are real artifacts written by the demo under `artifacts/hero_demo_runtime/
 
 ## Where Actenon changes the outcome
 
-Actenon is built for the execution gap exposed by real AI-agent failure patterns — the moment an agent moves from *suggesting* an action to *causing* one.
+Actenon is built for the execution gap exposed by real AI-agent failure patterns — the moment an agent moves from suggesting an action to causing one against a system you own.
 
 | Failure pattern | What Actenon enforces |
 | --- | --- |
 | [Production database deletion](docs/incidents/REPLIT_STYLE_DATABASE_DELETE.md) | No exact signed proof → refused before execution; Refusal emitted |
 | [Destructive production action](docs/incidents/PRODUCTION_DESTRUCTIVE_ACTION.md) | Proof must bind the exact action, subject, tenant, audience, and expiry |
-| [Explicit data export action](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) | A routed export/transmit action requires scoped proof, policy approval, audience binding, and a receipt; this does not cover in-band model output |
+| [Data export / exfiltration](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) | Export requires scoped proof, policy approval, audience binding, and a receipt |
 | [IAM privilege escalation](docs/incidents/IAM_PRIVILEGE_ESCALATION_PATTERN.md) | Access mutation requires proof-bound approval and credential brokering |
 | [MCP / tool proof laundering](docs/incidents/MCP_TOOL_PROOF_LAUNDERING.md) | Tool execution requires proof at the protected endpoint |
 
@@ -306,7 +317,7 @@ The claim is narrow and testable: **if a consequential action is routed through 
 
 Actenon **does**:
 
-- refuse unproven consequential actions at a protected endpoint, before the side effect
+- refuse unproven consequential actions at a protected endpoint, before the side effect — from any caller, cooperative or not
 - bind proof to exact action parameters, plus tenant, subject, audience, expiry, scope, and replay identity
 - enforce replay/single-use by default, consume escrow where configured, and broker credentials after verification
 - emit portable Receipt and Refusal artifacts
@@ -314,32 +325,31 @@ Actenon **does**:
 
 Actenon **does not**:
 
-- stop a model from *trying* to act, or make a bad-but-authorized action good
-- inspect or filter prompts, model output, or ordinary in-band responses
-- stop data disclosed inside ordinary output unless the disclosure is modeled and routed as a protected action
-- protect actions that are *not* routed through a protected endpoint (a standing agent credential is a side door)
-- provide cross-edge replay protection unless every edge that can perform the action shares the relevant replay state
+- stop a model from trying to act, or make a bad-but-authorized action good
+- protect actions that are not routed through a protected endpoint
+- stop in-band data disclosure — Actenon gates export/transmit actions, not what a model writes into its own output; pair it with output-side DLP for that
+- prevent replay unless every protected edge shares the relevant replay state
 - prove downstream business finality, or that a provider behaved honestly after handoff
 - replace IAM, OAuth, service mesh, API gateways, or human-approval workflows — it composes with them
 - certify that a repo is vulnerable
 - claim insurer endorsement, regulator recognition, hosted transparency, or production KMS/HSM custody in the open-source kernel
 
-A compromised issuer or signer can still mint valid proof for the wrong action; mint-audit records improve *detectability*, not *prevention*. The complete asset/attacker/limit analysis is in [THREAT_MODEL.md](THREAT_MODEL.md), and the exact guarantees are in [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md).
+A compromised issuer or signer can still mint valid proof for the wrong action; mint-audit records improve detectability, not prevention. The complete asset/attacker/limit analysis is in [THREAT_MODEL.md](THREAT_MODEL.md), and the exact guarantees are in [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md).
 
 ---
 
 ## The advisory scanner
 
-`actenon scan` maps candidate AI-controlled consequential action paths in a repo. It is **advisory** — it does not accuse maintainers of shipping vulnerabilities.
+`actenon scan` maps candidate AI-controlled consequential action paths in a repo. It is advisory — it does not accuse maintainers of shipping vulnerabilities.
 
 ```bash
 python3 -m actenon.cli scan repo --path .
 python3 -m actenon.cli scan mcp --path examples/mcp_server_protected_tool
 ```
 
-Findings use **consequence-class** language, not vulnerability-severity language:
+Findings use consequence-class language, not vulnerability-severity language:
 
-> *Critical-impact candidate action path, if reachable and ungated.* Not a vulnerability claim. Runtime reachability and exploitability not proven. Suggested control: add an approval or proof gate before the side effect (Actenon's `ProtectedExecutor` is one implementation).
+> *Critical-impact candidate action path, if reachable and ungated.* Not a vulnerability claim. Runtime reachability and exploitability not proven. Suggested control: add an approval or proof gate before the side effect.
 
 A *Critical-impact candidate* means an action surface could have critical consequences if reachable, agent-controlled, and ungated — not that a critical vulnerability has been proven. See [docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md).
 
@@ -347,7 +357,7 @@ A *Critical-impact candidate* means an action surface could have critical conseq
 
 ## An open standard, not lock-in
 
-Actenon provides verifiable evidence that a specific consequential action was approved, refused, executed, or blocked under a defined proof and policy boundary. The doctrine is simple:
+Actenon provides verifiable evidence that a specific consequential action was approved, refused, executed, or blocked under a defined proof and policy boundary.
 
 > The standard stays open. Operational services are built around it.
 
@@ -365,23 +375,17 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | --- | --- |
 | Run the local proof-gate demo | [QUICKSTART.md](QUICKSTART.md) |
 | First 10 minutes, end to end | [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md) |
-| Proof issuance and approval | [docs/guides/ISSUANCE_AND_APPROVAL.md](docs/guides/ISSUANCE_AND_APPROVAL.md) |
-| Domain policy packs | [docs/guides/POLICY_PACKS.md](docs/guides/POLICY_PACKS.md) |
 | The problem, in depth | [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) |
 | The category | [CATEGORY.md](CATEGORY.md) |
 | Threat model, attackers, limits | [THREAT_MODEL.md](THREAT_MODEL.md) |
-| Scope boundary and deployment conditions | [docs/SCOPE_AND_GUARANTEES.md](docs/SCOPE_AND_GUARANTEES.md) |
 | Exact kernel guarantees | [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md) |
 | Architecture & trust boundaries | [docs/architecture/TECHNICAL_ARCHITECTURE.md](docs/architecture/TECHNICAL_ARCHITECTURE.md) |
 | Credential broker deployment | [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md) |
-| Hardened resource-side edge | [docs/guides/EDGE_DEPLOYMENT.md](docs/guides/EDGE_DEPLOYMENT.md) |
 | Wrap consequential MCP tools | [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
 | Scanner methodology & wording | [docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md) |
-| SDKs (Python, TypeScript, Go, Rust) | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) · [SUPPORT_AND_COMPATIBILITY_STATUS.md](SUPPORT_AND_COMPATIBILITY_STATUS.md) |
-| SDK parity and refusal-message hygiene | [actenon/conformance/vectors/verifier_sdk_v1/README.md](actenon/conformance/vectors/verifier_sdk_v1/README.md) · [docs/security/REFUSAL_MESSAGE_HYGIENE.md](docs/security/REFUSAL_MESSAGE_HYGIENE.md) |
-| Verify Receipt counter-signatures offline | [spec/countersignature/SPEC.md](spec/countersignature/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
-| Verify transparency proofs and monitor checkpoints | [spec/transparency-log/SPEC.md](spec/transparency-log/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
-| Verify issuer status and signed approvals | [spec/issuer-status/SPEC.md](spec/issuer-status/SPEC.md) · [spec/approval-artifact/SPEC.md](spec/approval-artifact/SPEC.md) · [docs/guides/PREFLIGHT_EVIDENCE.md](docs/guides/PREFLIGHT_EVIDENCE.md) |
+| Consequential action coverage | [docs/coverage/CONSEQUENTIAL_ACTION_COVERAGE_MATRIX.md](docs/coverage/CONSEQUENTIAL_ACTION_COVERAGE_MATRIX.md) |
+| High-level proof gate API | [docs/guides/HIGH_LEVEL_GATE_API.md](docs/guides/HIGH_LEVEL_GATE_API.md) |
+| SDKs | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) · [SUPPORT_AND_COMPATIBILITY_STATUS.md](SUPPORT_AND_COMPATIBILITY_STATUS.md) |
 | Specs index | [SPEC_INDEX.md](SPEC_INDEX.md) |
 | Open-source vs commercial boundary | [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md) |
 | Compliance mapping | [COMPLIANCE_MAPPING.md](COMPLIANCE_MAPPING.md) |
@@ -390,7 +394,16 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 
 ## Who it's for
 
-Platform and security teams protecting consequential tools, routes, or provider calls; SDK and framework teams integrating protected tools into agent stacks; enterprise architects composing agent controls with IAM, OAuth, gateways, and approval systems; open-source maintainers who want neutral advisory scanning instead of vulnerability theatre; and anyone who needs portable receipts and refusals rather than internal logs.
+Actenon is for anyone who owns a system an AI agent can reach — and needs to guarantee that no agent, theirs or anyone else's, can take a consequential action against it without proof.
+
+- **Resource and platform owners** running a database, payments rail, cloud control plane, internal API, object store, deploy pipeline, or messaging system that agents now call.
+- **Companies exposed to agents they don't control** through third-party agents, partner integrations, customer-built agents, or autonomous workflows.
+- **Security and infrastructure teams** composing agent controls with IAM, OAuth, gateways, and approval systems.
+- **Regulated and high-stakes operators** who must prove, with verifiable Receipts and Refusals, that consequential actions were authorized and bounded.
+- **SDK and framework teams** integrating protected tools into agent stacks.
+- **Open-source maintainers** who want neutral advisory scanning instead of vulnerability theatre.
+
+If an agent can reach your system, Actenon lets you make proof the precondition for action — and lets you prove it afterward.
 
 ---
 
@@ -398,12 +411,13 @@ Platform and security teams protecting consequential tools, routes, or provider 
 
 Actenon is a good fit for contributors interested in AI agents, security tooling, MCP, open standards, and developer experience. Strong first contributions:
 
+- **Edge templates** — hardened resource-side gateways for databases, payments, cloud control planes, object storage, CI/CD, IAM, and messaging.
 - **Scanner rules** — detection for shell execution, file writes/deletes, browser submits, email sends, data exports, payments, deployments, IAM changes, database mutations, and MCP tool side effects.
 - **Framework examples** — minimal proof-gated examples for MCP servers, LangChain, CrewAI, LlamaIndex, browser-use, and tool-calling agents.
 - **SDK conformance** — conformance tests for language SDKs and receipt verification.
 - **Docs** — quickstart clarity, architecture diagrams, threat-model examples, receipt/refusal examples.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Useful labels: `good first issue`, `scanner`, `docs`, `sdk`, `mcp`, `conformance`, `examples`, `security`.
+Start with [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Useful labels: `good first issue`, `edge`, `scanner`, `docs`, `sdk`, `mcp`, `conformance`, `examples`, `security`.
 
 ---
 
