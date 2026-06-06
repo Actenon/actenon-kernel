@@ -12,6 +12,7 @@ from typing import Any, Sequence
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.core import ContractValidationError, RefusalException
 from actenon.core.json import loads_no_duplicate_keys
+from actenon.coverage_matrix import DEFAULT_EVIDENCE_PATH, render_coverage_matrix_text, run_consequential_action_matrix
 from actenon.evidence import (
     EvidenceQuery,
     EvidenceQueryService,
@@ -1201,6 +1202,15 @@ def _cmd_conformance_run(args: argparse.Namespace) -> int:
     return 0 if result.wasSuccessful() else 1
 
 
+def _cmd_coverage_run(args: argparse.Namespace) -> int:
+    result = run_consequential_action_matrix(evidence_path=args.output)
+    if args.json:
+        _emit_json(result.to_dict())
+    else:
+        print(render_coverage_matrix_text(result))
+    return 0 if result.result == "PASS" else 1
+
+
 def _scan_target_from_args(args: argparse.Namespace) -> str:
     scan_command = getattr(args, "scan_command", None)
     if scan_command is not None:
@@ -1436,7 +1446,7 @@ def _cmd_keys_generate(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="actenon",
-        description="Local CLI for bootstrapping the single-node trust runtime, verifying proof, generating local key material, creating execution anchors, publishing key-discovery documents, querying execution evidence, scanning execution gaps, validating artifacts, and running conformance.",
+        description="Local CLI for bootstrapping the single-node trust runtime, verifying proof, generating local key material, creating execution anchors, publishing key-discovery documents, querying execution evidence, scanning execution gaps, running coverage matrices, validating artifacts, and running conformance.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -1936,6 +1946,23 @@ def build_parser() -> argparse.ArgumentParser:
     conformance_run = conformance_subparsers.add_parser("run", help="Run the repository conformance suite.")
     conformance_run.add_argument("--verbose", action="store_true", help="Show full unittest output.")
     conformance_run.set_defaults(func=_cmd_conformance_run)
+
+    coverage = subparsers.add_parser(
+        "coverage",
+        help="Run local deterministic coverage matrices for proof-bound consequential actions.",
+    )
+    coverage_subparsers = coverage.add_subparsers(dest="coverage_command", required=True)
+    coverage_run = coverage_subparsers.add_parser(
+        "run",
+        help="Run the Consequential Action Coverage Matrix.",
+    )
+    coverage_run.add_argument(
+        "--output",
+        default=str(DEFAULT_EVIDENCE_PATH),
+        help=f"Evidence JSON path. Defaults to {DEFAULT_EVIDENCE_PATH}.",
+    )
+    coverage_run.add_argument("--json", action="store_true", help="Emit structured JSON output.")
+    coverage_run.set_defaults(func=_cmd_coverage_run)
 
     return parser
 

@@ -12,7 +12,6 @@ from .engine import (
     IntentChronologyHardRule,
     IntentTtlHardRule,
     PolicyEngine,
-    PolicyRule,
     TenantWorkflowRule,
     TenantWorkflowRuleLayer,
 )

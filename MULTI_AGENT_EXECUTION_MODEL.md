@@ -197,7 +197,13 @@ Relevant docs:
 
 Replay behavior matters even more in delegated systems because the same proof can be forwarded or retried across multiple boundaries.
 
-Replay protection only helps where the replay path is actually enforced. If a multi-agent host bypasses replay enforcement at the protected edge, the kernel cannot prevent duplicate execution for that edge.
+`ProtectedExecutor` enables replay/single-use protection by default. When a caller does not inject a `ReplayProtector`, the executor constructs one with the packaged default replay store. The default store is SQLite at `ACTENON_REPLAY_DB` when configured, otherwise `.actenon/replay.sqlite3`.
+
+That default is shared by executor instances that resolve to the same SQLite file, so separate protected edges on one node can reject reuse of the same proof. It is not cross-node shared state. Multi-process, container, or multi-node deployments must inject a replay protector backed by storage shared by every execution edge, such as `PostgresReplayStore`.
+
+Disabling replay protection requires the explicit `replay_protection="disabled"` opt-out and emits an unsafe-configuration warning. Consequential routes should not use that mode.
+
+Replay protection only helps where the replay path is actually enforced. If a multi-agent host bypasses `ProtectedExecutor`, disables replay protection, or gives different execution edges isolated replay stores, the kernel cannot prevent duplicate execution across those edges.
 
 Relevant docs and examples:
 

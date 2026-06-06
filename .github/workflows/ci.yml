@@ -37,5 +37,8 @@ jobs:
       - name: Run local scanner
         run: python -m actenon.cli scan local
 
+      - name: Run consequential action coverage matrix
+        run: python -m actenon.cli coverage run
+
       - name: Run full tests
         run: pytest tests/ -q

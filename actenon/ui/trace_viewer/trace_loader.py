@@ -259,7 +259,6 @@ def _load_local_proof_scenario(
     decision_receipt = _payload_for(artifact_map, "decision_receipt")
     execution_receipt = _payload_for(artifact_map, "execution_receipt")
     refusal_payload = _payload_for(artifact_map, "refusal")
-    execution_payload = _payload_for(artifact_map, "execution_payload")
 
     intent_id = _first_non_empty(
         scenario_summary.get("intent_id"),

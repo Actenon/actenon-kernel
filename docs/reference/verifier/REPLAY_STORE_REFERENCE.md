@@ -64,13 +64,15 @@ Behavior:
 
 ## Default Backend
 
-`ReplayProtector` uses a default replay store when the middleware is instantiated without one.
+`ProtectedExecutor` constructs a `ReplayProtector` with the default replay store when the caller does not inject one. Replay/single-use protection is therefore default-on for this protected execution path.
 
 Default store:
 
 - `SqliteReplayStore`
 - location from `ACTENON_REPLAY_DB` when set
 - otherwise `.actenon/replay.sqlite3`
+
+The explicit `replay_protection="disabled"` mode restores execution without a replay store and logs an unsafe-configuration warning. Supplying both an explicit `replay_protector` and `replay_protection="disabled"` is rejected.
 
 SQLite is intentionally the local and single-node default. It is appropriate
 for demos, tests, local proof runs, and a single process or single-node

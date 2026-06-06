@@ -33,8 +33,64 @@ You will see an unproven consequential action refused before the side effect, fo
 ACTENON
 No valid proof, no execution.
 
+Agent attempts:
+  database.delete_table production_customers
+
+WITHOUT proof gate:
+  WOULD EXECUTE
+  side_effect_executed: true
+
+WITH ACTENON:
+  REFUSED
+  reason_code: ACTION_HASH_MISMATCH
+  side_effect_executed: false
+  refusal artifact: artifacts/hero_demo_runtime/live/simulations/replit/refusal.json
+
+VALID PROOF:
+  EXECUTED ONCE
+  side_effect_executed: true
+  receipt artifact: artifacts/hero_demo_runtime/live/simulations/replay-refused/execution_receipt.json
+
 Done: unproven action refused; valid proof executed once.
 ```
+
+## Consequential Action Coverage Matrix
+
+Actenon ships a fast local coverage matrix for representative consequential action surfaces.
+
+It exercises hundreds of deterministic local scenarios across DevOps, Fintech, IAM, Database, Browser, MCP, Data Export, Email, and Code Agent operations.
+
+```bash
+python3 -m actenon.cli coverage run
+```
+
+Example output:
+
+```text
+ACTENON CONSEQUENTIAL ACTION COVERAGE MATRIX
+
+Total scenarios: 540
+Domains covered: 9
+
+Domain evidence:
+- DevOps:                   60 checks
+- Fintech:                  60 checks
+- IAM / Access Control:     60 checks
+- Database:                 60 checks
+- Browser / Computer Use:   60 checks
+- MCP Tools:                60 checks
+- Data Export:              60 checks
+- Email / Communications:   60 checks
+- Code Agent Operations:    60 checks
+
+Result: PASS
+
+No valid proof, no execution.
+```
+
+These are representative local simulations, not live provider integration tests.
+
+Read more: [Consequential Action Coverage Matrix](docs/coverage/CONSEQUENTIAL_ACTION_COVERAGE_MATRIX.md)
 
 For the incident-style walkthrough:
 
@@ -212,7 +268,7 @@ Actenon **does**:
 
 - refuse unproven consequential actions at a protected endpoint, before the side effect
 - bind proof to exact action parameters, plus tenant, subject, audience, expiry, scope, and replay identity
-- consume replay / escrow where configured, and broker single-use credentials after verification
+- enforce replay/single-use by default, consume escrow where configured, and broker credentials after verification
 - emit portable Receipt and Refusal artifacts
 - run fully locally — verification, conformance tests, and copied Cloud-issued artifact verification need no hosted service
 
@@ -220,7 +276,7 @@ Actenon **does not**:
 
 - stop a model from *trying* to act, or make a bad-but-authorized action good
 - protect actions that are *not* routed through a protected endpoint (a standing agent credential is a side door)
-- prevent replay unless the protected endpoint actually enforces the replay path
+- prevent replay through `ProtectedExecutor`'s default store, provided every protected edge shares the relevant replay state
 - prove downstream business finality, or that a provider behaved honestly after handoff
 - replace IAM, OAuth, service mesh, API gateways, or human-approval workflows — it composes with them
 - certify that a repo is vulnerable

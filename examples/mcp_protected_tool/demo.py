@@ -31,6 +31,7 @@ from actenon.models import (
 )
 from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier
 from actenon.receipts import CompositeOutcomeWriter, InMemoryOutcomeWriter, JsonArtifactOutcomeWriter, ReceiptFactory, RefusalFactory
+from actenon.replay import ReplayProtector, SqliteReplayStore
 
 
 DEMO_NOW = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
@@ -147,6 +148,7 @@ def build_executor(*, artifact_root: Path, request_id: str) -> ProtectedExecutor
             credential_id_factory=lambda: f"cred_{request_id}",
             secret_reference_prefix="memory://mcp-quickstart-credential",
         ),
+        replay_protector=ReplayProtector(SqliteReplayStore(artifact_root / "state" / "replay.sqlite3")),
         receipt_factory=ReceiptFactory(receipt_id_factory=lambda: f"rcpt_{request_id}"),
         refusal_factory=RefusalFactory(refusal_id_factory=lambda: f"rfsl_{request_id}"),
         outcome_writer=writer,
@@ -265,4 +267,3 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

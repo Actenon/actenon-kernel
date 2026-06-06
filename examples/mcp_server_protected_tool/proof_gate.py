@@ -43,6 +43,7 @@ from actenon.receipts import (
     ReceiptFactory,
     RefusalFactory,
 )
+from actenon.replay import ReplayProtector, SqliteReplayStore
 
 
 EXAMPLE_ROOT = Path(__file__).resolve().parent
@@ -525,6 +526,7 @@ def invoke_protected_tool(
     executor = ProtectedExecutor(
         proof_verifier=PCCBVerifier(build_local_proof_signer()),
         credential_broker=broker,
+        replay_protector=ReplayProtector(SqliteReplayStore(example_root / "state" / "replay.sqlite3")),
         receipt_factory=_receipt_factory(resolved_request_id),
         refusal_factory=_refusal_factory(resolved_request_id),
         outcome_writer=_outcome_writer(example_root),

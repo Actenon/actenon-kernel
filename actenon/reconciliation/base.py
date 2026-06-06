@@ -1,11 +1,12 @@
-from __future__ import annotations
-
 """Reserved-surface reconciliation interfaces.
 
 These types support ecosystem adapters, local examples, and future standards
 work. Their presence does not by itself activate Reconciliation as an active
 public compatibility target.
 """
+
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal, Protocol

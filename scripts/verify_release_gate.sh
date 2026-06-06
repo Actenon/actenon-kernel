@@ -154,6 +154,7 @@ PY
 
 cd "$ROOT_DIR"
 
+run_step "consequential action coverage matrix" "$PYTHON_BIN" -m actenon.cli coverage run
 run_step "focused keystone suite" "$PYTHON_BIN" -m pytest "${KEYSTONE_TESTS[@]}" -q
 run_step "full kernel test suite" "$PYTHON_BIN" -m pytest tests/ -q
 run_ruff
@@ -161,5 +162,5 @@ run_step "public boundary validation" env ACTENON_INTERNAL_PUBLIC_BOUNDARY_VALID
 run_step "public release archive creation" env ACTENON_RELEASE_GATE_PASSED=1 "$ROOT_DIR/scripts/create_public_release_archive.sh" "$ARCHIVE_PATH"
 run_step "public release archive validation" validate_public_archive "$ARCHIVE_PATH"
 
-printf '\nPASS: Release gate completed. Keystone, full suite, ruff, public boundary, and archive checks are green.\n'
+printf '\nPASS: Release gate completed. Coverage matrix, keystone, full suite, ruff, public boundary, and archive checks are green.\n'
 printf 'Release gate command: bash scripts/verify_release_gate.sh\n'

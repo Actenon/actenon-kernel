@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 from actenon.core.errors import RefusalException
 from actenon.core.redaction import (
@@ -14,10 +15,14 @@ from actenon.escrow import CapabilityEscrow
 from actenon.models.runtime import ExecutionResult, PolicyDecision, ProtectedExecutionRequest
 from actenon.proof import PCCBVerifier
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
-from actenon.replay import ReplayProtector
+from actenon.replay import ReplayProtector, build_default_replay_store
 
 
 BrokeredHandler = Callable[[ProtectedExecutionRequest, BrokeredCredential], dict[str, Any]]
+REPLAY_PROTECTION_DISABLED_WARNING = (
+    "Actenon: replay/single-use protection DISABLED — the same proof can execute more than once. "
+    "This is unsafe for consequential actions."
+)
 
 
 def _policy_refusal(decision: PolicyDecision) -> RefusalException:
@@ -54,6 +59,18 @@ class ProtectedExecutor:
     receipt_factory: ReceiptFactory = field(default_factory=ReceiptFactory)
     refusal_factory: RefusalFactory = field(default_factory=RefusalFactory)
     outcome_writer: OutcomeWriter = field(default_factory=InMemoryOutcomeWriter)
+    replay_protection: Literal["default", "disabled"] = "default"
+
+    def __post_init__(self) -> None:
+        if self.replay_protection not in {"default", "disabled"}:
+            raise ValueError("replay_protection must be 'default' or 'disabled'")
+        if self.replay_protection == "disabled":
+            if self.replay_protector is not None:
+                raise ValueError("replay_protector cannot be supplied when replay_protection is 'disabled'")
+            logging.warning(REPLAY_PROTECTION_DISABLED_WARNING)
+            return
+        if self.replay_protector is None:
+            self.replay_protector = ReplayProtector(build_default_replay_store())
 
     def execute(
         self,
