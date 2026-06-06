@@ -58,12 +58,15 @@ The current open kernel uses these stable replay failure codes:
 - `DUPLICATE_REPLAY`
 - `REPLAY_STATE_INVALID`
 - `REPLAY_CLAIM_MISSING`
+- `REPLAY_STORE_UNAVAILABLE`
+- `REPLAY_STORE_ROLLBACK_DETECTED`
 
 Replay failures surface as structured refusals in the `replay` category.
 
 ## Security Considerations
 
 - replay protection is effective only if claim and transition operations are atomic for the chosen backend
+- replay-store failures must refuse before side effects unless a host explicitly selects and logs an unsafe fail-open mode
 - weak or partial replay keys can permit dangerous duplicate execution
 - claims should not be released after the ambiguity boundary unless the operator has a stronger external guarantee that no side effect occurred
 - replay protection complements, but does not replace, proof verification and capability-state enforcement

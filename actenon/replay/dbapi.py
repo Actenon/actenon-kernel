@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from datetime import datetime, timezone
 from typing import Any, Callable
 
@@ -26,6 +27,7 @@ SELECT_FIELDS = """
     consumed_at,
     metadata_json
 """
+STORE_METADATA_KEY = "global"
 
 
 class DbApiReplayStore(ReplayStore):
@@ -35,7 +37,12 @@ class DbApiReplayStore(ReplayStore):
 
     def __init__(self, connection_factory: Callable[[], Any]) -> None:
         self._connection_factory = connection_factory
+        self._mutation_lock = threading.RLock()
+        self._last_observed_counter = 0
         self.ensure_schema()
+        with self._connect() as connection:
+            cursor = connection.cursor()
+            self._last_observed_counter = self._read_mutation_counter(cursor)
 
     def ensure_schema(self) -> None:
         with self._connect() as connection:
@@ -71,15 +78,44 @@ class DbApiReplayStore(ReplayStore):
                     """
                 )
             )
+            cursor.execute(
+                self._sql(
+                    """
+                    CREATE TABLE IF NOT EXISTS replay_store_metadata (
+                        store_key TEXT PRIMARY KEY,
+                        mutation_counter INTEGER NOT NULL,
+                        updated_at TEXT NOT NULL
+                    )
+                    """
+                )
+            )
+            cursor.execute(
+                self._sql(
+                    """
+                    INSERT INTO replay_store_metadata (
+                        store_key,
+                        mutation_counter,
+                        updated_at
+                    ) VALUES (?, ?, ?)
+                    ON CONFLICT (store_key) DO NOTHING
+                    """
+                ),
+                (
+                    STORE_METADATA_KEY,
+                    0,
+                    format_timestamp(datetime.now(timezone.utc)),
+                ),
+            )
             connection.commit()
 
     def claim_once(self, claim: ActionConsumptionClaim, *, now: datetime) -> ActionConsumptionState:
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
-        with self._connect() as connection:
-            cursor = connection.cursor()
-            try:
+        with self._mutation_lock:
+            with self._connect() as connection:
+                cursor = connection.cursor()
                 self._prepare_transaction(cursor)
+                self._assert_store_monotonic(cursor)
                 cursor.execute(
                     self._sql(
                         """
@@ -122,6 +158,7 @@ class DbApiReplayStore(ReplayStore):
                             consumed_at,
                             metadata_json
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT (replay_key) DO NOTHING
                         """,
                     ),
                     (
@@ -142,9 +179,7 @@ class DbApiReplayStore(ReplayStore):
                         json.dumps(claim.metadata, sort_keys=True, separators=(",", ":")),
                     ),
                 )
-                connection.commit()
-            except Exception as exc:
-                if self._is_integrity_error(exc):
+                if cursor.rowcount != 1:
                     connection.rollback()
                     existing = self.inspect(claim.replay_key, now=now_utc)
                     status = existing.status if existing else "unknown"
@@ -156,127 +191,154 @@ class DbApiReplayStore(ReplayStore):
                             "existing_status": status,
                             "pccb_id": claim.pccb_id,
                         },
-                    ) from exc
-                connection.rollback()
-                raise
+                    )
+                counter = self._advance_mutation_counter(cursor, now_raw)
+                connection.commit()
+                self._last_observed_counter = counter
         return self.inspect(claim.replay_key, now=now_utc)  # type: ignore[return-value]
 
     def mark_consumed(self, replay_key: str, *, now: datetime) -> ActionConsumptionState:
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
-        with self._connect() as connection:
-            cursor = connection.cursor()
-            self._prepare_transaction(cursor)
-            cursor.execute(
-                self._sql(
-                    """
-                    UPDATE action_consumption
-                    SET status = ?, updated_at = ?, consumed_at = ?
-                    WHERE replay_key = ?
-                      AND status = ?
-                    """,
-                ),
-                ("consumed", now_raw, now_raw, replay_key, "claimed"),
-            )
-            if cursor.rowcount != 1:
-                connection.rollback()
-                existing = self.inspect(replay_key, now=now_utc)
-                details = {"replay_key": replay_key}
-                if existing is not None:
-                    details["existing_status"] = existing.status
-                raise ReplayValidationError(
-                    "REPLAY_STATE_INVALID",
-                    "The replay record could not transition to consumed.",
-                    details=details,
+        with self._mutation_lock:
+            with self._connect() as connection:
+                cursor = connection.cursor()
+                self._prepare_transaction(cursor)
+                self._assert_store_monotonic(cursor)
+                cursor.execute(
+                    self._sql(
+                        """
+                        UPDATE action_consumption
+                        SET status = ?, updated_at = ?, consumed_at = ?
+                        WHERE replay_key = ?
+                          AND status = ?
+                        """,
+                    ),
+                    ("consumed", now_raw, now_raw, replay_key, "claimed"),
                 )
-            connection.commit()
+                if cursor.rowcount != 1:
+                    connection.rollback()
+                    existing = self.inspect(replay_key, now=now_utc)
+                    details = {"replay_key": replay_key}
+                    if existing is not None:
+                        details["existing_status"] = existing.status
+                    raise ReplayValidationError(
+                        "REPLAY_STATE_INVALID",
+                        "The replay record could not transition to consumed.",
+                        details=details,
+                    )
+                counter = self._advance_mutation_counter(cursor, now_raw)
+                connection.commit()
+                self._last_observed_counter = counter
         return self.inspect(replay_key, now=now_utc)  # type: ignore[return-value]
 
     def release_claim(self, replay_key: str, *, now: datetime, reason: str) -> ActionConsumptionState:
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
-        with self._connect() as connection:
-            cursor = connection.cursor()
-            self._prepare_transaction(cursor)
-            existing = self._select_row(cursor, replay_key)
-            if existing is None:
-                connection.rollback()
-                raise ReplayValidationError(
-                    "REPLAY_CLAIM_MISSING",
-                    "The replay claim does not exist.",
-                    details={"replay_key": replay_key},
+        with self._mutation_lock:
+            with self._connect() as connection:
+                cursor = connection.cursor()
+                self._prepare_transaction(cursor)
+                self._assert_store_monotonic(cursor)
+                existing = self._select_row(cursor, replay_key)
+                if existing is None:
+                    connection.rollback()
+                    raise ReplayValidationError(
+                        "REPLAY_CLAIM_MISSING",
+                        "The replay claim does not exist.",
+                        details={"replay_key": replay_key},
+                    )
+                current = self._row_to_state(existing)
+                if current.status == "consumed":
+                    connection.rollback()
+                    return current
+                metadata = {**current.metadata, "release_reason": reason}
+                cursor.execute(
+                    self._sql(
+                        """
+                        UPDATE action_consumption
+                        SET status = ?, updated_at = ?, metadata_json = ?
+                        WHERE replay_key = ?
+                          AND status = ?
+                        """,
+                    ),
+                    (
+                        "released",
+                        now_raw,
+                        json.dumps(metadata, sort_keys=True, separators=(",", ":")),
+                        replay_key,
+                        "claimed",
+                    ),
                 )
-            current = self._row_to_state(existing)
-            if current.status == "consumed":
-                connection.rollback()
-                return current
-            metadata = {**current.metadata, "release_reason": reason}
-            cursor.execute(
-                self._sql(
-                    """
-                    UPDATE action_consumption
-                    SET status = ?, updated_at = ?, metadata_json = ?
-                    WHERE replay_key = ?
-                      AND status = ?
-                    """,
-                ),
-                ("released", now_raw, json.dumps(metadata, sort_keys=True, separators=(",", ":")), replay_key, "claimed"),
-            )
-            if cursor.rowcount != 1:
-                connection.rollback()
-                raise ReplayValidationError(
-                    "REPLAY_RELEASE_INVALID",
-                    "The replay claim could not be released.",
-                    details={"replay_key": replay_key, "existing_status": current.status},
-                )
-            connection.commit()
+                if cursor.rowcount != 1:
+                    connection.rollback()
+                    raise ReplayValidationError(
+                        "REPLAY_RELEASE_INVALID",
+                        "The replay claim could not be released.",
+                        details={"replay_key": replay_key, "existing_status": current.status},
+                    )
+                counter = self._advance_mutation_counter(cursor, now_raw)
+                connection.commit()
+                self._last_observed_counter = counter
         return self.inspect(replay_key, now=now_utc)  # type: ignore[return-value]
 
     def inspect(self, replay_key: str, *, now: datetime | None = None) -> ActionConsumptionState | None:
         now_utc = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-        with self._connect() as connection:
-            cursor = connection.cursor()
-            row = self._select_row(cursor, replay_key)
-            if row is None:
-                return None
-            state = self._row_to_state(row)
-            if state.status == "claimed" and state.expires_at <= now_utc:
+        with self._mutation_lock:
+            with self._connect() as connection:
+                cursor = connection.cursor()
+                self._prepare_transaction(cursor)
+                self._assert_store_monotonic(cursor)
+                row = self._select_row(cursor, replay_key)
+                if row is None:
+                    connection.commit()
+                    return None
+                state = self._row_to_state(row)
+                if state.status == "claimed" and state.expires_at <= now_utc:
+                    now_raw = format_timestamp(now_utc)
+                    cursor.execute(
+                        self._sql(
+                            """
+                            UPDATE action_consumption
+                            SET status = ?, updated_at = ?
+                            WHERE replay_key = ?
+                              AND status = ?
+                            """,
+                        ),
+                        ("expired", now_raw, replay_key, "claimed"),
+                    )
+                    counter = self._advance_mutation_counter(cursor, now_raw)
+                    connection.commit()
+                    self._last_observed_counter = counter
+                    return self.inspect(replay_key, now=now_utc)
+                connection.commit()
+                return state
+
+    def purge_expired(self, *, now: datetime) -> int:
+        now_raw = format_timestamp(now.astimezone(timezone.utc))
+        with self._mutation_lock:
+            with self._connect() as connection:
+                cursor = connection.cursor()
+                self._prepare_transaction(cursor)
+                self._assert_store_monotonic(cursor)
                 cursor.execute(
                     self._sql(
                         """
                         UPDATE action_consumption
                         SET status = ?, updated_at = ?
-                        WHERE replay_key = ?
-                          AND status = ?
+                        WHERE status = ?
+                          AND expires_at <= ?
                         """,
                     ),
-                    ("expired", format_timestamp(now_utc), replay_key, "claimed"),
+                    ("expired", now_raw, "claimed", now_raw),
                 )
-                connection.commit()
-                row = self._select_row(cursor, replay_key)
-                if row is None:
-                    return None
-                state = self._row_to_state(row)
-            return state
-
-    def purge_expired(self, *, now: datetime) -> int:
-        now_raw = format_timestamp(now.astimezone(timezone.utc))
-        with self._connect() as connection:
-            cursor = connection.cursor()
-            self._prepare_transaction(cursor)
-            cursor.execute(
-                self._sql(
-                    """
-                    UPDATE action_consumption
-                    SET status = ?, updated_at = ?
-                    WHERE status = ?
-                      AND expires_at <= ?
-                    """,
-                ),
-                ("expired", now_raw, "claimed", now_raw),
-            )
-            count = cursor.rowcount
-            connection.commit()
+                count = cursor.rowcount
+                if count:
+                    counter = self._advance_mutation_counter(cursor, now_raw)
+                    connection.commit()
+                    self._last_observed_counter = counter
+                else:
+                    connection.commit()
         return count
 
     def _connect(self):
@@ -289,6 +351,63 @@ class DbApiReplayStore(ReplayStore):
 
     def _prepare_transaction(self, cursor: Any) -> None:
         """Backends may override this for stronger claim/consume isolation."""
+
+    def _read_mutation_counter(self, cursor: Any) -> int:
+        cursor.execute(
+            self._sql(
+                "SELECT mutation_counter FROM replay_store_metadata WHERE store_key = ?"
+            ),
+            (STORE_METADATA_KEY,),
+        )
+        row = cursor.fetchone()
+        if row is None:
+            raise ReplayValidationError(
+                "REPLAY_STORE_ROLLBACK_DETECTED",
+                "Replay store monotonic metadata is missing.",
+            )
+        return int(row[0])
+
+    def _assert_store_monotonic(self, cursor: Any) -> None:
+        counter = self._read_mutation_counter(cursor)
+        if counter < self._last_observed_counter:
+            raise ReplayValidationError(
+                "REPLAY_STORE_ROLLBACK_DETECTED",
+                "Replay store state regressed behind a previously observed mutation.",
+                details={
+                    "observed_counter": counter,
+                    "last_observed_counter": self._last_observed_counter,
+                },
+            )
+        self._last_observed_counter = counter
+
+    def _advance_mutation_counter(self, cursor: Any, now_raw: str) -> int:
+        cursor.execute(
+            self._sql(
+                """
+                UPDATE replay_store_metadata
+                SET mutation_counter = mutation_counter + 1,
+                    updated_at = ?
+                WHERE store_key = ?
+                """
+            ),
+            (now_raw, STORE_METADATA_KEY),
+        )
+        if cursor.rowcount != 1:
+            raise ReplayValidationError(
+                "REPLAY_STORE_ROLLBACK_DETECTED",
+                "Replay store monotonic metadata could not advance.",
+            )
+        counter = self._read_mutation_counter(cursor)
+        if counter <= self._last_observed_counter:
+            raise ReplayValidationError(
+                "REPLAY_STORE_ROLLBACK_DETECTED",
+                "Replay store mutation order regressed behind a previously observed mutation.",
+                details={
+                    "observed_counter": counter,
+                    "last_observed_counter": self._last_observed_counter,
+                },
+            )
+        return counter
 
     def _is_integrity_error(self, exc: Exception) -> bool:
         return any(cls.__name__.lower().endswith("integrityerror") for cls in type(exc).__mro__)

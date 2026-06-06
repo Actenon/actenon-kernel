@@ -203,6 +203,11 @@ That default is shared by executor instances that resolve to the same SQLite fil
 
 Disabling replay protection requires the explicit `replay_protection="disabled"` opt-out and emits an unsafe-configuration warning. Consequential routes should not use that mode.
 
+Replay-store failures are fail-closed by default. Multi-edge deployments must
+also operate the shared store so backup restoration, partition handling, and
+failover cannot silently reopen an old replay window. See
+[docs/guides/REPLAY_STORE_OPERATIONS.md](docs/guides/REPLAY_STORE_OPERATIONS.md).
+
 Replay protection only helps where the replay path is actually enforced. If a multi-agent host bypasses `ProtectedExecutor`, disables replay protection, or gives different execution edges isolated replay stores, the kernel cannot prevent duplicate execution across those edges.
 
 Relevant docs and examples:

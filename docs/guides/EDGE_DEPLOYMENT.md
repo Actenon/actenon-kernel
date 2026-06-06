@@ -70,7 +70,9 @@ Receipts, or Refusals.
 For multi-worker or multi-region edges, every executor that can reach the
 resource must share a durable replay store. The default local replay store is
 appropriate for one local process; configure SQLite or PostgreSQL according to
-the deployment topology.
+the deployment topology. The replay store is fail-closed by default and must
+meet the durability, consistency, monitoring, and restore requirements in
+[Replay Store Operations](REPLAY_STORE_OPERATIONS.md).
 
 ## False Assurance If Half-Deployed
 

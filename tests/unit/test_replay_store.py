@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sqlite3
 import threading
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -98,6 +99,22 @@ class SqliteReplayStoreTests(unittest.TestCase):
         self.assertEqual(8, len(results))
         self.assertEqual(1, results.count("claimed"))
         self.assertEqual(7, results.count("duplicate"))
+
+    def test_mutation_counter_regression_is_detected(self) -> None:
+        now = datetime.now(timezone.utc)
+        claim = build_claim(replay_key="rpk_rollback_detection")
+        self.store.claim_once(claim, now=now)
+
+        with sqlite3.connect(str(self.database_path)) as connection:
+            connection.execute(
+                "UPDATE replay_store_metadata SET mutation_counter = 0 WHERE store_key = 'global'"
+            )
+            connection.commit()
+
+        with self.assertRaises(ReplayValidationError) as context:
+            self.store.inspect(claim.replay_key, now=now)
+
+        self.assertEqual("REPLAY_STORE_ROLLBACK_DETECTED", context.exception.refusal_code)
 
 
 if __name__ == "__main__":

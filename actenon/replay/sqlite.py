@@ -24,10 +24,9 @@ class SqliteReplayStore(DbApiReplayStore):
         )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA journal_mode=WAL")
-        connection.execute("PRAGMA synchronous=NORMAL")
+        connection.execute("PRAGMA synchronous=FULL")
         connection.execute("PRAGMA foreign_keys=ON")
         return connection
 
     def _prepare_transaction(self, cursor: sqlite3.Cursor) -> None:
         cursor.execute("BEGIN IMMEDIATE")
-

@@ -4,6 +4,11 @@
 
 ### Changed
 
+- Replay-store claim and consume failures now refuse before side effects by
+  default. Durable relational stores use an atomic conditional claim, record
+  consumption before handler execution, and track a monotonic mutation
+  watermark for rollback detection. Unsafe fail-open behavior requires the
+  explicit `replay_store_failure="fail_open"` warning path.
 - `Refusal.reason_code` is now the canonical Python field and emitted JSON key,
   matching `GateOutcome.reason_code`. `Refusal.refusal_code`, the
   `refusal_code=` constructor keyword, and legacy refusal JSON remain accepted

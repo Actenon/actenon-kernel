@@ -74,6 +74,12 @@ Default store:
 
 The explicit `replay_protection="disabled"` mode restores execution without a replay store and logs an unsafe-configuration warning. Supplying both an explicit `replay_protector` and `replay_protection="disabled"` is rejected.
 
+Replay-store operational failures are fail-closed by default. The executor
+emits `REPLAY_STORE_UNAVAILABLE` and does not call the side-effect handler when
+a claim or consume cannot be committed. The explicit
+`replay_store_failure="fail_open"` mode logs an unsafe-configuration warning.
+Known duplicates, invalid transitions, and detected rollback remain refusals.
+
 SQLite is intentionally the local and single-node default. It is appropriate
 for demos, tests, local proof runs, and a single process or single-node
 deployment where every worker that can execute the route uses the same local
@@ -100,7 +106,17 @@ replay_protector = ReplayProtector(replay_store)
 
 You may also pass a DB-API compatible `connection_factory` if the host application owns connection pooling.
 
-The PostgreSQL adapter uses the same `action_consumption` table shape as the DB-API replay model and relies on PostgreSQL transactions plus the `replay_key` primary key for atomic duplicate-claim refusal across instances.
+The PostgreSQL adapter uses the same `action_consumption` table shape as the
+DB-API replay model and relies on PostgreSQL transactions, a conditional
+`INSERT ... ON CONFLICT DO NOTHING`, and the `replay_key` primary key for
+atomic duplicate-claim refusal across instances.
+
+SQLite and PostgreSQL stores also maintain a monotonic mutation counter in
+`replay_store_metadata`. A live store instance refuses a counter regression
+with `REPLAY_STORE_ROLLBACK_DETECTED`. See
+[Replay Store Operations](../../guides/REPLAY_STORE_OPERATIONS.md) for the
+detector's limits and the external monitoring required around backup restores
+and failover.
 
 ## Recommended Host Usage
 

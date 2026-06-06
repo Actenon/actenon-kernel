@@ -21,8 +21,8 @@ For routes that use replay and escrow, the protected endpoint order is:
 3. claim replay state
 4. consume escrow/capability state
 5. acquire brokered credentials
-6. execute the handler
-7. mark replay consumed
+6. durably mark replay consumed
+7. execute the handler
 8. emit Receipt or Refusal
 
 If proof verification fails, escrow is not consumed. If policy fails, escrow is
@@ -30,18 +30,21 @@ not consumed. If escrow fails after a replay claim, the replay claim is released
 because no consequential authority was brokered.
 
 If the credential broker or handler fails after escrow consumption, the replay
-and escrow state remain consumed. That is the safe ambiguity boundary: the same
-proof must not be retried as though no authority may have been used. Operators
-should reconcile from the emitted Refusal/Receipt and deployment logs.
+and escrow state remain consumed. Replay consumption is committed before the
+handler runs so a replay-store outage cannot be reported as a refusal after the
+side effect has already occurred. That is the safe ambiguity boundary: the
+same proof must not be retried as though no authority may have been used.
+Operators should reconcile from the emitted Refusal/Receipt and deployment
+logs.
 
 ## Store Guidance
 
 | Store | Concurrency posture | Production guidance |
 |---|---|---|
-| `SqliteReplayStore` | Uses SQLite transactions, `BEGIN IMMEDIATE`, and `replay_key` primary-key uniqueness. Concurrent local claims against the same database file allow exactly one winner. | Suitable for local, demo, and single-node deployments. Do not treat a node-local SQLite file as shared state for multi-node protected endpoints. |
+| `SqliteReplayStore` | Uses SQLite transactions, `BEGIN IMMEDIATE`, `synchronous=FULL`, a conditional insert, and `replay_key` primary-key uniqueness. Concurrent local claims against the same database file allow exactly one winner. | Suitable for local, demo, and single-node deployments. Do not treat a node-local SQLite file as shared state for multi-node protected endpoints. |
 | `SqliteCapabilityEscrow` | Uses SQLite transactions and state-guarded updates. Concurrent local consumes against the same database file allow exactly one winner. | Suitable for local, demo, and single-node deployments. Multi-node deployments need a shared transactional escrow backend. |
 | `InMemoryCapabilityEscrow` | Uses an in-process lock, so concurrent threads in one process allow exactly one winner. State is not durable and is not shared across processes. | Dev/test/demo only. Not a production or multi-worker escrow backend. |
-| `PostgresReplayStore` | Uses a transactional DB-API store and `replay_key` primary-key uniqueness. | Recommended OSS replay backend for multi-instance deployments. |
+| `PostgresReplayStore` | Uses a transaction, `INSERT ... ON CONFLICT DO NOTHING`, and `replay_key` primary-key uniqueness. | Recommended OSS replay backend for multi-instance deployments. |
 
 The kernel currently ships a production-oriented PostgreSQL replay store. It
 does not ship a PostgreSQL escrow backend in this pass. Production deployments
@@ -82,3 +85,6 @@ These tests prove the local store contract. They do not prove a custom
 production store is safe unless that store is tested against the same atomicity
 requirements.
 
+See [Replay Store Operations](../guides/REPLAY_STORE_OPERATIONS.md) for
+fail-closed behavior, rollback detection, monitoring, and cross-edge deployment
+requirements.

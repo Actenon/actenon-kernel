@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import threading
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -48,8 +49,13 @@ class _PercentStyleCursor:
 
 class _PercentStyleSqliteConnection:
     def __init__(self, database_path: Path, sql_log: list[str]) -> None:
-        self._connection = sqlite3.connect(str(database_path))
+        self._connection = sqlite3.connect(
+            str(database_path),
+            timeout=30,
+            check_same_thread=False,
+        )
         self._connection.row_factory = sqlite3.Row
+        self._connection.execute("PRAGMA journal_mode=WAL")
         self._sql_log = sql_log
         self.autocommit = False
 
@@ -133,6 +139,38 @@ class PostgresReplayStoreTests(unittest.TestCase):
         self.store.claim_once(build_claim(replay_key="rpk_pg_parameter_style"), now=datetime.now(timezone.utc))
 
         self.assertTrue(any("%s" in sql for sql in self.sql_log))
+        self.assertTrue(any("ON CONFLICT (replay_key) DO NOTHING" in sql for sql in self.sql_log))
+
+    def test_concurrent_dbapi_claims_use_atomic_unique_insert(self) -> None:
+        claim = build_claim(replay_key="rpk_pg_atomic_race")
+        now = datetime.now(timezone.utc)
+        stores = [
+            PostgresReplayStore(connection_factory=self._connection_factory)
+            for _ in range(8)
+        ]
+        barrier = threading.Barrier(len(stores))
+        results: list[str] = []
+        lock = threading.Lock()
+
+        def worker(store: PostgresReplayStore) -> None:
+            try:
+                barrier.wait(timeout=10)
+                store.claim_once(claim, now=now)
+                outcome = "claimed"
+            except ReplayValidationError:
+                outcome = "duplicate"
+            with lock:
+                results.append(outcome)
+
+        threads = [threading.Thread(target=worker, args=(store,)) for store in stores]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=10)
+
+        self.assertEqual(8, len(results))
+        self.assertEqual(1, results.count("claimed"))
+        self.assertEqual(7, results.count("duplicate"))
 
     def test_integrity_error_detection_handles_driver_subclasses(self) -> None:
         class DriverIntegrityError(Exception):
