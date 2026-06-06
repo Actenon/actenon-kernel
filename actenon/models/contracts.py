@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Mapping, Union
@@ -607,11 +608,11 @@ class Receipt:
         return payload
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class Refusal:
     refusal_id: str
     category: str
-    refusal_code: str
+    reason_code: str
     message: str
     retryable: bool
     refused_at: datetime
@@ -627,6 +628,75 @@ class Refusal:
     details: dict[str, Any] = field(default_factory=dict)
     extensions: dict[str, Any] = field(default_factory=dict)
 
+    def __init__(
+        self,
+        refusal_id: str,
+        category: str,
+        reason_code: str | None = None,
+        message: str | None = None,
+        retryable: bool | None = None,
+        refused_at: datetime | None = None,
+        intent_id: str | None = None,
+        tenant: TenantRef | None = None,
+        subject: PartyRef | None = None,
+        audience: AudienceRef | None = None,
+        action: ActionSpec | None = None,
+        target: TargetRef | None = None,
+        correlation: CorrelationRef | None = None,
+        rule_refs: tuple[str, ...] = (),
+        violations: tuple[Violation, ...] = (),
+        details: dict[str, Any] | None = None,
+        extensions: dict[str, Any] | None = None,
+        *,
+        refusal_code: str | None = None,
+    ) -> None:
+        if refusal_code is not None:
+            warnings.warn(
+                "Refusal(refusal_code=...) is deprecated; use reason_code=...",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        if reason_code is not None and refusal_code is not None and reason_code != refusal_code:
+            raise ValueError("reason_code and refusal_code must match when both are provided")
+        resolved_reason_code = reason_code if reason_code is not None else refusal_code
+        if resolved_reason_code is None:
+            raise TypeError("Refusal requires reason_code")
+        if message is None:
+            raise TypeError("Refusal requires message")
+        if retryable is None:
+            raise TypeError("Refusal requires retryable")
+        if refused_at is None:
+            raise TypeError("Refusal requires refused_at")
+
+        object.__setattr__(self, "refusal_id", refusal_id)
+        object.__setattr__(self, "category", category)
+        object.__setattr__(self, "reason_code", resolved_reason_code)
+        object.__setattr__(self, "message", message)
+        object.__setattr__(self, "retryable", retryable)
+        object.__setattr__(self, "refused_at", refused_at)
+        object.__setattr__(self, "intent_id", intent_id)
+        object.__setattr__(self, "tenant", tenant)
+        object.__setattr__(self, "subject", subject)
+        object.__setattr__(self, "audience", audience)
+        object.__setattr__(self, "action", action)
+        object.__setattr__(self, "target", target)
+        object.__setattr__(self, "correlation", correlation)
+        object.__setattr__(self, "rule_refs", rule_refs)
+        object.__setattr__(self, "violations", violations)
+        object.__setattr__(self, "details", dict(details or {}))
+        object.__setattr__(self, "extensions", dict(extensions or {}))
+
+    @property
+    def refusal_code(self) -> str:
+        """Deprecated compatibility alias for :attr:`reason_code`."""
+
+        warnings.warn(
+            "Refusal.refusal_code is deprecated; use reason_code",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.reason_code
+
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "Refusal":
         data = expect_mapping(raw, "refusal")
@@ -639,11 +709,17 @@ class Refusal:
         violations_raw = data.get("violations", [])
         if not isinstance(violations_raw, list):
             raise ValueError("violations must be an array when provided")
+        reason_code_raw = data.get("reason_code")
+        legacy_refusal_code_raw = data.get("refusal_code")
+        if reason_code_raw is not None and legacy_refusal_code_raw is not None:
+            if reason_code_raw != legacy_refusal_code_raw:
+                raise ValueError("reason_code and refusal_code must match when both are provided")
+        reason_code = reason_code_raw if reason_code_raw is not None else legacy_refusal_code_raw
         return cls(
             refusal_id=expect_string(data.get("refusal_id"), "refusal_id"),
             intent_id=data.get("intent_id"),
             category=expect_string(data.get("category"), "category"),
-            refusal_code=expect_string(data.get("refusal_code"), "refusal_code"),
+            reason_code=expect_string(reason_code, "reason_code"),
             message=expect_string(data.get("message"), "message"),
             retryable=expect_bool(data.get("retryable"), "retryable"),
             refused_at=parse_timestamp(data.get("refused_at"), "refused_at"),
@@ -664,7 +740,7 @@ class Refusal:
             "contract": {"name": "refusal", "version": "v1"},
             "refusal_id": self.refusal_id,
             "category": self.category,
-            "refusal_code": self.refusal_code,
+            "reason_code": self.reason_code,
             "message": self.message,
             "retryable": self.retryable,
             "refused_at": format_timestamp(self.refused_at),

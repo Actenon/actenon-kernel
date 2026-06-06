@@ -87,7 +87,7 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
             payload = json.loads(stdout)
             self.assertFalse(payload["ok"])
             self.assertEqual("proof", payload["refusal"]["category"])
-            self.assertEqual("AUDIENCE_MISMATCH", payload["refusal"]["refusal_code"])
+            self.assertEqual("AUDIENCE_MISMATCH", payload["refusal"]["reason_code"])
 
     def test_verify_proof_command_reports_schema_failure_for_malformed_json(self) -> None:
         with TemporaryDirectory() as tempdir:
@@ -114,7 +114,7 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
             payload = json.loads(stdout)
             self.assertFalse(payload["ok"])
             self.assertEqual("schema", payload["refusal"]["category"])
-            self.assertEqual("SCHEMA_INVALID", payload["refusal"]["refusal_code"])
+            self.assertEqual("SCHEMA_INVALID", payload["refusal"]["reason_code"])
 
     def test_verify_receipt_command_accepts_local_receipt_and_links(self) -> None:
         with TemporaryDirectory() as tempdir:

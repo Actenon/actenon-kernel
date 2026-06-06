@@ -252,7 +252,7 @@ def run_local_proof_demo(artifact_root: Path) -> dict[str, Any]:
             result_summary["decision_receipt_id"] = admission.receipt.receipt_id
         if admission.refusal is not None:
             _write_json(scenario_dir / "refusal.json", admission.refusal.to_dict())
-            result_summary["refusal_code"] = admission.refusal.refusal_code
+            result_summary["reason_code"] = admission.refusal.reason_code
 
         if scenario.name == "allow":
             if admission.intent is None or admission.pccb is None:
@@ -265,7 +265,7 @@ def run_local_proof_demo(artifact_root: Path) -> dict[str, Any]:
                 result_summary["execution_receipt_id"] = execution.receipt.receipt_id
             if execution.refusal is not None:
                 _write_json(scenario_dir / "execution_refusal.json", execution.refusal.to_dict())
-                result_summary["execution_refusal_code"] = execution.refusal.refusal_code
+                result_summary["execution_reason_code"] = execution.refusal.reason_code
             result_summary["final_outcome"] = execution.receipt.outcome if execution.receipt is not None else "unknown"
             if execution.payload is not None:
                 _write_json(scenario_dir / "execution_payload.json", execution.payload)
@@ -541,7 +541,7 @@ def run_invoice_payment_local_proof_demo(artifact_root: Path) -> dict[str, Any]:
             result_summary["decision_receipt_id"] = admission.receipt.receipt_id
         if admission.refusal is not None:
             _write_json(scenario_dir / "refusal.json", admission.refusal.to_dict())
-            result_summary["refusal_code"] = admission.refusal.refusal_code
+            result_summary["reason_code"] = admission.refusal.reason_code
 
         if scenario.name == "allow":
             if admission.intent is None or admission.pccb is None:
@@ -554,7 +554,7 @@ def run_invoice_payment_local_proof_demo(artifact_root: Path) -> dict[str, Any]:
                 result_summary["execution_receipt_id"] = execution.receipt.receipt_id
             if execution.refusal is not None:
                 _write_json(scenario_dir / "execution_refusal.json", execution.refusal.to_dict())
-                result_summary["execution_refusal_code"] = execution.refusal.refusal_code
+                result_summary["execution_reason_code"] = execution.refusal.reason_code
             result_summary["final_outcome"] = execution.receipt.outcome if execution.receipt is not None else "unknown"
             if execution.payload is not None:
                 _write_json(scenario_dir / "execution_payload.json", execution.payload)

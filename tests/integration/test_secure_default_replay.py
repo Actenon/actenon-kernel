@@ -111,7 +111,7 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(second.refusal)
         self.assertIsNotNone(second.receipt)
         assert second.refusal is not None
-        self.assertEqual("DUPLICATE_REPLAY", second.refusal.refusal_code)
+        self.assertEqual("DUPLICATE_REPLAY", second.refusal.reason_code)
         self.assertIsNone(second.payload)
         self.assertEqual(["intent_secure_default_replay_001"], side_effects)
 
@@ -171,7 +171,7 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
         self.assertIsNone(first.refusal)
         self.assertIsNotNone(second.refusal)
         assert second.refusal is not None
-        self.assertEqual("DUPLICATE_REPLAY", second.refusal.refusal_code)
+        self.assertEqual("DUPLICATE_REPLAY", second.refusal.reason_code)
         self.assertEqual(["intent_secure_default_replay_001"], side_effects)
 
 

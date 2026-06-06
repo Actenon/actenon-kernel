@@ -133,7 +133,7 @@ class EvidenceQueryServiceTests(unittest.TestCase):
             refusal_id=refusal_id,
             intent_id=refusal.intent_id,
             category=refusal.category,
-            refusal_code=refusal.refusal_code,
+            reason_code=refusal.reason_code,
             message=refusal.message,
             retryable=refusal.retryable,
             refused_at=refusal.refused_at,

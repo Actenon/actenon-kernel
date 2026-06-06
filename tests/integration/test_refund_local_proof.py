@@ -34,7 +34,7 @@ class RefundLocalProofIntegrationTests(unittest.TestCase):
             self.assertIn("external_id", evidence_receipt["follow_up"]["required_evidence"])
 
             refusal = json.loads((artifact_root / "scenarios" / "deny" / "refusal.json").read_text(encoding="utf-8"))
-            self.assertEqual("WORKFLOW_DENY", refusal["refusal_code"])
+            self.assertEqual("WORKFLOW_DENY", refusal["reason_code"])
 
 
 if __name__ == "__main__":

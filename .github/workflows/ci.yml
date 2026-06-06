@@ -31,6 +31,9 @@ jobs:
       - name: Run hero demo
         run: bash scripts/demo_hero.sh
 
+      - name: Verify README quickstart
+        run: bash scripts/verify_readme_quickstart.sh
+
       - name: Run conformance suite
         run: python -m actenon.cli conformance run
 

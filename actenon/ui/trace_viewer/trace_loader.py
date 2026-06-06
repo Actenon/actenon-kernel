@@ -327,7 +327,7 @@ def _load_local_proof_scenario(
         "pccb_id": pccb_id,
         "decision_outcome": scenario_summary.get("decision_outcome"),
         "final_outcome": scenario_summary.get("final_outcome", scenario_summary.get("expected_outcome")),
-        "refusal_code": scenario_summary.get("refusal_code"),
+        "reason_code": scenario_summary.get("reason_code") or scenario_summary.get("refusal_code"),
         "what_happened": _build_what_happened(execution_receipt, refusal_payload, decision_receipt),
         "why_result": _build_why_result(execution_receipt, refusal_payload, decision_receipt),
         "verification_checks": _build_verification_checks(intent_payload, pccb_payload, execution_receipt, refusal_payload),
@@ -355,7 +355,7 @@ def _load_portable_run(repo_root: Path, root: Path, manifest: dict[str, Any]) ->
         "pccb_id": _nested_get(pccb_payload, "pccb_id"),
         "decision_outcome": "allow",
         "final_outcome": "executed",
-        "refusal_code": None,
+        "reason_code": None,
         "what_happened": "A portable Action Intent and PCCB were generated locally, verified at the protected endpoint, and the protected resource returned a response.",
         "why_result": _portable_why_result(protected_response),
         "verification_checks": _build_portable_verification_checks(intent_payload, pccb_payload, verification_result),
@@ -448,7 +448,7 @@ def _load_simulation_scenario(repo_root: Path, scenario_dir: Path, result: dict[
         "pccb_id": _nested_get(_payload_for(artifact_map, "pccb"), "pccb_id"),
         "decision_outcome": result.get("status"),
         "final_outcome": result.get("status", "simulated"),
-        "refusal_code": result.get("refusal_code"),
+        "reason_code": result.get("reason_code") or result.get("refusal_code"),
         "what_happened": result.get("summary", "Simulation completed."),
         "why_result": result.get("lesson", result.get("summary", "Simulation completed.")),
         "verification_checks": verification_checks,
@@ -517,8 +517,8 @@ def _build_what_happened(execution_receipt: dict[str, Any] | None, refusal_paylo
 
 def _build_why_result(execution_receipt: dict[str, Any] | None, refusal_payload: dict[str, Any] | None, decision_receipt: dict[str, Any] | None) -> str:
     if refusal_payload is not None:
-        refusal_code = refusal_payload.get("refusal_code", "REFUSED")
-        return f"{refusal_code}: {refusal_payload.get('message', 'The request was refused.')}"
+        reason_code = refusal_payload.get("reason_code") or refusal_payload.get("refusal_code") or "REFUSED"
+        return f"{reason_code}: {refusal_payload.get('message', 'The request was refused.')}"
     if execution_receipt is not None:
         side_effects = execution_receipt.get("side_effects", {})
         state = side_effects.get("state")
@@ -551,7 +551,12 @@ def _build_verification_checks(
     refusal_payload: dict[str, Any] | None,
 ) -> list[dict[str, str]]:
     if pccb_payload is None:
-        outcome = _nested_get(execution_receipt, "outcome") or _nested_get(refusal_payload, "refusal_code") or "none"
+        outcome = (
+            _nested_get(execution_receipt, "outcome")
+            or _nested_get(refusal_payload, "reason_code")
+            or _nested_get(refusal_payload, "refusal_code")
+            or "none"
+        )
         return [
             {
                 "label": "Proof Status",
@@ -654,7 +659,7 @@ def _build_local_proof_flow(
         flow.append(
             {
                 "title": "Refusal Emitted",
-                "status": refusal_payload.get("refusal_code", "refused"),
+                "status": refusal_payload.get("reason_code") or refusal_payload.get("refusal_code", "refused"),
                 "detail": refusal_payload.get("message", "The action was refused."),
             }
         )

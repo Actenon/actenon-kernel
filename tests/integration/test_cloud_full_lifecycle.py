@@ -88,7 +88,7 @@ class _LifecycleOutcomeWriter(InMemoryOutcomeWriter):
         self.audit_log.record(
             "refusal_emitted",
             refusal_id=refusal.refusal_id,
-            refusal_code=refusal.refusal_code,
+            refusal_code=refusal.reason_code,
             category=refusal.category,
             pccb_id=refusal.correlation.pccb_id if refusal.correlation else None,
         )
@@ -207,7 +207,7 @@ class _InProcessCloudLifecycleHarness:
         assert self.kernel is not None
         result = self.kernel.submit_intent(payload, context)
         if result.intent is None:
-            self.audit_log.record("action_intent_rejected", refusal_code=result.refusal.refusal_code if result.refusal else None)
+            self.audit_log.record("action_intent_rejected", refusal_code=result.refusal.reason_code if result.refusal else None)
             return result
         self.audit_log.record("action_intent_accepted", intent_id=result.intent.intent_id, tenant_id=result.intent.tenant.tenant_id)
         assert result.decision is not None
@@ -423,7 +423,7 @@ class CloudFullLifecycleIntegrationTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         self.assertIsNone(result.pccb)
-        self.assertEqual("NO_WORKFLOW_RULE_MATCH", result.refusal.refusal_code)
+        self.assertEqual("NO_WORKFLOW_RULE_MATCH", result.refusal.reason_code)
         self.assertEqual(0, self.harness.usage_meter.billable_action_count)
         self.assertIn("refusal_emitted", self.harness.audit_log.names())
 
@@ -445,7 +445,7 @@ class CloudFullLifecycleIntegrationTests(unittest.TestCase):
 
                 self.assertIsNotNone(result.refusal)
                 assert result.refusal is not None
-                self.assertEqual(expected_code, result.refusal.refusal_code)
+                self.assertEqual(expected_code, result.refusal.reason_code)
                 self.assertEqual(0, harness.usage_meter.billable_action_count)
                 attestation = harness.attest_refusal(result.refusal)
                 verified_refusal = harness.verify_refusal_attestation(attestation)
@@ -466,7 +466,7 @@ class CloudFullLifecycleIntegrationTests(unittest.TestCase):
         self.assertIsNone(first.refusal)
         self.assertIsNotNone(second.refusal)
         assert second.refusal is not None
-        self.assertEqual("DUPLICATE_REPLAY", second.refusal.refusal_code)
+        self.assertEqual("DUPLICATE_REPLAY", second.refusal.reason_code)
         self.assertEqual(1, self.harness.usage_meter.billable_action_count)
         attestation = self.harness.attest_refusal(second.refusal)
         verified_refusal = self.harness.verify_refusal_attestation(attestation)
@@ -487,7 +487,7 @@ class CloudFullLifecycleIntegrationTests(unittest.TestCase):
 
         self.assertIsNone(result.intent)
         self.assertIsNotNone(result.refusal)
-        self.assertEqual("SCHEMA_INVALID", result.refusal.refusal_code)
+        self.assertEqual("SCHEMA_INVALID", result.refusal.reason_code)
         self.assertIsNone(result.pccb)
         self.assertEqual(0, self.harness.usage_meter.billable_action_count)
         self.assertIn("action_intent_rejected", self.harness.audit_log.names())

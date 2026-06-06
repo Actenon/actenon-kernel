@@ -112,7 +112,7 @@ class SecretRedactionAttackTests(unittest.TestCase):
         self.assertIsNotNone(result.refusal)
         self.assertIsNotNone(result.receipt)
         assert result.refusal is not None
-        self.assertEqual("EXECUTION_FAILED", result.refusal.refusal_code)
+        self.assertEqual("EXECUTION_FAILED", result.refusal.reason_code)
         self.assertEqual(SAFE_HANDLER_EXCEPTION_MESSAGE, result.refusal.message)
         self.assertEqual("ProviderSDKError", result.refusal.details["exception_type"])
         self.assertEqual(SAFE_HANDLER_EXCEPTION_CODE, result.refusal.details["safe_error_code"])

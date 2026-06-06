@@ -154,6 +154,7 @@ PY
 
 cd "$ROOT_DIR"
 
+run_step "README quickstart" "$ROOT_DIR/scripts/verify_readme_quickstart.sh"
 run_step "consequential action coverage matrix" "$PYTHON_BIN" -m actenon.cli coverage run
 run_step "focused keystone suite" "$PYTHON_BIN" -m pytest "${KEYSTONE_TESTS[@]}" -q
 run_step "full kernel test suite" "$PYTHON_BIN" -m pytest tests/ -q

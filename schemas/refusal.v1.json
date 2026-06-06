@@ -9,7 +9,6 @@
     "contract",
     "refusal_id",
     "category",
-    "refusal_code",
     "message",
     "retryable",
     "refused_at"
@@ -52,11 +51,18 @@
         "system"
       ]
     },
-    "refusal_code": {
+    "reason_code": {
       "type": "string",
       "minLength": 3,
       "maxLength": 128,
       "pattern": "^[A-Z][A-Z0-9_:-]{2,127}$"
+    },
+    "refusal_code": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Z][A-Z0-9_:-]{2,127}$",
+      "deprecated": true
     },
     "message": {
       "type": "string",
@@ -113,6 +119,18 @@
       "additionalProperties": true
     }
   },
+  "oneOf": [
+    {
+      "required": [
+        "reason_code"
+      ]
+    },
+    {
+      "required": [
+        "refusal_code"
+      ]
+    }
+  ],
   "$defs": {
     "identifier": {
       "type": "string",

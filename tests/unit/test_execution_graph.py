@@ -101,7 +101,7 @@ class ExecutionGraphTests(unittest.TestCase):
         self.refusal = Refusal(
             refusal_id="rfsl_graph_001",
             category="proof",
-            refusal_code="AUDIENCE_MISMATCH",
+            reason_code="AUDIENCE_MISMATCH",
             message="The proof audience does not match this endpoint.",
             retryable=False,
             refused_at=self.now,

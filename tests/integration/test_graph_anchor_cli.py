@@ -108,7 +108,7 @@ class GraphAnchorCliIntegrationTests(unittest.TestCase):
             refusal = Refusal(
                 refusal_id="rfsl_cli_graph_001",
                 category="proof",
-                refusal_code="AUDIENCE_MISMATCH",
+                reason_code="AUDIENCE_MISMATCH",
                 message="The proof audience does not match this endpoint.",
                 retryable=False,
                 refused_at=datetime(2026, 4, 11, 12, 1, tzinfo=timezone.utc),

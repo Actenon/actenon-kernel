@@ -103,6 +103,7 @@ main() {
   require_contains "$ROOT_DIR/OPEN_SOURCE_BOUNDARY.md" "paid control plane" "open-source boundary names the paid layer"
   require_contains "$ROOT_DIR/.github/workflows/ci.yml" "\"3.11\"" "ci covers python 3.11"
   require_contains "$ROOT_DIR/.github/workflows/ci.yml" "bash scripts/demo_hero.sh" "ci runs the public demo"
+  require_contains "$ROOT_DIR/.github/workflows/ci.yml" "bash scripts/verify_readme_quickstart.sh" "ci verifies the README quickstart"
   require_contains "$ROOT_DIR/.github/workflows/ci.yml" "actenon.cli conformance run" "ci runs conformance"
   require_contains "$ROOT_DIR/.github/workflows/ci.yml" "actenon.cli scan local" "ci runs the local scanner"
   require_contains "$ROOT_DIR/.github/workflows/ci.yml" "pytest tests/ -q" "ci runs full tests"

@@ -6,7 +6,7 @@
   "refusal_id": "rfsl_portable_hello_world_wrong_tenant_001",
   "intent_id": "intent_portable_hello_world_001",
   "category": "proof",
-  "refusal_code": "TENANT_MISMATCH",
+  "reason_code": "TENANT_MISMATCH",
   "message": "The proof tenant does not match the action intent.",
   "retryable": false,
   "refused_at": "2026-01-01T12:00:13Z",

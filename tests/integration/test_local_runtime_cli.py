@@ -140,10 +140,10 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             self.assertTrue(payload["takeaways"])
             results = {item["name"]: item for item in payload["results"]}
             self.assertEqual("verified", results["valid-proof"]["status"])
-            self.assertEqual("AUDIENCE_MISMATCH", results["audience-mismatch"]["refusal_code"])
-            self.assertEqual("ACTION_HASH_MISMATCH", results["action-hash-mismatch"]["refusal_code"])
-            self.assertEqual("PROOF_EXPIRED", results["expired-proof"]["refusal_code"])
-            self.assertEqual("DUPLICATE_REPLAY", results["replay-refused"]["refusal_code"])
+            self.assertEqual("AUDIENCE_MISMATCH", results["audience-mismatch"]["reason_code"])
+            self.assertEqual("ACTION_HASH_MISMATCH", results["action-hash-mismatch"]["reason_code"])
+            self.assertEqual("PROOF_EXPIRED", results["expired-proof"]["reason_code"])
+            self.assertEqual("DUPLICATE_REPLAY", results["replay-refused"]["reason_code"])
             self.assertTrue((runtime_dir / "simulations" / "manifest.json").exists())
             self.assertTrue((runtime_dir / "simulations" / "replay-refused" / "INCIDENT_SUMMARY.md").exists())
             self.assertTrue((runtime_dir / "simulations" / "replay-refused" / "counterfactual_unprotected_execution.json").exists())
@@ -165,7 +165,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             self.assertEqual(1, len(payload["results"]))
             result = payload["results"][0]
             self.assertEqual("refused", result["status"])
-            self.assertEqual("AUDIENCE_MISMATCH", result["refusal_code"])
+            self.assertEqual("AUDIENCE_MISMATCH", result["reason_code"])
             perspectives = {item["key"]: item for item in result["perspectives"]}
             self.assertEqual("counterfactual", perspectives["without_execution_edge"]["basis"])
             self.assertEqual("would_execute", perspectives["without_execution_edge"]["status"])
@@ -189,10 +189,10 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             self.assertEqual("approval-required", results["prod-delete"]["status"])
             self.assertEqual(
                 "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
-                results["prod-delete"]["refusal_code"],
+                results["prod-delete"]["reason_code"],
             )
             self.assertEqual("refused", results["replit"]["status"])
-            self.assertEqual("ACTION_HASH_MISMATCH", results["replit"]["refusal_code"])
+            self.assertEqual("ACTION_HASH_MISMATCH", results["replit"]["reason_code"])
             self.assertEqual("approval-required", results["openai-eggs"]["status"])
             self.assertEqual("refused", results["amazon-kiro"]["status"])
             for incident_name in ("prod-delete", "replit", "openai-eggs", "amazon-kiro"):
@@ -225,7 +225,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             result = payload["results"][0]
             self.assertEqual("Replit-Style Destructive Drift", result["title"])
             self.assertEqual("refused", result["status"])
-            self.assertEqual("ACTION_HASH_MISMATCH", result["refusal_code"])
+            self.assertEqual("ACTION_HASH_MISMATCH", result["reason_code"])
             perspectives = {item["key"]: item for item in result["perspectives"]}
             self.assertEqual("would_execute", perspectives["weak_control_path"]["status"])
             self.assertEqual("refused", perspectives["proof_bound_path"]["status"])
@@ -250,7 +250,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             payload = json.loads(stdout)
             result = payload["results"][0]
             self.assertEqual("approval-required", result["status"])
-            self.assertIsNone(result["refusal_code"])
+            self.assertIsNone(result["reason_code"])
             self.assertIsNotNone(result["receipt_id"])
             perspectives = {item["key"]: item for item in result["perspectives"]}
             self.assertEqual("approval-required", perspectives["proof_bound_path"]["status"])
@@ -283,7 +283,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
                 result = payload["results"][0]
                 self.assertEqual(scenario, result["name"])
                 self.assertEqual("approval-required", result["status"])
-                self.assertEqual(reason_code, result["refusal_code"])
+                self.assertEqual(reason_code, result["reason_code"])
                 perspectives = {item["key"]: item for item in result["perspectives"]}
                 self.assertEqual("would_execute", perspectives["without_actenon"]["status"])
                 self.assertEqual("approval-required", perspectives["with_preflight"]["status"])

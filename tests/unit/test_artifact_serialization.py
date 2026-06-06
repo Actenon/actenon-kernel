@@ -103,7 +103,7 @@ class ArtifactSerializationTests(unittest.TestCase):
         return Refusal(
             refusal_id="rfsl_serialization_001",
             category="proof",
-            refusal_code="AUDIENCE_MISMATCH",
+            reason_code="AUDIENCE_MISMATCH",
             message="The proof audience does not match this endpoint.",
             retryable=False,
             refused_at=datetime(2026, 4, 11, 11, 2, tzinfo=timezone.utc),

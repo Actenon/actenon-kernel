@@ -144,7 +144,7 @@ class ReceiptFactory:
             )
             details = refund_detail_fields(intent)
         elif is_invoice_payment_intent(intent):
-            summary = invoice_payment_operator_summary_for_refusal(intent, refusal.refusal_code)
+            summary = invoice_payment_operator_summary_for_refusal(intent, refusal.reason_code)
             details = invoice_payment_detail_fields(intent)
         return Receipt(
             receipt_id=self.receipt_id_factory(),
@@ -164,7 +164,7 @@ class ReceiptFactory:
                 action_hash=refusal.correlation.action_hash if refusal.correlation is not None else None,
             ),
             summary=summary,
-            reason_codes=(refusal.refusal_code,),
+            reason_codes=(refusal.reason_code,),
             side_effects={"state": "none"},
             details=details,
         )
@@ -195,7 +195,7 @@ class RefusalFactory:
             refusal_id=self.refusal_id_factory(),
             intent_id=intent.intent_id if intent else None,
             category=exc.category,
-            refusal_code=exc.refusal_code,
+            reason_code=exc.refusal_code,
             message=exc.message,
             retryable=exc.retryable,
             refused_at=occurred_at,

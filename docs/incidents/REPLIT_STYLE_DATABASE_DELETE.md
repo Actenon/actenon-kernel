@@ -32,7 +32,7 @@ The gap appears when the tool can execute a widened action without exact action-
 
 ```json
 {
-  "refusal_code": "ACTION_HASH_MISMATCH",
+  "reason_code": "ACTION_HASH_MISMATCH",
   "message": "The presented proof does not match the action being attempted."
 }
 ```
@@ -54,4 +54,3 @@ For the generic production destructive-action hero path, run:
 ```bash
 actenon simulate --incident prod-delete
 ```
-

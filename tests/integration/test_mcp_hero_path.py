@@ -66,7 +66,7 @@ class MCPHeroPathIntegrationTests(unittest.TestCase):
             self.assertEqual("approval_required", payload["preflight"]["outcome"])
             self.assertEqual(
                 "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
-                payload["refusal"]["refusal_code"],
+                payload["refusal"]["reason_code"],
             )
             self.assertEqual(
                 {
@@ -100,7 +100,7 @@ class MCPHeroPathIntegrationTests(unittest.TestCase):
             payload = outcome.to_dict()
 
             self.assertFalse(payload["ok"])
-            self.assertEqual("PCCB_REQUIRED", payload["refusal"]["refusal_code"])
+            self.assertEqual("PCCB_REQUIRED", payload["refusal"]["reason_code"])
             self.assertEqual("refused", payload["receipt"]["outcome"])
             self.assertEqual("receipt", payload["var"]["artifact_kind"])
 

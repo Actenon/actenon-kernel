@@ -229,7 +229,7 @@ class ProtectedExecutorTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         assert result.refusal is not None
-        self.assertEqual("AUDIENCE_MISMATCH", result.refusal.refusal_code)
+        self.assertEqual("AUDIENCE_MISMATCH", result.refusal.reason_code)
         self.assertEqual(0, broker.acquire_calls)
         self.assertEqual([], broker.issued_credentials)
         record = escrow.inspect("esc_exec_001")
@@ -254,7 +254,7 @@ class ProtectedExecutorTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         assert result.refusal is not None
-        self.assertEqual("SIGNATURE_INVALID", result.refusal.refusal_code)
+        self.assertEqual("SIGNATURE_INVALID", result.refusal.reason_code)
         self.assertEqual(0, broker.acquire_calls)
         self.assertEqual([], broker.issued_credentials)
 
@@ -266,7 +266,7 @@ class ProtectedExecutorTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         assert result.refusal is not None
-        self.assertEqual("INFRA_DELETE_PRODUCTION_DENIED", result.refusal.refusal_code)
+        self.assertEqual("INFRA_DELETE_PRODUCTION_DENIED", result.refusal.reason_code)
         self.assertEqual(0, broker.acquire_calls)
         self.assertEqual([], broker.issued_credentials)
 
@@ -289,7 +289,7 @@ class ProtectedExecutorTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         assert result.refusal is not None
-        self.assertEqual("INFRA_DELETE_PRODUCTION_DENIED", result.refusal.refusal_code)
+        self.assertEqual("INFRA_DELETE_PRODUCTION_DENIED", result.refusal.reason_code)
         self.assertEqual(0, broker.acquire_calls)
         record = escrow.inspect("esc_exec_001")
         self.assertIsNotNone(record)
@@ -305,7 +305,7 @@ class ProtectedExecutorTests(unittest.TestCase):
 
         self.assertIsNotNone(result.refusal)
         assert result.refusal is not None
-        self.assertEqual("ESCROW_NOT_FOUND", result.refusal.refusal_code)
+        self.assertEqual("ESCROW_NOT_FOUND", result.refusal.reason_code)
         self.assertEqual(0, broker.acquire_calls)
         self.assertEqual([], broker.issued_credentials)
 
@@ -332,7 +332,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         self.assertEqual(1, first_broker.acquire_calls)
         self.assertIsNotNone(second.refusal)
         assert second.refusal is not None
-        self.assertEqual("DUPLICATE_REPLAY", second.refusal.refusal_code)
+        self.assertEqual("DUPLICATE_REPLAY", second.refusal.reason_code)
         self.assertEqual(0, second_broker.acquire_calls)
         self.assertEqual([], second_broker.issued_credentials)
 
@@ -369,7 +369,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         self.assertIsNotNone(result.receipt)
         assert result.refusal is not None
         assert result.receipt is not None
-        self.assertEqual("EXECUTION_FAILED", result.refusal.refusal_code)
+        self.assertEqual("EXECUTION_FAILED", result.refusal.reason_code)
         self.assertEqual(SAFE_HANDLER_EXCEPTION_MESSAGE, result.refusal.message)
         self.assertEqual("RuntimeError", result.refusal.details["exception_type"])
         self.assertEqual(SAFE_HANDLER_EXCEPTION_CODE, result.refusal.details["safe_error_code"])
@@ -448,7 +448,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         self.assertIsNotNone(result.receipt)
         assert result.refusal is not None
         assert result.receipt is not None
-        self.assertEqual("EXECUTION_FAILED", result.refusal.refusal_code)
+        self.assertEqual("EXECUTION_FAILED", result.refusal.reason_code)
         self.assertEqual(SAFE_HANDLER_EXCEPTION_MESSAGE, result.refusal.message)
         self.assertEqual("RuntimeError", result.refusal.details["exception_type"])
         self.assertEqual(SAFE_HANDLER_EXCEPTION_CODE, result.refusal.details["safe_error_code"])

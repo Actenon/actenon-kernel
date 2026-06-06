@@ -420,7 +420,7 @@ def _print_verify_proof_failure(*, args: argparse.Namespace, refusal: Refusal) -
         return
     print("Proof verification failed.")
     print(f"Category: {refusal.category}")
-    print(f"Code: {refusal.refusal_code}")
+    print(f"Code: {refusal.reason_code}")
     print(f"Message: {refusal.message}")
     if refusal.intent_id is not None:
         print(f"Intent: {refusal.intent_id}")
@@ -550,8 +550,8 @@ def _print_scan_report(*, args: argparse.Namespace, report: ScanReport) -> None:
     for check in report.checks:
         print(f"- {check.label}: {check.status.upper()}")
         print(f"  {check.summary}")
-        if check.refusal_code is not None:
-            print(f"  Refusal code: {check.refusal_code}")
+        if check.reason_code is not None:
+            print(f"  Reason code: {check.reason_code}")
     if report.findings:
         print("Findings:")
         for finding in report.findings:
@@ -1007,7 +1007,7 @@ def _verify_receipt_links(receipt: Receipt, *, intent: ActionIntent | None, pccb
             )
         _require(receipt.intent_id == (refusal.intent_id or receipt.intent_id), "receipt intent_id does not match refusal")
         if receipt.reason_codes:
-            _require(refusal.refusal_code in receipt.reason_codes, "receipt reason_codes do not include refusal_code")
+            _require(refusal.reason_code in receipt.reason_codes, "receipt reason_codes do not include reason_code")
 
 
 def _verify_refusal_links(refusal: Refusal, *, intent: ActionIntent | None, pccb: PCCB | None, receipt: Receipt | None) -> None:
@@ -1037,7 +1037,7 @@ def _verify_refusal_links(refusal: Refusal, *, intent: ActionIntent | None, pccb
             )
         _require(receipt.intent_id == (refusal.intent_id or receipt.intent_id), "receipt intent_id does not match refusal")
         if receipt.reason_codes:
-            _require(refusal.refusal_code in receipt.reason_codes, "receipt reason_codes do not include refusal_code")
+            _require(refusal.reason_code in receipt.reason_codes, "receipt reason_codes do not include reason_code")
 
 
 def _cmd_verify_proof(args: argparse.Namespace) -> int:
@@ -1112,7 +1112,7 @@ def _cmd_verify_refusal(args: argparse.Namespace) -> int:
     print("Refusal verified.")
     print(f"Refusal: {refusal.refusal_id}")
     print(f"Category: {refusal.category}")
-    print(f"Code: {refusal.refusal_code}")
+    print(f"Code: {refusal.reason_code}")
     return 0
 
 

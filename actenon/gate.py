@@ -67,7 +67,7 @@ class GateOutcome:
     @property
     def reason_code(self) -> str | None:
         if self.refusal is not None:
-            return self.refusal.refusal_code
+            return self.refusal.reason_code
         return None
 
     def to_dict(self) -> dict[str, Any]:

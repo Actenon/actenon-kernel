@@ -104,7 +104,7 @@ class ReplayMiddlewareIntegrationTests(unittest.TestCase):
 
         self.assertIsNone(first.refusal)
         self.assertIsNotNone(duplicate.refusal)
-        self.assertEqual("DUPLICATE_REPLAY", duplicate.refusal.refusal_code)
+        self.assertEqual("DUPLICATE_REPLAY", duplicate.refusal.reason_code)
 
 
 if __name__ == "__main__":

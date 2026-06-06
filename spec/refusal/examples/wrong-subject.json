@@ -6,7 +6,7 @@
   "refusal_id": "rfsl_portable_hello_world_wrong_subject_001",
   "intent_id": "intent_portable_hello_world_001",
   "category": "proof",
-  "refusal_code": "SUBJECT_MISMATCH",
+  "reason_code": "SUBJECT_MISMATCH",
   "message": "The proof subject does not match the action intent.",
   "retryable": false,
   "refused_at": "2026-01-01T12:00:14Z",

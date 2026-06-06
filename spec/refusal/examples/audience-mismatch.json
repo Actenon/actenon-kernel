@@ -6,7 +6,7 @@
   "refusal_id": "rfsl_portable_hello_world_audience_mismatch_001",
   "intent_id": "intent_portable_hello_world_001",
   "category": "proof",
-  "refusal_code": "AUDIENCE_MISMATCH",
+  "reason_code": "AUDIENCE_MISMATCH",
   "message": "The proof audience does not match this endpoint.",
   "retryable": false,
   "refused_at": "2026-01-01T12:00:10Z",

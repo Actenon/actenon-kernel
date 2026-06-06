@@ -22,13 +22,13 @@ class ReplayConformanceTests(unittest.TestCase):
 
             self.assertIsNone(first.refusal)
             self.assertIsNotNone(duplicate.refusal)
-            self.assertEqual("DUPLICATE_REPLAY", duplicate.refusal.refusal_code)
+            self.assertEqual("DUPLICATE_REPLAY", duplicate.refusal.reason_code)
             self.assertEqual("replay", duplicate.refusal.category)
 
             refusal = Refusal.from_dict(duplicate.refusal.to_dict())
             receipt = Receipt.from_dict(duplicate.receipt.to_dict())
 
-            self.assertEqual("DUPLICATE_REPLAY", refusal.refusal_code)
+            self.assertEqual("DUPLICATE_REPLAY", refusal.reason_code)
             self.assertEqual("refused", receipt.outcome)
             self.assertEqual(refusal.refusal_id, receipt.correlation.refusal_id)
             self.assertIn("DUPLICATE_REPLAY", receipt.reason_codes)

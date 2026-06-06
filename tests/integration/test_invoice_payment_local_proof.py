@@ -39,16 +39,16 @@ class InvoicePaymentLocalProofIntegrationTests(unittest.TestCase):
             self.assertIn("invoice_pdf", evidence_receipt["follow_up"]["required_evidence"])
 
             duplicate_refusal = json.loads((artifact_root / "scenarios" / "duplicate_invoice_payment" / "refusal.json").read_text(encoding="utf-8"))
-            self.assertEqual("DUPLICATE_INVOICE_PAYMENT", duplicate_refusal["refusal_code"])
+            self.assertEqual("DUPLICATE_INVOICE_PAYMENT", duplicate_refusal["reason_code"])
 
             wrong_entity_refusal = json.loads((artifact_root / "scenarios" / "wrong_entity" / "refusal.json").read_text(encoding="utf-8"))
-            self.assertEqual("WRONG_ENTITY", wrong_entity_refusal["refusal_code"])
+            self.assertEqual("WRONG_ENTITY", wrong_entity_refusal["reason_code"])
 
             bank_refusal = json.loads((artifact_root / "scenarios" / "bank_mismatch" / "refusal.json").read_text(encoding="utf-8"))
-            self.assertEqual("BANK_MISMATCH", bank_refusal["refusal_code"])
+            self.assertEqual("BANK_MISMATCH", bank_refusal["reason_code"])
 
             batch_hash_refusal = json.loads((artifact_root / "scenarios" / "batch_hash_mismatch" / "refusal.json").read_text(encoding="utf-8"))
-            self.assertEqual("BATCH_HASH_MISMATCH", batch_hash_refusal["refusal_code"])
+            self.assertEqual("BATCH_HASH_MISMATCH", batch_hash_refusal["reason_code"])
 
 
 if __name__ == "__main__":

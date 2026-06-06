@@ -292,7 +292,11 @@ class RefundGuardService:
             "pccb_id": pccb["pccb_id"] if isinstance(pccb, Mapping) and isinstance(pccb.get("pccb_id"), str) else None,
             "admission_receipt_id": admission_receipt["receipt_id"] if isinstance(admission_receipt, Mapping) and isinstance(admission_receipt.get("receipt_id"), str) else None,
             "execution_receipt_id": execution_receipt["receipt_id"] if isinstance(execution_receipt, Mapping) and isinstance(execution_receipt.get("receipt_id"), str) else None,
-            "refusal_code": refusal["refusal_code"] if isinstance(refusal, Mapping) and isinstance(refusal.get("refusal_code"), str) else None,
+            "reason_code": (
+                refusal.get("reason_code") or refusal.get("refusal_code")
+                if isinstance(refusal, Mapping)
+                else None
+            ),
         }
         (request_dir / "summary.json").write_text(json.dumps(summary_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return {

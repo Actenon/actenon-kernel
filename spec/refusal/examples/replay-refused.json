@@ -6,7 +6,7 @@
   "refusal_id": "rfsl_portable_hello_world_duplicate_replay_001",
   "intent_id": "intent_portable_hello_world_001",
   "category": "replay",
-  "refusal_code": "DUPLICATE_REPLAY",
+  "reason_code": "DUPLICATE_REPLAY",
   "message": "The protected action has already been claimed for execution.",
   "retryable": false,
   "refused_at": "2026-01-01T12:00:20Z",

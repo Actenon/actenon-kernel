@@ -305,7 +305,7 @@ class ScanCheck:
     label: str
     status: CheckStatus
     summary: str
-    refusal_code: str | None = None
+    reason_code: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -313,8 +313,8 @@ class ScanCheck:
             "status": self.status,
             "summary": self.summary,
         }
-        if self.refusal_code is not None:
-            payload["refusal_code"] = self.refusal_code
+        if self.reason_code is not None:
+            payload["reason_code"] = self.reason_code
         return payload
 
 
@@ -500,9 +500,9 @@ class _ScanInventory:
     timeout_reason: str | None = None
 
 
-def _build_check(key: str, status: CheckStatus, summary: str, *, refusal_code: str | None = None) -> ScanCheck:
+def _build_check(key: str, status: CheckStatus, summary: str, *, reason_code: str | None = None) -> ScanCheck:
     label = dict(CHECK_SPECS)[key]
-    return ScanCheck(key=key, label=label, status=status, summary=summary, refusal_code=refusal_code)
+    return ScanCheck(key=key, label=label, status=status, summary=summary, reason_code=reason_code)
 
 
 def _build_report(
@@ -1368,7 +1368,7 @@ def scan_artifact_pair(
                 "proof_binding",
                 "missing",
                 f"Baseline verification failed before proof-binding probes could succeed: {baseline_error.refusal_code}.",
-                refusal_code=baseline_error.refusal_code,
+                reason_code=baseline_error.refusal_code,
             )
         )
     else:
@@ -1382,7 +1382,7 @@ def scan_artifact_pair(
                         "proof_binding",
                         "present",
                         f"Baseline verification succeeded and a mutated action was refused with {exc.refusal_code}.",
-                        refusal_code=exc.refusal_code,
+                        reason_code=exc.refusal_code,
                     )
                 )
             else:
@@ -1391,7 +1391,7 @@ def scan_artifact_pair(
                         "proof_binding",
                         "missing",
                         f"Mutated action was refused, but not with a proof-binding mismatch signal: {exc.refusal_code}.",
-                        refusal_code=exc.refusal_code,
+                        reason_code=exc.refusal_code,
                     )
                 )
         else:
@@ -1431,7 +1431,7 @@ def scan_artifact_pair(
                 "audience_enforcement",
                 "present",
                 "A wrong-audience verification attempt was refused with AUDIENCE_MISMATCH.",
-                refusal_code=wrong_audience_exc.refusal_code,
+                reason_code=wrong_audience_exc.refusal_code,
             )
         )
     elif wrong_audience_exc is not None:
@@ -1440,7 +1440,7 @@ def scan_artifact_pair(
                 "audience_enforcement",
                 "missing",
                 f"Wrong-audience verification failed, but not with AUDIENCE_MISMATCH: {wrong_audience_exc.refusal_code}.",
-                refusal_code=wrong_audience_exc.refusal_code,
+                reason_code=wrong_audience_exc.refusal_code,
             )
         )
     else:
@@ -1470,7 +1470,7 @@ def scan_artifact_pair(
                     "expiry_enforcement",
                     "present",
                     "An expired verification attempt was refused with PROOF_EXPIRED.",
-                    refusal_code=exc.refusal_code,
+                    reason_code=exc.refusal_code,
                 )
             )
         else:
@@ -1479,7 +1479,7 @@ def scan_artifact_pair(
                     "expiry_enforcement",
                     "missing",
                     f"Expired verification failed, but not with PROOF_EXPIRED: {exc.refusal_code}.",
-                    refusal_code=exc.refusal_code,
+                    reason_code=exc.refusal_code,
                 )
             )
     else:
@@ -1500,13 +1500,13 @@ def scan_artifact_pair(
             context=wrong_audience_context,
             pccb=pccb,
         )
-        if refusal.category == "proof" and refusal.refusal_code == "AUDIENCE_MISMATCH":
+        if refusal.category == "proof" and refusal.reason_code == "AUDIENCE_MISMATCH":
             checks.append(
                 _build_check(
                     "structured_refusals",
                     "present",
                     "The scanner materialized a canonical Refusal artifact from a blocked verification attempt.",
-                    refusal_code=refusal.refusal_code,
+                    reason_code=refusal.reason_code,
                 )
             )
         else:
@@ -1515,7 +1515,7 @@ def scan_artifact_pair(
                     "structured_refusals",
                     "missing",
                     "Blocked verification did not yield the expected canonical Refusal shape.",
-                    refusal_code=refusal.refusal_code,
+                    reason_code=refusal.reason_code,
                 )
             )
     else:
@@ -1635,13 +1635,13 @@ def scan_replay_harness() -> ScanReport:
         admission = _submit_admission(harness)
         mutated_intent = _mutate_intent(admission.intent)
         result = _execute_request(harness, intent=mutated_intent, pccb=admission.pccb, context=harness.context)
-        if result.refusal is not None and result.refusal.refusal_code in {"ACTION_MISMATCH", "ACTION_HASH_MISMATCH", "TARGET_MISMATCH", "INTENT_MISMATCH"}:
+        if result.refusal is not None and result.refusal.reason_code in {"ACTION_MISMATCH", "ACTION_HASH_MISMATCH", "TARGET_MISMATCH", "INTENT_MISMATCH"}:
             checks.append(
                 _build_check(
                     "proof_binding",
                     "present",
-                    f"The protected endpoint refused a mutated execution attempt with {result.refusal.refusal_code}.",
-                    refusal_code=result.refusal.refusal_code,
+                    f"The protected endpoint refused a mutated execution attempt with {result.refusal.reason_code}.",
+                    reason_code=result.refusal.reason_code,
                 )
             )
         else:
@@ -1658,13 +1658,13 @@ def scan_replay_harness() -> ScanReport:
         admission = _submit_admission(harness)
         first = _execute_request(harness, intent=admission.intent, pccb=admission.pccb, context=harness.context)
         duplicate = _execute_request(harness, intent=admission.intent, pccb=admission.pccb, context=harness.context)
-        if first.refusal is None and duplicate.refusal is not None and duplicate.refusal.refusal_code == "DUPLICATE_REPLAY":
+        if first.refusal is None and duplicate.refusal is not None and duplicate.refusal.reason_code == "DUPLICATE_REPLAY":
             checks.append(
                 _build_check(
                     "replay_protection",
                     "present",
                     "The local protected-endpoint harness refused a duplicate execution attempt with DUPLICATE_REPLAY.",
-                    refusal_code=duplicate.refusal.refusal_code,
+                    reason_code=duplicate.refusal.reason_code,
                 )
             )
         else:
@@ -1687,13 +1687,13 @@ def scan_replay_harness() -> ScanReport:
             facts=dict(harness.context.facts),
         )
         result = _execute_request(harness, intent=admission.intent, pccb=admission.pccb, context=wrong_context)
-        if result.refusal is not None and result.refusal.refusal_code == "AUDIENCE_MISMATCH":
+        if result.refusal is not None and result.refusal.reason_code == "AUDIENCE_MISMATCH":
             checks.append(
                 _build_check(
                     "audience_enforcement",
                     "present",
                     "The local protected-endpoint harness refused a wrong-audience execution attempt with AUDIENCE_MISMATCH.",
-                    refusal_code=result.refusal.refusal_code,
+                    reason_code=result.refusal.reason_code,
                 )
             )
         else:
@@ -1716,13 +1716,13 @@ def scan_replay_harness() -> ScanReport:
             facts=dict(harness.context.facts),
         )
         result = _execute_request(harness, intent=admission.intent, pccb=admission.pccb, context=expired_context)
-        if result.refusal is not None and result.refusal.refusal_code == "PROOF_EXPIRED":
+        if result.refusal is not None and result.refusal.reason_code == "PROOF_EXPIRED":
             checks.append(
                 _build_check(
                     "expiry_enforcement",
                     "present",
                     "The local protected-endpoint harness refused an expired execution attempt with PROOF_EXPIRED.",
-                    refusal_code=result.refusal.refusal_code,
+                    reason_code=result.refusal.reason_code,
                 )
             )
         else:
@@ -1745,13 +1745,13 @@ def scan_replay_harness() -> ScanReport:
             facts=dict(harness.context.facts),
         )
         result = _execute_request(harness, intent=admission.intent, pccb=admission.pccb, context=wrong_context)
-        if result.refusal is not None and result.receipt is not None and result.refusal.refusal_code == "AUDIENCE_MISMATCH":
+        if result.refusal is not None and result.receipt is not None and result.refusal.reason_code == "AUDIENCE_MISMATCH":
             checks.append(
                 _build_check(
                     "structured_refusals",
                     "present",
                     "Blocked execution produced both a canonical Refusal artifact and a refused Receipt in the local harness.",
-                    refusal_code=result.refusal.refusal_code,
+                    reason_code=result.refusal.reason_code,
                 )
             )
         else:

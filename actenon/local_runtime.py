@@ -298,7 +298,7 @@ class SimulationScenarioResult:
             "summary": self.summary,
             "artifact_dir": self.artifact_dir,
             "title": self.title,
-            "refusal_code": self.refusal_code,
+            "reason_code": self.refusal_code,
             "receipt_id": self.receipt_id,
             "perspectives": [item.to_dict() for item in self.perspectives],
             "lesson": self.lesson,
@@ -854,7 +854,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 refusal_id="rfsl_doctor_writer",
                 intent_id=sample_intent.intent_id,
                 category="runtime",
-                refusal_code="DOCTOR_PROBE",
+                reason_code="DOCTOR_PROBE",
                 message="Doctor write probe refusal.",
                 retryable=False,
                 refused_at=FIXED_BASE_TIME,
@@ -1553,9 +1553,9 @@ def _simulate_incident_proof_refusal(
             pccb_id=pccb.pccb_id,
             action_hash=pccb.action_hash,
         )
-        if refusal.refusal_code != expected_refusal_code:
+        if refusal.reason_code != expected_refusal_code:
             raise RuntimeError(
-                f"{incident.name} simulation returned {refusal.refusal_code!r}, expected {expected_refusal_code!r}"
+                f"{incident.name} simulation returned {refusal.reason_code!r}, expected {expected_refusal_code!r}"
             )
         _write_json(scenario_dir / "refusal.json", refusal.to_dict())
         perspectives = (
@@ -1588,9 +1588,9 @@ def _simulate_incident_proof_refusal(
             name=incident.name,
             title=incident.title,
             status="refused",
-            summary=f"{incident.title} was stopped before side effects with {refusal.refusal_code}.",
+            summary=f"{incident.title} was stopped before side effects with {refusal.reason_code}.",
             artifact_dir=str(scenario_dir),
-            refusal_code=refusal.refusal_code,
+            refusal_code=refusal.reason_code,
             perspectives=perspectives,
             lesson=incident.lesson,
             details={
@@ -2219,7 +2219,7 @@ def _persist_simulation_story(scenario_dir: Path, result: SimulationScenarioResu
         "summary": result.summary,
         "lesson": result.lesson,
         "perspectives": [item.to_dict() for item in result.perspectives],
-        "refusal_code": result.refusal_code,
+        "reason_code": result.refusal_code,
         "receipt_id": result.receipt_id,
         "details": result.details,
     }
@@ -2263,7 +2263,7 @@ def _persist_simulation_story(scenario_dir: Path, result: SimulationScenarioResu
     if result.lesson is not None:
         summary_lines.extend(["", f"Lesson: {result.lesson}"])
     if result.refusal_code is not None:
-        summary_lines.extend(["", f"Refusal code: `{result.refusal_code}`"])
+        summary_lines.extend(["", f"Reason code: `{result.refusal_code}`"])
     if result.receipt_id is not None:
         summary_lines.extend(["", f"Receipt id: `{result.receipt_id}`"])
     intent_record_path = result.details.get("intent_record_path")
@@ -2527,13 +2527,13 @@ def _simulate_portable_verifier_case(scenario_dir: Path, scenario_name: str) -> 
                 key="proof_verifier_only",
                 basis="observed",
                 status="would_refuse",
-                summary=f"Observed: proof verification rejected the request with {refusal.refusal_code}.",
+                summary=f"Observed: proof verification rejected the request with {refusal.reason_code}.",
             ),
             SimulationPerspective(
                 key="protected_endpoint_runtime",
                 basis="observed",
                 status="refused",
-                summary=f"Observed: the protected endpoint refused the request before any side effect with {refusal.refusal_code}.",
+                summary=f"Observed: the protected endpoint refused the request before any side effect with {refusal.reason_code}.",
             ),
             SimulationPerspective(
                 key="action_intent_record",
@@ -2545,9 +2545,9 @@ def _simulate_portable_verifier_case(scenario_dir: Path, scenario_name: str) -> 
         return SimulationScenarioResult(
             name=scenario_name,
             status="refused",
-            summary=f"Portable proof verification failed with {refusal.refusal_code}.",
+            summary=f"Portable proof verification failed with {refusal.reason_code}.",
             artifact_dir=str(scenario_dir),
-            refusal_code=refusal.refusal_code,
+            refusal_code=refusal.reason_code,
             perspectives=perspectives,
             lesson=refusal_reason,
             details={
@@ -2713,7 +2713,7 @@ def _simulate_replay_refused(scenario_dir: Path) -> SimulationScenarioResult:
             key="protected_endpoint_runtime",
             basis="observed",
             status="first_execution_then_refused",
-            summary=f"Observed: the protected endpoint executed once and refused the duplicate with {duplicate.refusal.refusal_code}.",
+            summary=f"Observed: the protected endpoint executed once and refused the duplicate with {duplicate.refusal.reason_code}.",
         ),
         SimulationPerspective(
             key="action_intent_record",
@@ -2727,7 +2727,7 @@ def _simulate_replay_refused(scenario_dir: Path) -> SimulationScenarioResult:
         status="refused",
         summary="Duplicate execution was refused by the replay layer.",
         artifact_dir=str(scenario_dir),
-        refusal_code=duplicate.refusal.refusal_code,
+        refusal_code=duplicate.refusal.reason_code,
         receipt_id=duplicate.receipt.receipt_id if duplicate.receipt is not None else None,
         perspectives=perspectives,
         lesson="Replay protection is a runtime property. Proof alone verifies intent, but only the protected endpoint with replay state prevents duplicate execution.",
@@ -2921,7 +2921,7 @@ def _bundle_evidence_chains(paths: LocalRuntimePaths) -> list[dict[str, Any]]:
             outcome_payload = refusal.to_dict()
             outcome_type = "refusal"
             outcome_id = refusal.refusal_id
-            outcome_value = refusal.refusal_code
+            outcome_value = refusal.reason_code
             if receipt_path.exists():
                 receipt = Receipt.from_dict(_load_json(receipt_path))
                 supporting_receipt = {

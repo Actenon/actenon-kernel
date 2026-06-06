@@ -485,9 +485,9 @@ class _CoverageRunner:
             check_key=definition.key,
             check_label=definition.label,
             outcome="refused",
-            passed=refusal.refusal_code == "MISSING_PROOF",
+            passed=refusal.reason_code == "MISSING_PROOF",
             side_effect_executed=False,
-            reason_code=refusal.refusal_code,
+            reason_code=refusal.reason_code,
             artifact=artifact,
         )
 
@@ -514,9 +514,9 @@ class _CoverageRunner:
             check_key=definition.key,
             check_label=definition.label,
             outcome="refused",
-            passed=refusal.refusal_code == "POLICY_DENIED",
+            passed=refusal.reason_code == "POLICY_DENIED",
             side_effect_executed=False,
-            reason_code=refusal.refusal_code,
+            reason_code=refusal.reason_code,
             artifact=artifact,
         )
 
@@ -571,9 +571,9 @@ class _CoverageRunner:
             check_key=definition.key,
             check_label=definition.label,
             outcome="refused",
-            passed=refusal.refusal_code in expected_reason_codes and side_effect_count == 0,
+            passed=refusal.reason_code in expected_reason_codes and side_effect_count == 0,
             side_effect_executed=False,
-            reason_code=refusal.refusal_code,
+            reason_code=refusal.reason_code,
             artifact=artifact,
             details={"expected_reason_codes": sorted(expected_reason_codes)},
         )
@@ -610,9 +610,9 @@ class _CoverageRunner:
             check_key=definition.key,
             check_label=definition.label,
             outcome="refused",
-            passed=first.receipt is not None and first.refusal is None and refusal.refusal_code == "DUPLICATE_REPLAY" and side_effects["count"] == 1,
+            passed=first.receipt is not None and first.refusal is None and refusal.reason_code == "DUPLICATE_REPLAY" and side_effects["count"] == 1,
             side_effect_executed=False,
-            reason_code=refusal.refusal_code,
+            reason_code=refusal.reason_code,
             artifact=artifact,
             details={"seed_execution_side_effects": side_effects["count"]},
         )
@@ -629,7 +629,7 @@ class _CoverageRunner:
         )
         receipt = result.receipt
         if receipt is None or result.refusal is not None:
-            reason = result.refusal.refusal_code if result.refusal is not None else "MISSING_RECEIPT"
+            reason = result.refusal.reason_code if result.refusal is not None else "MISSING_RECEIPT"
             raise AssertionError(f"valid proof-bound execution failed: {reason}")
         artifact = self._write_primary_artifact(scenario, definition, "receipt", receipt.to_dict())
         return CheckRecord(

@@ -6,7 +6,7 @@
   "refusal_id": "rfsl_0001",
   "intent_id": "intent_deny",
   "category": "policy",
-  "refusal_code": "WORKFLOW_DENY",
+  "reason_code": "WORKFLOW_DENY",
   "message": "The refund workflow denies blocked refund requests.",
   "retryable": false,
   "refused_at": "2026-01-01T12:01:00Z",

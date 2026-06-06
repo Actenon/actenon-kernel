@@ -7,3 +7,9 @@ Sections:
 - `guides/`: adoption and operator guides
 - `reference/`: detailed reference material and ecosystem-facing interface docs
 - `project-history/`: historical notes and prior implementation summaries that are not part of the main public launch path
+
+Start with:
+
+- [Issuance and approval](guides/ISSUANCE_AND_APPROVAL.md)
+- [Preflight evidence](guides/PREFLIGHT_EVIDENCE.md)
+- [Framework adapters](guides/FRAMEWORK_ADAPTERS.md)

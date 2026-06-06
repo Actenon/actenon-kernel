@@ -169,7 +169,7 @@ class ProofSealKernelTests(unittest.TestCase):
         admission = kernel.submit_intent(self.payload, self.context)
 
         self.assertIsNotNone(admission.refusal)
-        self.assertEqual("PROOF_SEAL_FAILED", admission.refusal.refusal_code)
+        self.assertEqual("PROOF_SEAL_FAILED", admission.refusal.reason_code)
         self.assertIsNone(admission.pccb)
         self.assertEqual([], writer.receipts)
         self.assertEqual(1, len(writer.refusals))

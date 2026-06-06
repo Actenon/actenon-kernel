@@ -45,7 +45,7 @@ class ArtifactShapeConformanceTests(unittest.TestCase):
 
             self.assertEqual("refusal", payload["contract"]["name"])
             self.assertEqual("policy", refusal.category)
-            self.assertEqual("WORKFLOW_DENY", refusal.refusal_code)
+            self.assertEqual("WORKFLOW_DENY", refusal.reason_code)
             self.assertFalse(refusal.retryable)
 
 

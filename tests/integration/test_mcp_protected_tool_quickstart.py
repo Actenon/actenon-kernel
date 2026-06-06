@@ -18,7 +18,7 @@ class MCPProtectedToolQuickstartTests(unittest.TestCase):
             self.assertFalse(payload["ok"])
             self.assertFalse(payload["handler_called"])
             self.assertFalse(payload["side_effect_executed"])
-            self.assertEqual("PCCB_REQUIRED", payload["refusal"]["refusal_code"])
+            self.assertEqual("PCCB_REQUIRED", payload["refusal"]["reason_code"])
             self.assertEqual("refused", payload["receipt"]["outcome"])
             self.assertTrue(Path(payload["refusal_path"]).exists())
             self.assertTrue(Path(payload["receipt_path"]).exists())
@@ -48,4 +48,3 @@ class MCPProtectedToolQuickstartTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

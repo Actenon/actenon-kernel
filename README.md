@@ -12,7 +12,7 @@ Actenon sits at the execution boundary and stops AI agents, MCP tools, browser a
 
 ---
 
-## See it in 60 seconds
+## Quickstart
 
 ```bash
 git clone https://github.com/Actenon/actenon.git
@@ -22,12 +22,33 @@ python3 -m venv .venv && source .venv/bin/activate
 python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[asymmetric]"
 
+python examples/quickstart_min.py
+```
+
+This local-only quickstart uses the packaged `ActenonGate` API. It executes the
+valid exact action once, refuses a mismatched action, and refuses replay:
+
+```text
+ACTENON QUICKSTART
+valid: EXECUTED
+mismatch: REFUSED (INTENT_MISMATCH)
+replay: REFUSED (DUPLICATE_REPLAY)
+side_effects: 1
+No valid proof, no execution.
+```
+
+It does not contact a cloud account, use external secrets, or perform a real
+destructive action. The local HMAC signer is for development only.
+
+## See it in 60 seconds
+
+For the cinematic refusal-before-side-effect demo:
+
+```bash
 bash scripts/demo_hero.sh
 ```
 
-This is a safe local simulation. It does not contact any cloud account, use external secrets, or perform a real destructive action.
-
-You will see an unproven consequential action refused before the side effect, followed by a valid proof-bound action executing once:
+You will see:
 
 ```text
 ACTENON
@@ -324,6 +345,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | --- | --- |
 | Run the local proof-gate demo | [QUICKSTART.md](QUICKSTART.md) |
 | First 10 minutes, end to end | [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md) |
+| Proof issuance and approval | [docs/guides/ISSUANCE_AND_APPROVAL.md](docs/guides/ISSUANCE_AND_APPROVAL.md) |
 | The problem, in depth | [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) |
 | The category | [CATEGORY.md](CATEGORY.md) |
 | Threat model, attackers, limits | [THREAT_MODEL.md](THREAT_MODEL.md) |

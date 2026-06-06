@@ -91,7 +91,7 @@ class RefundGuardLocalServerIntegrationTests(unittest.TestCase):
                 self.assertEqual(0, code, stderr)
                 refused = json.loads(stdout)
                 self.assertFalse(refused["ok"])
-                self.assertEqual("DUPLICATE_REPLAY", refused["refusal"]["refusal_code"])
+                self.assertEqual("DUPLICATE_REPLAY", refused["refusal"]["reason_code"])
                 self.assertEqual("refused", refused["receipt"]["outcome"])
                 self.assertTrue(Path(refused["artifacts"]["refusal"]).exists())
             finally:

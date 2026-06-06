@@ -8,4 +8,9 @@ effects = []
 valid = gate.protect(action, proof, lambda: effects.append("executed"))
 mismatch = gate.protect({**action, "intent_id": "intent_quickstart_other"}, proof, lambda: effects.append("mismatch"))
 replay = gate.protect(action, proof, lambda: effects.append("replay"))
-print(valid.outcome, mismatch.reason_code, replay.reason_code, effects)
+print(f"""ACTENON QUICKSTART
+valid: {valid.outcome.upper()}
+mismatch: {mismatch.outcome.upper()} ({mismatch.reason_code})
+replay: {replay.outcome.upper()} ({replay.reason_code})
+side_effects: {len(effects)}
+No valid proof, no execution.""")

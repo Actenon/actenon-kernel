@@ -131,7 +131,7 @@ function renderScenarioList() {
     button.classList.toggle("active", state.currentScenarioId === scenario.id);
     button.innerHTML = `
       <div class="scenario-item-title">${escapeHtml(scenario.label)}</div>
-      <p class="scenario-item-meta">${escapeHtml(scenario.final_outcome)}${scenario.refusal_code ? ` · ${escapeHtml(scenario.refusal_code)}` : ""}</p>
+      <p class="scenario-item-meta">${escapeHtml(scenario.final_outcome)}${scenario.reason_code ? ` · ${escapeHtml(scenario.reason_code)}` : ""}</p>
     `;
     button.addEventListener("click", () => {
       state.currentScenarioId = scenario.id;
@@ -162,8 +162,8 @@ function renderScenario() {
   if (scenario.decision_outcome) {
     elements.scenarioBadges.append(buildBadge(`decision: ${scenario.decision_outcome}`, badgeClassForOutcome(scenario.decision_outcome)));
   }
-  if (scenario.refusal_code) {
-    elements.scenarioBadges.append(buildBadge(`refusal: ${scenario.refusal_code}`, "badge-danger"));
+  if (scenario.reason_code) {
+    elements.scenarioBadges.append(buildBadge(`reason: ${scenario.reason_code}`, "badge-danger"));
   }
 
   elements.verificationChecks.replaceChildren();
