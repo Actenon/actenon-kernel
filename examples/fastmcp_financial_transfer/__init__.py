@@ -1,0 +1,1 @@
+"""FastMCP financial transfer example."""
