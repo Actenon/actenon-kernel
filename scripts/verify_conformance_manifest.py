@@ -3,15 +3,16 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-from actenon.conformance.manifest import (
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from actenon.conformance.manifest import (  # noqa: E402
     ConformanceManifestError,
     validate_conformance_manifest,
 )
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> int:

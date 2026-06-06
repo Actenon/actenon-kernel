@@ -31,7 +31,7 @@ def test_conformance_version_manifest_and_required_vectors_are_declared() -> Non
 
 def test_manifest_verification_command_passes() -> None:
     result = subprocess.run(
-        [sys.executable, "scripts/verify_conformance_manifest.py"],
+        [sys.executable, "-I", "scripts/verify_conformance_manifest.py"],
         cwd=REPO_ROOT,
         check=False,
         text=True,
@@ -48,6 +48,7 @@ def test_conformance_release_archive_is_deterministic_and_complete() -> None:
         output_dir = Path(tempdir)
         command = [
             sys.executable,
+            "-I",
             "scripts/build_conformance_release.py",
             "--output-dir",
             str(output_dir),

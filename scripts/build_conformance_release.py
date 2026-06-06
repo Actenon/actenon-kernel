@@ -8,13 +8,16 @@ import gzip
 import hashlib
 import io
 import json
+import sys
 import tarfile
 from pathlib import Path
 
-from actenon.conformance.manifest import validate_conformance_manifest
-
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from actenon.conformance.manifest import validate_conformance_manifest  # noqa: E402
+
+
 FIXED_MTIME = 1_704_067_200
 
 
