@@ -185,33 +185,30 @@ def delete_customer(customer_id: str):
     return {"status": "deleted"}
 ```
 
-**2. Require proof at the endpoint.** Verify a proof bound to the exact action before the side effect. The simplified shape looks like this; see the linked examples for runnable code:
+**2. Require proof at the endpoint.** Configure the gate once with the endpoint's verifier and audience, then pass the exact Action Intent and proof into the protected handler:
 
 ```python
+from actenon import ActenonGate
+
+gate = ActenonGate(
+    verifier=proof_verifier,
+    audience="service:customer-admin-delete",
+    issuer="service:proof-issuer",
+)
+
 @mcp.tool()
-def delete_customer(customer_id: str, proof: dict):
-    action = {
-        "type": "database.delete",
-        "resource": "customers",
-        "parameters": {"customer_id": customer_id},
-    }
+def delete_customer(action_intent: dict, proof: dict):
+    def delete():
+        customer_id = action_intent["action"]["parameters"]["customer_id"]
+        db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
+        return {"status": "deleted"}
 
-    verification = actenon.verify(
-        proof=proof,
-        action=action,
-        audience="mcp://customer-admin/delete_customer",
-    )
-
-    if not verification.allowed:
-        return actenon.refuse(reason=verification.reason, action=action)
-
-    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
-    return actenon.receipt(status="executed", action=action, proof=proof)
+    return gate.protect(action_intent, proof, delete).to_dict()
 ```
 
 **3. Test the refusal path.** A protected tool must refuse when proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, or issued for a different tenant, subject, or policy boundary.
 
-Start with [`examples/hello_protected_endpoint/`](examples/hello_protected_endpoint) (the smallest example), then [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool) and [INTEGRATIONS.md](INTEGRATIONS.md).
+Run [`examples/quickstart_min.py`](examples/quickstart_min.py) for the smallest high-level API example, then see [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool), the [high-level gate guide](docs/guides/HIGH_LEVEL_GATE_API.md), and [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ---
 
