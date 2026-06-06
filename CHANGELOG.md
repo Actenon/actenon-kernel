@@ -21,6 +21,11 @@
 
 ### Added
 
+- Versioned Conformance 1.0.0 metadata, hash-locked machine-readable vectors,
+  deterministic release bundles, signed-tag/Sigstore release provenance, and
+  an exact-version `Actenon Verified` self-certification policy.
+- Security assurance policy covering annual and trigger-based reassessment,
+  public security contact, and coordinated vulnerability disclosure.
 - Open Receipt Counter-Signature v1 format plus offline, `kid`-aware
   verification in the Python, TypeScript, Go, and Rust verifier SDKs.
 - Shared counter-signature conformance vectors covering historical keys,

@@ -19,6 +19,7 @@ Related documents:
 
 - [THREAT_MODEL.md](THREAT_MODEL.md)
 - [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md)
+- [docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md)
 - [spec/protected-endpoint/SPEC.md](spec/protected-endpoint/SPEC.md)
 - [spec/replay/SPEC.md](spec/replay/SPEC.md)
 
@@ -49,11 +50,13 @@ When reporting an issue, distinguish clearly between:
 
 Do not open a public issue for a sensitive vulnerability.
 
-Use the private maintainer channel associated with the repository release process, or repository security advisories if they are enabled in the hosting platform.
+Email `ross.buckley1990@gmail.com` with the subject prefix
+`[ACTENON SECURITY]`. Repository security advisories may also be used when the
+hosting platform presents the private reporting form.
 
-If neither exists yet, delay public disclosure until maintainers can provide a private reporting path.
-
-Before public push, enable repository security advisories or define an equivalent private reporting path in the hosting platform configuration.
+The acknowledgement, triage, coordinated-disclosure targets, reassessment
+cadence, and conformance-release assurance policy are defined in
+[docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md).
 
 ## What To Include
 

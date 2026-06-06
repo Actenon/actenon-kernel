@@ -23,7 +23,7 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             actenon = bin_dir / ("actenon.exe" if os.name == "nt" else "actenon")
 
             subprocess.run(
-                [str(python), "-m", "pip", "install", "."],
+                [str(python), "-m", "pip", "install", ".[asymmetric]"],
                 check=True,
                 cwd=REPO_ROOT,
                 text=True,
@@ -42,7 +42,7 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             self.assertIn("Local CLI", help_result.stdout)
 
             conformance_result = subprocess.run(
-                [str(actenon), "conformance", "run"],
+                [str(actenon), "conformance", "run", "--require-complete"],
                 check=True,
                 cwd=temp_root,
                 text=True,
@@ -50,6 +50,11 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
                 timeout=180,
             )
             self.assertIn("Conformance tests passed.", conformance_result.stdout)
+            self.assertIn("Skipped: 0.", conformance_result.stdout)
+            self.assertIn(
+                "Actenon Verified (Conformance 1.0.0)",
+                conformance_result.stdout,
+            )
 
             viewer_help_result = subprocess.run(
                 [str(python), "-m", "actenon.ui.trace_viewer.app", "--help"],

@@ -8,6 +8,13 @@ Actenon sits at your execution boundary — your database, your payments rail, y
 
 It doesn't matter whether the action comes from your own AI agent, a third-party agent, an MCP tool, a browser or coding agent, a workflow automation, or a compromised one: if the proof is missing, expired, replayed, or bound to a different action, the action is refused before the side effect, and every decision leaves a verifiable **Receipt** or **Refusal** artifact.
 
+**Actenon gates explicit execution-edge actions; it does not inspect or filter
+prompts, model output, or in-band response content.**
+
+**It can require proof for an explicit export or transmit action, but it does
+not stop data disclosed inside ordinary output unless that disclosure is itself
+modeled and routed as a protected action.**
+
 **You protect your boundary. The agent does not have to cooperate, trust you, or even know Actenon exists.**
 
 [![Actenon demo: an unproven agent action is refused before the side effect](docs/assets/actenon-hero-devops.gif)](docs/assets/actenon-hero-devops.gif)
@@ -25,6 +32,10 @@ And increasingly, the agent reaching your system was not built by you. It's a pa
 So the only place you can enforce safety is your own boundary — the endpoint, gateway, or resource the action actually hits. That is what Actenon protects: it lets the resource owner demand proof from any agent, and refuse anything unproven, before a single side effect occurs.
 
 This is the edge-protection model: like a WAF or an API gateway, you adopt it once at your boundary and you are protected against the entire agent ecosystem — cooperative, third-party, or hostile.
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
 
 Read the full problem statement in [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md).
 
@@ -367,6 +378,19 @@ A hosted control plane may add enterprise policy management, approvals, dashboar
 
 Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPEC_INDEX.md](SPEC_INDEX.md) · [VERSIONING_POLICY.md](VERSIONING_POLICY.md)
 
+Current compatibility target: **Actenon Conformance 1.0.0**. The
+machine-readable suite and hash-locked vectors cover exact-action verification,
+Receipt counter-signatures, transparency proofs, issuer status, and signed
+approvals across Python, TypeScript, Go, and Rust.
+
+```bash
+python3 -m actenon.cli conformance run --require-complete
+```
+
+The scoped self-certification wording is
+`Actenon Verified (Conformance 1.0.0)`. It is a versioned compatibility claim,
+not an endorsement or deployment audit.
+
 ---
 
 ## Documentation
@@ -378,6 +402,8 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | The problem, in depth | [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) |
 | The category | [CATEGORY.md](CATEGORY.md) |
 | Threat model, attackers, limits | [THREAT_MODEL.md](THREAT_MODEL.md) |
+| Scope boundary and deployment conditions | [docs/SCOPE_AND_GUARANTEES.md](docs/SCOPE_AND_GUARANTEES.md) |
+| Conformance version and security assurance | [docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md) · [conformance/suite.json](conformance/suite.json) |
 | Exact kernel guarantees | [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md) |
 | Architecture & trust boundaries | [docs/architecture/TECHNICAL_ARCHITECTURE.md](docs/architecture/TECHNICAL_ARCHITECTURE.md) |
 | Credential broker deployment | [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md) |

@@ -235,9 +235,16 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
             self.assertEqual("refusal", refusal_verification["artifact_kind"])
 
     def test_conformance_run_command_passes(self) -> None:
-        code, stdout, stderr = self._run_cli(["conformance", "run"])
+        code, stdout, stderr = self._run_cli(
+            ["conformance", "run", "--require-complete"]
+        )
         self.assertEqual(0, code, stderr)
+        self.assertIn("Conformance version: 1.0.0", stdout)
         self.assertIn("Conformance tests passed.", stdout)
+        self.assertIn(
+            "Mark eligibility: Actenon Verified (Conformance 1.0.0)",
+            stdout,
+        )
 
 
 if __name__ == "__main__":

@@ -31,6 +31,9 @@ jobs:
       - name: Verify public scope and edge claims
         run: python scripts/verify_scope_claims.py
 
+      - name: Verify conformance version and vector lock
+        run: python scripts/verify_conformance_manifest.py
+
       - name: Run hero demo
         run: bash scripts/demo_hero.sh
 
@@ -38,7 +41,7 @@ jobs:
         run: bash scripts/verify_readme_quickstart.sh
 
       - name: Run conformance suite
-        run: python -m actenon.cli conformance run
+        run: python -m actenon.cli conformance run --require-complete
 
       - name: Run local scanner
         run: python -m actenon.cli scan local

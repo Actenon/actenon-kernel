@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "conformance_version": "1.0.0",
+  "release_tag": "conformance-v1.0.0",
+  "canonicalization_profile": "actenon-jcs-sha256-v1",
+  "compatibility_surface": "Actenon Kernel active v1 public compatibility surface",
+  "verified_mark": {
+    "name": "Actenon Verified",
+    "claim": "Actenon Verified (Conformance 1.0.0)",
+    "self_certification_command": "python -m actenon.cli conformance run --require-complete",
+    "requirements": [
+      "Run the unmodified hash-locked vectors for this version.",
+      "Pass every mandatory vector with no skipped checks.",
+      "State the exact conformance version, implementation, and tested revision.",
+      "Keep the claim scoped to the active public compatibility surface."
+    ]
+  },
+  "vector_sets": [
+    {
+      "id": "verifier_sdk_v1",
+      "path": "actenon/conformance/vectors/verifier_sdk_v1",
+      "surfaces": [
+        "Action Intent",
+        "PCCB",
+        "Protected Endpoint"
+      ],
+      "sdk_targets": [
+        "python",
+        "typescript",
+        "go",
+        "rust"
+      ]
+    },
+    {
+      "id": "cloud_invoice_payment_v1",
+      "path": "conformance/vectors/cloud_invoice_payment_v1",
+      "surfaces": [
+        "Receipt",
+        "Refusal",
+        "Outcome Attestation"
+      ],
+      "sdk_targets": [
+        "python"
+      ]
+    },
+    {
+      "id": "receipt_countersignature_v1",
+      "path": "conformance/vectors/receipt_countersignature_v1",
+      "surfaces": [
+        "Receipt Counter-Signature"
+      ],
+      "sdk_targets": [
+        "python",
+        "typescript",
+        "go",
+        "rust"
+      ]
+    },
+    {
+      "id": "transparency_log_v1",
+      "path": "conformance/vectors/transparency_log_v1",
+      "surfaces": [
+        "Transparency Checkpoint",
+        "Inclusion Proof",
+        "Consistency Proof",
+        "Independent Monitor"
+      ],
+      "sdk_targets": [
+        "python",
+        "typescript",
+        "go",
+        "rust"
+      ]
+    },
+    {
+      "id": "trust_artifacts_v1",
+      "path": "conformance/vectors/trust_artifacts_v1",
+      "surfaces": [
+        "Issuer Status",
+        "Approval Artifact"
+      ],
+      "sdk_targets": [
+        "python",
+        "typescript",
+        "go",
+        "rust"
+      ]
+    }
+  ],
+  "sdk_targets": [
+    {
+      "id": "python",
+      "command": "python -m actenon.cli conformance run --require-complete"
+    },
+    {
+      "id": "typescript",
+      "command": "cd sdk/typescript && npm test"
+    },
+    {
+      "id": "go",
+      "command": "cd sdk/go && go test ./..."
+    },
+    {
+      "id": "rust",
+      "command": "cd sdk/rust && cargo test"
+    }
+  ]
+}

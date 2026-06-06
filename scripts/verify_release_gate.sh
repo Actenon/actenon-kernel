@@ -14,6 +14,7 @@ KEYSTONE_TESTS=(
   "tests/conformance/test_trust_artifacts_conformance.py"
   "tests/integration/test_verified_approval_preflight.py"
   "tests/unit/test_scope_claims.py"
+  "tests/unit/test_conformance_release.py"
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_canonicalization_interop.py"
   "tests/conformance"
@@ -40,6 +41,9 @@ RUFF_TARGETS=(
   "tests/integration/test_verified_approval_preflight.py"
   "scripts/public_hygiene_audit.py"
   "scripts/verify_scope_claims.py"
+  "scripts/build_conformance_release.py"
+  "scripts/update_conformance_vector_lock.py"
+  "scripts/verify_conformance_manifest.py"
 )
 
 run_step() {
@@ -168,6 +172,8 @@ PY
 cd "$ROOT_DIR"
 
 run_step "public scope and edge claims" "$PYTHON_BIN" "$ROOT_DIR/scripts/verify_scope_claims.py"
+run_step "conformance version and vector lock" "$PYTHON_BIN" "$ROOT_DIR/scripts/verify_conformance_manifest.py"
+run_step "complete Python conformance suite" "$PYTHON_BIN" -m actenon.cli conformance run --require-complete
 run_step "README quickstart" "$ROOT_DIR/scripts/verify_readme_quickstart.sh"
 run_step "consequential action coverage matrix" "$PYTHON_BIN" -m actenon.cli coverage run
 run_step "focused keystone suite" "$PYTHON_BIN" -m pytest "${KEYSTONE_TESTS[@]}" -q

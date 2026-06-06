@@ -11,6 +11,7 @@ Sections:
 Start with:
 
 - [Scope and guarantees](SCOPE_AND_GUARANTEES.md)
+- [Security assurance and conformance cadence](SECURITY_ASSURANCE.md)
 - [Issuance and approval](guides/ISSUANCE_AND_APPROVAL.md)
 - [Preflight evidence](guides/PREFLIGHT_EVIDENCE.md)
 - [Domain policy packs](guides/POLICY_PACKS.md)

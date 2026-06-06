@@ -1,5 +1,7 @@
 # Conformance
 
+Current suite version: **1.0.0**
+
 ## Purpose
 
 This document defines the public compatibility surface for the open kernel.
@@ -126,7 +128,7 @@ GitHub Action wrapper:
 ## Run The Suite
 
 ```bash
-actenon conformance run
+actenon conformance run --require-complete
 ```
 
 Equivalent direct test command:
@@ -151,6 +153,15 @@ python3 -m unittest discover -s tests/conformance -p 'test_*.py'
 
 A passing result supports a scoped compatibility claim against the repository's active public surface.
 
+The versioned self-certification wording for the current suite is:
+
+> Actenon Verified (Conformance 1.0.0)
+
+That wording is gated on the unmodified hash-locked vectors passing with no
+skipped checks. The claim must also state the implementation and tested
+revision. See [conformance/suite.json](conformance/suite.json) and
+[docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md).
+
 It supports saying that an implementation targets the OSS kernel compatibility surface for the active v1 contracts and behavior specs above. Where an implementation also emits and verifies Outcome Attestation v2alpha1 envelopes, it supports the scoped claim that those envelopes follow the public attestation contract.
 
 It does not support saying that an implementation conforms to unpublished, reserved, private, or paid-layer behavior. It also does not prove provider-backed reconciliation or finality, issuer integrity, or adapter honesty.
@@ -163,7 +174,7 @@ If you want to describe a passing result publicly, keep the claim scoped to the 
 
 Example:
 
-> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, supports the opt-in Outcome Attestation v2alpha1 envelope where used, and passes the public conformance suite shipped by this repository.
+> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, supports the opt-in Outcome Attestation v2alpha1 envelope where used, and is Actenon Verified (Conformance 1.0.0) at the stated implementation revision.
 
 Stronger but still safe:
 

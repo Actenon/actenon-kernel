@@ -1,0 +1,63 @@
+name: Conformance release
+
+on:
+  push:
+    tags:
+      - "conformance-v*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Signed conformance vectors
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout signed tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Require declared version and GitHub-verified signed tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          expected_tag="conformance-v$(cat conformance/VERSION)"
+          test "$GITHUB_REF_NAME" = "$expected_tag"
+          tag_object="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$GITHUB_REF_NAME")"
+          tag_type="$(jq -r '.object.type' <<<"$tag_object")"
+          test "$tag_type" = "tag"
+          tag_sha="$(jq -r '.object.sha' <<<"$tag_object")"
+          verified="$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" --jq '.verification.verified')"
+          test "$verified" = "true"
+
+      - name: Verify hash-locked vectors
+        run: python scripts/verify_conformance_manifest.py
+
+      - name: Build deterministic vector bundle
+        run: python scripts/build_conformance_release.py
+
+      - name: Attest bundle provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/conformance/actenon-conformance-*.tar.gz
+
+      - name: Publish signed conformance release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/conformance/* \
+            --verify-tag \
+            --title "Actenon Conformance $(cat conformance/VERSION)" \
+            --notes-file conformance/CHANGELOG.md

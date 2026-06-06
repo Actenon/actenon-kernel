@@ -76,6 +76,11 @@ Canonicalization profiles must not mutate in place. Any future change requires:
 
 Conformance vectors are compatibility artifacts, not disposable test fixtures.
 
+The suite itself uses semantic versioning independently of the package version.
+Its current version is declared by `conformance/VERSION`,
+`conformance/suite.json`, and `actenon/conformance/version.py`. Vector bytes are
+locked by `conformance/vector-lock.json`.
+
 Versioned vectors should identify:
 
 - VAR or kernel surface version
@@ -88,6 +93,11 @@ Versioned vectors should identify:
 Changing the expected interpretation of an existing vector is a breaking change
 unless the vector is clearly marked as superseded and a new versioned vector is
 published.
+
+Published conformance releases use `conformance-vMAJOR.MINOR.PATCH` signed Git
+tags. The release workflow emits a deterministic archive, SHA-256 sidecar, and
+GitHub/Sigstore provenance. The `Actenon Verified` mark must always state the
+exact conformance version.
 
 ## Key Discovery And Lifecycle Versioning
 

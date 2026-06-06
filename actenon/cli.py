@@ -1207,6 +1207,8 @@ def _cmd_verify_refusal_attestation(args: argparse.Namespace) -> int:
 
 
 def _cmd_conformance_run(args: argparse.Namespace) -> int:
+    from actenon.conformance import CONFORMANCE_VERSION, VERIFIED_MARK
+
     package_root = Path(__file__).resolve().parent
     conformance_dir = package_root / "conformance"
     if not conformance_dir.exists():
@@ -1216,11 +1218,24 @@ def _cmd_conformance_run(args: argparse.Namespace) -> int:
         pattern="test_*.py",
         top_level_dir=str(package_root.parent),
     )
+    print(f"Conformance version: {CONFORMANCE_VERSION}")
     stream = sys.stdout if args.verbose else StringIO()
     result = unittest.TextTestRunner(stream=stream, verbosity=2 if args.verbose else 1).run(suite)
+    skipped = len(result.skipped)
+    complete = result.wasSuccessful() and skipped == 0
     if not args.verbose:
         print(f"Conformance tests {'passed' if result.wasSuccessful() else 'failed'}.")
         print(f"Ran {result.testsRun} test(s).")
+    print(f"Skipped: {skipped}.")
+    if complete:
+        print(f"Mark eligibility: {VERIFIED_MARK}")
+    elif skipped:
+        print(
+            "Mark eligibility: INCOMPLETE "
+            "(install required extras and run with no skipped checks)."
+        )
+    if args.require_complete and skipped:
+        return 1
     return 0 if result.wasSuccessful() else 1
 
 
@@ -1967,6 +1982,11 @@ def build_parser() -> argparse.ArgumentParser:
     conformance_subparsers = conformance.add_subparsers(dest="conformance_command", required=True)
     conformance_run = conformance_subparsers.add_parser("run", help="Run the repository conformance suite.")
     conformance_run.add_argument("--verbose", action="store_true", help="Show full unittest output.")
+    conformance_run.add_argument(
+        "--require-complete",
+        action="store_true",
+        help="Fail when any conformance check is skipped; required for the Actenon Verified mark.",
+    )
     conformance_run.set_defaults(func=_cmd_conformance_run)
 
     coverage = subparsers.add_parser(

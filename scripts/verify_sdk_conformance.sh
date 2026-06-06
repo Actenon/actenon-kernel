@@ -18,22 +18,28 @@ fi
 
 cd "$ROOT_DIR"
 
-"$PYTHON_BIN" -m unittest \
-  actenon.conformance.test_verifier_sdk_conformance.VerifierSdkConformanceTests.test_shared_cross_sdk_conformance_vectors
+"$PYTHON_BIN" scripts/verify_conformance_manifest.py
+"$PYTHON_BIN" -m actenon.cli conformance run --require-complete
 
 (
   cd sdk/typescript
-  node --import tsx --test ./tests/verifier-conformance.test.ts
+  node --import tsx --test \
+    ./tests/verifier-conformance.test.ts \
+    ./tests/countersignature.test.ts \
+    ./tests/transparency.test.ts \
+    ./tests/trust-artifacts.test.ts
 )
 
 (
   cd sdk/go
-  go test ./verifier -run '^TestSharedVerifierConformanceVectors$'
+  go test ./verifier
 )
 
 (
   cd sdk/rust
-  "${CARGO_CMD[@]}" test --test verifier_conformance_test
+  "${CARGO_CMD[@]}" test --tests
 )
 
-printf 'Shared verifier SDK conformance passed: Python, TypeScript, Go, Rust.\n'
+CONFORMANCE_VERSION="$(tr -d '[:space:]' <"$ROOT_DIR/conformance/VERSION")"
+printf 'Conformance %s passed: Python, TypeScript, Go, Rust; P10-PUB, P11-PUB, and P12-PUB vectors included.\n' \
+  "$CONFORMANCE_VERSION"

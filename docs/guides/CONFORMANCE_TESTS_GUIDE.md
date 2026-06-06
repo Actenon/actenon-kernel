@@ -4,6 +4,8 @@
 
 The repository ships conformance material so implementers can validate that a verifier build still honors the public contract and proof verification behavior.
 
+Current suite version: **1.0.0**
+
 This guide complements:
 
 - [../../CONFORMANCE.md](../../CONFORMANCE.md)
@@ -20,7 +22,7 @@ The central behavioral compatibility surface is the Protected Endpoint. External
 
 ```bash
 make install
-actenon conformance run
+actenon conformance run --require-complete
 ```
 
 Broader public-release validation:
@@ -77,6 +79,9 @@ Approval Artifact cases require the
 optional `asymmetric` extra. The public CI and release gate install that extra;
 core-only installs skip those Ed25519 cases with an explicit message.
 
+Skipped checks are not eligible for the versioned `Actenon Verified` mark.
+Self-certification therefore uses `--require-complete`.
+
 Those checks are deliberately concentrated around the active public kernel targets. Outcome Attestation is additive and opt-in; it does not change active v1 Receipt or Refusal semantics or turn reserved or paid-layer surfaces into implied standards.
 
 ## Repo Command
@@ -113,9 +118,17 @@ Third-party implementers should:
 
 1. implement the public contracts and behavioral semantics under `/spec`
 2. use [../reference/EXECUTION_SEMANTICS.md](../reference/EXECUTION_SEMANTICS.md) as the behavioral state reference
-3. run the conformance suite against their verifier or packaged distribution
-4. treat failing conformance tests as compatibility failures unless they have intentionally moved to a new public version
-5. keep public compatibility claims scoped to the active public surfaces that actually pass
+3. verify `conformance/suite.json` and `conformance/vector-lock.json`
+4. run the complete suite against their verifier or packaged distribution
+5. treat failing conformance tests as compatibility failures unless they have intentionally moved to a new public version
+6. state the conformance version and tested implementation revision
+7. keep public compatibility claims scoped to the active public surfaces that actually pass
+
+The machine-readable suite declaration includes the mandatory vector families,
+SDK targets, and mark requirements. P10-PUB, P11-PUB, and P12-PUB coverage is
+represented by `receipt_countersignature_v1`, `transparency_log_v1`, and
+`trust_artifacts_v1`; the shared SDK command runs them against Python,
+TypeScript, Go, and Rust.
 
 ## What A Passing Run Means
 

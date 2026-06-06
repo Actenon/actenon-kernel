@@ -45,10 +45,21 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["actenon*", "examples*", "schemas*"]
+include = ["actenon*", "conformance*", "examples*", "schemas*"]
 
 [tool.setuptools.package-data]
 "actenon.conformance" = ["vectors/verifier_sdk_v1/*"]
+"conformance" = [
+  "CHANGELOG.md",
+  "MATRIX.md",
+  "README.md",
+  "VERSION",
+  "suite.json",
+  "vector-lock.json",
+  "vectors/*/*.json",
+  "vectors/*/README.md",
+  "vectors/*/mutations/*.json",
+]
 "actenon.ui.trace_viewer" = ["static/*"]
 "schemas" = ["*.json"]
 

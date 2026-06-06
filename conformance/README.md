@@ -2,6 +2,12 @@
 
 This directory is the publishable documentation surface for compatibility targets in the open kernel.
 
+Current conformance version: **1.0.0**
+
+- Machine-readable declaration: [`suite.json`](suite.json)
+- Hash lock: [`vector-lock.json`](vector-lock.json)
+- Version history: [`CHANGELOG.md`](CHANGELOG.md)
+
 ## What This Package Is For
 
 Use this package when you want to understand or run the repository's public compatibility target for:
@@ -43,7 +49,7 @@ included.
 ## Fastest Commands
 
 ```bash
-actenon conformance run
+actenon conformance run --require-complete
 ```
 
 ```bash
@@ -57,6 +63,30 @@ make public-verify
 ```
 
 For most external implementers, `actenon conformance run` is the fastest path to a meaningful compatibility signal. `make public-verify` delegates to `scripts/verify_release_gate.sh` and is the full release blocker for this distribution.
+
+`--require-complete` fails if an optional cryptographic dependency is absent
+and a mandatory check would otherwise be skipped. It is required for use of
+the versioned mark:
+
+> Actenon Verified (Conformance 1.0.0)
+
+The mark is a scoped self-certification statement. It must identify the exact
+suite version and tested implementation revision. It is not an endorsement,
+warranty, deployment audit, or permission from Actenon.
+
+## Release Integrity
+
+Run:
+
+```bash
+python scripts/verify_conformance_manifest.py
+python scripts/build_conformance_release.py
+```
+
+Published `conformance-v*` releases require a signed Git tag. CI then builds the
+deterministic vector archive, publishes its SHA-256 digest, and attaches
+GitHub/Sigstore artifact provenance. See
+[Security Assurance](../docs/SECURITY_ASSURANCE.md).
 
 ## Claim Boundary
 
