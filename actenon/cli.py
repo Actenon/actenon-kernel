@@ -640,17 +640,19 @@ def _mcp_wrap_payload(*, args: argparse.Namespace) -> dict[str, Any]:
     function_name = _mcp_wrapper_function_name(args.tool)
     wrapper = "\n".join(
         [
-            "from examples.mcp_server_protected_tool.proof_gate import invoke_protected_tool",
+            "from mcp.server.fastmcp import Context",
+            "from actenon.adapters.mcp import protected_mcp_tool",
             "",
             "",
-            f"def {function_name}(intent_json: str, pccb_json: str, preflight_evidence_json: str | None = None):",
-            "    outcome = invoke_protected_tool(",
-            f"        {args.tool!r},",
-            "        intent_payload=intent_json,",
-            "        pccb_payload=pccb_json,",
-            "        preflight_evidence=preflight_evidence_json,",
-            "    )",
-            "    return outcome.to_dict()",
+            f"@mcp.tool(name={args.tool!r})",
+            "@protected_mcp_tool(",
+            "    gate,",
+            "    action_builder=build_action_intent,",
+            f"    audience={args.audience!r},",
+            ")",
+            f"def {function_name}(target: str, ctx: Context):",
+            '    """Domain fields only; proof arrives in MCP request metadata."""',
+            "    return simulated_or_real_domain_operation(target)",
         ]
     )
     return {
@@ -665,9 +667,15 @@ def _mcp_wrap_payload(*, args: argparse.Namespace) -> dict[str, Any]:
             "tool executes/refuses",
             "VAR emitted",
         ],
-        "required_inputs": ["intent_json", "pccb_json", "preflight_evidence_json"],
+        "required_inputs": ["domain fields only"],
+        "runtime_injected": [
+            "proof via request metadata key 'actenon'",
+            "optional Preflight evidence via the same request metadata",
+            "FastMCP Context, hidden from the model-facing schema",
+        ],
         "proof_gate_steps": [
-            "parse Action Intent and PCCB",
+            "build the exact Action Intent from validated domain arguments",
+            "read PCCB from out-of-band MCP request metadata",
             "verify exact proof binding for the MCP tool audience",
             "run Preflight or endpoint policy",
             "acquire a Credential Broker reference only after allow",
@@ -692,6 +700,9 @@ def _print_mcp_wrap_result(*, args: argparse.Namespace, payload: dict[str, Any])
     print("Flow: " + " -> ".join(payload["flow"]))
     print("Required tool inputs:")
     for item in payload["required_inputs"]:
+        print(f"- {item}")
+    print("Runtime-injected inputs:")
+    for item in payload["runtime_injected"]:
         print(f"- {item}")
     print("Proof gate steps:")
     for item in payload["proof_gate_steps"]:

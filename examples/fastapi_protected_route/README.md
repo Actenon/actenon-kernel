@@ -1,63 +1,51 @@
-# FastAPI Protected Route Example
+# FastAPI Protected Route
 
-This example shows a minimal FastAPI route that verifies proof at the endpoint boundary before allowing a protected action.
+This example uses Actenon's native FastAPI dependency. The JSON body contains
+only payout fields. The PCCB travels out-of-band in `X-Actenon-Proof`.
 
-The route stays local and bounded:
+```python
+protected_payout = gate.fastapi_dependency(
+    audience="service:fastapi-payout-endpoint",
+    action_builder=build_payout_intent,
+    side_effect=simulate_payout,
+    body_model=PayoutRequest,
+)
 
-1. accept optional `intent` and `pccb` payloads in the request body
-2. fall back to local proof fixtures if the body omits them
-3. verify proof before the protected action runs
-4. return a receipt on success or a refusal plus refused receipt on failure
-
-## Files
-
-- `app.py`
-- `requirements.txt`
-- `artifacts/` after the first request
-
-## Install
-
-```bash
-cd examples/fastapi_protected_route
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+@app.post("/payouts")
+def create_payout(
+    body: PayoutRequest,
+    outcome: GateOutcome = Depends(protected_payout),
+):
+    return outcome.to_dict()
 ```
+
+The dependency runs before the route handler. Missing, malformed, mismatched,
+expired, or replayed proof returns HTTP `403` with the Refusal, refused Receipt,
+and any Preflight `unmet_requirements`. The side effect is not reached.
 
 ## Run
 
-```bash
-uvicorn app:app --reload
-```
-
-Then call it:
+Install the package and adapter:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/protected-resource \
-  -H 'content-type: application/json' \
-  -d '{}'
+python3 -m pip install -e ".[asymmetric,fastapi]"
+python3 -m pip install uvicorn
+uvicorn examples.fastapi_protected_route.app:app
 ```
 
-## Where Verification Happens
+Generate one local-only request and call the route:
 
-Proof verification happens inside `execute_protected_hello`, which the route calls before returning any protected result:
+```python
+from fastapi.testclient import TestClient
+from examples.fastapi_protected_route.app import app, build_demo_request
 
-- `examples/fastapi_protected_route/app.py`
-- `examples/integration_support.py`
+body, headers = build_demo_request()
+response = TestClient(app).post("/payouts", json=body, headers=headers)
+print(response.json())
+```
 
-## Receipt And Refusal Handling
+The payout is a deterministic local simulation. No payment provider is called.
+The local HMAC proof helper is development material, not production custody.
 
-The route returns:
-
-- `protected_response` and `receipt` on success
-- `refusal` and refused `receipt` with HTTP `403` when verification or execution is blocked
-- HTTP `400` for malformed payloads that cannot be parsed into the public contracts
-
-Outcome artifacts are also written locally under:
-
-- `examples/fastapi_protected_route/artifacts/outcomes/receipts/`
-- `examples/fastapi_protected_route/artifacts/outcomes/refusals/`
-
-## Boundary
-
-This example demonstrates verifier-edge route protection only. It does not add orchestration, approval routing, or any hosted control plane.
+The adapter encodes proof as base64url JSON for the header. Production callers
+can use `actenon.adapters.fastapi.encode_json_header(proof)`.

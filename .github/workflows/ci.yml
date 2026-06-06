@@ -25,8 +25,8 @@ jobs:
       - name: Install package and test tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest ruff build
-          python -m pip install -e ".[asymmetric]"
+          python -m pip install pytest ruff build httpx
+          python -m pip install -e ".[asymmetric,fastapi,langchain,mcp]"
 
       - name: Run hero demo
         run: bash scripts/demo_hero.sh

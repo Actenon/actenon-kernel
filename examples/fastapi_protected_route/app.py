@@ -1,56 +1,114 @@
+"""FastAPI endpoint protected by Actenon's native dependency adapter."""
+
 from __future__ import annotations
 
-import sys
+import warnings
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel
 
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from actenon.core import ContractValidationError  # noqa: E402
-from examples.integration_support import build_request_id, execute_protected_hello  # noqa: E402
+from actenon import ActenonGate
+from actenon.adapters.fastapi import ACTENON_PROOF_HEADER, encode_json_header
+from actenon.gate import GateOutcome
+from actenon.models import ActionIntent, ActionSpec, PartyRef, TargetRef, TenantRef
+from actenon.replay import ReplayProtector, SqliteReplayStore
 
 
 EXAMPLE_ROOT = Path(__file__).resolve().parent
-app = FastAPI(title="Action Control FastAPI Protected Route", version="0.1.0")
+DEMO_NOW = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+PAYOUT_AUDIENCE = "service:fastapi-payout-endpoint"
+SIMULATED_PAYOUTS: list[dict[str, Any]] = []
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", RuntimeWarning)
+    gate = ActenonGate.local_dev(
+        audience=PAYOUT_AUDIENCE,
+        replay_protector=ReplayProtector(
+            SqliteReplayStore(EXAMPLE_ROOT / "state" / "replay.sqlite3")
+        ),
+        clock=lambda: DEMO_NOW,
+    )
+
+app = FastAPI(title="Actenon FastAPI Protected Route", version="0.1.0")
 
 
-class ProtectedRouteRequest(BaseModel):
-    intent: dict[str, Any] | None = None
-    pccb: dict[str, Any] | None = None
+class PayoutRequest(BaseModel):
+    amount_minor: int
+    currency: str
+    destination: str
+
+
+def build_payout_intent(payload: Mapping[str, Any]) -> ActionIntent:
+    destination = str(payload["destination"])
+    return ActionIntent(
+        intent_id=(
+            f"intent_fastapi_payout_{payload['amount_minor']}_"
+            f"{destination.replace(':', '_')}"
+        ),
+        issued_at=DEMO_NOW,
+        expires_at=DEMO_NOW + timedelta(minutes=10),
+        tenant=TenantRef(tenant_id="tenant_fastapi_demo"),
+        requester=PartyRef(type="agent", id="fastapi-demo-agent"),
+        action=ActionSpec(
+            name="payout.release",
+            capability="payment.release",
+            parameters={
+                "amount_minor": int(payload["amount_minor"]),
+                "currency": str(payload["currency"]),
+                "destination": destination,
+            },
+        ),
+        target=TargetRef(
+            resource_type="payout_destination",
+            resource_id=destination,
+        ),
+    )
+
+
+def simulate_payout(payload: Mapping[str, Any]) -> dict[str, Any]:
+    record = {
+        "payout_id": f"payout_local_{len(SIMULATED_PAYOUTS) + 1:04d}",
+        "amount_minor": int(payload["amount_minor"]),
+        "currency": str(payload["currency"]),
+        "destination": str(payload["destination"]),
+        "simulated": True,
+    }
+    SIMULATED_PAYOUTS.append(record)
+    return record
+
+
+protected_payout = gate.fastapi_dependency(
+    audience=PAYOUT_AUDIENCE,
+    action_builder=build_payout_intent,
+    side_effect=simulate_payout,
+    body_model=PayoutRequest,
+)
 
 
 @app.get("/")
 def root() -> dict[str, Any]:
-    return {"ok": True, "endpoint": "/protected-resource"}
+    return {"ok": True, "endpoint": "/payouts", "proof_header": ACTENON_PROOF_HEADER}
 
 
-@app.post("/protected-resource")
-def protected_resource(body: ProtectedRouteRequest) -> JSONResponse | dict[str, Any]:
-    try:
-        # Proof verification happens inside execute_protected_hello before the route returns a protected result.
-        outcome = execute_protected_hello(
-            example_root=EXAMPLE_ROOT,
-            request_id=build_request_id("fastapi"),
-            intent_payload=body.intent,
-            pccb_payload=body.pccb,
-        )
-    except ContractValidationError as exc:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": exc.refusal_code,
-                "message": exc.message,
-                "details": exc.details,
-            },
-        ) from exc
+@app.post("/payouts")
+def create_payout(
+    body: PayoutRequest,
+    outcome: GateOutcome = Depends(protected_payout),
+) -> dict[str, Any]:
+    # The dependency has already proof-gated and executed the simulated payout.
+    return outcome.to_dict()
 
-    if outcome.ok:
-        return outcome.to_dict()
-    return JSONResponse(status_code=403, content=outcome.to_dict())
+
+def build_demo_request() -> tuple[dict[str, Any], dict[str, str]]:
+    """Create one local request body and its out-of-band proof header."""
+
+    body = {
+        "amount_minor": 1250,
+        "currency": "USD",
+        "destination": "bank:demo-approved",
+    }
+    proof = gate.mint_proof(build_payout_intent(body))
+    return body, {ACTENON_PROOF_HEADER: encode_json_header(proof)}

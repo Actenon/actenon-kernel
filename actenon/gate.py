@@ -388,6 +388,40 @@ class ActenonGate:
 
         return decorator
 
+    def fastapi_dependency(
+        self,
+        *,
+        action_builder: Callable[[Mapping[str, Any]], dict[str, Any] | ActionIntent],
+        side_effect: Callable[[Mapping[str, Any]], Any],
+        body_model: type[Any] | None = None,
+        audience: AudienceRef | str | None = None,
+        evidence_builder: Callable[
+            [Mapping[str, Any]],
+            Mapping[str, Any] | PreflightEvidence | None,
+        ]
+        | None = None,
+        proof_header: str = "X-Actenon-Proof",
+        evidence_header: str = "X-Actenon-Evidence",
+    ) -> Any:
+        """Return the optional FastAPI dependency without importing it in core."""
+
+        from actenon.adapters.fastapi import fastapi_dependency
+
+        return fastapi_dependency(
+            self,
+            action_builder=action_builder,
+            side_effect=side_effect,
+            body_model=body_model,
+            audience=(
+                f"{audience.type}:{audience.id}"
+                if isinstance(audience, AudienceRef)
+                else audience
+            ),
+            evidence_builder=evidence_builder,
+            proof_header=proof_header,
+            evidence_header=evidence_header,
+        )
+
     def _coerce_action(self, action: dict[str, Any] | ActionIntent) -> ActionIntent:
         if isinstance(action, ActionIntent):
             return action

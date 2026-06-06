@@ -185,10 +185,13 @@ def delete_customer(customer_id: str):
     return {"status": "deleted"}
 ```
 
-**2. Require proof at the endpoint.** Configure the gate once with the endpoint's verifier and audience, then pass the exact Action Intent and proof into the protected handler:
+**2. Require proof at the endpoint.** Keep proof out of the model-facing tool
+schema. FastMCP injects `Context`; the runtime attaches proof metadata there:
 
 ```python
 from actenon import ActenonGate
+from actenon.adapters.mcp import protected_mcp_tool
+from mcp.server.fastmcp import Context
 
 gate = ActenonGate(
     verifier=proof_verifier,
@@ -197,18 +200,19 @@ gate = ActenonGate(
 )
 
 @mcp.tool()
-def delete_customer(action_intent: dict, proof: dict):
-    def delete():
-        customer_id = action_intent["action"]["parameters"]["customer_id"]
-        db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
-        return {"status": "deleted"}
-
-    return gate.protect(action_intent, proof, delete).to_dict()
+@protected_mcp_tool(
+    gate,
+    action_builder=build_delete_customer_intent,
+    audience="service:customer-admin-delete",
+)
+def delete_customer(customer_id: str, ctx: Context):
+    db.execute("DELETE FROM customers WHERE id = ?", [customer_id])
+    return {"status": "deleted"}
 ```
 
 **3. Test the refusal path.** A protected tool must refuse when proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, or issued for a different tenant, subject, or policy boundary.
 
-Run [`examples/quickstart_min.py`](examples/quickstart_min.py) for the smallest high-level API example, then see [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool), the [high-level gate guide](docs/guides/HIGH_LEVEL_GATE_API.md), and [INTEGRATIONS.md](INTEGRATIONS.md).
+Run [`examples/quickstart_min.py`](examples/quickstart_min.py) for the smallest high-level API example, then see the [native framework adapters](docs/guides/FRAMEWORK_ADAPTERS.md), [`examples/mcp_server_protected_tool/`](examples/mcp_server_protected_tool), and [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ---
 

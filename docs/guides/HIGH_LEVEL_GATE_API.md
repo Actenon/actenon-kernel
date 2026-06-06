@@ -116,3 +116,7 @@ outcome = change_production_state()
 
 The decorated function body runs only after proof, policy, replay, escrow, and
 credential-broker checks succeed.
+
+For native FastAPI, LangChain, and FastMCP integration, including proof
+transport outside model-facing schemas, see
+[Framework Adapters](FRAMEWORK_ADAPTERS.md).

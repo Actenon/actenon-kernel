@@ -120,6 +120,7 @@ Reference files:
 | --- | --- |
 | the smallest verifier-first path | `actenon.demo.portable_local_proof` and [docs/reference/verifier/HELLO_WORLD_PROTECTED_RESOURCE.md](../reference/verifier/HELLO_WORLD_PROTECTED_RESOURCE.md) |
 | the strongest tool-integration path | [../../MCP_HERO_PATH.md](../../MCP_HERO_PATH.md) and [../../examples/mcp_server_protected_tool/README.md](../../examples/mcp_server_protected_tool/README.md) |
+| native FastAPI, LangChain, or FastMCP adapters | [FRAMEWORK_ADAPTERS.md](FRAMEWORK_ADAPTERS.md) |
 | a Python HTTP route | [../../examples/fastapi_protected_route/README.md](../../examples/fastapi_protected_route/README.md) |
 | a Node or TypeScript HTTP route | [../../examples/express_protected_route/README.md](../../examples/express_protected_route/README.md) |
 | an OpenAI Agents SDK tool | [../../examples/openai_agents_sdk_protected_tool/README.md](../../examples/openai_agents_sdk_protected_tool/README.md) |
