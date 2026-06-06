@@ -69,5 +69,6 @@ pub use types::{
 pub use verifier::{
     parse_action_intent_json,
     parse_pccb_json,
+    DEFAULT_CLOCK_SKEW_TOLERANCE,
     Verifier,
 };

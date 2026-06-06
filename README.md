@@ -357,6 +357,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | Wrap consequential MCP tools | [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
 | Scanner methodology & wording | [docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md) |
 | SDKs (Python, TypeScript, Go, Rust) | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) · [SUPPORT_AND_COMPATIBILITY_STATUS.md](SUPPORT_AND_COMPATIBILITY_STATUS.md) |
+| SDK parity and refusal-message hygiene | [actenon/conformance/vectors/verifier_sdk_v1/README.md](actenon/conformance/vectors/verifier_sdk_v1/README.md) · [docs/security/REFUSAL_MESSAGE_HYGIENE.md](docs/security/REFUSAL_MESSAGE_HYGIENE.md) |
 | Verify Receipt counter-signatures offline | [spec/countersignature/SPEC.md](spec/countersignature/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
 | Verify transparency proofs and monitor checkpoints | [spec/transparency-log/SPEC.md](spec/transparency-log/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
 | Verify issuer status and signed approvals | [spec/issuer-status/SPEC.md](spec/issuer-status/SPEC.md) · [spec/approval-artifact/SPEC.md](spec/approval-artifact/SPEC.md) · [docs/guides/PREFLIGHT_EVIDENCE.md](docs/guides/PREFLIGHT_EVIDENCE.md) |

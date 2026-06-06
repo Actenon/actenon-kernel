@@ -13,7 +13,6 @@ from .base import b64url_decode, b64url_encode
 
 LOCAL_PROOF_KEY_ID = "local-proof-v1"
 LOCAL_PROOF_SECRET = b"actenon-local-proof-secret-v1"
-ACTENON_ALLOW_LOCAL_HMAC_ENV = "ACTENON_ALLOW_LOCAL_HMAC"
 ACTENON_ENV_ENV = "ACTENON_ENV"
 ACTENON_LOCAL_HMAC_SECRET_ENV = "ACTENON_LOCAL_HMAC_SECRET"
 LOCAL_HMAC_WARNING_MESSAGE = (
@@ -22,7 +21,6 @@ LOCAL_HMAC_WARNING_MESSAGE = (
     "well-known/KMS/HSM signing custody."
 )
 _PRODUCTION_ENV_VALUES = frozenset({"prod", "production", "staging", "release", "ci", "non-dev", "nondev"})
-_LOCAL_ENV_VALUES = frozenset({"dev", "local", "demo", "test", "testing"})
 _PRODUCTION_FLAG_ENVS = (
     "ACTENON_PRODUCTION",
     "ACTENON_CI_RELEASE",
@@ -40,10 +38,6 @@ def _truthy(raw: str | None) -> bool:
 
 def _normalized_env() -> str:
     return os.environ.get(ACTENON_ENV_ENV, "").strip().lower()
-
-
-def _local_hmac_explicitly_allowed() -> bool:
-    return _truthy(os.environ.get(ACTENON_ALLOW_LOCAL_HMAC_ENV)) or _normalized_env() in _LOCAL_ENV_VALUES
 
 
 def _production_like_environment() -> bool:
@@ -66,10 +60,11 @@ def _resolve_local_hmac_secret(secret: bytes | str | None) -> bytes:
 
 
 def _guard_local_hmac_creation() -> None:
-    if _production_like_environment() and not _local_hmac_explicitly_allowed():
+    if _production_like_environment():
         raise LocalHmacProductionGuardError(
             "local HMAC proof signing is disabled in production-like environments. "
-            "Set ACTENON_ALLOW_LOCAL_HMAC=1 only for local demos/tests, or use asymmetric well-known/KMS/HSM signing custody."
+            "Production flags cannot be overridden; use asymmetric "
+            "well-known/KMS/HSM signing custody."
         )
 
 
@@ -119,7 +114,11 @@ def build_local_proof_signer(
     *,
     key_id: str = LOCAL_PROOF_KEY_ID,
 ) -> HmacSha256Signer:
-    """Return the canonical deterministic signer for local proof mode."""
+    """Return the canonical deterministic signer for local proof mode.
+
+    Creation fails whenever ``ACTENON_ENV`` or an Actenon production flag marks
+    the process as production-like. There is no production bypass.
+    """
 
     resolved_secret = _resolve_local_hmac_secret(secret)
     return HmacSha256Signer(secret=resolved_secret, key_id=key_id)

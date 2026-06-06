@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from cryptography.hazmat.primitives import serialization
@@ -22,7 +22,7 @@ from actenon.preflight import (
 from actenon.proof import build_action_hash_input, canonicalize_bytes, sha256_hex
 from actenon.verifier import TrustArtifactVerificationError
 
-NOW = datetime(2026, 6, 6, 12, 0, tzinfo=UTC)
+NOW = datetime(2026, 6, 6, 12, 0, tzinfo=timezone.utc)
 
 
 def _intent(amount_minor: int = 500_000) -> ActionIntent:

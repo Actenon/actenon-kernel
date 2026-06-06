@@ -104,7 +104,7 @@ The repository now exposes explicit verifier-side contracts in:
 - `sdk/go/verifier/signers.go`
 - `sdk/rust/src/signers.rs`
 
-Local demos use `build_local_proof_signer()` because the repo ships a deterministic local trust root for testing and examples. That local `HS256` HMAC path is dev/demo-only: the default secret is public repository material, so anyone can forge local-mode proofs. The signer emits a runtime warning and refuses creation in production-like environments unless an explicit local override is set for a demo/test process.
+Local demos use `build_local_proof_signer()` because the repo ships a deterministic local trust root for testing and examples. That local `HS256` HMAC path is dev/demo-only: the default secret is public repository material, so anyone can forge local-mode proofs. The signer emits a runtime warning in development and refuses creation whenever an Actenon production flag is set. Production flags have no local-HMAC override.
 
 Production deployments can instead supply any verifier-compatible implementation that can validate PCCB signatures against the deployment's configured trust root. The OSS kernel does not ship a hosted signer service or remote verification service.
 
@@ -311,7 +311,16 @@ let verifier = Verifier::new(build_local_proof_verifier())
     .with_clock_skew_tolerance(Duration::seconds(10))?;
 ```
 
-The tolerance is symmetric. It allows a verifier clock to be slightly behind `not_before` or slightly ahead of `expires_at`. It should cover expected NTP drift only, not queueing delay or operational retry windows.
+The default is zero. Configured tolerance is symmetric: it allows a verifier
+clock to be slightly behind `not_before` or slightly ahead of `expires_at`.
+That expands temporal acceptance by no more than the configured tolerance, so
+it should cover expected NTP drift only, not queueing delay or operational
+retry windows. Replay/single-use enforcement remains mandatory and prevents
+the tolerance from creating additional proof uses.
+
+Python, TypeScript, Go, and Rust run the same vectors from
+`actenon/conformance/vectors/verifier_sdk_v1`. The vectors assert exact binding
+semantics, boundary-time behavior, reason codes, and public-safe messages.
 
 Suggested proof validity windows:
 

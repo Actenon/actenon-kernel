@@ -6,7 +6,7 @@ from typing import Any, Mapping
 
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.models import ActionIntent, AudienceRef, DynamicContextInput, PCCB
-from actenon.proof.service import PCCBVerifier
+from actenon.proof.service import DEFAULT_CLOCK_SKEW_TOLERANCE, PCCBVerifier
 from actenon.proof.signing import SignatureVerifier
 
 
@@ -27,7 +27,7 @@ class VerifierSDK:
     """
 
     signer: SignatureVerifier
-    clock_skew_tolerance: timedelta = timedelta(0)
+    clock_skew_tolerance: timedelta = DEFAULT_CLOCK_SKEW_TOLERANCE
 
     def __post_init__(self) -> None:
         self._intake = ActionIntentIntakeService()

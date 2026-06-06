@@ -1,7 +1,4 @@
-use std::collections::BTreeMap;
-
 use serde::de::DeserializeOwned;
-use serde::Deserialize;
 use serde_json::{json, Deserializer, Value};
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime, UtcOffset};
@@ -13,7 +10,6 @@ use crate::types::{
     ActionIntent,
     ActionSpec,
     AudienceRef,
-    JsonObject,
     PCCB,
     PartyRef,
     ScopeSpec,
@@ -24,6 +20,8 @@ use crate::types::{
     VerificationContextInput,
     VerifiedProtectedRequest,
 };
+
+pub const DEFAULT_CLOCK_SKEW_TOLERANCE: Duration = Duration::ZERO;
 
 pub fn parse_action_intent_json(raw: &[u8]) -> Result<ActionIntent, VerificationError> {
     let intent: ActionIntent = decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
@@ -44,7 +42,7 @@ impl<V: SignatureVerifier> Verifier<V> {
     pub fn new(signature_verifier: V) -> Self {
         Self {
             signature_verifier,
-            clock_skew_tolerance: Duration::ZERO,
+            clock_skew_tolerance: DEFAULT_CLOCK_SKEW_TOLERANCE,
         }
     }
 
@@ -181,12 +179,13 @@ impl<V: SignatureVerifier> Verifier<V> {
             ));
         }
 
-        let expected_hash = sha256_hex(&build_action_hash_input(&normalized_intent))
-            .map_err(|error| details_error(
-                VerificationErrorCode::InvalidIntent,
-                "The action intent cannot be canonicalized for verification.",
-                error,
-            ))?;
+        let expected_hash =
+            sha256_hex(&build_action_hash_input(&normalized_intent)).map_err(|_error| {
+                VerificationError::new(
+                    VerificationErrorCode::InvalidIntent,
+                    "The action intent cannot be canonicalized for verification.",
+                )
+            })?;
         if normalized_pccb.action_hash.value != expected_hash {
             return Err(VerificationError::new(
                 VerificationErrorCode::ActionHashMismatch,
@@ -195,11 +194,12 @@ impl<V: SignatureVerifier> Verifier<V> {
         }
 
         let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
-            .map_err(|error| details_error(
-                VerificationErrorCode::InvalidPccb,
-                "The proof cannot be canonicalized for signature verification.",
-                error,
-            ))?;
+            .map_err(|_error| {
+                VerificationError::new(
+                    VerificationErrorCode::InvalidPccb,
+                    "The proof cannot be canonicalized for signature verification.",
+                )
+            })?;
         if !self
             .signature_verifier
             .verify(&unsigned_payload, &normalized_pccb.signature)
@@ -235,31 +235,19 @@ fn decode_json<T: DeserializeOwned>(
     artifact_name: &str,
 ) -> Result<T, VerificationError> {
     let mut deserializer = Deserializer::from_slice(raw);
-    let value = T::deserialize(&mut deserializer).map_err(|error| {
-        details_error(
+    let value = T::deserialize(&mut deserializer).map_err(|_error| {
+        VerificationError::new(
             code,
             format!("failed to decode {artifact_name} JSON payload."),
-            error.to_string(),
         )
     })?;
-    deserializer.end().map_err(|error| {
-        details_error(
+    deserializer.end().map_err(|_error| {
+        VerificationError::new(
             code,
             format!("{artifact_name} JSON payload must contain a single top-level object."),
-            error.to_string(),
         )
     })?;
     Ok(value)
-}
-
-fn details_error(
-    code: VerificationErrorCode,
-    message: impl Into<String>,
-    error: impl Into<String>,
-) -> VerificationError {
-    let mut details = BTreeMap::new();
-    details.insert("error".to_string(), error.into());
-    VerificationError::with_details(code, message, details)
 }
 
 fn require_non_empty(
@@ -287,13 +275,14 @@ fn parse_timestamp(
             format!("{field_name} must be an RFC3339 timestamp string."),
         ));
     }
-    OffsetDateTime::parse(raw, &Rfc3339).map(|value| value.to_offset(UtcOffset::UTC)).map_err(|error| {
-        details_error(
-            VerificationErrorCode::InvalidTimestamp,
-            format!("{field_name} must be an RFC3339 timestamp string."),
-            error.to_string(),
-        )
-    })
+    OffsetDateTime::parse(raw, &Rfc3339)
+        .map(|value| value.to_offset(UtcOffset::UTC))
+        .map_err(|_error| {
+            VerificationError::new(
+                VerificationErrorCode::InvalidTimestamp,
+                format!("{field_name} must be an RFC3339 timestamp string."),
+            )
+        })
 }
 
 fn normalize_timestamp(
@@ -302,9 +291,12 @@ fn normalize_timestamp(
     code: VerificationErrorCode,
 ) -> Result<String, VerificationError> {
     let parsed = parse_timestamp(raw, field_name, code)?;
-    parsed
-        .format(&Rfc3339)
-        .map_err(|error| details_error(code, format!("{field_name} must be an RFC3339 timestamp string."), error.to_string()))
+    parsed.format(&Rfc3339).map_err(|_error| {
+        VerificationError::new(
+            code,
+            format!("{field_name} must be an RFC3339 timestamp string."),
+        )
+    })
 }
 
 fn normalize_action_intent(intent: ActionIntent) -> Result<ActionIntent, VerificationError> {

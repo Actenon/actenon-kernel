@@ -18,7 +18,11 @@ from actenon.models.contracts import (
 from actenon.models.runtime import DynamicContextInput, PolicyDecision
 from .audit import AuditLogSink, PCCBMintAuditRecord
 from .canonical import canonicalize_bytes, sha256_hex
+from .refusal_messages import public_proof_refusal_message
 from .signing import SignatureVerifier, Signer
+
+
+DEFAULT_CLOCK_SKEW_TOLERANCE = timedelta(0)
 
 
 def build_action_hash_input(intent: ActionIntent) -> dict[str, Any]:
@@ -104,7 +108,7 @@ class PCCBMinter:
 @dataclass
 class PCCBVerifier:
     signer: SignatureVerifier
-    clock_skew_tolerance: timedelta = timedelta(0)
+    clock_skew_tolerance: timedelta = DEFAULT_CLOCK_SKEW_TOLERANCE
 
     def __post_init__(self) -> None:
         if self.clock_skew_tolerance < timedelta(0):
@@ -112,44 +116,80 @@ class PCCBVerifier:
 
     def verify(self, intent: ActionIntent, pccb: PCCB, context: DynamicContextInput) -> None:
         if context.now + self.clock_skew_tolerance < pccb.not_before:
-            raise ProofVerificationError("PROOF_NOT_YET_VALID", "The proof is not yet valid.")
+            raise ProofVerificationError(
+                "PROOF_NOT_YET_VALID",
+                public_proof_refusal_message("PROOF_NOT_YET_VALID"),
+            )
         if context.now - self.clock_skew_tolerance > pccb.expires_at:
-            raise ProofVerificationError("PROOF_EXPIRED", "The proof has expired.")
+            raise ProofVerificationError(
+                "PROOF_EXPIRED",
+                public_proof_refusal_message("PROOF_EXPIRED"),
+            )
         if pccb.audience != context.audience:
-            raise ProofVerificationError("AUDIENCE_MISMATCH", "The proof audience does not match this endpoint.")
+            raise ProofVerificationError(
+                "AUDIENCE_MISMATCH",
+                public_proof_refusal_message("AUDIENCE_MISMATCH"),
+            )
         if pccb.scope.mode != "exact":
-            raise ProofVerificationError("SCOPE_MODE_INVALID", "The proof scope mode is not supported.")
+            raise ProofVerificationError(
+                "SCOPE_MODE_INVALID",
+                public_proof_refusal_message("SCOPE_MODE_INVALID"),
+            )
         if intent.action.capability not in pccb.scope.capabilities:
-            raise ProofVerificationError("SCOPE_CAPABILITY_MISMATCH", "The proof scope does not allow this capability.")
+            raise ProofVerificationError(
+                "SCOPE_CAPABILITY_MISMATCH",
+                public_proof_refusal_message("SCOPE_CAPABILITY_MISMATCH"),
+            )
         if pccb.intent_id and pccb.intent_id != intent.intent_id:
-            raise ProofVerificationError("INTENT_MISMATCH", "The proof does not match the supplied action intent.")
+            raise ProofVerificationError(
+                "INTENT_MISMATCH",
+                public_proof_refusal_message("INTENT_MISMATCH"),
+            )
         if pccb.tenant != intent.tenant:
-            raise ProofVerificationError("TENANT_MISMATCH", "The proof tenant does not match the action intent.")
+            raise ProofVerificationError(
+                "TENANT_MISMATCH",
+                public_proof_refusal_message("TENANT_MISMATCH"),
+            )
         if pccb.subject != intent.requester:
-            raise ProofVerificationError("SUBJECT_MISMATCH", "The proof subject does not match the action intent.")
+            raise ProofVerificationError(
+                "SUBJECT_MISMATCH",
+                public_proof_refusal_message("SUBJECT_MISMATCH"),
+            )
         if pccb.action != intent.action:
-            raise ProofVerificationError("ACTION_MISMATCH", "The proof action does not exactly match the action intent.")
+            raise ProofVerificationError(
+                "ACTION_MISMATCH",
+                public_proof_refusal_message("ACTION_MISMATCH"),
+            )
         if pccb.target != intent.target:
-            raise ProofVerificationError("TARGET_MISMATCH", "The proof target does not exactly match the action intent.")
+            raise ProofVerificationError(
+                "TARGET_MISMATCH",
+                public_proof_refusal_message("TARGET_MISMATCH"),
+            )
 
         try:
             expected_hash = sha256_hex(build_action_hash_input(intent))
         except (TypeError, ValueError, RecursionError) as exc:
             raise ProofVerificationError(
                 "ACTION_HASH_INVALID",
-                "The action hash could not be recomputed safely.",
+                public_proof_refusal_message("ACTION_HASH_INVALID"),
             ) from exc
         if pccb.action_hash.algorithm != "sha-256" or pccb.action_hash.canonicalization != "RFC8785-JCS":
-            raise ProofVerificationError("ACTION_HASH_ALGORITHM_INVALID", "The proof action hash metadata is invalid.")
+            raise ProofVerificationError(
+                "ACTION_HASH_ALGORITHM_INVALID",
+                public_proof_refusal_message("ACTION_HASH_ALGORITHM_INVALID"),
+            )
         if pccb.action_hash.value != expected_hash:
-            raise ProofVerificationError("ACTION_HASH_MISMATCH", "The proof action hash does not match the action intent.")
+            raise ProofVerificationError(
+                "ACTION_HASH_MISMATCH",
+                public_proof_refusal_message("ACTION_HASH_MISMATCH"),
+            )
 
         try:
             unsigned_payload = canonicalize_bytes(pccb.unsigned_payload())
         except (TypeError, ValueError, RecursionError) as exc:
             raise ProofVerificationError(
                 "PROOF_PAYLOAD_INVALID",
-                "The proof payload could not be canonicalized safely.",
+                public_proof_refusal_message("PROOF_PAYLOAD_INVALID"),
             ) from exc
         verify_with_metadata = getattr(self.signer, "verify_with_metadata", None)
         if callable(verify_with_metadata):
@@ -162,4 +202,7 @@ class PCCBVerifier:
         else:
             is_valid = self.signer.verify(unsigned_payload, pccb.signature)
         if not is_valid:
-            raise ProofVerificationError("SIGNATURE_INVALID", "The proof signature could not be verified.")
+            raise ProofVerificationError(
+                "SIGNATURE_INVALID",
+                public_proof_refusal_message("SIGNATURE_INVALID"),
+            )

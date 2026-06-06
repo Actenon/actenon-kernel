@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 from copy import deepcopy
 from datetime import timedelta
@@ -16,8 +17,26 @@ from actenon.demo.portable_local_proof import (
     run_portable_local_proof_demo,
 )
 from actenon.models import AudienceRef, PolicyDecision
+from actenon.models.contracts import parse_timestamp
 from actenon.proof import PCCBMinter, build_local_proof_signer
 from actenon.verifier import VerifierSDK
+
+
+VECTOR_ROOT = Path(__file__).resolve().parent / "vectors" / "verifier_sdk_v1"
+
+
+def _load_vector(relative_path: str):
+    return json.loads((VECTOR_ROOT / relative_path).read_text(encoding="utf-8"))
+
+
+def _set_path(document: dict[str, object], path: list[str], value: object) -> None:
+    current = document
+    for segment in path[:-1]:
+        child = current.get(segment)
+        if not isinstance(child, dict):
+            raise AssertionError(f"vector path does not resolve to an object: {path}")
+        current = child
+    current[path[-1]] = value
 
 
 class VerifierSdkConformanceTests(unittest.TestCase):
@@ -95,6 +114,70 @@ class VerifierSdkConformanceTests(unittest.TestCase):
         )
         with self.assertRaises(ProofVerificationError):
             self.sdk.verify(intent=payload, pccb=pccb_payload, context=expired_context)
+
+    def test_shared_cross_sdk_conformance_vectors(self) -> None:
+        manifest = _load_vector("cases.json")
+        base = manifest["base"]
+        base_intent = _load_vector(base["intent"])
+        base_pccb = _load_vector(base["pccb"])
+
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                intent = deepcopy(base_intent)
+                pccb = deepcopy(base_pccb)
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("mutation")
+                if mutation is not None:
+                    document = {
+                        "intent": intent,
+                        "pccb": pccb,
+                        "context": context_payload,
+                    }[mutation["document"]]
+                    _set_path(document, mutation["path"], mutation["value"])
+
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(
+                        milliseconds=case["clock_skew_tolerance_ms"]
+                    ),
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(
+                        context_payload["audience"],
+                        "context.audience",
+                    ),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(
+                        context_payload["scope_capabilities"]
+                    ),
+                    parameter_constraints=dict(
+                        context_payload["parameter_constraints"]
+                    ),
+                    resource_selectors=tuple(
+                        context_payload["resource_selectors"]
+                    ),
+                )
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verified = sdk.verify(
+                        intent=intent,
+                        pccb=pccb,
+                        context=context,
+                    )
+                    self.assertEqual(
+                        "pccb_portable_hello_world_001",
+                        verified.pccb.pccb_id,
+                    )
+                    continue
+
+                with self.assertRaises(ProofVerificationError) as raised:
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                self.assertEqual(
+                    expected["reason_code"],
+                    raised.exception.refusal_code,
+                )
+                self.assertEqual(expected["message"], raised.exception.message)
 
 
 if __name__ == "__main__":

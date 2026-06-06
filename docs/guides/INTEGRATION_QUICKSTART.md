@@ -89,7 +89,7 @@ At minimum, the Protected Endpoint must verify:
 
 If a side effect can happen without those checks, the model is broken even if upstream policy or approval existed.
 
-Clock skew tolerance is optional and verifier-side. The default is zero. If a distributed deployment needs tolerance for small NTP drift, configure it explicitly and keep it short; do not use tolerance to compensate for long queues, retries, or stale proof.
+Clock skew tolerance is optional and verifier-side. The default is zero. If a distributed deployment needs tolerance for small NTP drift, configure it explicitly and keep it short; do not use tolerance to compensate for long queues, retries, or stale proof. Tolerance expands temporal acceptance by at most its configured value but does not grant another use: replay/single-use enforcement remains required.
 
 ## Common Integration Mistakes
 

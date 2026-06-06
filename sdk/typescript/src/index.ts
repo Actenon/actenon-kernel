@@ -28,7 +28,7 @@ export {
   verify_issuer_status,
 } from "./trust-artifacts.js";
 export { buildLocalProofVerifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
-export { VerifierSDK } from "./verifier.js";
+export { DEFAULT_CLOCK_SKEW_TOLERANCE_MS, VerifierSDK } from "./verifier.js";
 export type { SignatureVerifier } from "./signers.js";
 export type { VerifierSDKOptions } from "./verifier.js";
 export type {

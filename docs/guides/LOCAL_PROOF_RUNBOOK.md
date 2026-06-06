@@ -29,9 +29,9 @@ Production deployments must use an asymmetric verification path, such as
 well-known JWK discovery backed by production-grade signing custody. Do not
 publish local symmetric HMAC material through key discovery, do not treat it as
 public verification material, and do not use it for production protected
-endpoints. If a production-like environment needs a local/demo run, set an
-explicit local override such as `ACTENON_ALLOW_LOCAL_HMAC=1` only for that
-demo/test process.
+endpoints. Production flags are non-bypassable. Run local/demo flows in an
+explicitly local or test process, or use asymmetric well-known/KMS/HSM signing
+custody.
 
 The shipped local proof runtime now persists both replay state and capability escrow in SQLite, so a real single-node run survives process restart instead of depending on in-memory-only execution authority.
 

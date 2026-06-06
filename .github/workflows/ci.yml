@@ -86,3 +86,6 @@ jobs:
       - name: Test Rust verifier
         working-directory: sdk/rust
         run: cargo test
+
+      - name: Run shared cross-SDK conformance vectors
+        run: bash scripts/verify_sdk_conformance.sh

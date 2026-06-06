@@ -29,7 +29,7 @@ class LocalHmacGuardTests(unittest.TestCase):
             with self.assertRaises(LocalHmacProductionGuardError):
                 build_local_proof_signer()
 
-    def test_custom_secret_is_accepted_only_with_explicit_local_override(self) -> None:
+    def test_custom_secret_cannot_override_production_guard(self) -> None:
         with patch.dict(os.environ, {"ACTENON_ENV": "production"}, clear=True):
             with self.assertRaises(LocalHmacProductionGuardError):
                 build_local_proof_signer(secret=b"tenant-specific-demo-secret")
@@ -39,9 +39,23 @@ class LocalHmacGuardTests(unittest.TestCase):
             {"ACTENON_ENV": "production", "ACTENON_ALLOW_LOCAL_HMAC": "1"},
             clear=True,
         ):
-            signer = build_local_proof_signer(secret=b"tenant-specific-demo-secret")
+            with self.assertRaises(LocalHmacProductionGuardError):
+                build_local_proof_signer(secret=b"tenant-specific-demo-secret")
 
-        self.assertEqual(b"tenant-specific-demo-secret", signer.secret)
+    def test_explicit_production_flags_are_non_bypassable(self) -> None:
+        for flag in (
+            "ACTENON_PRODUCTION",
+            "ACTENON_CI_RELEASE",
+            "ACTENON_RELEASE_BUILD",
+        ):
+            with self.subTest(flag=flag):
+                with patch.dict(
+                    os.environ,
+                    {flag: "1", "ACTENON_ALLOW_LOCAL_HMAC": "1"},
+                    clear=True,
+                ):
+                    with self.assertRaises(LocalHmacProductionGuardError):
+                        build_local_proof_signer()
 
     def test_env_secret_is_accepted_in_explicit_demo_mode(self) -> None:
         with patch.dict(

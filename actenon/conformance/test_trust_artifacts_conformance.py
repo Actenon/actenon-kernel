@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import unittest
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from importlib.util import find_spec
 from pathlib import Path
 
@@ -21,7 +21,7 @@ VECTOR_ROOT = (
     / "vectors"
     / "trust_artifacts_v1"
 )
-NOW = datetime(2026, 6, 6, 12, 5, tzinfo=UTC)
+NOW = datetime(2026, 6, 6, 12, 5, tzinfo=timezone.utc)
 
 
 def _load(relative_path: str) -> dict[str, object]:

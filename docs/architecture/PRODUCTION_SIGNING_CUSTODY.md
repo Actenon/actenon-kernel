@@ -102,7 +102,9 @@ The kernel exposes:
 - `ExternalManagedSigner`
 - `ExternalManagedSigningBackend`
 
-The local HMAC signer already refuses production-like environments unless explicitly enabled for local demos/tests. That guard is separate from, and complementary to, backend selection validation.
+The local HMAC signer refuses production-like environments and has no
+production override. That guard is separate from, and complementary to,
+backend selection validation.
 
 ## Provider Notes
 
@@ -155,4 +157,3 @@ This document does not claim:
 - production custody is complete for Actenon Cloud unless the Cloud deployment separately proves it
 - local HMAC or pilot-local EdDSA are production-safe
 - a valid signature proves the business decision was correct
-

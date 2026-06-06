@@ -1,0 +1,244 @@
+{
+  "contract": {
+    "name": "verifier_sdk_conformance",
+    "version": "v1"
+  },
+  "base": {
+    "intent": "action_intent.json",
+    "pccb": "pccb.json",
+    "context": {
+      "request_id": "req_shared_sdk_conformance_001",
+      "audience": {
+        "type": "service",
+        "id": "portable-hello-world-endpoint"
+      },
+      "now": "2026-01-01T12:00:00Z",
+      "scope_capabilities": [
+        "protected_resource.read"
+      ],
+      "parameter_constraints": {
+        "exact_message": "portable hello world"
+      },
+      "resource_selectors": [
+        {
+          "resource_id": "hello_resource_demo_001"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "valid_exact_action",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "audience_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "context",
+        "path": ["audience", "id"],
+        "value": "wrong-endpoint"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUDIENCE_MISMATCH",
+        "message": "The proof audience does not match this endpoint."
+      }
+    },
+    {
+      "id": "scope_capability_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "pccb",
+        "path": ["scope", "capabilities"],
+        "value": ["unrelated.read"]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The proof scope does not allow this capability."
+      }
+    },
+    {
+      "id": "intent_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "intent",
+        "path": ["intent_id"],
+        "value": "intent_other_001"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "INTENT_MISMATCH",
+        "message": "The proof does not match the supplied action intent."
+      }
+    },
+    {
+      "id": "tenant_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "intent",
+        "path": ["tenant", "tenant_id"],
+        "value": "tenant_other"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "TENANT_MISMATCH",
+        "message": "The proof tenant does not match the action intent."
+      }
+    },
+    {
+      "id": "subject_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "intent",
+        "path": ["requester", "id"],
+        "value": "other_actor"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SUBJECT_MISMATCH",
+        "message": "The proof subject does not match the action intent."
+      }
+    },
+    {
+      "id": "action_parameter_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "intent",
+        "path": ["action", "parameters", "message"],
+        "value": "tampered hello world"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "ACTION_MISMATCH",
+        "message": "The proof action does not exactly match the action intent."
+      }
+    },
+    {
+      "id": "target_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "intent",
+        "path": ["target", "resource_id"],
+        "value": "hello_resource_other"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "TARGET_MISMATCH",
+        "message": "The proof target does not exactly match the action intent."
+      }
+    },
+    {
+      "id": "action_hash_mismatch",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "pccb",
+        "path": ["action_hash", "value"],
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "ACTION_HASH_MISMATCH",
+        "message": "The proof action hash does not match the action intent."
+      }
+    },
+    {
+      "id": "signature_invalid",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "pccb",
+        "path": ["signature", "value"],
+        "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SIGNATURE_INVALID",
+        "message": "The proof signature could not be verified."
+      }
+    },
+    {
+      "id": "strict_not_before",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T11:59:59Z"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_NOT_YET_VALID",
+        "message": "The proof is not yet valid."
+      }
+    },
+    {
+      "id": "strict_expiry",
+      "clock_skew_tolerance_ms": 0,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T12:05:01Z"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_EXPIRED",
+        "message": "The proof has expired."
+      }
+    },
+    {
+      "id": "not_before_minus_skew_boundary",
+      "clock_skew_tolerance_ms": 2000,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T11:59:58Z"
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "before_not_before_minus_skew",
+      "clock_skew_tolerance_ms": 2000,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T11:59:57Z"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_NOT_YET_VALID",
+        "message": "The proof is not yet valid."
+      }
+    },
+    {
+      "id": "expiry_plus_skew_boundary",
+      "clock_skew_tolerance_ms": 2000,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T12:05:02Z"
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "after_expiry_plus_skew",
+      "clock_skew_tolerance_ms": 2000,
+      "mutation": {
+        "document": "context",
+        "path": ["now"],
+        "value": "2026-01-01T12:05:03Z"
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_EXPIRED",
+        "message": "The proof has expired."
+      }
+    }
+  ]
+}

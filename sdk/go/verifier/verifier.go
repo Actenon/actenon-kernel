@@ -2,8 +2,10 @@ package verifier
 
 import "time"
 
+const DefaultClockSkewTolerance time.Duration = 0
+
 type Verifier struct {
-	signatureVerifier SignatureVerifier
+	signatureVerifier  SignatureVerifier
 	clockSkewTolerance time.Duration
 }
 
@@ -16,7 +18,10 @@ func WithClockSkewTolerance(tolerance time.Duration) VerifierOption {
 }
 
 func NewVerifier(signatureVerifier SignatureVerifier, options ...VerifierOption) *Verifier {
-	v := &Verifier{signatureVerifier: signatureVerifier}
+	v := &Verifier{
+		signatureVerifier:  signatureVerifier,
+		clockSkewTolerance: DefaultClockSkewTolerance,
+	}
 	for _, option := range options {
 		option(v)
 	}
@@ -85,7 +90,11 @@ func (v *Verifier) Verify(intent ActionIntent, pccb PCCB, context VerificationCo
 
 	expectedHash, err := sha256Hex(normalizedIntentActionHashInput(normalizedIntent))
 	if err != nil {
-		return VerifiedProtectedRequest{}, newVerificationError(ErrInvalidIntent, "The action intent cannot be canonicalized for verification.", map[string]any{"error": err.Error()})
+		return VerifiedProtectedRequest{}, newVerificationError(
+			ErrInvalidIntent,
+			"The action intent cannot be canonicalized for verification.",
+			nil,
+		)
 	}
 	if normalizedPCCB.ActionHash.Value != expectedHash {
 		return VerifiedProtectedRequest{}, newVerificationError(ErrActionHashMismatch, "The proof action hash does not match the action intent.", nil)
@@ -93,7 +102,11 @@ func (v *Verifier) Verify(intent ActionIntent, pccb PCCB, context VerificationCo
 
 	unsignedPayload, err := canonicalizeBytes(normalizedUnsignedPCCBPayload(normalizedPCCB))
 	if err != nil {
-		return VerifiedProtectedRequest{}, newVerificationError(ErrInvalidPCCB, "The proof cannot be canonicalized for signature verification.", map[string]any{"error": err.Error()})
+		return VerifiedProtectedRequest{}, newVerificationError(
+			ErrInvalidPCCB,
+			"The proof cannot be canonicalized for signature verification.",
+			nil,
+		)
 	}
 	if v.signatureVerifier == nil || !v.signatureVerifier.Verify(unsignedPayload, normalizedPCCB.Signature) {
 		return VerifiedProtectedRequest{}, newVerificationError(ErrSignatureInvalid, "The proof signature could not be verified.", nil)

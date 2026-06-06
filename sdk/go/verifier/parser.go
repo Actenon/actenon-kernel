@@ -30,7 +30,7 @@ func decodeJSON(raw []byte, target any, code VerificationErrorCode, artifactName
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.UseNumber()
 	if err := decoder.Decode(target); err != nil {
-		return newVerificationError(code, "failed to decode "+artifactName+" JSON payload.", map[string]any{"error": err.Error()})
+		return newVerificationError(code, "failed to decode "+artifactName+" JSON payload.", nil)
 	}
 	if err := ensureNoTrailingJSON(decoder, code, artifactName); err != nil {
 		return err
@@ -45,7 +45,7 @@ func ensureNoTrailingJSON(decoder *json.Decoder, code VerificationErrorCode, art
 		return nil
 	}
 	if err != nil {
-		return newVerificationError(code, "failed while checking trailing "+artifactName+" JSON content.", map[string]any{"error": err.Error()})
+		return newVerificationError(code, "failed while checking trailing "+artifactName+" JSON content.", nil)
 	}
 	return newVerificationError(code, artifactName+" JSON payload must contain a single top-level object.", nil)
 }
@@ -56,7 +56,7 @@ func parseTimestamp(raw string, fieldName string, code VerificationErrorCode) (t
 	}
 	parsed, err := time.Parse(time.RFC3339, raw)
 	if err != nil {
-		return time.Time{}, newVerificationError(ErrInvalidTimestamp, fieldName+" must be an RFC3339 timestamp string.", map[string]any{"error": err.Error()})
+		return time.Time{}, newVerificationError(ErrInvalidTimestamp, fieldName+" must be an RFC3339 timestamp string.", nil)
 	}
 	return parsed.UTC(), nil
 }
@@ -490,9 +490,9 @@ func targetRefToMap(ref TargetRef) map[string]any {
 
 func scopeSpecToMap(scope ScopeSpec) map[string]any {
 	payload := map[string]any{
-		"mode":        scope.Mode,
+		"mode":         scope.Mode,
 		"capabilities": cloneStringSlice(scope.Capabilities),
-		"single_use":  scope.SingleUse,
+		"single_use":   scope.SingleUse,
 	}
 	if len(scope.ResourceSelectors) > 0 {
 		payload["resource_selectors"] = cloneJSONObjects(scope.ResourceSelectors)

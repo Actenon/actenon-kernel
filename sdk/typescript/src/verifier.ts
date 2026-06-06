@@ -260,12 +260,15 @@ export interface VerifierSDKOptions {
   clockSkewToleranceMs?: number;
 }
 
+export const DEFAULT_CLOCK_SKEW_TOLERANCE_MS = 0;
+
 export class VerifierSDK {
   private readonly signatureVerifier: SignatureVerifier;
   private readonly clockSkewToleranceMs: number;
 
   constructor(signatureVerifier: SignatureVerifier, options: VerifierSDKOptions = {}) {
-    const clockSkewToleranceMs = options.clockSkewToleranceMs ?? 0;
+    const clockSkewToleranceMs =
+      options.clockSkewToleranceMs ?? DEFAULT_CLOCK_SKEW_TOLERANCE_MS;
     if (!Number.isFinite(clockSkewToleranceMs) || clockSkewToleranceMs < 0) {
       throw new VerificationError("INVALID_CONTEXT", "clockSkewToleranceMs must be a non-negative number.");
     }
