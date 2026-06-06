@@ -299,6 +299,7 @@ class ActenonGate:
         *,
         audience: AudienceRef | str | None = None,
         evidence: Mapping[str, Any] | PreflightEvidence | None = None,
+        _missing_proof_reason_code: str = "PCCB_REQUIRED",
     ) -> GateOutcome:
         """Verify, enforce single-use and policy, then execute or refuse."""
 
@@ -323,7 +324,10 @@ class ActenonGate:
             return self._refuse(
                 intent,
                 context,
-                ProofVerificationError("PCCB_REQUIRED", "The protected action did not include a proof credential block."),
+                ProofVerificationError(
+                    _missing_proof_reason_code,
+                    "The protected action did not include a proof credential block.",
+                ),
                 unmet_requirements=unmet_requirements,
             )
         try:

@@ -14,3 +14,4 @@ Start with:
 - [Preflight evidence](guides/PREFLIGHT_EVIDENCE.md)
 - [Domain policy packs](guides/POLICY_PACKS.md)
 - [Framework adapters](guides/FRAMEWORK_ADAPTERS.md)
+- [Protected edge deployment](guides/EDGE_DEPLOYMENT.md)

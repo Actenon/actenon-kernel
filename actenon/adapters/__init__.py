@@ -7,8 +7,11 @@ from .base import (
     ProviderAdapterResult,
     ReconciliationCapableProviderAdapter,
 )
+from .edge import EdgeConfigurationError, ProtectedEdge
 
 __all__ = [
+    "EdgeConfigurationError",
+    "ProtectedEdge",
     "ProviderAdapter",
     "ProviderAdapterContext",
     "ProviderAdapterRequest",

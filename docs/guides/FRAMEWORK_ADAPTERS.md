@@ -102,3 +102,8 @@ and replay state at the protected execution boundary.
 Framework adapters do not protect alternate routes that bypass the wrapped
 endpoint or tool. Remove standing provider credentials from the agent path and
 route consequential actions through the protected boundary.
+
+For resource-owner adoption across framework boundaries, use the hardened
+[`ProtectedEdge`](EDGE_DEPLOYMENT.md) adapter. It binds the complete raw request
+before proof verification and gives the backend only the verified intent and a
+brokered credential.
