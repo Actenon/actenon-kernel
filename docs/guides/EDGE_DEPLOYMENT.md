@@ -49,6 +49,10 @@ Reusing a proof is refused by Actenon's default replay protection.
 
 ## Deployment Requirement: No Side Door
 
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
 **The resource MUST be reachable only through the protected edge for the
 claimed boundary to hold. The backend MUST accept only brokered credentials
 issued after successful verification. Agents MUST NOT retain standing
@@ -102,6 +106,8 @@ provider actions.
 
 The adapter proves proof-bound behavior for requests routed through it. It does
 not prove complete route coverage, provider finality, production exposure,
-exploitability, or prevention of every unsafe action. Review the wider
+exploitability, prevention of every unsafe action, or protection of model/tool
+output content. Review the wider
 [Credential Broker Deployment](CREDENTIAL_BROKER_DEPLOYMENT.md) and
-[Bypass Resistance](../architecture/BYPASS_RESISTANCE.md) guidance.
+[Bypass Resistance](../architecture/BYPASS_RESISTANCE.md) guidance, plus the
+canonical [Scope And Guarantees](../SCOPE_AND_GUARANTEES.md).

@@ -10,6 +10,9 @@ Get from clone to a complete local trust runtime, a memorable execution-gap simu
 
 If you want the category problem first, read [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) before this guide. Quickstart is the shortest path to seeing the answer, not the full argument for why the answer is needed.
 
+For the exact protection boundary and deployment conditions, read
+[Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
+
 ## Requirements
 
 - `python3`

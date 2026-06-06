@@ -6,6 +6,16 @@ Intent from validated domain fields, obtains proof from framework runtime
 context, and calls `ActenonGate.protect(...)` immediately before the side
 effect.
 
+**Actenon gates explicit execution-edge actions; it does not inspect or filter
+prompts, model output, or in-band response content.**
+
+**It can require proof for an explicit export or transmit action, but it does
+not stop data disclosed inside ordinary output unless that disclosure is itself
+modeled and routed as a protected action.**
+
+Read the canonical [Scope And Guarantees](../SCOPE_AND_GUARANTEES.md) before
+choosing which framework operations to protect.
+
 ## Install
 
 Install only the adapters used by the application:
@@ -102,6 +112,10 @@ and replay state at the protected execution boundary.
 Framework adapters do not protect alternate routes that bypass the wrapped
 endpoint or tool. Remove standing provider credentials from the agent path and
 route consequential actions through the protected boundary.
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
 
 For resource-owner adoption across framework boundaries, use the hardened
 [`ProtectedEdge`](EDGE_DEPLOYMENT.md) adapter. It binds the complete raw request

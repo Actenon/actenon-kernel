@@ -17,6 +17,14 @@ The rule stays the same:
 
 - each protected execution edge verifies its own proof before side effects
 
+That rule applies to explicit execution-edge actions, not prompts, model
+output, or in-band response content. See
+[Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
 For the normative execution-edge behavior, see [spec/protected-endpoint/SPEC.md](spec/protected-endpoint/SPEC.md). For how trusted issuers evaluate policy and approval before creating per-action proof, see [docs/guides/ISSUANCE_AND_APPROVAL.md](docs/guides/ISSUANCE_AND_APPROVAL.md). For the neutral tool pattern, see [MCP_HERO_PATH.md](MCP_HERO_PATH.md). For the current framework and platform example order, see [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ## Why Multi-Agent Systems Increase Risk

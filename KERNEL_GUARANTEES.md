@@ -2,6 +2,19 @@
 
 These guarantees define what the OSS kernel provides when it is integrated according to the published specs and when the relevant protected-endpoint checks are actually enforced.
 
+**Actenon gates explicit execution-edge actions; it does not inspect or filter
+prompts, model output, or in-band response content.**
+
+**It can require proof for an explicit export or transmit action, but it does
+not stop data disclosed inside ordinary output unless that disclosure is itself
+modeled and routed as a protected action.**
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
+See [Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
+
 ## What The OSS Kernel Guarantees
 
 - Explicit public contracts. Consequential requests enter the system as versioned Action Intent payloads, not hidden internal request shapes.
@@ -30,6 +43,8 @@ These guarantees define what the OSS kernel provides when it is integrated accor
 - production key custody or HSM-backed signing
 - multi-tenant hosted-service isolation
 - business correctness outside the kernel boundary
+- prompt, model-output, or in-band response filtering
+- prevention of data disclosure through ordinary output on an unprotected path
 - portable cryptographic attestation of origin for copied receipts or refusals unless an Outcome Attestation envelope is present and verified against a trusted key
 - provider-backed reconciliation or finality as an active v1 standard
 - active v1 compatibility targets for Reconciliation or Policy Bundle

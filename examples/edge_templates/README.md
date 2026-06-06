@@ -16,3 +16,11 @@ Use `edge.intent_for(raw_request)` when requesting or minting a proof, then
 submit the same raw request to `edge.execute(raw_request, proof)`. See
 [Edge Deployment](../../docs/guides/EDGE_DEPLOYMENT.md) before deploying a
 resource-side boundary.
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
+These templates gate explicit execution-edge actions. They do not inspect
+prompts, model output, or in-band response content. See
+[Scope And Guarantees](../../docs/SCOPE_AND_GUARANTEES.md).

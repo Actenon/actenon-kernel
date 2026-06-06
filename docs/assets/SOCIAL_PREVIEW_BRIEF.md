@@ -40,6 +40,7 @@ Do not include or imply:
 - formally verified
 - unhackable
 - prevents all prompt injection
+- stops data leaks or filters model output
 - prevents all incidents
 - production KMS/HSM custody unless separately implemented and verified
 - Actenon Network or Agent Trust Score as existing product claims

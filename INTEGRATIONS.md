@@ -4,6 +4,15 @@ This page is the root index for adopting the OSS kernel from current agent and a
 
 Use these examples when you want to keep proof verification at the protected edge without pulling this repository into orchestration or a hosted control plane.
 
+Adapters gate explicit execution-edge actions. They do not inspect prompts,
+model output, or in-band response content. Read
+[Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md) before selecting the
+actions to protect.
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
 Not every example here carries the same strategic weight. The current framework and platform sequence is:
 
 1. MCP

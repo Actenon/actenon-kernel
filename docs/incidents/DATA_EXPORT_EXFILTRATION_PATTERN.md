@@ -2,6 +2,10 @@
 
 This is a generic pattern simulation, not a named factual incident report.
 
+This pattern covers an explicit export or transmit action at an execution
+boundary. It does not claim that Actenon detects or blocks sensitive data
+included in ordinary model output or returned in-band by an unprotected tool.
+
 ## Pattern Summary
 
 An agent with standing data access exports a broad or sensitive dataset to an external destination. Read access becomes export authority because the execution edge does not verify legal basis, scope, destination, approval, or evidence.
@@ -40,11 +44,13 @@ The gap appears when data read credentials can be used as bulk export credential
 
 ## What Actenon Does Not Claim
 
-Actenon does not prove the export is lawful, that downstream storage is secure, or that a destination accepted or deleted data. It can verify and record the protected execution decision before the side effect.
+Actenon does not prove the export is lawful, that downstream storage is secure,
+or that a destination accepted or deleted data. It can verify and record the
+protected execution decision before the side effect. It is not a content
+filter or general data-loss-prevention system.
 
 ## Simulate
 
 ```bash
 actenon simulate --scenario data-export
 ```
-

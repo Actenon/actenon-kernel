@@ -4,11 +4,22 @@
 
 > **No valid proof, no execution.**
 
-Actenon sits at the execution boundary and stops AI agents, MCP tools, browser agents, coding agents, and workflow automations from taking consequential actions — deleting data, moving money, changing access, deploying code, exporting records — unless the endpoint can verify a cryptographic proof bound to the *exact* action being attempted. Every decision leaves a verifiable **Receipt** or **Refusal** artifact for audit, compliance, and trust.
+Actenon provides deterministic action authorization at the execution boundary.
+AI agents, MCP tools, browser agents, coding agents, and workflow automations
+can execute a consequential action through a protected endpoint only when it
+verifies cryptographic proof bound to the *exact* action being attempted. Every
+protected decision leaves a verifiable **Receipt** or **Refusal** artifact.
+
+**Actenon gates explicit execution-edge actions; it does not inspect or filter
+prompts, model output, or in-band response content.**
+
+**It can require proof for an explicit export or transmit action, but it does
+not stop data disclosed inside ordinary output unless that disclosure is itself
+modeled and routed as a protected action.**
 
 [![Actenon demo: an unproven agent action is refused before the side effect](docs/assets/actenon-hero-devops.gif)](docs/assets/actenon-hero-devops.gif)
 
-[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
+[![CI](https://github.com/Actenon/actenon/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon/actions/workflows/ci.yml) · [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) · [![Python 3.9–3.12](https://img.shields.io/badge/python-3.9--3.12-blue)](pyproject.toml) · [Scope and guarantees](docs/SCOPE_AND_GUARANTEES.md) · [Conformance suite](CONFORMANCE.md) · [Adversarial security tests](docs/security/SECURITY_TESTING.md) · [Release gate](scripts/verify_release_gate.sh)
 
 ---
 
@@ -137,7 +148,7 @@ The full walkthrough is in [QUICKSTART.md](QUICKSTART.md) and [docs/guides/FIRST
 | Just curious | Watch the GIF, run `bash scripts/demo_hero.sh` |
 | Building agents or MCP tools | [Protect an MCP tool in 3 steps](#protect-an-mcp-tool-in-3-steps) · [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
 | Reviewing security | [Why this isn't just middleware](#why-this-isnt-just-middleware) · [THREAT_MODEL.md](THREAT_MODEL.md) · [Security testing](docs/security/SECURITY_TESTING.md) |
-| Designing enterprise architecture | [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md) · [docs/architecture/DEPLOYMENT_ARCHITECTURES.md](docs/architecture/DEPLOYMENT_ARCHITECTURES.md) |
+| Designing enterprise architecture | [Scope and guarantees](docs/SCOPE_AND_GUARANTEES.md) · [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md) · [docs/architecture/DEPLOYMENT_ARCHITECTURES.md](docs/architecture/DEPLOYMENT_ARCHITECTURES.md) |
 | Maintaining an open-source agent repo | [The advisory scanner](#the-advisory-scanner) |
 | Evaluating governance or standards | [An open standard, not lock-in](#an-open-standard-not-lock-in) · [CONFORMANCE.md](CONFORMANCE.md) · [GOVERNANCE.md](GOVERNANCE.md) |
 | Considering contributing | [Contributing](#contributing) |
@@ -182,7 +193,10 @@ Actenon is not a client-side safety wrapper. The agent and the SDK are **not** t
 
 A consequential action executes only when the endpoint verifies proof bound to the exact action parameters, tenant, subject, audience, expiry, and replay state. If the proof is missing, expired, replayed, audience-mismatched, action-mismatched, parameter-mismatched, tenant-mismatched, or policy-denied, the endpoint refuses *before* the side effect and emits a Refusal.
 
-**This is why prompt injection can make an agent *want* to act, but it should not make a protected action *execute* without valid proof.**
+Prompt injection can make an agent *want* to act. It does not bypass exact
+proof verification at a correctly deployed protected endpoint. Actenon does
+not detect or remove the prompt injection itself, and it does not inspect model
+output.
 
 The strongest deployment removes standing production credentials from the agent path entirely:
 
@@ -192,6 +206,10 @@ agent → protected endpoint → brokered single-use credential → production s
 ```
 
 If the agent still holds a raw production credential that reaches the provider directly, Actenon can still produce proof, receipts, and refusals for the protected path — but it cannot stop side-door execution on an unprotected one. See [docs/architecture/TRUST_BOUNDARIES.md](docs/architecture/TRUST_BOUNDARIES.md), [docs/architecture/BYPASS_RESISTANCE.md](docs/architecture/BYPASS_RESISTANCE.md), and [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md).
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
 
 ---
 
@@ -276,7 +294,7 @@ Actenon is built for the execution gap exposed by real AI-agent failure patterns
 | --- | --- |
 | [Production database deletion](docs/incidents/REPLIT_STYLE_DATABASE_DELETE.md) | No exact signed proof → refused before execution; Refusal emitted |
 | [Destructive production action](docs/incidents/PRODUCTION_DESTRUCTIVE_ACTION.md) | Proof must bind the exact action, subject, tenant, audience, and expiry |
-| [Data export / exfiltration](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) | Export requires scoped proof, policy approval, audience binding, and a receipt |
+| [Explicit data export action](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) | A routed export/transmit action requires scoped proof, policy approval, audience binding, and a receipt; this does not cover in-band model output |
 | [IAM privilege escalation](docs/incidents/IAM_PRIVILEGE_ESCALATION_PATTERN.md) | Access mutation requires proof-bound approval and credential brokering |
 | [MCP / tool proof laundering](docs/incidents/MCP_TOOL_PROOF_LAUNDERING.md) | Tool execution requires proof at the protected endpoint |
 
@@ -297,8 +315,10 @@ Actenon **does**:
 Actenon **does not**:
 
 - stop a model from *trying* to act, or make a bad-but-authorized action good
+- inspect or filter prompts, model output, or ordinary in-band responses
+- stop data disclosed inside ordinary output unless the disclosure is modeled and routed as a protected action
 - protect actions that are *not* routed through a protected endpoint (a standing agent credential is a side door)
-- prevent replay through `ProtectedExecutor`'s default store, provided every protected edge shares the relevant replay state
+- provide cross-edge replay protection unless every edge that can perform the action shares the relevant replay state
 - prove downstream business finality, or that a provider behaved honestly after handoff
 - replace IAM, OAuth, service mesh, API gateways, or human-approval workflows — it composes with them
 - certify that a repo is vulnerable
@@ -350,6 +370,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | The problem, in depth | [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) |
 | The category | [CATEGORY.md](CATEGORY.md) |
 | Threat model, attackers, limits | [THREAT_MODEL.md](THREAT_MODEL.md) |
+| Scope boundary and deployment conditions | [docs/SCOPE_AND_GUARANTEES.md](docs/SCOPE_AND_GUARANTEES.md) |
 | Exact kernel guarantees | [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md) |
 | Architecture & trust boundaries | [docs/architecture/TECHNICAL_ARCHITECTURE.md](docs/architecture/TECHNICAL_ARCHITECTURE.md) |
 | Credential broker deployment | [docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md](docs/guides/CREDENTIAL_BROKER_DEPLOYMENT.md) |

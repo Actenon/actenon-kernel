@@ -28,6 +28,9 @@ jobs:
           python -m pip install pytest ruff build httpx
           python -m pip install -e ".[asymmetric,fastapi,langchain,mcp]"
 
+      - name: Verify public scope and edge claims
+        run: python scripts/verify_scope_claims.py
+
       - name: Run hero demo
         run: bash scripts/demo_hero.sh
 

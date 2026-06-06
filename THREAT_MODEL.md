@@ -6,15 +6,27 @@ and is not a third-party audit attestation.
 
 ## Purpose
 
-Actenon protects the execution boundary for consequential AI actions. The core
-security objective is narrow and deliberate:
+Actenon provides deterministic action authorization at the execution boundary
+for consequential AI actions. The core security objective is narrow and
+deliberate:
 
-> Prompt injection can make the agent want to act; it cannot make the action execute without valid proof.
+> Prompt injection can make the agent want to act; a correctly deployed
+> protected endpoint still requires valid proof for the exact action.
 
 That statement is true only when the consequential action is routed through a
 Protected Endpoint or equivalent enforcement boundary that verifies proof,
 checks replay/escrow state where required, brokers credentials after approval,
 and emits Receipt/Refusal artifacts.
+
+**Actenon gates explicit execution-edge actions; it does not inspect or filter
+prompts, model output, or in-band response content.**
+
+**It can require proof for an explicit export or transmit action, but it does
+not stop data disclosed inside ordinary output unless that disclosure is itself
+modeled and routed as a protected action.**
+
+See [Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md) for the canonical
+boundary.
 
 ## Security Objectives
 
@@ -75,6 +87,8 @@ enforcement. SDK-only or Preflight-only deployment is advisory, not enforcement.
   policy.
 - Consequential actions are routed through a Protected Endpoint or equivalent
   enforcement boundary.
+- The protected edge is the only route to the resource, and the backend accepts
+  only credentials brokered after successful verification.
 - Production agents do not retain raw provider credentials, database URLs,
   browser session cookies, or long-lived API tokens for consequential systems.
 - Replay and escrow stores are atomic and shared by every worker that can
@@ -85,6 +99,10 @@ enforcement. SDK-only or Preflight-only deployment is advisory, not enforcement.
   pilot-local EdDSA are not production custody.
 - Adapters and credential brokers are part of the trusted computing base for
   the side effects they perform.
+
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
 
 ## Attacker Classes And Attack Paths
 
@@ -147,6 +165,9 @@ present in a real deployment. It is not a claim that a vulnerability is proven.
 Actenon cannot:
 
 - stop a model from trying to act
+- inspect or filter prompts, model output, or in-band response content
+- stop data disclosed inside ordinary output unless that disclosure is modeled
+  and routed as a protected action
 - make a bad-but-authorized action good
 - protect paths not routed through the Protected Endpoint or equivalent boundary
 - save historical artifacts after hard key compromise without an external anchor
@@ -163,6 +184,8 @@ Actenon cannot:
   routed through a Protected Endpoint or equivalent enforcement boundary.
 - Actenon maps and enforces proof-bound execution boundaries; it does not claim
   generic model alignment.
+- Actenon provides deterministic action authorization and verifiable
+  Receipt/Refusal artifacts for protected execution-edge actions.
 - Actenon’s open kernel includes adversarial tests for signature confusion,
   canonicalization, key discovery, replay/escrow, external anchors, secret
   redaction, artifact parsing, and scanner safety.
@@ -176,6 +199,7 @@ Do not claim:
 - Actenon prevents all bypass when agents still hold production credentials.
 - Actenon makes business decisions correct.
 - Actenon prevents every SSRF, every secret leak, or every third-party broker bug.
+- Actenon stops in-band disclosure or filters model output.
 - Actenon Cloud uses production KMS/HSM custody unless that deployment proves it.
 - Actenon is formally verified, unhackable, certified, or audit-complete.
 - Scanner findings prove exploitability, runtime reachability, production
@@ -184,6 +208,7 @@ Do not claim:
 ## Related Security Documents
 
 - [`docs/security/RISK_REGISTER.md`](docs/security/RISK_REGISTER.md)
+- [`docs/SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
 - [`docs/security/SECURITY_TESTING.md`](docs/security/SECURITY_TESTING.md)
 - [`SECURITY_AUDIT_FINDINGS.md`](SECURITY_AUDIT_FINDINGS.md)
 - [`docs/architecture/TRUST_BOUNDARIES.md`](docs/architecture/TRUST_BOUNDARIES.md)

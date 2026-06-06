@@ -6,6 +6,13 @@ Actenon is built for a simple security problem: AI systems are no longer just pr
 
 The risk is not only what the model says. The risk is what connected systems allow the model, agent, tool, or automation to do.
 
+Actenon addresses the second category: explicit actions at protected execution
+boundaries. It does not inspect prompts or model output, and it is not a
+content-filtering or general data-loss-prevention system. An explicit
+export/transmit action can be gated; sensitive data written into ordinary
+output is outside the boundary unless that disclosure is itself modeled and
+routed as a protected action.
+
 Actenon provides an execution-boundary control:
 
 > **No valid proof, no execution.**
@@ -97,6 +104,10 @@ In this model, the agent does not hold raw production credentials that can bypas
 
 If an agent still has a direct production credential that can reach the provider outside the protected endpoint, Actenon can still produce useful proof, receipts, and refusals for the protected route — but it cannot stop side-door execution on an unprotected path.
 
+**The edge guarantee applies only when the protected edge is the only path to
+the resource, the backend accepts only brokered credentials issued after
+verification, and the agent has no standing credential or alternate route.**
+
 ---
 
 ## What Actenon helps answer
@@ -119,6 +130,8 @@ Actenon does **not** claim to:
 
 - prevent all prompt injection
 - prevent all unsafe AI behavior
+- inspect or filter model output or in-band response content
+- stop data disclosed inside ordinary output unless it is modeled and routed as a protected action
 - stop a model from trying to act
 - make a bad-but-authorized action good
 - protect actions that bypass the protected endpoint

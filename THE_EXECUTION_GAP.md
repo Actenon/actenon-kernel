@@ -17,6 +17,11 @@ The gap remains open unless the execution edge independently verifies proof boun
 
 Consequential actions include actions that move money, change permissions, export sensitive data, call provider APIs, or trigger other irreversible external effects.
 
+Here, "export sensitive data" means an explicit export or transmit action at an
+execution edge. Proof-bound execution does not inspect prompts, model output,
+or data returned in-band by an unprotected tool. See
+[Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
+
 Short citation form:
 
 > The execution gap is the gap between upstream authorization and the execution edge that actually performs a consequential side effect.
@@ -213,6 +218,8 @@ if the execution edge enforces proof binding, audience, tenant, subject, expiry,
 
 This concept does not claim:
 
+- that prompts, model output, or in-band response content are inspected or filtered
+- that data disclosed through ordinary output is stopped unless the disclosure is modeled and routed as a protected action
 - that the upstream issuer or signer made the correct business decision
 - that replay protection exists where the execution edge does not actually enforce it
 - that a malicious or buggy adapter cannot lie after control passes to it

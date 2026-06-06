@@ -15,6 +15,12 @@ A consequential action is any action where incorrect execution is materially uns
 
 In this category, authorization is not complete when a caller is authenticated, when a policy engine says `allow`, or when an approval exists somewhere upstream. Authorization is complete only when the protected endpoint verifies proof bound to the exact action it is about to execute.
 
+The category covers explicit execution-edge actions. A sensitive-data export
+means an export or transmit operation modeled as a consequential action; it
+does not mean ordinary model output or an unprotected tool response. Actenon is
+not a prompt filter, model-safety system, or general data-loss-prevention
+system. See [Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
+
 ## Why This Category Exists
 
 Agent systems are moving from advisory behavior into direct execution. They now call tools, initiate provider actions, modify state, and trigger irreversible operations.
