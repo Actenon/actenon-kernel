@@ -9,6 +9,7 @@ ARCHIVE_PATH="${1:-$ROOT_DIR/dist/actenon-kernel-public.tar.gz}"
 KEYSTONE_TESTS=(
   "tests/integration/test_cloud_invoice_payment_conformance_vector.py"
   "tests/unit/test_outcome_attestation.py"
+  "tests/conformance/test_countersignature_conformance.py"
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_canonicalization_interop.py"
   "tests/conformance"
@@ -26,6 +27,8 @@ RUFF_TARGETS=(
   "tests/unit/test_canonicalization_interop.py"
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_outcome_attestation.py"
+  "actenon/verifier/countersignature.py"
+  "tests/conformance/test_countersignature_conformance.py"
   "scripts/public_hygiene_audit.py"
 )
 

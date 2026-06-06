@@ -40,6 +40,7 @@ The active compatibility target is the set of active surfaces in [SPEC_INDEX.md]
 - `spec/receipt/SPEC.md`
 - `spec/refusal/SPEC.md`
 - `spec/outcome-attestation/SPEC.md`
+- `spec/countersignature/SPEC.md`
 - `spec/protected-endpoint/SPEC.md`
 - `spec/replay/SPEC.md`
 
@@ -95,7 +96,7 @@ Conformance to this repository does not imply:
 - hosted approval workflows
 - provider-authenticated reconciliation or finality
 - compatibility with a paid control plane that is not represented in the public specs
-- portable cryptographic attestation of origin for copied Receipt or Refusal artifacts unless the Outcome Attestation envelope is present and verified against a trusted key
+- portable cryptographic attestation of origin for copied artifacts unless an applicable Outcome Attestation or Receipt Counter-Signature is present and verified against a trusted key
 - that an issuer, signer, or external control plane made the correct business decision before minting proof
 - that a downstream adapter told the truth after control passed to it
 - that a deployment which bypasses the replay path still has replay protection
@@ -139,6 +140,7 @@ python3 -m unittest discover -s tests/conformance -p 'test_*.py'
 - refusal artifact shape
 - receipt artifact shape
 - opt-in Receipt/Refusal outcome attestation creation and verification
+- opt-in receipt counter-signature verification against pinned public keys
 - execution state transition invariants
 
 ## What A Passing Result Supports

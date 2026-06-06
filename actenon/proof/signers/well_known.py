@@ -19,9 +19,15 @@ from .base import b64url_decode
 WELL_KNOWN_KEYS_PATH = "/.well-known/actenon/keys.json"
 DEFAULT_WELL_KNOWN_CACHE_MAX_AGE_SECONDS = 300
 ALLOWED_DISCOVERY_KEY_STATUSES = ("active", "retired", "suspended", "revoked", "hard_revoked")
-ALLOWED_DISCOVERY_KEY_USES = ("verify", "proof_issuance", "outcome_attestation")
+ALLOWED_DISCOVERY_KEY_USES = (
+    "verify",
+    "proof_issuance",
+    "outcome_attestation",
+    "receipt_countersignature",
+)
 PROOF_ISSUANCE_USE = "proof_issuance"
 OUTCOME_ATTESTATION_USE = "outcome_attestation"
+RECEIPT_COUNTERSIGNATURE_USE = "receipt_countersignature"
 LEGACY_VERIFY_USE = "verify"
 _BASE64URL_UNPADDED_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 MIN_RS256_MODULUS_BITS = 2048

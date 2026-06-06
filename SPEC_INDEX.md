@@ -21,6 +21,7 @@ For a public compatibility claim to be safe, an implementation should target the
 | Receipt | Active v1 | [`spec/receipt/SPEC.md`](spec/receipt/SPEC.md) | [`spec/receipt/schema.json`](spec/receipt/schema.json) | [`spec/receipt/examples/`](spec/receipt/examples) |
 | Refusal | Active v1 | [`spec/refusal/SPEC.md`](spec/refusal/SPEC.md) | [`spec/refusal/schema.json`](spec/refusal/schema.json) | [`spec/refusal/examples/`](spec/refusal/examples) |
 | Outcome Attestation | Active opt-in v2alpha1 | [`spec/outcome-attestation/SPEC.md`](spec/outcome-attestation/SPEC.md) | [`schemas/receipt_attestation.v2alpha1.json`](schemas/receipt_attestation.v2alpha1.json), [`schemas/refusal_attestation.v2alpha1.json`](schemas/refusal_attestation.v2alpha1.json) | Embedded v1 Receipt or Refusal artifacts |
+| Receipt Counter-Signature | Active opt-in v1 | [`spec/countersignature/SPEC.md`](spec/countersignature/SPEC.md) | [`schemas/receipt_countersignature.v1.json`](schemas/receipt_countersignature.v1.json) | [`conformance/vectors/receipt_countersignature_v1/`](conformance/vectors/receipt_countersignature_v1) |
 
 ## Active Behavior Specs
 

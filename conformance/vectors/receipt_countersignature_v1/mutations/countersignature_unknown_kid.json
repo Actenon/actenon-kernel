@@ -1,0 +1,28 @@
+{
+  "anchor_reference": {
+    "id": "fixture-anchor-001",
+    "type": "transparency_log",
+    "uri": "https://witness.example/anchors/fixture-anchor-001"
+  },
+  "contract": {
+    "name": "receipt_countersignature",
+    "version": "v1"
+  },
+  "receipt_digest": {
+    "algorithm": "sha-256",
+    "canonicalization": "RFC8785-JCS",
+    "value": "47dbb2e07068f0f5459d0ad4c2ca425c721962b89ff9c29f3305c3b77bacfb1c"
+  },
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "actenon-countersignature-fixture-missing",
+    "value": "W4xV48AKvRoW_gub-6Mllkj8z1L_anddH4awMC-bzzlBpJv42mb1T5DlUFoH7z9buGcQoQZEWjZYwJy7PenvAA"
+  },
+  "signed_at": "2026-04-10T09:02:00Z",
+  "witness": {
+    "display_name": "Actenon Counter-Signature Fixture",
+    "id": "actenon-countersignature-fixture",
+    "type": "service"
+  }
+}

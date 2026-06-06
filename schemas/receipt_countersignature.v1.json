@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:receipt_countersignature:v1",
+  "title": "Receipt Counter-Signature v1",
+  "description": "A verifier-portable witness signature over a canonical receipt-digest statement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "receipt_digest",
+    "witness",
+    "signed_at",
+    "signature"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "receipt_countersignature"
+        },
+        "version": {
+          "const": "v1"
+        }
+      }
+    },
+    "receipt_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "witness": {
+      "$ref": "#/$defs/party"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "anchor_reference": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2048
+        }
+      }
+    },
+    "signature": {
+      "$ref": "#/$defs/signature"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha-256"
+        },
+        "canonicalization": {
+          "const": "RFC8785-JCS"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "party": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "key_id",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "EdDSA"
+        },
+        "key_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "encoding": {
+          "const": "base64url"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      }
+    }
+  }
+}

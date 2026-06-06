@@ -13,10 +13,15 @@ Use this package when you want to understand or run the repository's public comp
 - Receipt
 - Refusal
 - Outcome Attestation
+- Receipt Counter-Signature
 
 The central behavioral compatibility surface is the Protected Endpoint. The suite is built around whether the execution edge verifies proof, enforces replay when claimed, and refuses execution before side effects when the public rules fail.
 
 Outcome Attestation coverage is opt-in and additive: it validates signed envelopes around v1 Receipt and Refusal artifacts without changing those v1 payload semantics.
+
+Receipt Counter-Signature coverage is verifier-only: it validates a witness
+signature over a Receipt digest against a pinned public key set, including
+historical key IDs.
 
 ## Contents
 

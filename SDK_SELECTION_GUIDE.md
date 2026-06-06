@@ -94,6 +94,11 @@ It is not the repo's claim about production key custody.
 
 Production deployments can provide a verifier-compatible trust root without turning the protected endpoint into a signer service.
 
+All four SDK paths also verify the open Receipt Counter-Signature v1 format
+offline. Relying parties pass a pinned `key_discovery v1` public-key set, and
+the verifier selects the exact active or historical key by `kid`. See
+[spec/countersignature/SPEC.md](spec/countersignature/SPEC.md).
+
 If you are starting from the public launch path, use this order:
 
 1. [QUICKSTART.md](QUICKSTART.md)

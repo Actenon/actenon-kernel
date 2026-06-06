@@ -46,6 +46,15 @@ Main methods:
 - `verify(intent=..., pccb=..., context=...)`
 - `verify_payloads(...)`
 
+Receipt counter-signature verification:
+
+- `verify_countersignature(receipt_or_digest, countersignature, trusted_keys)`
+
+The counter-signature API is offline and verify-only. `trusted_keys` is an
+already trusted, pinned `key_discovery v1` document containing current and
+historical public keys. The verifier selects the exact public key by `kid`; it
+does not fetch keys, sign artifacts, or handle private key custody.
+
 ## What The Verifier Needs From A Protected Endpoint
 
 The verifier does not run by itself. A Protected Endpoint still has to supply:
@@ -108,6 +117,23 @@ verified = sdk.verify_payloads(
     scope_capabilities=("protected_resource.read",),
 )
 ```
+
+Verify a Receipt counter-signature:
+
+```python
+from actenon.verifier import verify_countersignature
+
+verified_witness = verify_countersignature(
+    receipt,
+    countersignature,
+    pinned_public_keys,
+)
+```
+
+The same conformance vectors are exercised by the TypeScript, Go, and Rust
+verifier SDKs. See
+[`../../../spec/countersignature/SPEC.md`](../../../spec/countersignature/SPEC.md)
+for the signed statement and key-rotation rules.
 
 ## Standalone CLI Verification
 
@@ -219,6 +245,7 @@ The portable verifier SDK does not provide:
 - evidence collection
 - hosted replay state
 - hosted receipt pipelines
+- counter-signature issuance, signing, or private-key custody
 
 ## Related Docs
 
@@ -227,4 +254,5 @@ The portable verifier SDK does not provide:
 - [../../../SDK_SELECTION_GUIDE.md](../../../SDK_SELECTION_GUIDE.md)
 - [../../../docs/reference/ecosystem/SIGNER_KMS_SPEC.md](../../../docs/reference/ecosystem/SIGNER_KMS_SPEC.md)
 - [../../../spec/key-discovery/SPEC.md](../../../spec/key-discovery/SPEC.md)
+- [../../../spec/countersignature/SPEC.md](../../../spec/countersignature/SPEC.md)
 - [HELLO_WORLD_PROTECTED_RESOURCE.md](HELLO_WORLD_PROTECTED_RESOURCE.md)

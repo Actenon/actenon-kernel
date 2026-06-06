@@ -1,0 +1,50 @@
+{
+  "cache": {
+    "max_age_seconds": 300
+  },
+  "contract": {
+    "name": "key_discovery",
+    "version": "v1"
+  },
+  "issuer": {
+    "display_name": "Actenon Counter-Signature Fixture",
+    "id": "actenon-countersignature-fixture",
+    "type": "service"
+  },
+  "keys": [
+    {
+      "algorithm": "EdDSA",
+      "key_id": "actenon-countersignature-fixture-2026-05",
+      "not_before": "2026-05-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "actenon-countersignature-fixture-2026-05",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "kXGDR-p-u0h34d5OUp9knk3CjV-vVi6BOj5YQEZ07eY"
+      },
+      "status": "active",
+      "use": "receipt_countersignature"
+    },
+    {
+      "algorithm": "EdDSA",
+      "expires_at": "2026-12-01T00:00:00Z",
+      "key_id": "actenon-countersignature-fixture-2025-11",
+      "not_before": "2025-11-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "actenon-countersignature-fixture-2025-11",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "8wxTJ1EZ5q9HFAKyUsgRn38eL-qzu7P8b0gwaECnK_0"
+      },
+      "replaced_by": "actenon-countersignature-fixture-2026-05",
+      "status": "retired",
+      "use": "receipt_countersignature"
+    }
+  ],
+  "origin": "https://countersignature-fixture.actenon.example",
+  "published_at": "2026-05-15T00:00:00Z"
+}

@@ -10,6 +10,7 @@ It is designed for:
 
 - PCCB verification when the issuer uses asymmetric signing
 - signed outcome-attestation verification
+- receipt counter-signature verification
 - independent verifier implementations that need a stable key-discovery format
 
 It is not tied to hosted Actenon infrastructure. Any issuer can publish this document from its own HTTPS origin.
@@ -150,9 +151,12 @@ It MUST match the signed artifact's `signature.key_id` exactly.
 
 `use` identifies the intended use of the discovered key.
 
-The current required value is:
+Current values include:
 
-- `verify`
+- `verify` for legacy generic verification
+- `proof_issuance`
+- `outcome_attestation`
+- `receipt_countersignature`
 
 ### `status`
 
@@ -206,6 +210,7 @@ Examples:
 
 - for a PCCB, use `issued_at`
 - for a signed outcome attestation, use the attestation envelope's `issued_at`
+- for a receipt counter-signature, use `signed_at`
 
 A key is usable only if all of the following hold:
 

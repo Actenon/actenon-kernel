@@ -12,8 +12,11 @@ path = "src/lib.rs"
 
 [dependencies]
 base64 = "0.22"
+# Keep the Rust 1.81 MSRV resolvable through ed25519's optional PKCS#8 graph.
+base64ct = "=1.6.0"
+ed25519-dalek = "=2.1.1"
 hmac = "0.12"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
-time = { version = "0.3", features = ["formatting", "parsing"] }
+time = { version = "=0.3.36", features = ["formatting", "parsing"] }

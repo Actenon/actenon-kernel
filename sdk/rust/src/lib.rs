@@ -1,9 +1,14 @@
 mod canonical;
+mod countersignature;
 mod errors;
 mod signers;
 mod types;
 mod verifier;
 
+pub use countersignature::{
+    verify_countersignature, CounterSignatureVerificationError, ReceiptDigest,
+    VerifiedCounterSignature, COUNTERSIGNATURE_CONTEXT, COUNTERSIGNATURE_KEY_USE,
+};
 pub use errors::{VerificationError, VerificationErrorCode};
 pub use signers::{
     build_local_proof_verifier,

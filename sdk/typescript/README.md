@@ -2,7 +2,7 @@
 
 Minimal protected-endpoint verifier SDK for Node and TypeScript, aligned to the Python kernel's public `action_intent` and `pccb` contracts.
 
-This package is intentionally narrow. It focuses on verifier-side proof checking at the protected execution edge. It does not attempt to port replay, escrow, receipts, refusals, policy engines, or any hosted control-plane behavior.
+This package is intentionally narrow. It focuses on verifier-side proof checking at the protected execution edge and offline verification of Receipt counter-signatures. It does not issue counter-signatures or contain private-key custody or service code.
 
 Choosing between Python, TypeScript, and Go paths? Start with [`../../SDK_SELECTION_GUIDE.md`](../../SDK_SELECTION_GUIDE.md).
 
@@ -14,6 +14,7 @@ Choosing between Python, TypeScript, and Go paths? Start with [`../../SDK_SELECT
 - optional verifier-side clock skew tolerance, defaulting to zero
 - deterministic local-proof verification using the OSS local `HS256` signer
 - custom signature verification via the exported `SignatureVerifier` interface
+- offline Receipt counter-signature verification by historical or active `kid`
 - plain Node protected-endpoint example
 
 ## Out Of Scope
@@ -24,6 +25,7 @@ Choosing between Python, TypeScript, and Go paths? Start with [`../../SDK_SELECT
 - provider adapters
 - approval workflows
 - hosted or paid control-plane features
+- counter-signature issuance and private-key custody
 
 ## Install
 
@@ -75,6 +77,22 @@ If verification fails, the SDK throws `VerificationError` with stable codes such
 - `PROOF_EXPIRED`
 - `SIGNATURE_INVALID`
 
+## Verify A Receipt Counter-Signature
+
+```ts
+import { verifyCountersignature } from "@actenon/verifier-sdk";
+
+const verified = verifyCountersignature(
+  receiptOrDigest,
+  countersignature,
+  pinnedPublicKeys,
+);
+```
+
+`pinnedPublicKeys` is a trusted `key_discovery v1` document. Verification is
+offline, selects the exact public key by `kid`, and supports retained
+historical keys. It performs no key fetch and contains no signing path.
+
 ## Example
 
 Run the plain Node protected-endpoint example:
@@ -108,6 +126,7 @@ Current coverage includes:
 - action mutation
 - expired proof
 - strict and tolerant clock-boundary behavior
+- valid historical counter-signature plus unknown-key, wrong-key, and altered-digest rejection
 
 ## Example Fixtures
 
@@ -127,3 +146,5 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../spec/pccb/SPEC.md`](../../spec/pccb/SPEC.md)
 - [`../../schemas/action_intent.v1.json`](../../schemas/action_intent.v1.json)
 - [`../../schemas/pccb.v1.json`](../../schemas/pccb.v1.json)
+- [`../../spec/countersignature/SPEC.md`](../../spec/countersignature/SPEC.md)
+- [`../../schemas/receipt_countersignature.v1.json`](../../schemas/receipt_countersignature.v1.json)

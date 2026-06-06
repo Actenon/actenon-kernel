@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-type CanonicalValue =
+export type CanonicalValue =
   | null
   | boolean
   | string

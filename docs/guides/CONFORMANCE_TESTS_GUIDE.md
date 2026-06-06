@@ -48,6 +48,7 @@ Current conformance modules:
 - `tests/conformance/test_artifact_shape_conformance.py`
 - `tests/conformance/test_execution_state_conformance.py`
 - `tests/conformance/test_outcome_attestation_conformance.py`
+- `tests/conformance/test_countersignature_conformance.py`
 
 ## Covered Behaviors
 
@@ -61,7 +62,13 @@ Current conformance modules:
 - receipt artifacts preserve the public receipt shape
 - opt-in Receipt/Refusal outcome attestations can be created and verified
 - attested outcomes fail verification after tampering or with the wrong key
+- receipt counter-signatures verify offline by `kid`, including retired historical keys
+- unknown counter-signing keys, wrong public keys, and altered Receipt digests fail closed
 - execution state transition invariants hold
+
+The Python Receipt Counter-Signature cases require the optional `asymmetric`
+extra. The public CI and release gate install that extra; core-only installs
+skip those Ed25519 cases with an explicit message.
 
 Those checks are deliberately concentrated around the active public kernel targets. Outcome Attestation is additive and opt-in; it does not change active v1 Receipt or Refusal semantics or turn reserved or paid-layer surfaces into implied standards.
 

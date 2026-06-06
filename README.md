@@ -357,6 +357,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | Wrap consequential MCP tools | [MCP_HERO_PATH.md](MCP_HERO_PATH.md) |
 | Scanner methodology & wording | [docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md](docs/guides/EXECUTION_GAP_SCANNER_METHODOLOGY.md) |
 | SDKs (Python, TypeScript, Go, Rust) | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) · [SUPPORT_AND_COMPATIBILITY_STATUS.md](SUPPORT_AND_COMPATIBILITY_STATUS.md) |
+| Verify Receipt counter-signatures offline | [spec/countersignature/SPEC.md](spec/countersignature/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
 | Specs index | [SPEC_INDEX.md](SPEC_INDEX.md) |
 | Open-source vs commercial boundary | [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md) |
 | Compliance mapping | [COMPLIANCE_MAPPING.md](COMPLIANCE_MAPPING.md) |

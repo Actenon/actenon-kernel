@@ -1,0 +1,19 @@
+{
+  "capability": "finance.transfer.release",
+  "contract": {
+    "name": "receipt",
+    "version": "v1"
+  },
+  "issued_at": "2026-01-15T12:01:00Z",
+  "metadata": {
+    "pass": "keystone_pass_4",
+    "vector_id": "cloud_invoice_payment_v1"
+  },
+  "outcome": "executed",
+  "proof_binding": {
+    "action_hash": "ff83a7e14dfbc6e2b361e8a9a4a802b5ba5a96ba26aa19f76bb23230da8ced24",
+    "intent_id": "intent_cloud_invoice_v1",
+    "pccb_id": "pccb_proof_cloud_invoice_v1"
+  },
+  "receipt_id": "receipt_cloud_invoice_v1"
+}

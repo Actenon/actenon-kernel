@@ -2,7 +2,7 @@
 
 Minimal protected-endpoint verifier SDK for Rust, aligned to the Python kernel's public `action_intent` and `pccb` contracts.
 
-This crate is intentionally narrow. It focuses on verifier-side proof checking at the protected execution edge. It does not attempt to port replay, escrow, receipts, refusals, policy engines, or any hosted control-plane behavior.
+This crate is intentionally narrow. It focuses on verifier-side proof checking at the protected execution edge and offline verification of Receipt counter-signatures. It does not issue counter-signatures or contain private-key custody or service code.
 
 Choosing between Python, TypeScript, Go, and Rust paths? Start with [`../../SDK_SELECTION_GUIDE.md`](../../SDK_SELECTION_GUIDE.md).
 
@@ -14,6 +14,7 @@ Choosing between Python, TypeScript, Go, and Rust paths? Start with [`../../SDK_
 - optional verifier-side clock skew tolerance, defaulting to zero
 - deterministic local-proof verification using the OSS local `HS256` verifier
 - custom signature verification via the exported `SignatureVerifier` trait
+- offline Receipt counter-signature verification by historical or active `kid`
 - integration tests that intentionally reuse the portable local-proof fixtures already used by the Go SDK so parity stays visible
 
 ## Out Of Scope
@@ -24,6 +25,7 @@ Choosing between Python, TypeScript, Go, and Rust paths? Start with [`../../SDK_
 - provider adapters
 - approval workflows
 - hosted or paid control-plane features
+- counter-signature issuance and private-key custody
 
 ## Install
 
@@ -110,6 +112,20 @@ If verification fails, the SDK returns `VerificationError` with stable codes suc
 - `PROOF_EXPIRED`
 - `SIGNATURE_INVALID`
 
+## Verify A Receipt Counter-Signature
+
+```rust
+let verified = verify_countersignature(
+    &receipt_or_digest,
+    &countersignature,
+    &pinned_public_keys,
+)?;
+```
+
+`pinned_public_keys` is a trusted `key_discovery v1` JSON value. Verification
+is offline, selects the exact public key by `kid`, and supports retained
+historical keys. It performs no key fetch and contains no signing path.
+
 ## Tests
 
 ```bash
@@ -125,6 +141,7 @@ Current coverage includes:
 - action-hash mismatch
 - expired proof
 - strict and tolerant clock-boundary behavior
+- valid historical counter-signature plus unknown-key, wrong-key, and altered-digest rejection
 
 Replay validation is intentionally out of scope for this crate. Replay remains a protected-endpoint responsibility outside this verifier-only surface.
 
@@ -154,3 +171,5 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../spec/pccb/SPEC.md`](../../spec/pccb/SPEC.md)
 - [`../../schemas/action_intent.v1.json`](../../schemas/action_intent.v1.json)
 - [`../../schemas/pccb.v1.json`](../../schemas/pccb.v1.json)
+- [`../../spec/countersignature/SPEC.md`](../../spec/countersignature/SPEC.md)
+- [`../../schemas/receipt_countersignature.v1.json`](../../schemas/receipt_countersignature.v1.json)
