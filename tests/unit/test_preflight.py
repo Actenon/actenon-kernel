@@ -54,15 +54,22 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual("PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED", decision.reason_code)
         self.assertEqual(("infrastructure_owner", "security_admin"), decision.required_approvals)
 
-    def test_missing_backup_triggers_needs_evidence(self) -> None:
+    def test_missing_backup_is_reported_with_higher_severity_approval(self) -> None:
         decision = PreflightEngine().check(
             self._intent(capability="volume.delete", environment="production"),
             evidence_context={"change_ticket": "CHG-001"},
         )
 
-        self.assertEqual("needs_evidence", decision.outcome)
-        self.assertEqual("PREFLIGHT_BACKUP_EVIDENCE_REQUIRED", decision.reason_code)
+        self.assertEqual("approval_required", decision.outcome)
+        self.assertEqual(
+            "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+            decision.reason_code,
+        )
         self.assertEqual(("backup_verified",), decision.required_evidence)
+        self.assertIn(
+            "PREFLIGHT_BACKUP_EVIDENCE_REQUIRED",
+            {requirement.reason_code for requirement in decision.unmet_requirements},
+        )
 
     def test_sandbox_action_can_allow(self) -> None:
         decision = PreflightEngine().check(self._intent(capability="infrastructure.delete", environment="sandbox"))

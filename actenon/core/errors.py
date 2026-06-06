@@ -74,6 +74,26 @@ class EscrowValidationError(RefusalException):
         )
 
 
+class EscrowConfigurationError(EscrowValidationError):
+    """Raised when an escrow-enabled gate receives an incompatible proof."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        missing_field: str,
+        minting_step: str,
+    ) -> None:
+        super().__init__(
+            "ESCROW_CONFIGURATION_INVALID",
+            message,
+            details={
+                "missing_field": missing_field,
+                "minting_step": minting_step,
+            },
+        )
+
+
 class ReplayValidationError(RefusalException):
     def __init__(self, refusal_code: str, message: str, *, details: dict[str, Any] | None = None) -> None:
         super().__init__(

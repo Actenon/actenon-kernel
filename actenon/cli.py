@@ -605,6 +605,17 @@ def _print_preflight_decision(*, args: argparse.Namespace, decision: PreflightDe
         print("Required approvals:")
         for item in decision.required_approvals:
             print(f"- {item}")
+    if decision.unmet_requirements:
+        print("Unmet requirements:")
+        for requirement in decision.unmet_requirements:
+            print(f"- {requirement.reason_code}: {requirement.summary}")
+            for evidence_key in requirement.evidence_keys:
+                example = json.dumps(evidence_key.example, sort_keys=True)
+                print(
+                    "  "
+                    f"evidence.{evidence_key.key} ({evidence_key.value_type}), "
+                    f"example: {example}"
+                )
     if decision.matched_rules:
         print("Matched rules:")
         for item in decision.matched_rules:

@@ -10,7 +10,12 @@ from typing import Any, Callable, Literal, Mapping
 from uuid import uuid4
 
 from actenon.api import ActionIntentIntakeService
-from actenon.core import ContractValidationError, ProofVerificationError, RefusalException
+from actenon.core import (
+    ContractValidationError,
+    EscrowConfigurationError,
+    ProofVerificationError,
+    RefusalException,
+)
 from actenon.credentials import BrokeredCredential, CredentialBroker, InMemoryCredentialBroker
 from actenon.escrow import CapabilityEscrow
 from actenon.execution import ProtectedExecutor
@@ -27,7 +32,13 @@ from actenon.models import (
     RuleEvaluation,
 )
 from actenon.models.contracts import utc_now
-from actenon.preflight import PolicyPack, PreflightDecision, PreflightEngine
+from actenon.preflight import (
+    PolicyPack,
+    PreflightDecision,
+    PreflightEngine,
+    PreflightEvidence,
+    Requirement,
+)
 from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, build_local_proof_signer
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
@@ -43,6 +54,7 @@ class GateOutcome:
     receipt: Receipt | None
     refusal: Refusal | None
     payload: dict[str, Any] | None = None
+    unmet_requirements: tuple[Requirement, ...] = ()
 
     @property
     def ok(self) -> bool:
@@ -58,16 +70,14 @@ class GateOutcome:
             return self.refusal.refusal_code
         return None
 
-    @property
-    def unmet_requirements(self) -> tuple[str, ...]:
-        return ()
-
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "ok": self.ok,
             "outcome": self.outcome,
             "reason_code": self.reason_code,
-            "unmet_requirements": list(self.unmet_requirements),
+            "unmet_requirements": [
+                requirement.to_dict() for requirement in self.unmet_requirements
+            ],
             "payload": self.payload,
         }
         if self.receipt is not None:
@@ -100,28 +110,55 @@ def _coerce_party(value: PartyRef | str) -> PartyRef:
 
 
 def _policy_from_preflight(decision: PreflightDecision) -> PolicyDecision:
-    outcome = {
-        "allow": "allow",
-        "deny": "deny",
-        "approval_required": "approval-required",
-        "needs_evidence": "needs-evidence",
-    }[decision.outcome]
-    evaluations = tuple(
-        RuleEvaluation(
-            rule_id=rule_id,
-            outcome=outcome,
-            reason_code=decision.reason_code,
-            summary=decision.summary,
-            required_evidence=decision.required_evidence,
-            approver_types=decision.required_approvals,
+    def policy_outcome(value: str) -> str:
+        return {
+            "allow": "allow",
+            "deny": "deny",
+            "approval_required": "approval-required",
+            "needs_evidence": "needs-evidence",
+        }[value]
+
+    outcome = policy_outcome(decision.outcome)
+    if decision.unmet_requirements:
+        evaluations = tuple(
+            RuleEvaluation(
+                rule_id=(requirement.matched_rules or ("actenon.gate.preflight",))[0],
+                outcome=policy_outcome(requirement.outcome),
+                reason_code=requirement.reason_code,
+                summary=requirement.summary,
+                details={
+                    "evidence_keys": [
+                        evidence_key.to_dict()
+                        for evidence_key in requirement.evidence_keys
+                    ],
+                    "risk_level": requirement.risk_level,
+                },
+                required_evidence=requirement.required_evidence,
+                approver_types=requirement.required_approvals,
+            )
+            for requirement in decision.unmet_requirements
         )
-        for rule_id in (decision.matched_rules or ("actenon.gate.preflight",))
-    )
+    else:
+        evaluations = tuple(
+            RuleEvaluation(
+                rule_id=rule_id,
+                outcome=outcome,
+                reason_code=decision.reason_code,
+                summary=decision.summary,
+                required_evidence=decision.required_evidence,
+                approver_types=decision.required_approvals,
+            )
+            for rule_id in (decision.matched_rules or ("actenon.gate.preflight",))
+        )
+    reason_codes = [decision.reason_code]
+    for requirement in decision.unmet_requirements:
+        if requirement.reason_code not in reason_codes:
+            reason_codes.append(requirement.reason_code)
     return PolicyDecision(
         outcome=outcome,
         summary=decision.summary,
         rule_evaluations=evaluations,
-        reason_codes=(decision.reason_code,),
+        reason_codes=tuple(reason_codes),
         required_evidence=decision.required_evidence,
         approver_types=decision.required_approvals,
     )
@@ -261,26 +298,33 @@ class ActenonGate:
         side_effect: SideEffect,
         *,
         audience: AudienceRef | str | None = None,
-        evidence: Mapping[str, Any] | None = None,
+        evidence: Mapping[str, Any] | PreflightEvidence | None = None,
     ) -> GateOutcome:
         """Verify, enforce single-use and policy, then execute or refuse."""
 
         intent = self._coerce_action(action)
+        evidence_context = self._coerce_evidence(evidence)
         context = self._build_context(
             intent,
             audience=_coerce_audience(audience) if audience is not None else self.audience,
-            evidence=evidence,
+            evidence=evidence_context,
         )
         policy_decision = None
+        unmet_requirements: tuple[Requirement, ...] = ()
         if self.policy_pack is not None:
-            preflight = PreflightEngine(self.policy_pack).check(intent, evidence_context=evidence)
+            preflight = PreflightEngine(self.policy_pack).check(
+                intent,
+                evidence_context=evidence_context,
+            )
             policy_decision = _policy_from_preflight(preflight)
+            unmet_requirements = preflight.unmet_requirements
 
         if proof is None:
             return self._refuse(
                 intent,
                 context,
                 ProofVerificationError("PCCB_REQUIRED", "The protected action did not include a proof credential block."),
+                unmet_requirements=unmet_requirements,
             )
         try:
             pccb = proof if isinstance(proof, PCCB) else PCCB.from_dict(proof)
@@ -289,6 +333,17 @@ class ActenonGate:
                 intent,
                 context,
                 ContractValidationError(f"PCCB contract validation failed: {exc}"),
+                unmet_requirements=unmet_requirements,
+            )
+        if self.escrow is not None and pccb.escrow_id is None:
+            missing_field = "pccb.escrow_reference.escrow_id"
+            minting_step = "ActenonGate.mint_proof(...)"
+            raise EscrowConfigurationError(
+                "Actenon escrow is enabled, but the proof is missing "
+                f"`{missing_field}`. Mint the proof with {minting_step} on the "
+                "same escrow-enabled gate so the PCCB and escrow record are created together.",
+                missing_field=missing_field,
+                minting_step=minting_step,
             )
 
         request = ProtectedExecutionRequest(intent=intent, pccb=pccb, context=context)
@@ -301,7 +356,12 @@ class ActenonGate:
             ),
             policy_decision=policy_decision,
         )
-        return GateOutcome(receipt=result.receipt, refusal=result.refusal, payload=result.payload)
+        return GateOutcome(
+            receipt=result.receipt,
+            refusal=result.refusal,
+            payload=result.payload,
+            unmet_requirements=unmet_requirements,
+        )
 
     def protect_action(
         self,
@@ -309,7 +369,7 @@ class ActenonGate:
         proof: dict[str, Any] | PCCB | None,
         *,
         audience: AudienceRef | str | None = None,
-        evidence: Mapping[str, Any] | None = None,
+        evidence: Mapping[str, Any] | PreflightEvidence | None = None,
     ) -> Callable[[SideEffect], SideEffect]:
         """Decorate a function so its body runs only after gate verification."""
 
@@ -332,6 +392,14 @@ class ActenonGate:
         if isinstance(action, ActionIntent):
             return action
         return self._intake.parse(action)
+
+    @staticmethod
+    def _coerce_evidence(
+        evidence: Mapping[str, Any] | PreflightEvidence | None,
+    ) -> dict[str, Any]:
+        if isinstance(evidence, PreflightEvidence):
+            return evidence.to_dict()
+        return dict(evidence or {})
 
     def _build_context(
         self,
@@ -357,6 +425,8 @@ class ActenonGate:
         intent: ActionIntent,
         context: DynamicContextInput,
         exc: RefusalException,
+        *,
+        unmet_requirements: tuple[Requirement, ...] = (),
     ) -> GateOutcome:
         refusal = self.refusal_factory.create_from_exception(
             exc,
@@ -367,7 +437,12 @@ class ActenonGate:
         receipt = self.receipt_factory.create_refused_receipt(intent, context, refusal)
         self.outcome_writer.write_refusal(refusal)
         self.outcome_writer.write_receipt(receipt)
-        return GateOutcome(receipt=receipt, refusal=refusal, payload=None)
+        return GateOutcome(
+            receipt=receipt,
+            refusal=refusal,
+            payload=None,
+            unmet_requirements=unmet_requirements,
+        )
 
     @staticmethod
     def _invoke_side_effect(

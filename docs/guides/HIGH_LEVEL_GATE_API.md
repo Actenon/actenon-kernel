@@ -53,6 +53,35 @@ unavailable on verifier-only gates.
 - A configured `PolicyPack` runs through Preflight and is enforced before the
   side effect.
 
+## Escrow setup contract
+
+Configure the same `CapabilityEscrow` on the gate that mints and protects the
+action:
+
+```python
+from actenon import ActenonGate
+from actenon.escrow import InMemoryCapabilityEscrow
+
+gate = ActenonGate.local_dev(
+    audience="service:protected-endpoint",
+    escrow=InMemoryCapabilityEscrow(),
+)
+proof = gate.mint_proof(action_intent)
+outcome = gate.protect(action_intent, proof, side_effect)
+```
+
+`mint_proof()` creates `pccb.escrow_reference.escrow_id` and issues the matching
+escrow record as one operation. `protect()` consumes that record before
+credential brokering and execution.
+
+Do not submit a legacy proof minted without escrow to an escrow-enabled gate.
+The gate raises `EscrowConfigurationError` before protected execution begins,
+and names both the missing field and the required `ActenonGate.mint_proof(...)`
+step. This is a setup error, not a policy or exact-action refusal.
+
+For deployment and durable-store guidance, see
+[Credential Broker Deployment](CREDENTIAL_BROKER_DEPLOYMENT.md#escrow-setup-contract).
+
 ## Outcomes
 
 `protect()` always returns a `GateOutcome` for a valid Action Intent:
@@ -67,7 +96,9 @@ else:
 The outcome exposes `ok`, `outcome`, `reason_code`, `unmet_requirements`,
 `receipt`, `refusal`, `payload`, and `to_dict()`. Missing proof is a
 `PCCB_REQUIRED` refusal. Exact-action mismatch and replay are refused before
-the side effect.
+the side effect. When Preflight blocks an action, `unmet_requirements` contains
+every matching policy requirement and the exact evidence key types/examples.
+See [Preflight Evidence](PREFLIGHT_EVIDENCE.md).
 
 The common side-effect form takes no arguments. Advanced endpoint handlers may
 accept `(request, brokered_credential)` when they need the verified request or

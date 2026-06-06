@@ -2,6 +2,7 @@
 
 from .errors import (
     ContractValidationError,
+    EscrowConfigurationError,
     EscrowValidationError,
     PolicyDecisionError,
     ProofVerificationError,
@@ -24,6 +25,7 @@ __all__ = [
     "DEFAULT_MAX_JSON_BYTES",
     "DEFAULT_MAX_JSON_DEPTH",
     "DuplicateJSONKeyError",
+    "EscrowConfigurationError",
     "EscrowValidationError",
     "JSONInputTooLargeError",
     "JSONNestingDepthError",

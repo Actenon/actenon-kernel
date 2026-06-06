@@ -63,8 +63,22 @@ class MCPHeroPathIntegrationTests(unittest.TestCase):
             payload = outcome.to_dict()
 
             self.assertFalse(payload["ok"])
-            self.assertEqual("needs_evidence", payload["preflight"]["outcome"])
-            self.assertEqual("PREFLIGHT_CHANGE_TICKET_REQUIRED", payload["refusal"]["refusal_code"])
+            self.assertEqual("approval_required", payload["preflight"]["outcome"])
+            self.assertEqual(
+                "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+                payload["refusal"]["refusal_code"],
+            )
+            self.assertEqual(
+                {
+                    "PREFLIGHT_CHANGE_TICKET_REQUIRED",
+                    "PREFLIGHT_BACKUP_EVIDENCE_REQUIRED",
+                    "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+                },
+                {
+                    requirement["reason_code"]
+                    for requirement in payload["preflight"]["unmet_requirements"]
+                },
+            )
             self.assertEqual("refused", payload["receipt"]["outcome"])
             self.assertEqual("receipt", payload["var"]["artifact_kind"])
             self.assertEqual(payload["receipt"]["receipt_id"], payload["var"]["artifact_id"])
@@ -106,4 +120,3 @@ class MCPHeroPathIntegrationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

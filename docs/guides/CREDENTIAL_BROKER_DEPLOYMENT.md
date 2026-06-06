@@ -104,6 +104,39 @@ A typical brokered path is:
 The credential is not handed to the agent. It is held by the protected executor
 or brokered just-in-time under the endpoint's control.
 
+## Escrow Setup Contract
+
+An escrow-enabled execution edge requires two linked records:
+
+- a PCCB containing `escrow_reference.escrow_id`
+- an escrow record issued for that PCCB ID and exact capability
+
+The high-level `ActenonGate` creates both when `mint_proof()` is called on a
+gate configured with escrow. This is the recommended setup because proof
+minting and escrow issuance cannot drift apart:
+
+```python
+from actenon import ActenonGate
+from actenon.escrow import InMemoryCapabilityEscrow
+
+gate = ActenonGate.local_dev(
+    audience="service:protected-endpoint",
+    escrow=InMemoryCapabilityEscrow(),
+)
+proof = gate.mint_proof(action_intent)
+outcome = gate.protect(action_intent, proof, side_effect)
+```
+
+Supplying a legacy PCCB without `pccb.escrow_reference.escrow_id` to this gate
+raises `EscrowConfigurationError` before protected execution begins. The error
+points to `ActenonGate.mint_proof(...)`; it is intentionally distinguishable
+from policy, binding, and replay refusals.
+
+Low-level `PCCBMinter` users must pass an `escrow_id` while minting and issue
+the matching escrow record themselves. See
+[High-Level Gate API](HIGH_LEVEL_GATE_API.md#escrow-setup-contract) for the
+correct-on-enable path.
+
 ## Local Kernel Code Path
 
 The OSS kernel exposes a local `ProtectedExecutor` helper for this pattern:

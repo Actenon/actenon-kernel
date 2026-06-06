@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional
 
 from actenon.models import ActionIntent
 
-from .models import PreflightOutcome
+from .models import EvidenceKey, PreflightOutcome
 
 
 EvidenceContext = dict[str, Any]
@@ -82,8 +82,39 @@ def _requires_backup(capability: str) -> bool:
     }
 
 
-def _required_approval(intent: ActionIntent, evidence: EvidenceContext) -> bool:
-    return _truthy(evidence.get("approval_present")) or _truthy(intent.action.parameters.get("approval_present")) or _truthy(intent.context.get("approval_present"))
+def _approval_present(intent: ActionIntent, evidence: EvidenceContext) -> bool:
+    return (
+        _truthy(evidence.get("approval_present"))
+        or _truthy(intent.action.parameters.get("approval_present"))
+        or _truthy(intent.context.get("approval_present"))
+    )
+
+
+def _approver_types(intent: ActionIntent, evidence: EvidenceContext) -> tuple[str, ...]:
+    raw = (
+        evidence.get("approver_types")
+        or intent.action.parameters.get("approver_types")
+        or intent.context.get("approver_types")
+        or ()
+    )
+    if isinstance(raw, str):
+        return (raw,)
+    if isinstance(raw, (list, tuple, set, frozenset)):
+        return tuple(str(item) for item in raw)
+    return ()
+
+
+def _approval_satisfied(
+    intent: ActionIntent,
+    evidence: EvidenceContext,
+    required_approvals: tuple[str, ...],
+) -> bool:
+    if not _approval_present(intent, evidence):
+        return False
+    provided = _approver_types(intent, evidence)
+    if not provided:
+        return True
+    return set(required_approvals).issubset(provided)
 
 
 def _row_count(intent: ActionIntent, evidence: EvidenceContext) -> int:
@@ -108,6 +139,7 @@ def _result(
     matched_rule: str,
     required_evidence: tuple[str, ...] = (),
     required_approvals: tuple[str, ...] = (),
+    evidence_keys: tuple[EvidenceKey, ...] = (),
     metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
@@ -118,12 +150,47 @@ def _result(
         "matched_rules": (matched_rule,),
         "required_evidence": required_evidence,
         "required_approvals": required_approvals,
+        "evidence_keys": evidence_keys,
         "metadata": dict(metadata or {}),
     }
 
 
+def _evidence_key(
+    key: str,
+    value_type: str,
+    example: Any,
+    description: str,
+) -> EvidenceKey:
+    return EvidenceKey(
+        key=key,
+        value_type=value_type,
+        example=example,
+        description=description,
+    )
+
+
+def _approval_evidence_keys(required_approvals: tuple[str, ...]) -> tuple[EvidenceKey, ...]:
+    return (
+        _evidence_key(
+            "approval_present",
+            "boolean",
+            True,
+            "Set true only after the required approval has been verified.",
+        ),
+        _evidence_key(
+            "approver_types",
+            "array[string]",
+            list(required_approvals),
+            "Approval roles present for this exact action.",
+        ),
+    )
+
+
 def _unsupported_capability(intent: ActionIntent, evidence: EvidenceContext) -> dict[str, Any] | None:
     if intent.action.capability not in DESTRUCTIVE_AND_DATA_CAPABILITIES:
+        classification = str(evidence.get("capability_classification", "")).strip().lower()
+        if classification == "non_consequential":
+            return None
         return _result(
             outcome="needs_evidence",
             reason_code="PREFLIGHT_CAPABILITY_UNCLASSIFIED",
@@ -131,6 +198,14 @@ def _unsupported_capability(intent: ActionIntent, evidence: EvidenceContext) -> 
             risk_level="medium",
             matched_rule="destructive_data.capability_unclassified",
             required_evidence=("capability_classification",),
+            evidence_keys=(
+                _evidence_key(
+                    "capability_classification",
+                    "string",
+                    "non_consequential",
+                    "Use non_consequential only after locally reviewing a capability outside the default policy pack.",
+                ),
+            ),
             metadata={"capability": intent.action.capability},
         )
     return None
@@ -147,6 +222,14 @@ def _missing_change_ticket(intent: ActionIntent, evidence: EvidenceContext) -> d
             risk_level="high",
             matched_rule="destructive_data.change_ticket_required",
             required_evidence=("change_ticket",),
+            evidence_keys=(
+                _evidence_key(
+                    "change_ticket",
+                    "string",
+                    "CHG-2026-0042",
+                    "Verified change-ticket identifier bound to this action.",
+                ),
+            ),
             metadata={"environment": environment, "capability": capability},
         )
     return None
@@ -163,6 +246,14 @@ def _missing_backup_evidence(intent: ActionIntent, evidence: EvidenceContext) ->
             risk_level="high",
             matched_rule="destructive_data.backup_evidence_required",
             required_evidence=("backup_verified",),
+            evidence_keys=(
+                _evidence_key(
+                    "backup_verified",
+                    "boolean",
+                    True,
+                    "True only after a current backup has been verified.",
+                ),
+            ),
             metadata={"environment": environment, "capability": capability},
         )
     return None
@@ -181,17 +272,18 @@ def _production_destructive_without_approval(intent: ActionIntent, evidence: Evi
                 summary="Production backup deletion is denied by the default preflight policy pack.",
                 risk_level="critical",
                 matched_rule="destructive_data.production_backup_delete_denied",
-                required_approvals=("security_admin",),
                 metadata={"environment": environment, "capability": capability},
             )
-        if not _required_approval(intent, evidence):
+        required_approvals = ("infrastructure_owner", "security_admin")
+        if not _approval_satisfied(intent, evidence, required_approvals):
             return _result(
                 outcome="approval_required",
                 reason_code="PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
                 summary="Production destructive action requires explicit approval before execution.",
                 risk_level="critical",
                 matched_rule="destructive_data.production_destructive_approval_required",
-                required_approvals=("infrastructure_owner", "security_admin"),
+                required_approvals=required_approvals,
+                evidence_keys=_approval_evidence_keys(required_approvals),
                 metadata={"environment": environment, "capability": capability},
             )
     return None
@@ -203,14 +295,20 @@ def _broad_data_export(intent: ActionIntent, evidence: EvidenceContext) -> dict[
     row_count = _row_count(intent, evidence)
     sensitive = _truthy(evidence.get("sensitive_data", intent.action.parameters.get("sensitive_data")))
     external = _is_external_destination(intent, evidence)
-    if row_count >= 10_000 or sensitive or external:
+    required_approvals = ("data_owner", "privacy_reviewer")
+    if (row_count >= 10_000 or sensitive or external) and not _approval_satisfied(
+        intent,
+        evidence,
+        required_approvals,
+    ):
         return _result(
             outcome="approval_required",
             reason_code="PREFLIGHT_BROAD_DATA_EXPORT_APPROVAL_REQUIRED",
             summary="Broad or sensitive data export requires approval before execution.",
             risk_level="high",
             matched_rule="destructive_data.broad_data_export_approval_required",
-            required_approvals=("data_owner", "privacy_reviewer"),
+            required_approvals=required_approvals,
+            evidence_keys=_approval_evidence_keys(required_approvals),
             metadata={"row_count": row_count, "sensitive_data": sensitive, "external_destination": external},
         )
     return None
@@ -220,14 +318,19 @@ def _admin_permission_grant(intent: ActionIntent, evidence: EvidenceContext) -> 
     if intent.action.capability != "iam.permission.grant":
         return None
     role = str(evidence.get("role", intent.action.parameters.get("role", intent.action.parameters.get("permission", "")))).lower()
-    if role in {"admin", "administrator", "owner", "root", "superuser"} or "*" in role:
+    required_approvals = ("security_admin",)
+    if (
+        role in {"admin", "administrator", "owner", "root", "superuser"}
+        or "*" in role
+    ) and not _approval_satisfied(intent, evidence, required_approvals):
         return _result(
             outcome="approval_required",
             reason_code="PREFLIGHT_ADMIN_PERMISSION_APPROVAL_REQUIRED",
             summary="Admin or wildcard permission grant requires approval before execution.",
             risk_level="high",
             matched_rule="destructive_data.admin_permission_approval_required",
-            required_approvals=("security_admin",),
+            required_approvals=required_approvals,
+            evidence_keys=_approval_evidence_keys(required_approvals),
             metadata={"role": role},
         )
     return None
@@ -247,15 +350,33 @@ def _sandbox_low_risk_allow(intent: ActionIntent, evidence: EvidenceContext) -> 
     return None
 
 
-def _default_needs_evidence(intent: ActionIntent, evidence: EvidenceContext) -> dict[str, Any] | None:
+def _default_decision(intent: ActionIntent, evidence: EvidenceContext) -> dict[str, Any] | None:
+    environment = _env(intent, evidence)
+    if environment == "unknown":
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_CONTEXT_REQUIRED",
+            summary="Preflight needs an environment classification before this action can proceed.",
+            risk_level="medium",
+            matched_rule="destructive_data.context_required",
+            required_evidence=("environment",),
+            evidence_keys=(
+                _evidence_key(
+                    "environment",
+                    "string",
+                    "production",
+                    "Deployment environment for the exact target action.",
+                ),
+            ),
+            metadata={"capability": intent.action.capability},
+        )
     return _result(
-        outcome="needs_evidence",
-        reason_code="PREFLIGHT_CONTEXT_REQUIRED",
-        summary="Preflight needs environment, evidence, or approval context before this action can proceed.",
-        risk_level="medium",
-        matched_rule="destructive_data.context_required",
-        required_evidence=("environment", "change_ticket"),
-        metadata={"capability": intent.action.capability},
+        outcome="allow",
+        reason_code="PREFLIGHT_REQUIREMENTS_SATISFIED",
+        summary="All requirements in the default Preflight policy pack are satisfied.",
+        risk_level="low",
+        matched_rule="destructive_data.requirements_satisfied",
+        metadata={"environment": environment, "capability": intent.action.capability},
     )
 
 
@@ -272,7 +393,7 @@ def build_destructive_actions_policy_pack() -> PolicyPack:
             _broad_data_export,
             _admin_permission_grant,
             _sandbox_low_risk_allow,
-            _default_needs_evidence,
+            _default_decision,
         ),
     )
 

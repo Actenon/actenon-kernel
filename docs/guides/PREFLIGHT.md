@@ -40,6 +40,11 @@ actenon preflight check \
   --json
 ```
 
+Every matching rule is evaluated in one pass. A blocked decision reports all
+missing inputs in `unmet_requirements`, including each evidence key's type and
+example. See [Preflight Evidence](PREFLIGHT_EVIDENCE.md) for the complete
+default policy contract.
+
 Explain a saved decision:
 
 ```bash
@@ -135,7 +140,26 @@ Default rules:
   "required_approvals": ["infrastructure_owner", "security_admin"],
   "risk_level": "critical",
   "matched_rules": ["destructive_data.production_destructive_approval_required"],
-  "metadata": {}
+  "metadata": {},
+  "unmet_requirements": [
+    {
+      "reason_code": "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+      "summary": "Production destructive action requires explicit approval before execution.",
+      "evidence_keys": [
+        {"key": "approval_present", "type": "boolean", "example": true},
+        {
+          "key": "approver_types",
+          "type": "array[string]",
+          "example": ["infrastructure_owner", "security_admin"]
+        }
+      ],
+      "required_approvals": ["infrastructure_owner", "security_admin"],
+      "required_evidence": [],
+      "outcome": "approval_required",
+      "risk_level": "critical",
+      "matched_rules": ["destructive_data.production_destructive_approval_required"]
+    }
+  ]
 }
 ```
 

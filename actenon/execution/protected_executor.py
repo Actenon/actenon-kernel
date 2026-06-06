@@ -38,6 +38,17 @@ def _policy_refusal(decision: PolicyDecision) -> RefusalException:
             "reason_codes": list(decision.reason_codes),
             "required_evidence": list(decision.required_evidence),
             "approver_types": list(decision.approver_types),
+            "unmet_requirements": [
+                {
+                    "reason_code": evaluation.reason_code,
+                    "summary": evaluation.summary,
+                    "required_evidence": list(evaluation.required_evidence),
+                    "required_approvals": list(evaluation.approver_types),
+                    "evidence_keys": list(evaluation.details.get("evidence_keys", [])),
+                }
+                for evaluation in decision.rule_evaluations
+                if evaluation.outcome != "allow"
+            ],
         },
     )
 

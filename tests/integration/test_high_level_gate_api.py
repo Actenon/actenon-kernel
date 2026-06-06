@@ -147,7 +147,21 @@ class HighLevelGateAPIIntegrationTests(unittest.TestCase):
         )
 
         self.assertFalse(outcome.ok)
-        self.assertEqual("PREFLIGHT_CHANGE_TICKET_REQUIRED", outcome.reason_code)
+        self.assertEqual(
+            "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+            outcome.reason_code,
+        )
+        self.assertEqual(
+            {
+                "PREFLIGHT_CHANGE_TICKET_REQUIRED",
+                "PREFLIGHT_BACKUP_EVIDENCE_REQUIRED",
+                "PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED",
+            },
+            {
+                requirement.reason_code
+                for requirement in outcome.unmet_requirements
+            },
+        )
 
     def test_optional_escrow_is_issued_and_consumed(self) -> None:
         escrow = InMemoryCapabilityEscrow()
