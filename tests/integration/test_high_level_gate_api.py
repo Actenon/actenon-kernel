@@ -11,7 +11,9 @@ from unittest.mock import patch
 
 import actenon
 from actenon import ActenonGate
+from actenon.escrow import CapabilityEscrow, InMemoryCapabilityEscrow
 from actenon.models import ActionIntent, ActionSpec, PartyRef, TargetRef, TenantRef
+from actenon.preflight import PolicyPack, build_destructive_actions_policy_pack
 from actenon.receipts import InMemoryOutcomeWriter
 
 
@@ -40,7 +42,13 @@ class HighLevelGateAPIIntegrationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tempdir.cleanup()
 
-    def _gate(self, *, writer: InMemoryOutcomeWriter | None = None) -> ActenonGate:
+    def _gate(
+        self,
+        *,
+        writer: InMemoryOutcomeWriter | None = None,
+        policy_pack: PolicyPack | None = None,
+        escrow: CapabilityEscrow | None = None,
+    ) -> ActenonGate:
         replay_db = self.root / "gate-replay.sqlite3"
         with (
             patch.dict(os.environ, {"ACTENON_REPLAY_DB": str(replay_db)}, clear=False),
@@ -51,6 +59,8 @@ class HighLevelGateAPIIntegrationTests(unittest.TestCase):
                 audience="service:database-protected-endpoint",
                 clock=lambda: self.now,
                 outcome_writer=writer,
+                policy_pack=policy_pack,
+                escrow=escrow,
             )
 
     def test_top_level_package_exports_gate(self) -> None:
@@ -114,6 +124,46 @@ class HighLevelGateAPIIntegrationTests(unittest.TestCase):
         self.assertTrue(outcome.ok)
         self.assertEqual({"status": "deleted"}, outcome.payload)
         self.assertEqual(["executed"], side_effects)
+
+    def test_configured_preflight_policy_refuses_before_side_effect(self) -> None:
+        production_intent = replace(
+            self.intent,
+            action=replace(
+                self.intent.action,
+                parameters={"table": "synthetic_customers", "environment": "production"},
+            ),
+            target=replace(
+                self.intent.target,
+                selectors={"environment": "production"},
+            ),
+        )
+        gate = self._gate(policy_pack=build_destructive_actions_policy_pack())
+        proof = gate.mint_proof(production_intent)
+
+        outcome = gate.protect(
+            production_intent,
+            proof,
+            lambda: self.fail("policy-refused side effect ran"),
+        )
+
+        self.assertFalse(outcome.ok)
+        self.assertEqual("PREFLIGHT_CHANGE_TICKET_REQUIRED", outcome.reason_code)
+
+    def test_optional_escrow_is_issued_and_consumed(self) -> None:
+        escrow = InMemoryCapabilityEscrow()
+        gate = self._gate(escrow=escrow)
+        proof = gate.mint_proof(self.intent)
+        assert proof.escrow_id is not None
+        issued = escrow.inspect(proof.escrow_id)
+
+        outcome = gate.protect(self.intent, proof, lambda: {"status": "deleted"})
+        consumed = escrow.inspect(proof.escrow_id)
+
+        self.assertIsNotNone(issued)
+        self.assertEqual("issued", issued.state)
+        self.assertTrue(outcome.ok)
+        self.assertIsNotNone(consumed)
+        self.assertEqual("consumed", consumed.state)
 
 
 if __name__ == "__main__":
