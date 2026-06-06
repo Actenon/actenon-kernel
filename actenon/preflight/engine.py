@@ -105,11 +105,15 @@ class PreflightEngine:
         candidates = blockers or [result for result in results if result["outcome"] == "allow"]
         _, selected = max(enumerate(candidates), key=_result_priority)
         requirements = tuple(_requirement_from_result(result) for result in blockers)
+        policy_pack_metadata: dict[str, Any] = {
+            "pack_id": pack.pack_id,
+            "display_name": pack.display_name,
+        }
+        if pack.is_template:
+            policy_pack_metadata["is_template"] = True
+            policy_pack_metadata["disclaimer"] = pack.disclaimer
         metadata = {
-            "policy_pack": {
-                "pack_id": pack.pack_id,
-                "display_name": pack.display_name,
-            },
+            "policy_pack": policy_pack_metadata,
             "intent_id": parsed_intent.intent_id,
             "capability": parsed_intent.action.capability,
             "target": parsed_intent.target.to_dict(),

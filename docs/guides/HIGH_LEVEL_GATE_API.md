@@ -52,6 +52,9 @@ unavailable on verifier-only gates.
   reference and `protect()` consumes it before credential brokering.
 - A configured `PolicyPack` runs through Preflight and is enforced before the
   side effect.
+- Select the pack explicitly with `policy_pack=...`; see
+  [POLICY_PACKS.md](POLICY_PACKS.md) for the destructive, privacy, access,
+  payments, and clinical-template options.
 
 ## Escrow setup contract
 

@@ -10,6 +10,9 @@ replace proof verification at the protected endpoint, and production
 deployments should bind verified evidence references or digests to their
 authorization process.
 
+Domain-specific privacy, access, payments, and clinical-template evidence is
+documented in [POLICY_PACKS.md](POLICY_PACKS.md).
+
 ## Evidence Shape
 
 Raw dictionaries remain supported:

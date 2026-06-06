@@ -15,3 +15,5 @@
 
 - Production issuance and approval guidance, including per-action and
   risk-tiered autonomous-agent patterns.
+- Domain-tuned Preflight packs for data privacy, access governance, and
+  payments, plus a clearly marked clinical workflow template.

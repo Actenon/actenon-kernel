@@ -346,6 +346,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | Run the local proof-gate demo | [QUICKSTART.md](QUICKSTART.md) |
 | First 10 minutes, end to end | [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md) |
 | Proof issuance and approval | [docs/guides/ISSUANCE_AND_APPROVAL.md](docs/guides/ISSUANCE_AND_APPROVAL.md) |
+| Domain policy packs | [docs/guides/POLICY_PACKS.md](docs/guides/POLICY_PACKS.md) |
 | The problem, in depth | [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) |
 | The category | [CATEGORY.md](CATEGORY.md) |
 | Threat model, attackers, limits | [THREAT_MODEL.md](THREAT_MODEL.md) |

@@ -18,6 +18,8 @@ class PolicyPack:
     display_name: str
     capabilities: tuple[str, ...]
     rules: tuple[PreflightRule, ...]
+    is_template: bool = False
+    disclaimer: str | None = None
 
 
 DESTRUCTIVE_AND_DATA_CAPABILITIES: tuple[str, ...] = (
@@ -31,6 +33,41 @@ DESTRUCTIVE_AND_DATA_CAPABILITIES: tuple[str, ...] = (
     "iam.permission.grant",
     "data.export",
     "payment.release",
+)
+
+DATA_PRIVACY_CAPABILITIES: tuple[str, ...] = (
+    "data.export",
+    "data.download",
+    "data.share",
+    "data.sync.external",
+    "report.generate.external",
+)
+
+ACCESS_GOVERNANCE_CAPABILITIES: tuple[str, ...] = (
+    "iam.permission.grant",
+    "iam.role.assign",
+    "iam.role.membership.change",
+    "iam.api_key.create",
+    "iam.credential.rotate",
+    "workspace.share",
+)
+
+PAYMENTS_CAPABILITIES: tuple[str, ...] = (
+    "payment.create",
+    "payment.release",
+    "payment.transfer",
+    "payment.refund",
+    "invoice.approve",
+    "payout.release",
+    "bank_details.update",
+)
+
+CLINICAL_TEMPLATE_CAPABILITIES: tuple[str, ...] = (
+    "clinical.note.draft",
+    "clinical.note.publish",
+    "clinical.record.update",
+    "medication.order",
+    "treatment_plan.change",
 )
 
 
@@ -125,9 +162,106 @@ def _row_count(intent: ActionIntent, evidence: EvidenceContext) -> int:
         return 0
 
 
+def _sensitivity_classification(
+    intent: ActionIntent,
+    evidence: EvidenceContext,
+) -> str:
+    for key in ("sensitivity_classification", "data_classification", "sensitivity"):
+        value = _string_value(intent, evidence, key)
+        if value:
+            return value
+    return ""
+
+
 def _is_external_destination(intent: ActionIntent, evidence: EvidenceContext) -> bool:
-    destination = str(evidence.get("destination", intent.action.parameters.get("destination", ""))).lower()
-    return destination.startswith(("http://", "https://", "s3://", "gs://")) or destination in {"external", "third_party", "vendor"}
+    destination = _string_value(intent, evidence, "destination")
+    destination_classification = _string_value(
+        intent,
+        evidence,
+        "destination_classification",
+    )
+    return (
+        destination.startswith(("http://", "https://", "s3://", "gs://"))
+        or destination in {"external", "third_party", "vendor"}
+        or destination_classification in {"external", "third_party", "vendor"}
+    )
+
+
+def _value(intent: ActionIntent, evidence: EvidenceContext, key: str, default: Any = None) -> Any:
+    if key in evidence:
+        return evidence[key]
+    if key in intent.action.parameters:
+        return intent.action.parameters[key]
+    return intent.context.get(key, default)
+
+
+def _string_value(
+    intent: ActionIntent,
+    evidence: EvidenceContext,
+    key: str,
+    default: str = "",
+) -> str:
+    return str(_value(intent, evidence, key, default)).strip().lower()
+
+
+def _string_values(
+    intent: ActionIntent,
+    evidence: EvidenceContext,
+    key: str,
+) -> tuple[str, ...]:
+    raw = _value(intent, evidence, key, ())
+    if isinstance(raw, str):
+        return (raw.strip().lower(),) if raw.strip() else ()
+    if isinstance(raw, (list, tuple, set, frozenset)):
+        return tuple(str(item).strip().lower() for item in raw if str(item).strip())
+    return ()
+
+
+def _domain_capability_rule(
+    *,
+    pack_id: str,
+    capabilities: tuple[str, ...],
+) -> PreflightRule:
+    def check(intent: ActionIntent, evidence: EvidenceContext) -> dict[str, Any] | None:
+        if intent.action.capability in capabilities:
+            return None
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_CAPABILITY_NOT_COVERED",
+            summary=f"The action capability is not covered by the {pack_id} policy pack.",
+            risk_level="medium",
+            matched_rule=f"{pack_id}.capability_not_covered",
+            required_evidence=("policy_pack_selection",),
+            evidence_keys=(
+                _evidence_key(
+                    "policy_pack_selection",
+                    "string",
+                    pack_id,
+                    "Select a policy pack that explicitly covers this action capability.",
+                ),
+            ),
+            metadata={"capability": intent.action.capability},
+        )
+
+    return check
+
+
+def _requirements_satisfied_rule(
+    *,
+    pack_id: str,
+    summary: str,
+) -> PreflightRule:
+    def allow(intent: ActionIntent, evidence: EvidenceContext) -> dict[str, Any]:
+        return _result(
+            outcome="allow",
+            reason_code="PREFLIGHT_REQUIREMENTS_SATISFIED",
+            summary=summary,
+            risk_level="low",
+            matched_rule=f"{pack_id}.requirements_satisfied",
+            metadata={"capability": intent.action.capability},
+        )
+
+    return allow
 
 
 def _result(
@@ -166,6 +300,44 @@ def _evidence_key(
         value_type=value_type,
         example=example,
         description=description,
+    )
+
+
+def build_evidence_key(
+    key: str,
+    value_type: str,
+    example: Any,
+    description: str,
+) -> EvidenceKey:
+    """Build one documented evidence requirement for a custom rule."""
+
+    return _evidence_key(key, value_type, example, description)
+
+
+def build_preflight_rule_result(
+    *,
+    outcome: PreflightOutcome,
+    reason_code: str,
+    summary: str,
+    risk_level: str,
+    matched_rule: str,
+    required_evidence: tuple[str, ...] = (),
+    required_approvals: tuple[str, ...] = (),
+    evidence_keys: tuple[EvidenceKey, ...] = (),
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build a result dictionary with the shape consumed by PreflightEngine."""
+
+    return _result(
+        outcome=outcome,
+        reason_code=reason_code,
+        summary=summary,
+        risk_level=risk_level,
+        matched_rule=matched_rule,
+        required_evidence=required_evidence,
+        required_approvals=required_approvals,
+        evidence_keys=evidence_keys,
+        metadata=metadata,
     )
 
 
@@ -396,6 +568,460 @@ def build_destructive_actions_policy_pack() -> PolicyPack:
             _default_decision,
         ),
     )
+
+
+def build_data_privacy_policy_pack(
+    *,
+    broad_export_row_threshold: int = 10_000,
+    allowed_external_destinations: tuple[str, ...] = (),
+    allowed_residency_pairs: tuple[tuple[str, str], ...] = (),
+) -> PolicyPack:
+    """Build policy for representative data export, sharing, and egress actions."""
+
+    if broad_export_row_threshold < 1:
+        raise ValueError("broad_export_row_threshold must be positive")
+    allowed_destinations = {
+        value.strip().lower()
+        for value in allowed_external_destinations
+        if value.strip()
+    }
+    allowed_residencies = {
+        (source.strip().lower(), destination.strip().lower())
+        for source, destination in allowed_residency_pairs
+        if source.strip() and destination.strip()
+    }
+
+    def classification_required(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in DATA_PRIVACY_CAPABILITIES:
+            return None
+        sensitivity = _sensitivity_classification(intent, evidence)
+        if sensitivity or _truthy(_value(intent, evidence, "sensitive_data")):
+            return None
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_DATA_CLASSIFICATION_REQUIRED",
+            summary="Data movement requires a sensitivity classification before execution.",
+            risk_level="medium",
+            matched_rule="data_privacy.data_classification_required",
+            required_evidence=("sensitivity_classification",),
+            evidence_keys=(
+                _evidence_key(
+                    "sensitivity_classification",
+                    "string",
+                    "internal",
+                    "Classification for the exact dataset, such as public, internal, confidential, restricted, pii, or phi.",
+                ),
+            ),
+        )
+
+    def broad_or_sensitive_export(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in DATA_PRIVACY_CAPABILITIES:
+            return None
+        row_count = _row_count(intent, evidence)
+        sensitivity = _sensitivity_classification(intent, evidence)
+        sensitive = sensitivity in {
+            "confidential",
+            "restricted",
+            "sensitive",
+            "pii",
+            "phi",
+            "financial",
+        } or _truthy(_value(intent, evidence, "sensitive_data"))
+        external = _is_external_destination(intent, evidence)
+        required_approvals = ("data_owner", "privacy_reviewer")
+        if (
+            row_count >= broad_export_row_threshold or sensitive or external
+        ) and not _approval_satisfied(intent, evidence, required_approvals):
+            return _result(
+                outcome="approval_required",
+                reason_code="PREFLIGHT_BROAD_DATA_EXPORT_APPROVAL_REQUIRED",
+                summary="Broad, sensitive, or external data movement requires data-owner and privacy approval.",
+                risk_level="high",
+                matched_rule="data_privacy.broad_export_approval_required",
+                required_approvals=required_approvals,
+                evidence_keys=_approval_evidence_keys(required_approvals),
+                metadata={
+                    "row_count": row_count,
+                    "row_threshold": broad_export_row_threshold,
+                    "sensitivity_classification": sensitivity,
+                    "external_destination": external,
+                },
+            )
+        return None
+
+    def external_destination_control(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in DATA_PRIVACY_CAPABILITIES:
+            return None
+        if not _is_external_destination(intent, evidence):
+            return None
+        destination = _string_value(intent, evidence, "destination")
+        configured_allow = destination in allowed_destinations
+        evidence_allow = _truthy(_value(intent, evidence, "destination_allowlisted"))
+        egress_approval = _truthy(_value(intent, evidence, "external_egress_approved"))
+        if configured_allow or evidence_allow or egress_approval:
+            return None
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_EXTERNAL_EGRESS_EVIDENCE_REQUIRED",
+            summary="External data movement requires an allow-listed destination or verified egress exception.",
+            risk_level="high",
+            matched_rule="data_privacy.external_egress_evidence_required",
+            required_evidence=("destination_allowlisted", "external_egress_approved"),
+            evidence_keys=(
+                _evidence_key(
+                    "destination_allowlisted",
+                    "boolean",
+                    True,
+                    "True when the exact destination is on the deployment's reviewed allow-list.",
+                ),
+                _evidence_key(
+                    "external_egress_approved",
+                    "boolean",
+                    True,
+                    "True only after a reviewed exception authorizes this exact external destination.",
+                ),
+            ),
+            metadata={"destination": destination},
+        )
+
+    def residency_control(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in DATA_PRIVACY_CAPABILITIES:
+            return None
+        source = _string_value(intent, evidence, "source_residency")
+        destination = _string_value(intent, evidence, "destination_residency")
+        if not source or not destination or source == destination:
+            return None
+        configured_allow = (source, destination) in allowed_residencies
+        if configured_allow or _truthy(_value(intent, evidence, "residency_allowed")):
+            return None
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_RESIDENCY_EVIDENCE_REQUIRED",
+            summary="Cross-residency data movement requires verified residency authorization.",
+            risk_level="high",
+            matched_rule="data_privacy.residency_evidence_required",
+            required_evidence=("residency_allowed",),
+            evidence_keys=(
+                _evidence_key(
+                    "residency_allowed",
+                    "boolean",
+                    True,
+                    "True only when policy permits this exact source-to-destination residency pair.",
+                ),
+            ),
+            metadata={
+                "source_residency": source,
+                "destination_residency": destination,
+            },
+        )
+
+    return PolicyPack(
+        pack_id="data_privacy_v1",
+        display_name="Data privacy and external egress",
+        capabilities=DATA_PRIVACY_CAPABILITIES,
+        rules=(
+            _domain_capability_rule(
+                pack_id="data_privacy_v1",
+                capabilities=DATA_PRIVACY_CAPABILITIES,
+            ),
+            classification_required,
+            broad_or_sensitive_export,
+            external_destination_control,
+            residency_control,
+            _requirements_satisfied_rule(
+                pack_id="data_privacy",
+                summary="Data privacy requirements are satisfied for this action.",
+            ),
+        ),
+    )
+
+
+def build_access_governance_policy_pack(
+    *,
+    privileged_roles: tuple[str, ...] = (
+        "admin",
+        "administrator",
+        "owner",
+        "root",
+        "superuser",
+    ),
+) -> PolicyPack:
+    """Build policy for representative role, credential, and sharing actions."""
+
+    privileged = {role.strip().lower() for role in privileged_roles if role.strip()}
+
+    def privileged_or_standing_access(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in ACCESS_GOVERNANCE_CAPABILITIES:
+            return None
+        role = _string_value(intent, evidence, "role") or _string_value(
+            intent,
+            evidence,
+            "permission",
+        )
+        role_tier = _string_value(intent, evidence, "role_tier")
+        access_mode = _string_value(intent, evidence, "access_mode", "jit")
+        wildcard = "*" in role
+        privileged_role = role in privileged or role_tier in {
+            "admin",
+            "privileged",
+            "critical",
+        }
+        standing_access = access_mode == "standing"
+        required_approvals = ("security_admin", "resource_owner")
+        if (
+            privileged_role or wildcard or standing_access
+        ) and not _approval_satisfied(intent, evidence, required_approvals):
+            return _result(
+                outcome="approval_required",
+                reason_code="PREFLIGHT_PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+                summary="Privileged, wildcard, or standing access requires security and resource-owner approval.",
+                risk_level="high",
+                matched_rule="access_governance.privileged_access_approval_required",
+                required_approvals=required_approvals,
+                evidence_keys=_approval_evidence_keys(required_approvals),
+                metadata={
+                    "role": role,
+                    "role_tier": role_tier,
+                    "access_mode": access_mode,
+                },
+            )
+        return None
+
+    def separation_of_duties(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in ACCESS_GOVERNANCE_CAPABILITIES:
+            return None
+        if not _approval_present(intent, evidence):
+            return None
+        approver_ids = set(_string_values(intent, evidence, "approver_ids"))
+        requester_is_approver = _truthy(
+            _value(intent, evidence, "requester_is_approver")
+        )
+        if intent.requester.id.lower() not in approver_ids and not requester_is_approver:
+            return None
+        return _result(
+            outcome="deny",
+            reason_code="PREFLIGHT_SEPARATION_OF_DUTIES_VIOLATION",
+            summary="The requesting subject cannot satisfy its own privileged-access approval.",
+            risk_level="critical",
+            matched_rule="access_governance.separation_of_duties",
+            evidence_keys=(
+                _evidence_key(
+                    "approver_ids",
+                    "array[string]",
+                    ["security-reviewer-42", "resource-owner-17"],
+                    "Verified approver identities for separation-of-duties evaluation.",
+                ),
+            ),
+        )
+
+    return PolicyPack(
+        pack_id="access_governance_v1",
+        display_name="IAM and access governance",
+        capabilities=ACCESS_GOVERNANCE_CAPABILITIES,
+        rules=(
+            _domain_capability_rule(
+                pack_id="access_governance_v1",
+                capabilities=ACCESS_GOVERNANCE_CAPABILITIES,
+            ),
+            separation_of_duties,
+            privileged_or_standing_access,
+            _requirements_satisfied_rule(
+                pack_id="access_governance",
+                summary="Access-governance requirements are satisfied for this action.",
+            ),
+        ),
+    )
+
+
+def build_payments_policy_pack(
+    *,
+    approval_threshold_minor: int = 100_000,
+) -> PolicyPack:
+    """Build policy for representative payment, refund, and payout actions."""
+
+    if approval_threshold_minor < 1:
+        raise ValueError("approval_threshold_minor must be positive")
+
+    def payment_approval(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in PAYMENTS_CAPABILITIES:
+            return None
+        raw_amount = _value(
+            intent,
+            evidence,
+            "amount_minor",
+            _value(intent, evidence, "notional_minor", 0),
+        )
+        try:
+            amount_minor = int(raw_amount)
+        except (TypeError, ValueError):
+            amount_minor = 0
+        new_payee = _truthy(_value(intent, evidence, "new_payee"))
+        destination_changed = intent.action.capability == "bank_details.update" or _truthy(
+            _value(intent, evidence, "destination_changed")
+        )
+        required_approvals = ("finance_approver",)
+        if (
+            amount_minor >= approval_threshold_minor
+            or new_payee
+            or destination_changed
+        ) and not _approval_satisfied(intent, evidence, required_approvals):
+            return _result(
+                outcome="approval_required",
+                reason_code="PREFLIGHT_PAYMENT_APPROVAL_REQUIRED",
+                summary="High-notional payment or changed payee destination requires finance approval.",
+                risk_level="high",
+                matched_rule="payments.payment_approval_required",
+                required_approvals=required_approvals,
+                evidence_keys=_approval_evidence_keys(required_approvals),
+                metadata={
+                    "amount_minor": amount_minor,
+                    "approval_threshold_minor": approval_threshold_minor,
+                    "new_payee": new_payee,
+                    "destination_changed": destination_changed,
+                },
+            )
+        return None
+
+    def payee_verification(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in PAYMENTS_CAPABILITIES:
+            return None
+        new_payee = _truthy(_value(intent, evidence, "new_payee"))
+        destination_changed = intent.action.capability == "bank_details.update" or _truthy(
+            _value(intent, evidence, "destination_changed")
+        )
+        if not (new_payee or destination_changed):
+            return None
+        if _truthy(_value(intent, evidence, "payee_verified")) and _truthy(
+            _value(intent, evidence, "destination_verified")
+        ):
+            return None
+        return _result(
+            outcome="needs_evidence",
+            reason_code="PREFLIGHT_PAYEE_DESTINATION_VERIFICATION_REQUIRED",
+            summary="New or changed payment destinations require verified payee and destination evidence.",
+            risk_level="high",
+            matched_rule="payments.payee_destination_verification_required",
+            required_evidence=("payee_verified", "destination_verified"),
+            evidence_keys=(
+                _evidence_key(
+                    "payee_verified",
+                    "boolean",
+                    True,
+                    "True after the payee identity has been verified for this action.",
+                ),
+                _evidence_key(
+                    "destination_verified",
+                    "boolean",
+                    True,
+                    "True after the exact bank, wallet, or payout destination has been verified.",
+                ),
+            ),
+        )
+
+    return PolicyPack(
+        pack_id="payments_v1",
+        display_name="Payments and destination controls",
+        capabilities=PAYMENTS_CAPABILITIES,
+        rules=(
+            _domain_capability_rule(
+                pack_id="payments_v1",
+                capabilities=PAYMENTS_CAPABILITIES,
+            ),
+            payment_approval,
+            payee_verification,
+            _requirements_satisfied_rule(
+                pack_id="payments",
+                summary="Payment policy requirements are satisfied for this action.",
+            ),
+        ),
+    )
+
+
+def build_clinical_policy_pack_template() -> PolicyPack:
+    """Build an illustrative clinical workflow template, not certified guidance."""
+
+    def high_risk_clinical_action(
+        intent: ActionIntent,
+        evidence: EvidenceContext,
+    ) -> dict[str, Any] | None:
+        if intent.action.capability not in CLINICAL_TEMPLATE_CAPABILITIES:
+            return None
+        risk = _string_value(intent, evidence, "clinical_risk")
+        high_risk = intent.action.capability in {
+            "medication.order",
+            "treatment_plan.change",
+            "clinical.note.publish",
+        } or risk in {"high", "critical"}
+        required_approvals = ("licensed_clinician",)
+        if high_risk and not _approval_satisfied(
+            intent,
+            evidence,
+            required_approvals,
+        ):
+            return _result(
+                outcome="approval_required",
+                reason_code="PREFLIGHT_CLINICAL_REVIEW_REQUIRED",
+                summary="This template requires licensed-clinician review for the selected clinical action.",
+                risk_level="high",
+                matched_rule="clinical_template.clinical_review_required",
+                required_approvals=required_approvals,
+                evidence_keys=_approval_evidence_keys(required_approvals),
+                metadata={"clinical_risk": risk},
+            )
+        return None
+
+    disclaimer = (
+        "Illustrative template only. It is not certified clinical guidance, "
+        "medical advice, or a substitute for local clinical governance."
+    )
+    return PolicyPack(
+        pack_id="clinical_template_v1",
+        display_name="Clinical workflow TEMPLATE (not certified guidance)",
+        capabilities=CLINICAL_TEMPLATE_CAPABILITIES,
+        rules=(
+            _domain_capability_rule(
+                pack_id="clinical_template_v1",
+                capabilities=CLINICAL_TEMPLATE_CAPABILITIES,
+            ),
+            high_risk_clinical_action,
+            _requirements_satisfied_rule(
+                pack_id="clinical_template",
+                summary="The illustrative clinical-template requirements are satisfied.",
+            ),
+        ),
+        is_template=True,
+        disclaimer=disclaimer,
+    )
+
+
+def build_clinical_policy_pack() -> PolicyPack:
+    """Compatibility-friendly name for the explicitly marked clinical template."""
+
+    return build_clinical_policy_pack_template()
 
 
 DEFAULT_PREFLIGHT_POLICY_PACK = build_destructive_actions_policy_pack()

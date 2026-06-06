@@ -102,6 +102,16 @@ The request may be a raw Action Intent JSON object or a wrapper:
 }
 ```
 
+## Policy Packs
+
+`PreflightEngine()` keeps the original destructive/data pack as its
+backward-compatible default. New integrations should select a domain pack
+explicitly in `PreflightEngine(pack)` or `ActenonGate(policy_pack=pack)`.
+
+Actenon includes starter packs for data privacy, access governance, payments,
+and an explicitly non-certified clinical template. See
+[POLICY_PACKS.md](POLICY_PACKS.md).
+
 ## Default Policy Pack
 
 The first local pack covers destructive infrastructure and data actions:
