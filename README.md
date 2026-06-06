@@ -1,4 +1,4 @@
-# Actenon
+# actenon-kernel
 
 **The open proof gate and receipt standard that protects your systems from any agent's actions.**
 
@@ -67,6 +67,21 @@ No valid proof, no execution.
 ```
 
 It does not contact a cloud account, use external secrets, or perform a real destructive action. The local HMAC signer is for development only.
+
+---
+
+## See Actenon stop money movement
+
+The simplest way to understand Actenon is a financial agent.
+
+The agent can reason about a transfer. It can ask to transfer funds. It can even be prompt-injected into trying the wrong transfer.
+
+But the ledger does not move unless the protected financial boundary receives valid proof bound to the exact amount, destination, tenant, subject, audience, expiry, and replay identity.
+
+Run the example:
+
+```bash
+python3 -m pytest examples/financial_agent_protected_transfer -q
 
 ---
 
