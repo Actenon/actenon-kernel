@@ -119,6 +119,43 @@ VALID PROOF:
 
 Done: unproven action refused; valid proof executed once.
 ```
+---
+
+# FastMCP Financial Transfer Example
+
+This example shows the developer experience Actenon should make default:
+
+> simple MCP tool, deterministic execution boundary.
+
+The LLM can request a financial transfer, but the ledger mutation is protected by Actenon. Missing, mismatched, replayed, expired, or policy-denied proof is refused before the side effect.
+
+This example is intentionally focused on developer ergonomics:
+
+- FastMCP exposes the tool with a simple decorator.
+
+- Actenon protects the execution boundary.
+
+- The ledger does not trust the model.
+
+- Valid proof executes once.
+
+- Invalid proof emits refusal evidence.
+
+## Why this matters
+
+Developers choose the path of least resistance.
+
+If secure agent tools require complex boilerplate, they will eventually be bypassed. The secure path must be the easy path.
+
+FastMCP gives the simple tool surface. Actenon gives the deterministic proof gate.
+
+## Run
+
+```bash
+
+python3 -m pytest examples/fastmcp_financial_transfer -q
+
+---
 
 For the incident-style walkthrough and local runtime:
 
