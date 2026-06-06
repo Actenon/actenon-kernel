@@ -15,6 +15,8 @@ Choosing between Python, TypeScript, and Go paths? Start with [`../../SDK_SELECT
 - deterministic local-proof verification using the OSS local `HS256` signer
 - custom signature verification via the exported `SignatureVerifier` interface
 - offline Receipt counter-signature verification by historical or active `kid`
+- offline, fail-closed issuer-status verification
+- signed exact-action approval verification
 - plain Node protected-endpoint example
 
 ## Out Of Scope
@@ -105,6 +107,27 @@ const consistency = verifyConsistency(oldTreeHead, treeHead, consistencyProof);
 an independent monitor. `verifyCountersignatureInclusion` rejects a
 counter-signature whose exact digest is not included at its declared log leaf.
 
+## Verify Issuer Status And Approval
+
+```ts
+const standing = verifyIssuerStatus(
+  issuer,
+  signedStatus,
+  pinnedStatusAuthorityKeys,
+  new Date(),
+);
+const approval = verifyApprovalArtifact(
+  signedApproval,
+  pinnedApproverKeys,
+  expectedActionHash,
+);
+```
+
+Issuer status fails closed by default for missing, stale, expired, revoked, or
+unverifiable assertions. Setting `statusPolicy: "disabled"` is an explicit,
+warning-emitting opt-out. Approval verification is public-key-only and can
+require the signed approval to match the expected exact-action hash.
+
 ## Example
 
 Run the plain Node protected-endpoint example:
@@ -140,6 +163,7 @@ Current coverage includes:
 - strict and tolerant clock-boundary behavior
 - valid historical counter-signature plus unknown-key, wrong-key, and altered-digest rejection
 - transparency inclusion, consistency, key rotation, fork/rewind, and orphan rejection
+- fail-closed issuer status and exact-action signed approval verification
 
 ## Example Fixtures
 
@@ -163,3 +187,7 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../schemas/receipt_countersignature.v1.json`](../../schemas/receipt_countersignature.v1.json)
 - [`../../spec/transparency-log/SPEC.md`](../../spec/transparency-log/SPEC.md)
 - [`../../schemas/transparency_checkpoint.v1.json`](../../schemas/transparency_checkpoint.v1.json)
+- [`../../spec/issuer-status/SPEC.md`](../../spec/issuer-status/SPEC.md)
+- [`../../schemas/issuer_status.v1.json`](../../schemas/issuer_status.v1.json)
+- [`../../spec/approval-artifact/SPEC.md`](../../spec/approval-artifact/SPEC.md)
+- [`../../schemas/approval_artifact.v1.json`](../../schemas/approval_artifact.v1.json)

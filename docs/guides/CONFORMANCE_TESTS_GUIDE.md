@@ -50,6 +50,7 @@ Current conformance modules:
 - `tests/conformance/test_outcome_attestation_conformance.py`
 - `tests/conformance/test_countersignature_conformance.py`
 - `tests/conformance/test_transparency_log_conformance.py`
+- `tests/conformance/test_trust_artifacts_conformance.py`
 
 ## Covered Behaviors
 
@@ -67,9 +68,12 @@ Current conformance modules:
 - unknown counter-signing keys, wrong public keys, and altered Receipt digests fail closed
 - transparency checkpoints, inclusion proofs, and consistency proofs verify offline
 - signed forks, rewinds, unknown checkpoint keys, and orphan counter-signatures fail closed
+- signed issuer status rejects revoked, stale, expired, missing, or unverifiable assertions
+- signed approvals verify by `kid`, bind to the exact action, and reject forgery or laundering
 - execution state transition invariants hold
 
-The Python Receipt Counter-Signature and Transparency Log cases require the
+The Python Receipt Counter-Signature, Transparency Log, Issuer Status, and
+Approval Artifact cases require the
 optional `asymmetric` extra. The public CI and release gate install that extra;
 core-only installs skip those Ed25519 cases with an explicit message.
 

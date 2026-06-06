@@ -23,6 +23,8 @@ For a public compatibility claim to be safe, an implementation should target the
 | Outcome Attestation | Active opt-in v2alpha1 | [`spec/outcome-attestation/SPEC.md`](spec/outcome-attestation/SPEC.md) | [`schemas/receipt_attestation.v2alpha1.json`](schemas/receipt_attestation.v2alpha1.json), [`schemas/refusal_attestation.v2alpha1.json`](schemas/refusal_attestation.v2alpha1.json) | Embedded v1 Receipt or Refusal artifacts |
 | Receipt Counter-Signature | Active opt-in v1 | [`spec/countersignature/SPEC.md`](spec/countersignature/SPEC.md) | [`schemas/receipt_countersignature.v1.json`](schemas/receipt_countersignature.v1.json) | [`conformance/vectors/receipt_countersignature_v1/`](conformance/vectors/receipt_countersignature_v1) |
 | Transparency Log Proofs | Active opt-in v1 | [`spec/transparency-log/SPEC.md`](spec/transparency-log/SPEC.md) | [`schemas/transparency_checkpoint.v1.json`](schemas/transparency_checkpoint.v1.json), [`schemas/transparency_inclusion_proof.v1.json`](schemas/transparency_inclusion_proof.v1.json), [`schemas/transparency_consistency_proof.v1.json`](schemas/transparency_consistency_proof.v1.json) | [`conformance/vectors/transparency_log_v1/`](conformance/vectors/transparency_log_v1) |
+| Issuer Status | Active opt-in v1 | [`spec/issuer-status/SPEC.md`](spec/issuer-status/SPEC.md) | [`schemas/issuer_status.v1.json`](schemas/issuer_status.v1.json) | [`conformance/vectors/trust_artifacts_v1/`](conformance/vectors/trust_artifacts_v1) |
+| Approval Artifact | Active opt-in v1 | [`spec/approval-artifact/SPEC.md`](spec/approval-artifact/SPEC.md) | [`schemas/approval_artifact.v1.json`](schemas/approval_artifact.v1.json) | [`conformance/vectors/trust_artifacts_v1/`](conformance/vectors/trust_artifacts_v1) |
 
 ## Active Behavior Specs
 
@@ -64,6 +66,8 @@ Reserved surfaces are named extension boundaries, not active v1 standards, confo
 - key discovery does not by itself define trust bootstrap, operator workflows, or a hosted registry
 - execution graph does not by itself define a hosted transparency service, archive, or public search endpoint
 - transparency-log proof verification does not ship or imply a hosted log service
+- issuer-status verification does not ship or imply an operated issuer registry
+- approval-artifact verification does not ship an approval workflow or signing service
 - intent record does not by itself create a new mandatory protected-endpoint input or activate a new v1 proof-verification requirement
 - reserved surfaces such as Reconciliation and Policy Bundle are not active standards until a future version explicitly activates them
 

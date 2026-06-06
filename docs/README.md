@@ -15,3 +15,4 @@ Start with:
 - [Domain policy packs](guides/POLICY_PACKS.md)
 - [Framework adapters](guides/FRAMEWORK_ADAPTERS.md)
 - [Protected edge deployment](guides/EDGE_DEPLOYMENT.md)
+- [Verifier SDK reference](reference/verifier/VERIFIER_SDK_REFERENCE.md)

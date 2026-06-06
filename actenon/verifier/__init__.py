@@ -20,6 +20,13 @@ from .transparency import (
     verify_inclusion,
     verify_monitor_update,
 )
+from .trust_artifacts import (
+    TrustArtifactVerificationError,
+    VerifiedApprovalArtifact,
+    VerifiedIssuerStatus,
+    verify_approval_artifact,
+    verify_issuer_status,
+)
 
 __all__ = [
     "LocalAdmissionOutcome",
@@ -28,11 +35,14 @@ __all__ = [
     "PythonProtectedEndpoint",
     "CounterSignatureVerificationError",
     "TransparencyVerificationError",
+    "TrustArtifactVerificationError",
+    "VerifiedApprovalArtifact",
     "VerifiedCounterSignature",
     "VerifiedCheckpoint",
     "VerifiedConsistency",
     "VerifiedInclusion",
     "VerifiedMonitorUpdate",
+    "VerifiedIssuerStatus",
     "VerifiedPortableRequest",
     "VerifierSDK",
     "verify_countersignature",
@@ -41,4 +51,6 @@ __all__ = [
     "verify_countersignature_inclusion",
     "verify_inclusion",
     "verify_monitor_update",
+    "verify_approval_artifact",
+    "verify_issuer_status",
 ]

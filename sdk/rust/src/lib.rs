@@ -3,6 +3,7 @@ mod countersignature;
 mod errors;
 mod signers;
 mod transparency;
+mod trust_artifacts;
 mod types;
 mod verifier;
 
@@ -31,6 +32,21 @@ pub use transparency::{
     VerifiedMonitorUpdate,
     CHECKPOINT_CONTEXT,
     CHECKPOINT_KEY_USE,
+};
+pub use trust_artifacts::{
+    verify_approval_artifact,
+    verify_approval_artifact_for_action,
+    verify_issuer_status,
+    verify_issuer_status_with_options,
+    IssuerStatusOptions,
+    IssuerStatusPolicy,
+    TrustArtifactVerificationError,
+    VerifiedApprovalArtifact,
+    VerifiedIssuerStatus,
+    APPROVAL_CONTEXT,
+    APPROVAL_KEY_USE,
+    ISSUER_STATUS_CONTEXT,
+    ISSUER_STATUS_KEY_USE,
 };
 pub use types::{
     ActionHashSpec,

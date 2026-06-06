@@ -20,6 +20,13 @@ export {
   verify_inclusion,
   verify_monitor_update,
 } from "./transparency.js";
+export {
+  TrustArtifactVerificationError,
+  verifyApprovalArtifact,
+  verifyIssuerStatus,
+  verify_approval_artifact,
+  verify_issuer_status,
+} from "./trust-artifacts.js";
 export { buildLocalProofVerifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
 export { VerifierSDK } from "./verifier.js";
 export type { SignatureVerifier } from "./signers.js";
@@ -36,6 +43,13 @@ export type {
   VerifiedInclusion,
   VerifiedMonitorUpdate,
 } from "./transparency.js";
+export type {
+  ActionHash,
+  IssuerStatusOptions,
+  TrustArtifactVerificationErrorCode,
+  VerifiedApprovalArtifact,
+  VerifiedIssuerStatus,
+} from "./trust-artifacts.js";
 export type {
   ActionHashSpec,
   ActionIntent,

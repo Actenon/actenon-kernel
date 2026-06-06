@@ -1,0 +1,24 @@
+{
+  "authority": {
+    "id": "fixture-status-authority",
+    "type": "service"
+  },
+  "contract": {
+    "name": "issuer_status",
+    "version": "v1"
+  },
+  "expires_at": "2026-06-06T12:00:00Z",
+  "issued_at": "2026-06-06T11:00:00Z",
+  "issuer": {
+    "id": "fixture-proof-issuer",
+    "type": "service"
+  },
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "fixture-status-2026",
+    "value": "ftowe_YIVqEQbA3Y_gH96o-UVsoCubPxtGGxX_O6XDuGo47jDsxsuLmeYLpaKUct4y-FGACDTiTsjoajuIGIBw"
+  },
+  "status": "good_standing",
+  "status_reference": "fixture-status-expired"
+}

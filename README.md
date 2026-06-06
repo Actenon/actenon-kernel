@@ -359,6 +359,7 @@ Read: [GOVERNANCE.md](GOVERNANCE.md) · [CONFORMANCE.md](CONFORMANCE.md) · [SPE
 | SDKs (Python, TypeScript, Go, Rust) | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) · [SUPPORT_AND_COMPATIBILITY_STATUS.md](SUPPORT_AND_COMPATIBILITY_STATUS.md) |
 | Verify Receipt counter-signatures offline | [spec/countersignature/SPEC.md](spec/countersignature/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
 | Verify transparency proofs and monitor checkpoints | [spec/transparency-log/SPEC.md](spec/transparency-log/SPEC.md) · [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
+| Verify issuer status and signed approvals | [spec/issuer-status/SPEC.md](spec/issuer-status/SPEC.md) · [spec/approval-artifact/SPEC.md](spec/approval-artifact/SPEC.md) · [docs/guides/PREFLIGHT_EVIDENCE.md](docs/guides/PREFLIGHT_EVIDENCE.md) |
 | Specs index | [SPEC_INDEX.md](SPEC_INDEX.md) |
 | Open-source vs commercial boundary | [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md) |
 | Compliance mapping | [COMPLIANCE_MAPPING.md](COMPLIANCE_MAPPING.md) |

@@ -17,6 +17,8 @@ Choosing between Python, TypeScript, Go, and Rust paths? Start with [`../../SDK_
 - deterministic local-proof verification using the OSS local `HS256` verifier
 - custom signature verification via the exported `SignatureVerifier` trait
 - offline Receipt counter-signature verification by historical or active `kid`
+- offline, fail-closed issuer-status verification
+- signed exact-action approval verification
 - integration tests that intentionally reuse the portable local-proof fixtures already used by the Go SDK so parity stays visible
 
 ## Out Of Scope
@@ -141,6 +143,27 @@ let consistency =
 for an independent monitor. `verify_countersignature_inclusion` rejects a
 counter-signature whose exact digest is not included at its declared log leaf.
 
+## Verify Issuer Status And Approval
+
+```rust
+let standing = verify_issuer_status(
+    &issuer,
+    Some(&signed_status),
+    Some(&pinned_status_authority_keys),
+    OffsetDateTime::now_utc(),
+)?;
+let approval = verify_approval_artifact_for_action(
+    &signed_approval,
+    &pinned_approver_keys,
+    Some(&expected_action_hash),
+)?;
+```
+
+Issuer status fails closed by default for missing, stale, expired, revoked, or
+unverifiable assertions. `IssuerStatusPolicy::Disabled` is an explicit,
+warning-emitting opt-out. Approval verification is public-key-only and can
+require the signed approval to match the expected exact-action hash.
+
 ## Tests
 
 ```bash
@@ -158,6 +181,7 @@ Current coverage includes:
 - strict and tolerant clock-boundary behavior
 - valid historical counter-signature plus unknown-key, wrong-key, and altered-digest rejection
 - transparency inclusion, consistency, key rotation, fork/rewind, and orphan rejection
+- fail-closed issuer status and exact-action signed approval verification
 
 Replay validation is intentionally out of scope for this crate. Replay remains a protected-endpoint responsibility outside this verifier-only surface.
 
@@ -191,3 +215,7 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../schemas/receipt_countersignature.v1.json`](../../schemas/receipt_countersignature.v1.json)
 - [`../../spec/transparency-log/SPEC.md`](../../spec/transparency-log/SPEC.md)
 - [`../../schemas/transparency_checkpoint.v1.json`](../../schemas/transparency_checkpoint.v1.json)
+- [`../../spec/issuer-status/SPEC.md`](../../spec/issuer-status/SPEC.md)
+- [`../../schemas/issuer_status.v1.json`](../../schemas/issuer_status.v1.json)
+- [`../../spec/approval-artifact/SPEC.md`](../../spec/approval-artifact/SPEC.md)
+- [`../../schemas/approval_artifact.v1.json`](../../schemas/approval_artifact.v1.json)

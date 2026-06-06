@@ -78,7 +78,9 @@ def test_admin_grant_reports_all_requirements_and_documented_evidence_allows() -
     assert change_ticket.evidence_keys[0].example == "CHG-2026-0042"
     admin_approval = requirements["PREFLIGHT_ADMIN_PERMISSION_APPROVAL_REQUIRED"]
     assert {item.key for item in admin_approval.evidence_keys} == {
+        "approval_artifacts",
         "approval_present",
+        "approval_trusted_keys",
         "approver_types",
     }
     assert admin_approval.required_approvals == ("security_admin",)

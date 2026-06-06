@@ -6,6 +6,7 @@ from typing import Any, Mapping
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.models import ActionIntent
 from actenon.proof import sha256_hex
+from actenon.verifier.trust_artifacts import verify_approval_artifact
 
 from .evidence import PreflightEvidence
 from .models import EvidenceKey, PreflightDecision, Requirement
@@ -76,6 +77,72 @@ def _requirement_from_result(result: dict[str, Any]) -> Requirement:
     )
 
 
+def _party_key(raw: Any) -> tuple[str, str] | None:
+    if not isinstance(raw, Mapping):
+        return None
+    party_type = raw.get("type")
+    party_id = raw.get("id")
+    if not isinstance(party_type, str) or not isinstance(party_id, str):
+        return None
+    return party_type, party_id
+
+
+def _with_verified_approvals(
+    intent: ActionIntent,
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    raw_artifacts = evidence.get("approval_artifacts", ())
+    if not raw_artifacts:
+        return evidence
+    if not isinstance(raw_artifacts, (list, tuple)):
+        raise ValueError("approval_artifacts must be an array of approval objects")
+    raw_key_sets = evidence.get("approval_trusted_keys", ())
+    if not isinstance(raw_key_sets, (list, tuple)) or not raw_key_sets:
+        raise ValueError(
+            "approval_trusted_keys must contain a public key set for each signed approval"
+        )
+    key_sets: dict[tuple[str, str], Mapping[str, Any]] = {}
+    for raw_key_set in raw_key_sets:
+        if not isinstance(raw_key_set, Mapping):
+            raise ValueError("approval_trusted_keys entries must be JSON objects")
+        identity = _party_key(raw_key_set.get("issuer"))
+        if identity is None or identity in key_sets:
+            raise ValueError(
+                "approval_trusted_keys must have unique, valid issuer identities"
+            )
+        key_sets[identity] = raw_key_set
+
+    approval_types: list[str] = []
+    approver_ids: list[str] = []
+    approval_ids: list[str] = []
+    for raw_artifact in raw_artifacts:
+        if not isinstance(raw_artifact, Mapping):
+            raise ValueError("approval_artifacts entries must be JSON objects")
+        identity = _party_key(raw_artifact.get("approver"))
+        if identity is None or identity not in key_sets:
+            raise ValueError(
+                "no trusted approval key set matches the artifact approver"
+            )
+        verified = verify_approval_artifact(
+            raw_artifact,
+            key_sets[identity],
+            expected_action=intent,
+        )
+        if verified.approval_type not in approval_types:
+            approval_types.append(verified.approval_type)
+        if verified.approver.id not in approver_ids:
+            approver_ids.append(verified.approver.id)
+        approval_ids.append(verified.approval_id)
+
+    return {
+        **evidence,
+        "verified_approval_present": True,
+        "verified_approver_types": approval_types,
+        "verified_approver_ids": approver_ids,
+        "verified_approval_ids": approval_ids,
+    }
+
+
 @dataclass(frozen=True)
 class PreflightEngine:
     policy_pack: PolicyPack = DEFAULT_PREFLIGHT_POLICY_PACK
@@ -92,6 +159,7 @@ class PreflightEngine:
             evidence = evidence_context.to_dict()
         else:
             evidence = dict(evidence_context or {})
+        evidence = _with_verified_approvals(parsed_intent, evidence)
         pack = policy_pack or self.policy_pack
         results: list[dict[str, Any]] = []
         for rule in pack.rules:

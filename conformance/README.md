@@ -15,6 +15,8 @@ Use this package when you want to understand or run the repository's public comp
 - Outcome Attestation
 - Receipt Counter-Signature
 - Transparency Log Proofs
+- Issuer Status
+- Approval Artifact
 
 The central behavioral compatibility surface is the Protected Endpoint. The suite is built around whether the execution edge verifies proof, enforces replay when claimed, and refuses execution before side effects when the public rules fail.
 
@@ -27,6 +29,11 @@ historical key IDs.
 Transparency Log coverage is verifier-only: it validates signed checkpoints,
 Merkle inclusion, append-only consistency, monitor updates, and rejection of
 counter-signatures whose digest is not included in the verified checkpoint.
+
+Issuer Status and Approval Artifact coverage is verifier-only. It validates
+freshness-bounded issuer standing and exact-action signed approvals using
+pinned public keys. No registry, approval backend, or signing service is
+included.
 
 ## Contents
 

@@ -11,6 +11,8 @@ KEYSTONE_TESTS=(
   "tests/unit/test_outcome_attestation.py"
   "tests/conformance/test_countersignature_conformance.py"
   "tests/conformance/test_transparency_log_conformance.py"
+  "tests/conformance/test_trust_artifacts_conformance.py"
+  "tests/integration/test_verified_approval_preflight.py"
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_canonicalization_interop.py"
   "tests/conformance"
@@ -30,8 +32,11 @@ RUFF_TARGETS=(
   "tests/unit/test_outcome_attestation.py"
   "actenon/verifier/countersignature.py"
   "actenon/verifier/transparency.py"
+  "actenon/verifier/trust_artifacts.py"
   "tests/conformance/test_countersignature_conformance.py"
   "tests/conformance/test_transparency_log_conformance.py"
+  "tests/conformance/test_trust_artifacts_conformance.py"
+  "tests/integration/test_verified_approval_preflight.py"
   "scripts/public_hygiene_audit.py"
 )
 

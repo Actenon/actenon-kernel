@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:issuer_status:v1",
+  "title": "Issuer Status v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "issuer",
+    "authority",
+    "status",
+    "issued_at",
+    "expires_at",
+    "signature"
+  ],
+  "properties": {
+    "contract": {
+      "const": {"name": "issuer_status", "version": "v1"}
+    },
+    "issuer": {"$ref": "#/$defs/party"},
+    "authority": {"$ref": "#/$defs/party"},
+    "status": {
+      "enum": ["good_standing", "suspended", "revoked"]
+    },
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "status_reference": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "signature": {"$ref": "#/$defs/signature"}
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1, "maxLength": 64},
+        "id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "key_id", "encoding", "value"],
+      "properties": {
+        "algorithm": {"const": "EdDSA"},
+        "key_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "encoding": {"const": "base64url"},
+        "value": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"}
+      }
+    }
+  }
+}

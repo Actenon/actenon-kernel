@@ -1,0 +1,25 @@
+{
+  "action_hash": {
+    "algorithm": "sha-256",
+    "canonicalization": "RFC8785-JCS",
+    "value": "ff83a7e14dfbc6e2b361e8a9a4a802b5ba5a96ba26aa19f76bb23230da8ced24"
+  },
+  "approval_id": "fixture-approval-001",
+  "approval_type": "finance_approver",
+  "approver": {
+    "id": "fixture-security-admin",
+    "type": "user"
+  },
+  "contract": {
+    "name": "approval_artifact",
+    "version": "v1"
+  },
+  "decision": "approved",
+  "issued_at": "2026-06-06T12:00:00Z",
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "fixture-approval-2026",
+    "value": "AHMFEf-jFskSBda9Lf_wUqcAxKC3fcvbhbXROgFm0BjPb3LgV5bCi4JcAJbIGBiDrFOC8RVogYejRVBphSpEDA"
+  }
+}

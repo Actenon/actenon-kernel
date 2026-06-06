@@ -14,6 +14,8 @@ class PreflightEvidence:
     backup_snapshot: str | None = None
     approval_present: bool | None = None
     approver_types: tuple[str, ...] = ()
+    approval_artifacts: tuple[Mapping[str, Any], ...] = ()
+    approval_trusted_keys: tuple[Mapping[str, Any], ...] = ()
     capability_classification: str | None = None
     row_count: int | None = None
     destination: str | None = None
@@ -74,6 +76,14 @@ class PreflightEvidence:
                 payload[key] = value
         if self.approver_types:
             payload["approver_types"] = list(self.approver_types)
+        if self.approval_artifacts:
+            payload["approval_artifacts"] = [
+                dict(item) for item in self.approval_artifacts
+            ]
+        if self.approval_trusted_keys:
+            payload["approval_trusted_keys"] = [
+                dict(item) for item in self.approval_trusted_keys
+            ]
         if self.approver_ids:
             payload["approver_ids"] = list(self.approver_ids)
         return payload
@@ -93,6 +103,12 @@ class PreflightEvidence:
             backup_snapshot=raw.get("backup_snapshot"),
             approval_present=raw.get("approval_present"),
             approver_types=tuple(str(item) for item in approver_types),
+            approval_artifacts=tuple(
+                dict(item) for item in raw.get("approval_artifacts", ())
+            ),
+            approval_trusted_keys=tuple(
+                dict(item) for item in raw.get("approval_trusted_keys", ())
+            ),
             capability_classification=raw.get("capability_classification"),
             row_count=raw.get("row_count"),
             destination=raw.get("destination"),

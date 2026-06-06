@@ -121,24 +121,35 @@ def _requires_backup(capability: str) -> bool:
 
 def _approval_present(intent: ActionIntent, evidence: EvidenceContext) -> bool:
     return (
-        _truthy(evidence.get("approval_present"))
+        _truthy(evidence.get("verified_approval_present"))
+        or _truthy(evidence.get("approval_present"))
         or _truthy(intent.action.parameters.get("approval_present"))
         or _truthy(intent.context.get("approval_present"))
     )
 
 
 def _approver_types(intent: ActionIntent, evidence: EvidenceContext) -> tuple[str, ...]:
+    verified = evidence.get("verified_approver_types") or ()
     raw = (
         evidence.get("approver_types")
         or intent.action.parameters.get("approver_types")
         or intent.context.get("approver_types")
         or ()
     )
+    verified_values = (
+        (verified,)
+        if isinstance(verified, str)
+        else tuple(str(item) for item in verified)
+        if isinstance(verified, (list, tuple, set, frozenset))
+        else ()
+    )
     if isinstance(raw, str):
-        return (raw,)
+        return tuple(dict.fromkeys((*verified_values, raw)))
     if isinstance(raw, (list, tuple, set, frozenset)):
-        return tuple(str(item) for item in raw)
-    return ()
+        return tuple(
+            dict.fromkeys((*verified_values, *(str(item) for item in raw)))
+        )
+    return verified_values
 
 
 def _approval_satisfied(
@@ -354,6 +365,18 @@ def _approval_evidence_keys(required_approvals: tuple[str, ...]) -> tuple[Eviden
             "array[string]",
             list(required_approvals),
             "Approval roles present for this exact action.",
+        ),
+        _evidence_key(
+            "approval_artifacts",
+            "array[approval_artifact.v1]",
+            [],
+            "Preferred: signed approvals bound to this exact action.",
+        ),
+        _evidence_key(
+            "approval_trusted_keys",
+            "array[key_discovery.v1]",
+            [],
+            "Pinned public keys for the signed approval artifacts.",
         ),
     )
 

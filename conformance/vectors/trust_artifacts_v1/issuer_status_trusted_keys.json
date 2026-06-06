@@ -1,0 +1,28 @@
+{
+  "contract": {
+    "name": "key_discovery",
+    "version": "v1"
+  },
+  "issuer": {
+    "id": "fixture-status-authority",
+    "type": "service"
+  },
+  "keys": [
+    {
+      "algorithm": "EdDSA",
+      "expires_at": "2027-01-01T00:00:00Z",
+      "key_id": "fixture-status-2026",
+      "not_before": "2026-01-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "fixture-status-2026",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "Zr5-Myx6RTMyvZ0Kf32wVfXF7xoGraZtmLOftoEMRzo"
+      },
+      "status": "active",
+      "use": "issuer_status"
+    }
+  ]
+}

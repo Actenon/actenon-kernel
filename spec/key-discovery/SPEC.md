@@ -159,6 +159,8 @@ Current values include:
 - `outcome_attestation`
 - `receipt_countersignature`
 - `transparency_checkpoint`
+- `issuer_status`
+- `approval_artifact`
 
 ### `status`
 
@@ -214,6 +216,8 @@ Examples:
 - for a signed outcome attestation, use the attestation envelope's `issued_at`
 - for a receipt counter-signature, use `signed_at`
 - for a transparency checkpoint, use `issued_at`
+- for an issuer-status artifact, use `issued_at`
+- for an approval artifact, use `issued_at`
 
 A key is usable only if all of the following hold:
 

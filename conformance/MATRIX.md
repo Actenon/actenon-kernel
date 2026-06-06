@@ -19,6 +19,8 @@ Outcome Attestation is additive and opt-in. It verifies signed envelopes around 
 | Outcome attestation | Outcome Attestation | attested Receipt and Refusal envelopes are created, verified, and fail on tampering or wrong keys | `tests/conformance/test_outcome_attestation_conformance.py` |
 | Receipt counter-signature | Receipt Counter-Signature | digest-bound witness signature verifies offline by historical `kid`; unknown keys, wrong keys, and altered digests fail | `tests/conformance/test_countersignature_conformance.py` |
 | Transparency log | Transparency Log Proofs | historical checkpoint keys, inclusion, consistency, and monitor updates verify offline; signed forks, rewinds, unknown keys, and orphan counter-signatures fail | `tests/conformance/test_transparency_log_conformance.py` |
+| Issuer standing | Issuer Status | good standing verifies offline; revoked, stale, expired, missing, and unverifiable status fails closed | `tests/conformance/test_trust_artifacts_conformance.py` |
+| Verifiable approval | Approval Artifact | exact-action signed approval verifies; altered signatures and action laundering fail closed | `tests/conformance/test_trust_artifacts_conformance.py` |
 | Execution semantics | Protected Endpoint | valid state paths are accepted | `tests/conformance/test_execution_state_conformance.py` |
 | Execution semantics | Protected Endpoint | invalid state paths are rejected | `tests/conformance/test_execution_state_conformance.py` |
 

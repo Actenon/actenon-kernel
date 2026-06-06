@@ -58,6 +58,11 @@ Transparency-log verification:
 - `verify_countersignature_inclusion(countersignature, inclusion_proof, checkpoint, trusted_keys)`
 - `verify_monitor_update(previous_checkpoint, current_checkpoint, consistency_proof, trusted_keys)`
 
+Trust-artifact verification:
+
+- `verify_issuer_status(issuer, status_artifact, trusted_keys, now)`
+- `verify_approval_artifact(approval, trusted_keys, expected_action=...)`
+
 The counter-signature API is offline and verify-only. `trusted_keys` is an
 already trusted, pinned `key_discovery v1` document containing current and
 historical public keys. The verifier selects the exact public key by `kid`; it
@@ -67,6 +72,12 @@ The transparency APIs are also offline and verify-only. They validate signed
 checkpoints, Merkle inclusion, append-only consistency, and monitor updates.
 `verify_countersignature_inclusion` checks the log anchor after the caller has
 verified the counter-signature itself with `verify_countersignature`.
+
+The trust-artifact APIs are offline and public-key-only. Issuer status fails
+closed by default when the assertion is missing, stale, expired, revoked, or
+unverifiable. The optional disabled policy is an explicit, logged opt-out.
+Approval verification selects an approver key by `kid`; when
+`expected_action` is supplied, it also enforces exact-action binding.
 
 ## What The Verifier Needs From A Protected Endpoint
 
@@ -184,6 +195,28 @@ See
 [`../../../spec/transparency-log/SPEC.md`](../../../spec/transparency-log/SPEC.md)
 for the hash domains, proof ordering, checkpoint signature input, and monitor
 state requirements.
+
+Verify issuer status and an exact-action approval:
+
+```python
+from actenon.verifier import verify_approval_artifact, verify_issuer_status
+
+standing = verify_issuer_status(
+    issuer,
+    signed_status,
+    pinned_status_authority_keys,
+    now,
+)
+approval = verify_approval_artifact(
+    signed_approval,
+    pinned_approver_keys,
+    expected_action=action_intent,
+)
+```
+
+See [`../../../spec/issuer-status/SPEC.md`](../../../spec/issuer-status/SPEC.md)
+and
+[`../../../spec/approval-artifact/SPEC.md`](../../../spec/approval-artifact/SPEC.md).
 
 ## Standalone CLI Verification
 

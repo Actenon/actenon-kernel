@@ -42,6 +42,8 @@ The active compatibility target is the set of active surfaces in [SPEC_INDEX.md]
 - `spec/outcome-attestation/SPEC.md`
 - `spec/countersignature/SPEC.md`
 - `spec/transparency-log/SPEC.md`
+- `spec/issuer-status/SPEC.md`
+- `spec/approval-artifact/SPEC.md`
 - `spec/protected-endpoint/SPEC.md`
 - `spec/replay/SPEC.md`
 
