@@ -14,28 +14,29 @@ from pathlib import Path
 from typing import Any, Mapping
 from uuid import uuid4
 
-from actenon.core import ContractValidationError, ProofVerificationError, RefusalException
+from actenon import ActenonGate
+from actenon.core import ContractValidationError
 from actenon.credentials import BrokeredCredential, InMemoryCredentialBroker
-from actenon.execution import ProtectedExecutor
 from actenon.models import (
     ActionIntent,
     ActionSpec,
     AudienceRef,
-    DynamicContextInput,
     ExecutionResult,
     PartyRef,
     PCCB,
-    PolicyDecision,
     ProtectedExecutionRequest,
     Receipt,
     Refusal,
-    RuleEvaluation,
     TargetRef,
     TenantRef,
 )
 from actenon.models.contracts import format_timestamp
-from actenon.preflight import PreflightDecision, PreflightEngine
-from actenon.proof import PCCBMinter, PCCBVerifier, build_local_proof_signer
+from actenon.preflight import (
+    DEFAULT_PREFLIGHT_POLICY_PACK,
+    PolicyPack,
+    PreflightDecision,
+    PreflightEngine,
+)
 from actenon.receipts import (
     CompositeOutcomeWriter,
     InMemoryOutcomeWriter,
@@ -255,37 +256,16 @@ def _intent_for(tool_name: str, *, scenario: str) -> ActionIntent:
     )
 
 
-def _context_for(intent: ActionIntent, *, request_id: str) -> DynamicContextInput:
-    return DynamicContextInput(
-        request_id=request_id,
-        audience=MCP_AUDIENCE,
-        scope_capabilities=(intent.action.capability,),
-        now=DEMO_NOW,
-        facts={"mcp_tool": intent.action.name, "environment": intent.context.get("environment")},
-        parameter_constraints=dict(intent.action.parameters),
-        resource_selectors=(intent.target.selectors,),
-    )
-
-
 def build_demo_tool_call(tool_name: str, *, scenario: str = "allow", request_id: str | None = None) -> DemoToolCall:
     intent = _intent_for(tool_name, scenario=scenario)
-    context = _context_for(intent, request_id=request_id or f"req_demo_{_tool_slug(tool_name)}_{scenario}")
-    signer = build_local_proof_signer()
-    pccb = PCCBMinter(
-        signer=signer,
+    resolved_request_id = request_id or f"req_demo_{_tool_slug(tool_name)}_{scenario}"
+    gate = ActenonGate.local_dev(
+        audience=MCP_AUDIENCE,
         issuer=PartyRef(type="service", id="actenon-local-mcp-demo"),
-        pccb_id_factory=lambda: f"pccb_{context.request_id}",
-        nonce_factory=lambda: f"nonce-{context.request_id}",
-    ).mint(
-        intent,
-        PolicyDecision(
-            outcome="allow",
-            summary="Demo proof minted for the MCP tool gate.",
-            rule_evaluations=(),
-            reason_codes=("MCP_DEMO_PROOF_MINTED",),
-        ),
-        context,
+        clock=lambda: DEMO_NOW,
+        request_id_factory=lambda: resolved_request_id,
     )
+    pccb = gate.mint_proof(intent)
     return DemoToolCall(tool_name=tool_name, intent=intent, pccb=pccb, preflight_evidence={})
 
 
@@ -303,57 +283,31 @@ def _coerce_mapping(raw: Mapping[str, Any] | str | None, *, field_name: str) -> 
     return dict(parsed)
 
 
-def _policy_from_preflight(decision: PreflightDecision) -> PolicyDecision:
-    outcome = {
-        "allow": "allow",
-        "deny": "deny",
-        "approval_required": "approval-required",
-        "needs_evidence": "needs-evidence",
-    }[decision.outcome]
-    evaluations = tuple(
-        RuleEvaluation(
-            rule_id=rule_id,
-            outcome=outcome,
-            reason_code=decision.reason_code,
-            summary=decision.summary,
-            required_evidence=tuple(decision.required_evidence),
-            approver_types=tuple(decision.required_approvals),
-        )
-        for rule_id in (decision.matched_rules or ("mcp.preflight",))
-    )
-    return PolicyDecision(
-        outcome=outcome,
-        summary=decision.summary,
-        rule_evaluations=evaluations,
-        reason_codes=(decision.reason_code,),
-        required_evidence=tuple(decision.required_evidence),
-        approver_types=tuple(decision.required_approvals),
-    )
-
-
-def _tool_binding_policy(tool_name: str, intent: ActionIntent) -> PolicyDecision | None:
+def _policy_pack_for_tool(tool_name: str) -> PolicyPack:
     spec = _spec_for(tool_name)
-    if intent.action.name == tool_name and intent.action.capability == spec.capability:
-        return None
-    summary = "The Action Intent is not bound to this MCP tool handler."
-    return PolicyDecision(
-        outcome="deny",
-        summary=summary,
-        rule_evaluations=(
-            RuleEvaluation(
-                rule_id="mcp.tool_binding",
-                outcome="deny",
-                reason_code="MCP_TOOL_INTENT_MISMATCH",
-                summary=summary,
-                details={
-                    "expected_tool": tool_name,
-                    "expected_capability": spec.capability,
-                    "observed_tool": intent.action.name,
-                    "observed_capability": intent.action.capability,
-                },
-            ),
-        ),
-        reason_codes=("MCP_TOOL_INTENT_MISMATCH",),
+
+    def enforce_tool_binding(intent: ActionIntent, _evidence: dict[str, Any]) -> dict[str, Any] | None:
+        if intent.action.name == tool_name and intent.action.capability == spec.capability:
+            return None
+        return {
+            "outcome": "deny",
+            "reason_code": "MCP_TOOL_INTENT_MISMATCH",
+            "summary": "The Action Intent is not bound to this MCP tool handler.",
+            "risk_level": "high",
+            "matched_rules": ("mcp.tool_binding",),
+            "metadata": {
+                "expected_tool": tool_name,
+                "expected_capability": spec.capability,
+                "observed_tool": intent.action.name,
+                "observed_capability": intent.action.capability,
+            },
+        }
+
+    return PolicyPack(
+        pack_id=f"mcp_{_tool_slug(tool_name)}_v1",
+        display_name=f"MCP binding and {DEFAULT_PREFLIGHT_POLICY_PACK.display_name}",
+        capabilities=DEFAULT_PREFLIGHT_POLICY_PACK.capabilities,
+        rules=(enforce_tool_binding, *DEFAULT_PREFLIGHT_POLICY_PACK.rules),
     )
 
 
@@ -430,43 +384,6 @@ def _write_var_emission(
     return {**var_emission, "path": str(path)}
 
 
-def _refuse_without_pccb(
-    *,
-    tool_name: str,
-    intent: ActionIntent,
-    context: DynamicContextInput,
-    preflight_decision: PreflightDecision,
-    request_id: str,
-    example_root: Path,
-    exc: RefusalException,
-) -> ProtectedMCPToolOutcome:
-    writer = _outcome_writer(example_root)
-    refusal = _refusal_factory(request_id).create_from_exception(
-        exc,
-        occurred_at=context.now,
-        intent=intent,
-        context=context,
-    )
-    receipt = _receipt_factory(request_id).create_refused_receipt(intent, context, refusal)
-    writer.write_refusal(refusal)
-    writer.write_receipt(receipt)
-    var_emission = _write_var_emission(
-        example_root=example_root,
-        tool_name=tool_name,
-        intent=intent,
-        receipt=receipt,
-        refusal=refusal,
-    )
-    return ProtectedMCPToolOutcome(
-        ok=False,
-        tool_name=tool_name,
-        execution=ExecutionResult(receipt=receipt, refusal=refusal, payload=None),
-        preflight_decision=preflight_decision,
-        var_emission=var_emission,
-        artifact_root=example_root / "artifacts",
-    )
-
-
 def invoke_protected_tool(
     tool_name: str,
     *,
@@ -495,46 +412,37 @@ def invoke_protected_tool(
         except ValueError as exc:
             raise ContractValidationError(str(exc)) from exc
         pccb_raw = _coerce_mapping(pccb_payload, field_name="pccb_json")
-        try:
-            pccb = PCCB.from_dict(pccb_raw) if pccb_raw is not None else None
-        except ValueError as exc:
-            raise ContractValidationError(str(exc)) from exc
+        pccb = pccb_raw
         evidence = _coerce_mapping(preflight_evidence, field_name="preflight_evidence_json") or {}
 
-    context = _context_for(intent, request_id=resolved_request_id)
     preflight_decision = PreflightEngine().check(intent, evidence_context=evidence)
-    binding_policy = _tool_binding_policy(tool_name, intent)
-    policy_decision = binding_policy or _policy_from_preflight(preflight_decision)
-
-    if pccb is None:
-        return _refuse_without_pccb(
-            tool_name=tool_name,
-            intent=intent,
-            context=context,
-            preflight_decision=preflight_decision,
-            request_id=resolved_request_id,
-            example_root=example_root,
-            exc=ProofVerificationError("PCCB_REQUIRED", "The MCP tool call did not include a proof credential block."),
-        )
-
-    request = ProtectedExecutionRequest(intent=intent, pccb=pccb, context=context)
     broker = InMemoryCredentialBroker(
         ttl=timedelta(seconds=60),
         credential_id_factory=lambda: f"cred_{resolved_request_id}",
         secret_reference_prefix="memory://mcp-tool-credential",
     )
-    executor = ProtectedExecutor(
-        proof_verifier=PCCBVerifier(build_local_proof_signer()),
+    gate = ActenonGate.local_dev(
+        audience=MCP_AUDIENCE,
+        issuer=PartyRef(type="service", id="actenon-local-mcp-demo"),
+        policy_pack=_policy_pack_for_tool(tool_name),
         credential_broker=broker,
         replay_protector=ReplayProtector(SqliteReplayStore(example_root / "state" / "replay.sqlite3")),
         receipt_factory=_receipt_factory(resolved_request_id),
         refusal_factory=_refusal_factory(resolved_request_id),
         outcome_writer=_outcome_writer(example_root),
+        clock=lambda: DEMO_NOW,
+        request_id_factory=lambda: resolved_request_id,
     )
-    execution = executor.execute(
-        request,
+    outcome = gate.protect(
+        intent,
+        pccb,
         lambda protected_request, credential: _execute_simulated_side_effect(tool_name, protected_request, credential),
-        policy_decision=policy_decision,
+        evidence=evidence,
+    )
+    execution = ExecutionResult(
+        receipt=outcome.receipt,
+        refusal=outcome.refusal,
+        payload=outcome.payload,
     )
     if execution.receipt is None:
         raise RuntimeError("protected executor returned no receipt")

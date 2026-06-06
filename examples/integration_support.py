@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Any, Mapping
 from uuid import uuid4
 
-from actenon.core import ContractValidationError, RefusalException
+from actenon import ActenonGate
+from actenon.core import ContractValidationError
 from actenon.demo.portable_local_proof import FIXED_BASE_TIME, run_portable_local_proof_demo
-from actenon.models import AudienceRef, Receipt, Refusal
-from actenon.proof import build_local_proof_signer
+from actenon.models import Receipt, Refusal
 from actenon.receipts import (
     CompositeOutcomeWriter,
     InMemoryOutcomeWriter,
@@ -17,14 +17,11 @@ from actenon.receipts import (
     ReceiptFactory,
     RefusalFactory,
 )
-from actenon.verifier import VerifierSDK
+from actenon.replay import ReplayProtector, SqliteReplayStore
 from examples.hello_world_protected_resource_python.protected_resource import HelloWorldProtectedResource
 
 
 DEFAULT_AUDIENCE_ID = "portable-hello-world-endpoint"
-DEFAULT_SCOPE_CAPABILITIES = ("protected_resource.read",)
-DEFAULT_PARAMETER_CONSTRAINTS = {"exact_message": "portable hello world"}
-DEFAULT_RESOURCE_SELECTORS = ({"resource_id": "hello_resource_demo_001"},)
 
 
 @dataclass(frozen=True)
@@ -83,74 +80,38 @@ def execute_protected_hello(
     else:
         fixture_root = example_root / "artifacts" / "portable_local_proof"
 
-    signer = build_local_proof_signer()
-    sdk = VerifierSDK(signer)
-
-    try:
-        intent = sdk.parse_intent(intent_payload)
-        pccb = sdk.parse_pccb(pccb_payload)
-    except ValueError as exc:
-        raise ContractValidationError(str(exc), details={"request_id": request_id}) from exc
-
-    context = sdk.build_context(
-        request_id=request_id,
-        audience=AudienceRef(type="service", id=audience_id),
-        now=FIXED_BASE_TIME,
-        scope_capabilities=DEFAULT_SCOPE_CAPABILITIES,
-        parameter_constraints=DEFAULT_PARAMETER_CONSTRAINTS,
-        resource_selectors=DEFAULT_RESOURCE_SELECTORS,
-    )
-
     outcome_root = example_root / "artifacts" / "outcomes"
     memory_writer = InMemoryOutcomeWriter()
     artifact_writer = JsonArtifactOutcomeWriter(outcome_root)
     writer = CompositeOutcomeWriter(memory_writer, artifact_writer)
     receipt_factory = ReceiptFactory(receipt_id_factory=lambda: f"rcpt_{request_id}")
     refusal_factory = RefusalFactory(refusal_id_factory=lambda: f"rfsl_{request_id}")
+    gate = ActenonGate.local_dev(
+        audience=f"service:{audience_id}",
+        replay_protector=ReplayProtector(SqliteReplayStore(example_root / "state" / "replay.sqlite3")),
+        receipt_factory=receipt_factory,
+        refusal_factory=refusal_factory,
+        outcome_writer=writer,
+        clock=lambda: FIXED_BASE_TIME,
+        request_id_factory=lambda: request_id,
+    )
 
-    try:
-        verified = sdk.verify(intent=intent, pccb=pccb, context=context)
-        protected_response = HelloWorldProtectedResource().handle(verified)
-        protected_response = {
-            **protected_response,
+    outcome = gate.protect(
+        dict(intent_payload),
+        dict(pccb_payload),
+        lambda request, _credential: {
+            **HelloWorldProtectedResource().handle(request),
             "external_reference": f"hello_local_{request_id}",
-        }
-        receipt = receipt_factory.create_execution_receipt(
-            intent=intent,
-            context=context,
-            pccb_id=pccb.pccb_id,
-            escrow_id=pccb.escrow_id,
-            payload=protected_response,
-        )
-        writer.write_receipt(receipt)
-        return ProtectedHelloOutcome(
-            ok=True,
-            protected_response=protected_response,
-            receipt=receipt,
-            refusal=None,
-            fixture_root=fixture_root,
-            outcome_root=outcome_root,
-        )
-    except RefusalException as exc:
-        refusal = refusal_factory.create_from_exception(
-            exc,
-            occurred_at=context.now,
-            intent=intent,
-            context=context,
-            pccb_id=pccb.pccb_id,
-            escrow_id=pccb.escrow_id,
-        )
-        receipt = receipt_factory.create_refused_receipt(intent, context, refusal)
-        writer.write_refusal(refusal)
-        writer.write_receipt(receipt)
-        return ProtectedHelloOutcome(
-            ok=False,
-            protected_response=None,
-            receipt=receipt,
-            refusal=refusal,
-            fixture_root=fixture_root,
-            outcome_root=outcome_root,
-        )
+        },
+    )
+    return ProtectedHelloOutcome(
+        ok=outcome.ok,
+        protected_response=outcome.payload,
+        receipt=outcome.receipt,
+        refusal=outcome.refusal,
+        fixture_root=fixture_root,
+        outcome_root=outcome_root,
+    )
 
 
 def parse_optional_json_mapping(raw: str | None, *, field_name: str) -> dict[str, Any] | None:
