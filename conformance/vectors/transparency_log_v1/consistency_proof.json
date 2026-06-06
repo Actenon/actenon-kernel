@@ -1,0 +1,13 @@
+{
+  "consistency_path": [
+    "1bd6caddba2d6a431c4879512dd628f696df256e463844c105447071ffa08f7f"
+  ],
+  "contract": {
+    "name": "transparency_consistency_proof",
+    "version": "v1"
+  },
+  "hash_algorithm": "sha-256",
+  "log_id": "actenon-transparency-fixture",
+  "new_tree_size": 4,
+  "old_tree_size": 2
+}

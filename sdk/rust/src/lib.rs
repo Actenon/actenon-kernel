@@ -2,6 +2,7 @@ mod canonical;
 mod countersignature;
 mod errors;
 mod signers;
+mod transparency;
 mod types;
 mod verifier;
 
@@ -16,6 +17,20 @@ pub use signers::{
     SignatureVerifier,
     LOCAL_PROOF_KEY_ID,
     LOCAL_PROOF_SECRET,
+};
+pub use transparency::{
+    verify_checkpoint_signature,
+    verify_consistency,
+    verify_countersignature_inclusion,
+    verify_inclusion,
+    verify_monitor_update,
+    TransparencyVerificationError,
+    VerifiedCheckpoint,
+    VerifiedConsistency,
+    VerifiedInclusion,
+    VerifiedMonitorUpdate,
+    CHECKPOINT_CONTEXT,
+    CHECKPOINT_KEY_USE,
 };
 pub use types::{
     ActionHashSpec,

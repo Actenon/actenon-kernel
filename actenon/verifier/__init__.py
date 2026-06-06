@@ -8,6 +8,18 @@ from .countersignature import (
 from .endpoint import LocalAdmissionOutcome, LocalAdmissionProtectedEndpoint, PythonProtectedEndpoint
 from .middleware import ProtectedEndpointMiddleware
 from .sdk import VerifiedPortableRequest, VerifierSDK
+from .transparency import (
+    TransparencyVerificationError,
+    VerifiedCheckpoint,
+    VerifiedConsistency,
+    VerifiedInclusion,
+    VerifiedMonitorUpdate,
+    verify_checkpoint_signature,
+    verify_consistency,
+    verify_countersignature_inclusion,
+    verify_inclusion,
+    verify_monitor_update,
+)
 
 __all__ = [
     "LocalAdmissionOutcome",
@@ -15,8 +27,18 @@ __all__ = [
     "ProtectedEndpointMiddleware",
     "PythonProtectedEndpoint",
     "CounterSignatureVerificationError",
+    "TransparencyVerificationError",
     "VerifiedCounterSignature",
+    "VerifiedCheckpoint",
+    "VerifiedConsistency",
+    "VerifiedInclusion",
+    "VerifiedMonitorUpdate",
     "VerifiedPortableRequest",
     "VerifierSDK",
     "verify_countersignature",
+    "verify_checkpoint_signature",
+    "verify_consistency",
+    "verify_countersignature_inclusion",
+    "verify_inclusion",
+    "verify_monitor_update",
 ]

@@ -1,6 +1,7 @@
 package verifier
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/base64"
@@ -73,7 +74,9 @@ func countersignatureError(code string, message string) error {
 
 func ParseReceiptCountersignatureJSON(raw []byte) (ReceiptCountersignature, error) {
 	var artifact ReceiptCountersignature
-	if err := json.Unmarshal(raw, &artifact); err != nil {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	if err := decoder.Decode(&artifact); err != nil {
 		return ReceiptCountersignature{}, countersignatureError("INVALID_COUNTERSIGNATURE", "counter-signature must be valid JSON")
 	}
 	return artifact, nil

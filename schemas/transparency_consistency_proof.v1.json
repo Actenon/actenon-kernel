@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:transparency_consistency_proof:v1",
+  "title": "Transparency Consistency Proof v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "log_id",
+    "hash_algorithm",
+    "old_tree_size",
+    "new_tree_size",
+    "consistency_path"
+  ],
+  "properties": {
+    "contract": {
+      "const": {"name": "transparency_consistency_proof", "version": "v1"}
+    },
+    "log_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "hash_algorithm": {"const": "sha-256"},
+    "old_tree_size": {"type": "integer", "minimum": 0},
+    "new_tree_size": {"type": "integer", "minimum": 0},
+    "consistency_path": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    }
+  }
+}

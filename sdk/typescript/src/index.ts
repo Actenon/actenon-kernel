@@ -5,6 +5,21 @@ export {
   verify_countersignature,
 } from "./countersignature.js";
 export { VerificationError } from "./errors.js";
+export {
+  CHECKPOINT_CONTEXT,
+  CHECKPOINT_KEY_USE,
+  TransparencyVerificationError,
+  verifyCheckpointSignature,
+  verifyConsistency,
+  verifyCountersignatureInclusion,
+  verifyInclusion,
+  verifyMonitorUpdate,
+  verify_checkpoint_signature,
+  verify_consistency,
+  verify_countersignature_inclusion,
+  verify_inclusion,
+  verify_monitor_update,
+} from "./transparency.js";
 export { buildLocalProofVerifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
 export { VerifierSDK } from "./verifier.js";
 export type { SignatureVerifier } from "./signers.js";
@@ -14,6 +29,13 @@ export type {
   ReceiptDigest,
   VerifiedCounterSignature,
 } from "./countersignature.js";
+export type {
+  TransparencyVerificationErrorCode,
+  VerifiedCheckpoint,
+  VerifiedConsistency,
+  VerifiedInclusion,
+  VerifiedMonitorUpdate,
+} from "./transparency.js";
 export type {
   ActionHashSpec,
   ActionIntent,

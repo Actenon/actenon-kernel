@@ -41,6 +41,7 @@ The active compatibility target is the set of active surfaces in [SPEC_INDEX.md]
 - `spec/refusal/SPEC.md`
 - `spec/outcome-attestation/SPEC.md`
 - `spec/countersignature/SPEC.md`
+- `spec/transparency-log/SPEC.md`
 - `spec/protected-endpoint/SPEC.md`
 - `spec/replay/SPEC.md`
 
@@ -141,6 +142,7 @@ python3 -m unittest discover -s tests/conformance -p 'test_*.py'
 - receipt artifact shape
 - opt-in Receipt/Refusal outcome attestation creation and verification
 - opt-in receipt counter-signature verification against pinned public keys
+- opt-in transparency checkpoint, inclusion, consistency, and monitor verification
 - execution state transition invariants
 
 ## What A Passing Result Supports

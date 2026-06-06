@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:transparency_checkpoint:v1",
+  "title": "Transparency Checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "log", "tree_size", "root_hash", "issued_at", "signature"],
+  "properties": {
+    "contract": {
+      "const": {"name": "transparency_checkpoint", "version": "v1"}
+    },
+    "log": {"$ref": "#/$defs/party"},
+    "tree_size": {"type": "integer", "minimum": 0},
+    "root_hash": {"$ref": "#/$defs/treeHash"},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "signature": {"$ref": "#/$defs/signature"}
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1, "maxLength": 64},
+        "id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "treeHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "encoding", "value"],
+      "properties": {
+        "algorithm": {"const": "sha-256"},
+        "encoding": {"const": "hex"},
+        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "key_id", "encoding", "value"],
+      "properties": {
+        "algorithm": {"const": "EdDSA"},
+        "key_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "encoding": {"const": "base64url"},
+        "value": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$"}
+      }
+    }
+  }
+}

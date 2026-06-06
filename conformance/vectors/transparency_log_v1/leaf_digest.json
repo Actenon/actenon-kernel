@@ -1,0 +1,5 @@
+{
+  "algorithm": "sha-256",
+  "canonicalization": "RFC8785-JCS",
+  "value": "45c4949cc975ca51a6990ded2c45dc0ec6f92b3a9d547b9cd401e1c32133e1b1"
+}

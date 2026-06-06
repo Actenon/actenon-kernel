@@ -11,6 +11,7 @@ It is designed for:
 - PCCB verification when the issuer uses asymmetric signing
 - signed outcome-attestation verification
 - receipt counter-signature verification
+- transparency checkpoint verification
 - independent verifier implementations that need a stable key-discovery format
 
 It is not tied to hosted Actenon infrastructure. Any issuer can publish this document from its own HTTPS origin.
@@ -157,6 +158,7 @@ Current values include:
 - `proof_issuance`
 - `outcome_attestation`
 - `receipt_countersignature`
+- `transparency_checkpoint`
 
 ### `status`
 
@@ -211,6 +213,7 @@ Examples:
 - for a PCCB, use `issued_at`
 - for a signed outcome attestation, use the attestation envelope's `issued_at`
 - for a receipt counter-signature, use `signed_at`
+- for a transparency checkpoint, use `issued_at`
 
 A key is usable only if all of the following hold:
 

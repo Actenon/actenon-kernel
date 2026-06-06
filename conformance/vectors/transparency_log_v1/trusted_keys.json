@@ -1,0 +1,60 @@
+{
+  "contract": {
+    "name": "key_discovery",
+    "version": "v1"
+  },
+  "issuer": {
+    "id": "actenon-transparency-fixture",
+    "type": "service"
+  },
+  "keys": [
+    {
+      "algorithm": "EdDSA",
+      "expires_at": "2027-01-01T00:00:00Z",
+      "key_id": "fixture-log-2025",
+      "not_before": "2025-01-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "fixture-log-2025",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "0EqyMnQrtKs6E2i9RhXk5tAiSrcaAWuvhSCjMsl3hzc"
+      },
+      "status": "retired",
+      "use": "transparency_checkpoint"
+    },
+    {
+      "algorithm": "EdDSA",
+      "expires_at": "2028-01-01T00:00:00Z",
+      "key_id": "fixture-log-2026",
+      "not_before": "2026-01-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "fixture-log-2026",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "6NpjpAymh8h8_OBcskp4bH51zEnHDbVXPwJvHGqGzqo"
+      },
+      "status": "active",
+      "use": "transparency_checkpoint"
+    },
+    {
+      "algorithm": "EdDSA",
+      "expires_at": "2028-01-01T00:00:00Z",
+      "key_id": "fixture-counter-2026",
+      "not_before": "2026-01-01T00:00:00Z",
+      "public_key_jwk": {
+        "alg": "EdDSA",
+        "crv": "Ed25519",
+        "kid": "fixture-counter-2026",
+        "kty": "OKP",
+        "use": "sig",
+        "x": "-kg0FH9uaQw2k-_2EzYEZAPNiuKhTzGzxAc1hWkjlWU"
+      },
+      "status": "active",
+      "use": "receipt_countersignature"
+    }
+  ]
+}

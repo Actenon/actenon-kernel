@@ -57,6 +57,10 @@
           "minLength": 1,
           "maxLength": 512
         },
+        "leaf_index": {
+          "type": "integer",
+          "minimum": 0
+        },
         "uri": {
           "type": "string",
           "format": "uri",

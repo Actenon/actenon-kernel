@@ -14,6 +14,7 @@ Use this package when you want to understand or run the repository's public comp
 - Refusal
 - Outcome Attestation
 - Receipt Counter-Signature
+- Transparency Log Proofs
 
 The central behavioral compatibility surface is the Protected Endpoint. The suite is built around whether the execution edge verifies proof, enforces replay when claimed, and refuses execution before side effects when the public rules fail.
 
@@ -22,6 +23,10 @@ Outcome Attestation coverage is opt-in and additive: it validates signed envelop
 Receipt Counter-Signature coverage is verifier-only: it validates a witness
 signature over a Receipt digest against a pinned public key set, including
 historical key IDs.
+
+Transparency Log coverage is verifier-only: it validates signed checkpoints,
+Merkle inclusion, append-only consistency, monitor updates, and rejection of
+counter-signatures whose digest is not included in the verified checkpoint.
 
 ## Contents
 

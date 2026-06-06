@@ -1,0 +1,23 @@
+{
+  "contract": {
+    "name": "transparency_checkpoint",
+    "version": "v1"
+  },
+  "issued_at": "2026-06-06T12:00:00Z",
+  "log": {
+    "id": "actenon-transparency-fixture",
+    "type": "service"
+  },
+  "root_hash": {
+    "algorithm": "sha-256",
+    "encoding": "hex",
+    "value": "2acddbbc6159accbd4959c3f3cbbbc8c22233932ef31ab29fb245c844c145334"
+  },
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "fixture-log-2025",
+    "value": "3McBloAXJFLeLEjcbZa8CJPh7FSItY6pXbondJ8Ko-pg_3fHdnPofS2nnjXPcGyPBqNM26GtLiyueZjSJ30-Aw"
+  },
+  "tree_size": 2
+}

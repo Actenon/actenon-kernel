@@ -10,6 +10,7 @@ KEYSTONE_TESTS=(
   "tests/integration/test_cloud_invoice_payment_conformance_vector.py"
   "tests/unit/test_outcome_attestation.py"
   "tests/conformance/test_countersignature_conformance.py"
+  "tests/conformance/test_transparency_log_conformance.py"
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_canonicalization_interop.py"
   "tests/conformance"
@@ -28,7 +29,9 @@ RUFF_TARGETS=(
   "tests/unit/test_external_anchors.py"
   "tests/unit/test_outcome_attestation.py"
   "actenon/verifier/countersignature.py"
+  "actenon/verifier/transparency.py"
   "tests/conformance/test_countersignature_conformance.py"
+  "tests/conformance/test_transparency_log_conformance.py"
   "scripts/public_hygiene_audit.py"
 )
 

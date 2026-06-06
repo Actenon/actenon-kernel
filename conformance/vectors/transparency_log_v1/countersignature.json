@@ -1,0 +1,27 @@
+{
+  "anchor_reference": {
+    "id": "actenon-transparency-fixture",
+    "leaf_index": 2,
+    "type": "transparency_log"
+  },
+  "contract": {
+    "name": "receipt_countersignature",
+    "version": "v1"
+  },
+  "receipt_digest": {
+    "algorithm": "sha-256",
+    "canonicalization": "RFC8785-JCS",
+    "value": "45c4949cc975ca51a6990ded2c45dc0ec6f92b3a9d547b9cd401e1c32133e1b1"
+  },
+  "signature": {
+    "algorithm": "EdDSA",
+    "encoding": "base64url",
+    "key_id": "fixture-counter-2026",
+    "value": "T-YCGIga_qBYDdVQSIV1AIHR_BMvSZmRNySncf0gv0S00ZHSUV7ZnJV0hoLOmp9QOIM98HbebDv1e8VD6CpSAQ"
+  },
+  "signed_at": "2026-06-06T12:00:30Z",
+  "witness": {
+    "id": "actenon-transparency-fixture",
+    "type": "service"
+  }
+}

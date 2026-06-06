@@ -93,6 +93,18 @@ const verified = verifyCountersignature(
 offline, selects the exact public key by `kid`, and supports retained
 historical keys. It performs no key fetch and contains no signing path.
 
+## Verify Transparency Proofs
+
+```ts
+const checkpoint = verifyCheckpointSignature(treeHead, pinnedPublicKeys);
+const inclusion = verifyInclusion(receiptDigest, inclusionProof, treeHead);
+const consistency = verifyConsistency(oldTreeHead, treeHead, consistencyProof);
+```
+
+`verifyMonitorUpdate` combines checkpoint-signature and consistency checks for
+an independent monitor. `verifyCountersignatureInclusion` rejects a
+counter-signature whose exact digest is not included at its declared log leaf.
+
 ## Example
 
 Run the plain Node protected-endpoint example:
@@ -127,6 +139,7 @@ Current coverage includes:
 - expired proof
 - strict and tolerant clock-boundary behavior
 - valid historical counter-signature plus unknown-key, wrong-key, and altered-digest rejection
+- transparency inclusion, consistency, key rotation, fork/rewind, and orphan rejection
 
 ## Example Fixtures
 
@@ -148,3 +161,5 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../schemas/pccb.v1.json`](../../schemas/pccb.v1.json)
 - [`../../spec/countersignature/SPEC.md`](../../spec/countersignature/SPEC.md)
 - [`../../schemas/receipt_countersignature.v1.json`](../../schemas/receipt_countersignature.v1.json)
+- [`../../spec/transparency-log/SPEC.md`](../../spec/transparency-log/SPEC.md)
+- [`../../schemas/transparency_checkpoint.v1.json`](../../schemas/transparency_checkpoint.v1.json)

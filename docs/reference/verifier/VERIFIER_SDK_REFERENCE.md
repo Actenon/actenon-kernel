@@ -50,10 +50,23 @@ Receipt counter-signature verification:
 
 - `verify_countersignature(receipt_or_digest, countersignature, trusted_keys)`
 
+Transparency-log verification:
+
+- `verify_checkpoint_signature(checkpoint, trusted_keys)`
+- `verify_inclusion(digest, inclusion_proof, checkpoint)`
+- `verify_consistency(old_checkpoint, new_checkpoint, consistency_proof)`
+- `verify_countersignature_inclusion(countersignature, inclusion_proof, checkpoint, trusted_keys)`
+- `verify_monitor_update(previous_checkpoint, current_checkpoint, consistency_proof, trusted_keys)`
+
 The counter-signature API is offline and verify-only. `trusted_keys` is an
 already trusted, pinned `key_discovery v1` document containing current and
 historical public keys. The verifier selects the exact public key by `kid`; it
 does not fetch keys, sign artifacts, or handle private key custody.
+
+The transparency APIs are also offline and verify-only. They validate signed
+checkpoints, Merkle inclusion, append-only consistency, and monitor updates.
+`verify_countersignature_inclusion` checks the log anchor after the caller has
+verified the counter-signature itself with `verify_countersignature`.
 
 ## What The Verifier Needs From A Protected Endpoint
 
@@ -134,6 +147,43 @@ The same conformance vectors are exercised by the TypeScript, Go, and Rust
 verifier SDKs. See
 [`../../../spec/countersignature/SPEC.md`](../../../spec/countersignature/SPEC.md)
 for the signed statement and key-rotation rules.
+
+Verify a transparency checkpoint and proof:
+
+```python
+from actenon.verifier import (
+    verify_checkpoint_signature,
+    verify_consistency,
+    verify_inclusion,
+    verify_monitor_update,
+)
+
+verified_checkpoint = verify_checkpoint_signature(
+    checkpoint,
+    pinned_public_keys,
+)
+verified_inclusion = verify_inclusion(
+    receipt_digest,
+    inclusion_proof,
+    checkpoint,
+)
+verified_history = verify_consistency(
+    previous_checkpoint,
+    checkpoint,
+    consistency_proof,
+)
+verified_update = verify_monitor_update(
+    previous_checkpoint,
+    checkpoint,
+    consistency_proof,
+    pinned_public_keys,
+)
+```
+
+See
+[`../../../spec/transparency-log/SPEC.md`](../../../spec/transparency-log/SPEC.md)
+for the hash domains, proof ordering, checkpoint signature input, and monitor
+state requirements.
 
 ## Standalone CLI Verification
 
@@ -246,6 +296,7 @@ The portable verifier SDK does not provide:
 - hosted replay state
 - hosted receipt pipelines
 - counter-signature issuance, signing, or private-key custody
+- a running transparency log, checkpoint signing, fetching, gossip, or durable monitor state
 
 ## Related Docs
 
@@ -255,4 +306,5 @@ The portable verifier SDK does not provide:
 - [../../../docs/reference/ecosystem/SIGNER_KMS_SPEC.md](../../../docs/reference/ecosystem/SIGNER_KMS_SPEC.md)
 - [../../../spec/key-discovery/SPEC.md](../../../spec/key-discovery/SPEC.md)
 - [../../../spec/countersignature/SPEC.md](../../../spec/countersignature/SPEC.md)
+- [../../../spec/transparency-log/SPEC.md](../../../spec/transparency-log/SPEC.md)
 - [HELLO_WORLD_PROTECTED_RESOURCE.md](HELLO_WORLD_PROTECTED_RESOURCE.md)

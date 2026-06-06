@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:actenon:contracts:transparency_inclusion_proof:v1",
+  "title": "Transparency Inclusion Proof v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "log_id",
+    "hash_algorithm",
+    "tree_size",
+    "leaf_index",
+    "leaf_digest",
+    "audit_path"
+  ],
+  "properties": {
+    "contract": {
+      "const": {"name": "transparency_inclusion_proof", "version": "v1"}
+    },
+    "log_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "hash_algorithm": {"const": "sha-256"},
+    "tree_size": {"type": "integer", "minimum": 1},
+    "leaf_index": {"type": "integer", "minimum": 0},
+    "leaf_digest": {"$ref": "#/$defs/artifactDigest"},
+    "audit_path": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    }
+  },
+  "$defs": {
+    "artifactDigest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value"],
+      "properties": {
+        "algorithm": {"const": "sha-256"},
+        "canonicalization": {"const": "RFC8785-JCS"},
+        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

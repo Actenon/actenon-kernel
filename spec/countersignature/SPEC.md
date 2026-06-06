@@ -38,7 +38,8 @@ Machine schema:
   "signed_at": "2026-04-10T09:02:00Z",
   "anchor_reference": {
     "type": "transparency_log",
-    "id": "optional-anchor-id"
+    "id": "optional-anchor-id",
+    "leaf_index": 2
   },
   "signature": {
     "algorithm": "EdDSA",
@@ -58,7 +59,10 @@ Required fields:
 - `signature`
 
 `anchor_reference` is optional. When present, it is covered by the signature.
-Verification of the referenced external system is a separate operation.
+For the `transparency_log` profile, `leaf_index` identifies the digest leaf and
+is verified according to
+[`../transparency-log/SPEC.md`](../transparency-log/SPEC.md). Verification of
+the referenced external system is a separate operation.
 
 ## Receipt Digest
 
