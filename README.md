@@ -154,7 +154,7 @@ If the proof does not validate, the lambda is never called.
 
 ## Action helper: no hand-written envelopes
 
-Use `gate.build_action(...)` for first integrations so developers do not have to hand-write the full `action_intent` envelope.
+Use `gate.build_action` for first integrations so developers do not have to hand-write the full `action_intent` envelope.
 
 The helper has safe local-development defaults, but production callers should pass real `tenant_id`, `requester_id`, `requester_type`, `target_type`, and `target_id` values so every proof, receipt, refusal, and audit record is attributable to the correct tenant, agent, principal, and resource.
 
