@@ -529,510 +529,81 @@ class PCCB:
 
 @dataclass(frozen=True)
 
-    def to_dict(self):
-        """Return a JSON-safe dictionary representation of this proof."""
-        def convert(value):
-            if isinstance(value, datetime):
-                return value.isoformat()
-            if isinstance(value, dict):
-                return {k: convert(v) for k, v in value.items()}
-            if isinstance(value, list):
-                return [convert(v) for v in value]
-            return value
 
-        return convert(asdict(self))
-
-    @classmethod
-    def from_dict(cls, payload):
-        """Recreate a proof from a dictionary produced by to_dict()."""
-        data = dict(payload)
-        for key in ("issued_at", "expires_at"):
-            if isinstance(data.get(key), str):
-                data[key] = datetime.fromisoformat(data[key])
-        return cls(**data)
-
-    def to_wire(self):
-        """Serialize proof to a compact HTTP-header-safe string."""
-        raw = json.dumps(self.to_dict(), separators=(",", ":"), sort_keys=True)
-        return base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii")
-
-    @classmethod
-    def from_wire(cls, value):
-        """Deserialize proof from an HTTP-header-safe string."""
-        raw = base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8")
-        return cls.from_dict(json.loads(raw))
-
-class Receipt:
-    receipt_id: str
-    intent_id: str
-    occurred_at: datetime
-    outcome: str
-    tenant: TenantRef
-    subject: PartyRef
-    action: ActionSpec
-    target: TargetRef
-    summary: str
-    phase: str | None = None
-    correlation: CorrelationRef | None = None
-    reason_codes: tuple[str, ...] = ()
-    follow_up: dict[str, Any] = field(default_factory=dict)
-    side_effects: dict[str, Any] = field(default_factory=dict)
-    details: dict[str, Any] = field(default_factory=dict)
-    metadata: dict[str, JsonScalar] = field(default_factory=dict)
-    extensions: dict[str, Any] = field(default_factory=dict)
-
-    @classmethod
-    def from_dict(cls, raw: Mapping[str, Any]) -> "Receipt":
-        data = expect_mapping(raw, "receipt")
-        contract = expect_mapping(data.get("contract"), "contract")
-        if contract.get("name") != "receipt" or contract.get("version") != "v1":
-            raise ValueError("contract must declare receipt v1")
-        reason_codes_raw = data.get("reason_codes", [])
-        if not isinstance(reason_codes_raw, list):
-            raise ValueError("reason_codes must be an array when provided")
-        return cls(
-            receipt_id=expect_string(data.get("receipt_id"), "receipt_id"),
-            intent_id=expect_string(data.get("intent_id"), "intent_id"),
-            occurred_at=parse_timestamp(data.get("occurred_at"), "occurred_at"),
-            outcome=expect_string(data.get("outcome"), "outcome"),
-            phase=data.get("phase"),
-            tenant=TenantRef.from_dict(data.get("tenant")),
-            subject=PartyRef.from_dict(data.get("subject"), "subject"),
-            action=ActionSpec.from_dict(data.get("action")),
-            target=TargetRef.from_dict(data.get("target")),
-            correlation=CorrelationRef.from_dict(data.get("correlation")) if data.get("correlation") else None,
-            summary=expect_string(data.get("summary"), "summary"),
-            reason_codes=tuple(expect_string(item, "reason_codes[]") for item in reason_codes_raw),
-            follow_up=dict(data.get("follow_up", {})),
-            side_effects=dict(data.get("side_effects", {})),
-            details=dict(data.get("details", {})),
-            metadata=dict(data.get("metadata", {})),
-            extensions=dict(data.get("extensions", {})),
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        payload: dict[str, Any] = {
-            "contract": {"name": "receipt", "version": "v1"},
-            "receipt_id": self.receipt_id,
-            "intent_id": self.intent_id,
-            "occurred_at": format_timestamp(self.occurred_at),
-            "outcome": self.outcome,
-            "tenant": self.tenant.to_dict(),
-            "subject": self.subject.to_dict(),
-            "action": self.action.to_dict(),
-            "target": self.target.to_dict(),
-            "summary": self.summary,
-        }
-        if self.phase is not None:
-            payload["phase"] = self.phase
-        if self.correlation is not None and self.correlation.to_dict():
-            payload["correlation"] = self.correlation.to_dict()
-        if self.reason_codes:
-            payload["reason_codes"] = list(self.reason_codes)
-        if self.follow_up:
-            payload["follow_up"] = self.follow_up
-        if self.side_effects:
-            payload["side_effects"] = self.side_effects
-        if self.details:
-            payload["details"] = self.details
-        if self.metadata:
-            payload["metadata"] = self.metadata
-        if self.extensions:
-            payload["extensions"] = self.extensions
-        return payload
-
-
-@dataclass(frozen=True, init=False)
-class Refusal:
-    refusal_id: str
-    category: str
-    reason_code: str
-    message: str
-    retryable: bool
-    refused_at: datetime
-    intent_id: str | None = None
-    tenant: TenantRef | None = None
-    subject: PartyRef | None = None
-    audience: AudienceRef | None = None
-    action: ActionSpec | None = None
-    target: TargetRef | None = None
-    correlation: CorrelationRef | None = None
-    rule_refs: tuple[str, ...] = ()
-    violations: tuple[Violation, ...] = ()
-    details: dict[str, Any] = field(default_factory=dict)
-    extensions: dict[str, Any] = field(default_factory=dict)
-
-    def __init__(
-        self,
-        refusal_id: str,
-        category: str,
-        reason_code: str | None = None,
-        message: str | None = None,
-        retryable: bool | None = None,
-        refused_at: datetime | None = None,
-        intent_id: str | None = None,
-        tenant: TenantRef | None = None,
-        subject: PartyRef | None = None,
-        audience: AudienceRef | None = None,
-        action: ActionSpec | None = None,
-        target: TargetRef | None = None,
-        correlation: CorrelationRef | None = None,
-        rule_refs: tuple[str, ...] = (),
-        violations: tuple[Violation, ...] = (),
-        details: dict[str, Any] | None = None,
-        extensions: dict[str, Any] | None = None,
-        *,
-        refusal_code: str | None = None,
-    ) -> None:
-        if refusal_code is not None:
-            warnings.warn(
-                "Refusal(refusal_code=...) is deprecated; use reason_code=...",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-        if reason_code is not None and refusal_code is not None and reason_code != refusal_code:
-            raise ValueError("reason_code and refusal_code must match when both are provided")
-        resolved_reason_code = reason_code if reason_code is not None else refusal_code
-        if resolved_reason_code is None:
-            raise TypeError("Refusal requires reason_code")
-        if message is None:
-            raise TypeError("Refusal requires message")
-        if retryable is None:
-            raise TypeError("Refusal requires retryable")
-        if refused_at is None:
-            raise TypeError("Refusal requires refused_at")
-
-        object.__setattr__(self, "refusal_id", refusal_id)
-        object.__setattr__(self, "category", category)
-        object.__setattr__(self, "reason_code", resolved_reason_code)
-        object.__setattr__(self, "message", message)
-        object.__setattr__(self, "retryable", retryable)
-        object.__setattr__(self, "refused_at", refused_at)
-        object.__setattr__(self, "intent_id", intent_id)
-        object.__setattr__(self, "tenant", tenant)
-        object.__setattr__(self, "subject", subject)
-        object.__setattr__(self, "audience", audience)
-        object.__setattr__(self, "action", action)
-        object.__setattr__(self, "target", target)
-        object.__setattr__(self, "correlation", correlation)
-        object.__setattr__(self, "rule_refs", rule_refs)
-        object.__setattr__(self, "violations", violations)
-        object.__setattr__(self, "details", dict(details or {}))
-        object.__setattr__(self, "extensions", dict(extensions or {}))
-
-    @property
-    def refusal_code(self) -> str:
-        """Deprecated compatibility alias for :attr:`reason_code`."""
-
-        warnings.warn(
-            "Refusal.refusal_code is deprecated; use reason_code",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.reason_code
-
-    @classmethod
-    def from_dict(cls, raw: Mapping[str, Any]) -> "Refusal":
-        data = expect_mapping(raw, "refusal")
-        contract = expect_mapping(data.get("contract"), "contract")
-        if contract.get("name") != "refusal" or contract.get("version") != "v1":
-            raise ValueError("contract must declare refusal v1")
-        rule_refs_raw = data.get("rule_refs", [])
-        if not isinstance(rule_refs_raw, list):
-            raise ValueError("rule_refs must be an array when provided")
-        violations_raw = data.get("violations", [])
-        if not isinstance(violations_raw, list):
-            raise ValueError("violations must be an array when provided")
-        reason_code_raw = data.get("reason_code")
-        legacy_refusal_code_raw = data.get("refusal_code")
-        if reason_code_raw is not None and legacy_refusal_code_raw is not None:
-            if reason_code_raw != legacy_refusal_code_raw:
-                raise ValueError("reason_code and refusal_code must match when both are provided")
-        reason_code = reason_code_raw if reason_code_raw is not None else legacy_refusal_code_raw
-        return cls(
-            refusal_id=expect_string(data.get("refusal_id"), "refusal_id"),
-            intent_id=data.get("intent_id"),
-            category=expect_string(data.get("category"), "category"),
-            reason_code=expect_string(reason_code, "reason_code"),
-            message=expect_string(data.get("message"), "message"),
-            retryable=expect_bool(data.get("retryable"), "retryable"),
-            refused_at=parse_timestamp(data.get("refused_at"), "refused_at"),
-            tenant=TenantRef.from_dict(data.get("tenant")) if data.get("tenant") else None,
-            subject=PartyRef.from_dict(data.get("subject"), "subject") if data.get("subject") else None,
-            audience=AudienceRef.from_dict(data.get("audience")) if data.get("audience") else None,
-            action=ActionSpec.from_dict(data.get("action")) if data.get("action") else None,
-            target=TargetRef.from_dict(data.get("target")) if data.get("target") else None,
-            correlation=CorrelationRef.from_dict(data.get("correlation")) if data.get("correlation") else None,
-            rule_refs=tuple(expect_string(item, "rule_refs[]") for item in rule_refs_raw),
-            violations=tuple(Violation.from_dict(item) for item in violations_raw),
-            details=dict(data.get("details", {})),
-            extensions=dict(data.get("extensions", {})),
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        payload: dict[str, Any] = {
-            "contract": {"name": "refusal", "version": "v1"},
-            "refusal_id": self.refusal_id,
-            "category": self.category,
-            "reason_code": self.reason_code,
-            "message": self.message,
-            "retryable": self.retryable,
-            "refused_at": format_timestamp(self.refused_at),
-        }
-        if self.intent_id is not None:
-            payload["intent_id"] = self.intent_id
-        if self.tenant is not None:
-            payload["tenant"] = self.tenant.to_dict()
-        if self.subject is not None:
-            payload["subject"] = self.subject.to_dict()
-        if self.audience is not None:
-            payload["audience"] = self.audience.to_dict()
-        if self.action is not None:
-            payload["action"] = self.action.to_dict()
-        if self.target is not None:
-            payload["target"] = self.target.to_dict()
-        if self.correlation is not None and self.correlation.to_dict():
-            payload["correlation"] = self.correlation.to_dict()
-        if self.rule_refs:
-            payload["rule_refs"] = list(self.rule_refs)
-        if self.violations:
-            payload["violations"] = [item.to_dict() for item in self.violations]
-        if self.details:
-            payload["details"] = self.details
-        if self.extensions:
-            payload["extensions"] = self.extensions
-        return payload
-
-
-@dataclass(frozen=True)
-class ExecutionAnchor:
-    published_at: datetime
-    outcome: str
-    action_hash: ActionHashSpec
-    pccb_digest: DigestSpec
-    receipt_digest: DigestSpec | None = None
-    refusal_digest: DigestSpec | None = None
-    metadata: dict[str, JsonScalar] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        if self.outcome not in {"executed", "refused"}:
-            raise ValueError("outcome must be 'executed' or 'refused'")
-        if self.outcome == "executed":
-            if self.receipt_digest is None:
-                raise ValueError("receipt_digest is required when outcome is 'executed'")
-            if self.refusal_digest is not None:
-                raise ValueError("refusal_digest must not be set when outcome is 'executed'")
-        if self.outcome == "refused":
-            if self.refusal_digest is None:
-                raise ValueError("refusal_digest is required when outcome is 'refused'")
-            if self.receipt_digest is not None:
-                raise ValueError("receipt_digest must not be set when outcome is 'refused'")
-        for key, value in self.metadata.items():
-            if not isinstance(key, str) or not key:
-                raise ValueError("metadata keys must be non-empty strings")
-            expect_json_scalar(value, f"metadata.{key}")
-
-    @classmethod
-    def from_dict(cls, raw: Mapping[str, Any]) -> "ExecutionAnchor":
-        data = expect_mapping(raw, "execution_anchor")
-        contract = expect_mapping(data.get("contract"), "contract")
-        if contract.get("name") != "execution_anchor" or contract.get("version") != "v1":
-            raise ValueError("contract must declare execution_anchor v1")
-        metadata_raw = data.get("metadata", {})
-        metadata_mapping = expect_mapping(metadata_raw, "metadata") if metadata_raw else {}
-        metadata = {
-            expect_string(key, "metadata key"): expect_json_scalar(value, f"metadata.{key}")
-            for key, value in metadata_mapping.items()
-        }
-        return cls(
-            published_at=parse_timestamp(data.get("published_at"), "published_at"),
-            outcome=expect_string(data.get("outcome"), "outcome"),
-            action_hash=ActionHashSpec.from_dict(data.get("action_hash")),
-            pccb_digest=DigestSpec.from_dict(data.get("pccb_digest"), "pccb_digest"),
-            receipt_digest=DigestSpec.from_dict(data.get("receipt_digest"), "receipt_digest")
-            if data.get("receipt_digest")
-            else None,
-            refusal_digest=DigestSpec.from_dict(data.get("refusal_digest"), "refusal_digest")
-            if data.get("refusal_digest")
-            else None,
-            metadata=metadata,
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        payload: dict[str, Any] = {
-            "contract": {"name": "execution_anchor", "version": "v1"},
-            "published_at": format_timestamp(self.published_at),
-            "outcome": self.outcome,
-            "action_hash": self.action_hash.to_dict(),
-            "pccb_digest": self.pccb_digest.to_dict(),
-        }
-        if self.receipt_digest is not None:
-            payload["receipt_digest"] = self.receipt_digest.to_dict()
-        if self.refusal_digest is not None:
-            payload["refusal_digest"] = self.refusal_digest.to_dict()
-        if self.metadata:
-            payload["metadata"] = dict(self.metadata)
-        return payload
-
-
-# ---------------------------------------------------------------------
-# Blessed PCCB proof transport API
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# PCCB wire transport helpers
+# ---------------------------------------------------------------------------
 #
-# PCCB is a frozen dataclass. Do not attach runtime-only fields to a proof.
-# Use these methods when a proof crosses a process, service, API, MCP or HTTP
-# boundary.
+# These helpers are intentionally attached after the dataclass definition so
+# they work without changing the existing PCCB constructor/signature.
 #
-#   wire = proof.to_wire()
-#   proof = PCCB.from_wire(wire)
+# Use:
+#   proof_header = proof.to_wire()
+#   proof = PCCB.from_wire(proof_header)
 #
+# The wire form is URL-safe base64 JSON. It is suitable for HTTP headers,
+# queues, webhooks and test clients.
 
-def _actenon_pccb_value_to_wire(value):
-    from dataclasses import asdict, is_dataclass
-    from datetime import datetime
+import base64 as _actenon_base64
+import dataclasses as _actenon_dataclasses
+import json as _actenon_json
+from datetime import datetime as _actenon_datetime
 
-    if isinstance(value, datetime):
+
+def _actenon_wire_jsonable(value):
+    if isinstance(value, _actenon_datetime):
         return value.isoformat()
-
-    if is_dataclass(value):
+    if _actenon_dataclasses.is_dataclass(value):
         return {
-            key: _actenon_pccb_value_to_wire(item)
-            for key, item in asdict(value).items()
+            key: _actenon_wire_jsonable(val)
+            for key, val in _actenon_dataclasses.asdict(value).items()
         }
-
     if isinstance(value, dict):
-        return {
-            key: _actenon_pccb_value_to_wire(item)
-            for key, item in value.items()
-        }
-
+        return {key: _actenon_wire_jsonable(val) for key, val in value.items()}
     if isinstance(value, (list, tuple)):
-        return [_actenon_pccb_value_to_wire(item) for item in value]
-
+        return [_actenon_wire_jsonable(item) for item in value]
     return value
 
 
-def _actenon_pccb_value_from_wire(value):
-    from datetime import datetime
-
-    if isinstance(value, dict):
-        return {
-            key: _actenon_pccb_value_from_wire(item)
-            for key, item in value.items()
-        }
-
-    if isinstance(value, list):
-        return [_actenon_pccb_value_from_wire(item) for item in value]
-
-    return value
+def _pccb_to_dict(self):
+    return _actenon_wire_jsonable(self)
 
 
-def _actenon_pccb_to_dict(self):
-    return _actenon_pccb_value_to_wire(self)
-
-
-@classmethod
-def _actenon_pccb_from_dict(cls, payload):
-    from datetime import datetime
-
+def _pccb_from_dict(cls, payload):
     data = dict(payload)
 
     for key in ("issued_at", "expires_at"):
-        if isinstance(data.get(key), str):
-            data[key] = datetime.fromisoformat(data[key])
+        value = data.get(key)
+        if isinstance(value, str):
+            data[key] = _actenon_datetime.fromisoformat(value)
 
     return cls(**data)
 
 
-def _actenon_pccb_to_wire(self):
-    import base64
-    import json
-
-    raw = json.dumps(
+def _pccb_to_wire(self):
+    raw = _actenon_json.dumps(
         self.to_dict(),
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
+    return _actenon_base64.urlsafe_b64encode(raw).decode("ascii")
 
-    return base64.urlsafe_b64encode(raw).decode("ascii")
 
+def _pccb_from_wire(cls, value):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("PCCB wire value must be a non-empty string")
 
-@classmethod
-def _actenon_pccb_from_wire(cls, value):
-    import base64
-    import json
+    try:
+        raw = _actenon_base64.urlsafe_b64decode(value.encode("ascii"))
+        payload = _actenon_json.loads(raw.decode("utf-8"))
+    except Exception as exc:
+        raise ValueError("Invalid PCCB wire value") from exc
 
-    raw = base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8")
-    payload = json.loads(raw)
     return cls.from_dict(payload)
 
 
-PCCB.to_dict = _actenon_pccb_to_dict
-PCCB.from_dict = _actenon_pccb_from_dict
-PCCB.to_wire = _actenon_pccb_to_wire
-PCCB.from_wire = _actenon_pccb_from_wire
-
-
-# --- Actenon PCCB wire transport helpers ---
-#
-# These helpers are deliberately attached after class definition so they work
-# with the current frozen dataclass model without changing constructor semantics.
-
-def _actenon_wire_normalise(value):
-    from dataclasses import asdict, is_dataclass
-    from datetime import datetime
-
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if is_dataclass(value):
-        return {k: _actenon_wire_normalise(v) for k, v in asdict(value).items()}
-    if isinstance(value, dict):
-        return {k: _actenon_wire_normalise(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [_actenon_wire_normalise(v) for v in value]
-    if isinstance(value, tuple):
-        return [_actenon_wire_normalise(v) for v in value]
-    return value
-
-
-def _actenon_parse_datetimes(payload):
-    from datetime import datetime
-
-    out = dict(payload)
-    for key in ("issued_at", "expires_at"):
-        value = out.get(key)
-        if isinstance(value, str):
-            out[key] = datetime.fromisoformat(value)
-    return out
-
-
-def _pccb_to_dict(self):
-    return _actenon_wire_normalise(self)
-
-
-@classmethod
-def _pccb_from_dict(cls, payload):
-    return cls(**_actenon_parse_datetimes(payload))
-
-
-def _pccb_to_wire(self):
-    import base64
-    import json
-
-    raw = json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return base64.urlsafe_b64encode(raw).decode("ascii")
-
-
-@classmethod
-def _pccb_from_wire(cls, token):
-    import base64
-    import json
-
-    raw = base64.urlsafe_b64decode(token.encode("ascii")).decode("utf-8")
-    return cls.from_dict(json.loads(raw))
-
-
 PCCB.to_dict = _pccb_to_dict
-PCCB.from_dict = _pccb_from_dict
+PCCB.from_dict = classmethod(_pccb_from_dict)
 PCCB.to_wire = _pccb_to_wire
-PCCB.from_wire = _pccb_from_wire
+PCCB.from_wire = classmethod(_pccb_from_wire)
+
