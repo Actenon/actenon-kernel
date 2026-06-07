@@ -150,6 +150,8 @@ That is the core mental model:
 
 If the proof does not validate, the lambda is never called.
 
+In local demos, `gate.mint_proof(action)` is used only to simulate the issuer so the example is runnable end-to-end. In production, proof issuance belongs outside the protected tool: your auth layer, policy engine, approval workflow, or control plane decides whether to mint proof. The execution boundary receives that proof and verifies it immediately before the side effect.
+
 ---
 
 ## Action helper: no hand-written envelopes
@@ -173,7 +175,11 @@ action = gate.build_action(
     requester_id="support-agent",
 )
 
+# Local demo only: mint a proof with the local development signer.
+# In production, your issuer/control plane mints the proof after auth,
+# policy checks, and any required approval. The protected tool only verifies it.
 proof = gate.mint_proof(action)
+
 outcome = gate.protect(
     action,
     proof,
