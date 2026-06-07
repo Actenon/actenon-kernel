@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
@@ -53,7 +53,7 @@ def build_refund_action(
 def refund_order(
     order_id: str,
     body: RefundRequest,
-    x_actenon_proof: str | None = Header(default=None),
+    x_actenon_proof: Optional[str] = Header(default=None),
 ) -> Any:
     action = build_refund_action(
         order_id=order_id,
