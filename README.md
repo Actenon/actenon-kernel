@@ -1,5 +1,10 @@
 # actenon-kernel
 
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
+![Runs locally](https://img.shields.io/badge/runs-locally-brightgreen)
+![No cloud required](https://img.shields.io/badge/cloud-not_required-lightgrey)
+
 **Stop AI agents from taking consequential actions they were never authorised to take.**
 
 Actenon Kernel is the open proof gate for agentic execution.
@@ -22,7 +27,7 @@ It is an execution-edge control:
 
 ---
 
-## What this is
+## 10-second read
 
 Actenon Kernel is a local, open-source Python execution gate for AI-agent actions.
 
@@ -39,48 +44,9 @@ Use it when an agent, workflow, automation or tool caller can trigger something 
 - mutating a database;
 - running an MCP tool with side effects.
 
-The core idea is simple:
+The core idea:
 
 > A model can propose an action. A protected boundary must verify proof before that action can execute.
-
----
-
-## Where Actenon sits
-
-Actenon can be used in two complementary places.
-
-### 1. Agent framework boundary
-
-Use Actenon inside an agent/tool framework adapter when you control the tool wrapper.
-
-Examples:
-
-- MCP / FastMCP tool wrappers;
-- LangChain or LangGraph tools;
-- OpenAI / Claude / CrewAI / LlamaIndex tool adapters;
-- browser automation or coding-agent tool registries.
-
-This protects the point where an agent calls a tool.
-
-### 2. Resource boundary
-
-Use Actenon directly at the resource, service or API boundary when you own the system that performs the side effect.
-
-Examples:
-
-- refund API;
-- payment service;
-- data export endpoint;
-- IAM grant service;
-- deployment pipeline;
-- database mutation service;
-- internal workflow API.
-
-This is the stronger deployment pattern.
-
-Even if multiple agents, workflows or frameworks can reach the same resource, the resource itself refuses execution unless valid proof is bound to the exact action.
-
-> Protect the boundary you own. Do not rely on the agent to be safe.
 
 ---
 
@@ -141,37 +107,42 @@ That is the guarantee Actenon is built around:
 
 ---
 
-## Try the core examples
+## Where Actenon sits
 
-Run the smallest proof-bound path:
+Actenon can be used in two complementary places.
 
-```bash
-python examples/quickstart_min.py
-```
+### Agent framework boundary
 
-Run the interactive demo:
+Use Actenon inside an agent/tool framework adapter when you control the tool wrapper.
 
-```bash
-python examples/interactive_execution_demo.py
-```
+Examples:
 
-Run issuer-side policy preflight:
+- MCP / FastMCP tool wrappers;
+- LangChain or LangGraph tools;
+- OpenAI / Claude / CrewAI / LlamaIndex tool adapters;
+- browser automation or coding-agent tool registries.
 
-```bash
-python -m pytest examples/protected_policy_preflight_refund -q
-```
+This protects the point where an agent calls a tool.
 
-Run core evidence examples:
+### Resource boundary
 
-```bash
-python -m pytest \
-  examples/protected_policy_preflight_refund \
-  examples/financial_agent_protected_transfer \
-  examples/fastmcp_financial_transfer \
-  examples/protected_multi_agent_swarm \
-  examples/protected_iam_control_plane \
-  -q
-```
+Use Actenon directly at the resource, service or API boundary when you own the system that performs the side effect.
+
+Examples:
+
+- refund API;
+- payment service;
+- data export endpoint;
+- IAM grant service;
+- deployment pipeline;
+- database mutation service;
+- internal workflow API.
+
+This is the stronger deployment pattern.
+
+Even if multiple agents, workflows or frameworks can reach the same resource, the resource itself refuses execution unless valid proof is bound to the exact action.
+
+> **Protect the boundary you own. Do not rely on the agent to be safe.**
 
 ---
 
@@ -204,7 +175,7 @@ outcome = gate.protect(
 )
 ```
 
-The model is:
+The model:
 
 1. Build the action intent.
 2. Present proof for that exact action.
@@ -269,6 +240,40 @@ Actenon Cloud is an optional managed issuer and governance layer for teams that 
 The security guarantee is not gated behind Actenon Cloud:
 
 > **No valid proof, no execution.**
+
+---
+
+## Try the core examples
+
+Run the smallest proof-bound path:
+
+```bash
+python examples/quickstart_min.py
+```
+
+Run the interactive demo:
+
+```bash
+python examples/interactive_execution_demo.py
+```
+
+Run issuer-side policy preflight:
+
+```bash
+python -m pytest examples/protected_policy_preflight_refund -q
+```
+
+Run core evidence examples:
+
+```bash
+python -m pytest \
+  examples/protected_policy_preflight_refund \
+  examples/financial_agent_protected_transfer \
+  examples/fastmcp_financial_transfer \
+  examples/protected_multi_agent_swarm \
+  examples/protected_iam_control_plane \
+  -q
+```
 
 ---
 
