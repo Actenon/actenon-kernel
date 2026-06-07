@@ -122,23 +122,44 @@ Expected outcome: the authorised action executes, and the tampered/replayed/unpr
 
 ---
 
-## The 3-line adoption model
+## Drop-in boundary model
 
 Start here.
 
-The direct `gate.protect()` path is the lowest-friction way to understand and adopt Actenon.
+The direct `gate.protect()` path is the lowest-friction way to understand and adopt Actenon. It keeps the model’s proposed action separate from the protected side effect.
 
 ```python
 from actenon import ActenonGate
 
 gate = ActenonGate.local_dev(audience="service:refunds")
 
-proof = gate.mint_proof(action)   # normally issued by your control plane
+def issue_refund(order_id: str, amount_cents: int):
+    return {
+        "status": "refunded",
+        "order_id": order_id,
+        "amount_cents": amount_cents,
+    }
+
+action = gate.build_action(
+    "refund.issue",
+    "payment.refund",
+    {"order_id": "ord-123", "amount_cents": 2500},
+    target_type="order",
+    target_id="ord-123",
+    tenant_id="demo",
+    requester_id="support-agent",
+)
+
+# Local demo only: mint a proof with the local development signer.
+# In production, your issuer/control plane mints proof after auth,
+# policy checks, and any required approval. The protected tool only verifies it.
+proof = gate.mint_proof(action)
 
 outcome = gate.protect(
     action,
     proof,
     lambda: issue_refund(order_id="ord-123", amount_cents=2500),
+    audience="service:refunds",
 )
 ```
 
@@ -164,6 +185,9 @@ The helper has safe local-development defaults, but production callers should pa
 from actenon import ActenonGate
 
 gate = ActenonGate.local_dev(audience="service:refunds")
+
+def issue_refund(order_id: str, amount_cents: int):
+    return {"refunded": order_id, "amount_cents": amount_cents}
 
 action = gate.build_action(
     "refund.issue",
@@ -192,10 +216,204 @@ The helper fills the contract, timestamps, intent id, tenant, requester, action,
 
 ---
 
+## Drop-in framework wrappers
+
+These are copy/paste starting points for common agent runtimes. The proof travels through framework/runtime metadata, not as a normal model-visible tool argument.
+
+### LangChain / LangGraph
+
+Use `RunnableConfig` so the proof is supplied by the execution runtime rather than the LLM prompt or tool schema.
+
+```python
+from typing import Any
+
+from actenon import ActenonGate
+from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import tool
+
+gate = ActenonGate.local_dev(audience="service:billing")
+
+BALANCES: dict[str, int] = {}
+
+def update_balance_in_store(customer_id: str, delta_cents: int) -> dict[str, Any]:
+    BALANCES[customer_id] = BALANCES.get(customer_id, 0) + delta_cents
+    return {
+        "customer_id": customer_id,
+        "balance_cents": BALANCES[customer_id],
+    }
+
+@tool
+def update_customer_balance(
+    customer_id: str,
+    delta_cents: int,
+    config: RunnableConfig,
+) -> dict[str, Any]:
+    """Update a customer balance. The proof is supplied by runtime config, not by the LLM."""
+
+    proof = config.get("configurable", {}).get("x-actenon-proof")
+
+    action = gate.build_action(
+        "balance.update",
+        "financial.write",
+        {"customer_id": customer_id, "delta_cents": delta_cents},
+        target_type="customer",
+        target_id=customer_id,
+        tenant_id="demo",
+        requester_id="billing-agent",
+    )
+
+    return gate.protect(
+        action,
+        proof,
+        lambda: update_balance_in_store(customer_id, delta_cents),
+        audience="service:billing",
+    )
+```
+
+Example runtime call shape:
+
+```python
+# Local demo only. In production, this proof comes from your issuer/control plane.
+action = gate.build_action(
+    "balance.update",
+    "financial.write",
+    {"customer_id": "cus-123", "delta_cents": 5000},
+    target_type="customer",
+    target_id="cus-123",
+    tenant_id="demo",
+    requester_id="billing-agent",
+)
+proof = gate.mint_proof(action)
+
+update_customer_balance.invoke(
+    {"customer_id": "cus-123", "delta_cents": 5000},
+    config={"configurable": {"x-actenon-proof": proof}},
+)
+```
+
+### FastMCP / Claude tool server
+
+Protect MCP tools at the server boundary. If the agent calls the tool without valid proof, the side effect is refused before it runs.
+
+```python
+from typing import Any
+
+from actenon import ActenonGate
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("Secure Customer Tools")
+gate = ActenonGate.local_dev(audience="mcp:customers")
+
+CUSTOMERS: dict[str, dict[str, Any]] = {
+    "cus-123": {"status": "active"},
+}
+
+def delete_customer_from_store(customer_id: str) -> dict[str, str]:
+    CUSTOMERS.pop(customer_id, None)
+    return {"deleted": customer_id}
+
+def proof_from_context(ctx: Any) -> str | None:
+    """Adapt this helper to your MCP transport/context object."""
+    if ctx is None:
+        return None
+
+    request = getattr(ctx, "request", None)
+    meta = getattr(request, "meta", None)
+
+    if isinstance(meta, dict):
+        return meta.get("x-actenon-proof") or meta.get("X-Actenon-Proof")
+
+    headers = getattr(request, "headers", None)
+    if isinstance(headers, dict):
+        return headers.get("x-actenon-proof") or headers.get("X-Actenon-Proof")
+
+    return None
+
+@mcp.tool()
+def delete_customer(customer_id: str, ctx: Any = None) -> dict[str, Any]:
+    proof = proof_from_context(ctx)
+
+    action = gate.build_action(
+        "customer.delete",
+        "customer.delete",
+        {"customer_id": customer_id},
+        target_type="customer",
+        target_id=customer_id,
+        tenant_id="demo",
+        requester_id="customer-agent",
+    )
+
+    outcome = gate.protect(
+        action,
+        proof,
+        lambda: delete_customer_from_store(customer_id),
+        audience="mcp:customers",
+    )
+
+    if not outcome.allowed:
+        return {
+            "status": "refused",
+            "reason": outcome.reason,
+        }
+
+    return {
+        "status": "executed",
+        "result": outcome.result,
+    }
+```
+
+### FastAPI / HTTP
+
+For service boundaries, keep proof out of the request body. Pass it in the `X-Actenon-Proof` header.
+
+```python
+from typing import Any
+
+from actenon import ActenonGate
+from fastapi import FastAPI, Header, HTTPException
+
+app = FastAPI()
+gate = ActenonGate.local_dev(audience="service:refunds")
+
+def issue_refund(order_id: str, amount_cents: int) -> dict[str, Any]:
+    return {"refunded": order_id, "amount_cents": amount_cents}
+
+@app.post("/refunds/{order_id}")
+def refund(
+    order_id: str,
+    amount_cents: int,
+    x_actenon_proof: str | None = Header(default=None, alias="X-Actenon-Proof"),
+):
+    action = gate.build_action(
+        "refund.issue",
+        "payment.refund",
+        {"order_id": order_id, "amount_cents": amount_cents},
+        target_type="order",
+        target_id=order_id,
+        tenant_id="demo",
+        requester_id="support-agent",
+    )
+
+    outcome = gate.protect(
+        action,
+        x_actenon_proof,
+        lambda: issue_refund(order_id, amount_cents),
+        audience="service:refunds",
+    )
+
+    if not outcome.allowed:
+        raise HTTPException(status_code=403, detail=outcome.reason)
+
+    return outcome.result
+```
+
+---
+
 ## Minimal example: protected refund
 
 ```python
 from datetime import datetime, timedelta, timezone
+
 from actenon import ActenonGate
 
 now = datetime.now(timezone.utc)
@@ -267,10 +485,10 @@ Once the direct path is understood, use the framework adapter that matches your 
 |---|---|---|
 | Direct Python | Argument to `gate.protect()` | First adoption, tests, services, jobs, workers |
 | MCP / FastMCP | Request metadata / context | Protecting MCP tools |
-| LangChain | `RunnableConfig` | Keeping proof out of model-visible tool schemas |
+| LangChain / LangGraph | `RunnableConfig` | Keeping proof out of model-visible tool schemas |
 | FastAPI / HTTP | `X-Actenon-Proof` header | Protecting HTTP APIs and service boundaries |
 
-The evidence examples below are intentionally runnable. They show how proof enters each runtime channel and how refusals behave locally.
+The examples above are copy/paste wrappers. The evidence examples below are runnable proof cases that show how refusals behave locally.
 
 ---
 
@@ -339,7 +557,7 @@ Actenon’s position is simple:
 
 ## Evidence: LangChain
 
-The LangChain example demonstrates proof injection through `RunnableConfig`.
+The LangChain pattern demonstrates proof injection through `RunnableConfig`.
 
 This matters because the proof is **not** a model-visible tool argument.
 
@@ -500,6 +718,8 @@ For production design details, see:
 - [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md)
 - [`SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
 
+---
+
 ## Architecture
 
 A typical Actenon deployment has three layers:
@@ -583,6 +803,12 @@ Run quickstart:
 
 ```bash
 python examples/quickstart_min.py
+```
+
+Run interactive demo:
+
+```bash
+python examples/interactive_execution_demo.py
 ```
 
 Run evidence:
