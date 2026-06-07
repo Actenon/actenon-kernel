@@ -801,3 +801,4 @@ Actenon Kernel is an open-source execution gate and evidence standard for proof-
 The goal is to make proof-bound execution a normal default for high-risk AI-agent actions.
 
 > **No valid proof, no execution.**
+<!-- README_LF_NORMALIZED_FOR_GITHUB_RENDERING -->
