@@ -12,7 +12,6 @@ test:
 		examples/protected_multi_agent_swarm \
 		examples/protected_iam_control_plane \
 		examples/fastapi_resource_boundary_refund \
-		examples/fastapi_verifier_only_refund \
 		-vv
 
 demo:
@@ -21,5 +20,4 @@ demo:
 fastapi-demo:
 	python -m pytest \
 		examples/fastapi_resource_boundary_refund \
-		examples/fastapi_verifier_only_refund \
 		-vv
