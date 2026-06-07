@@ -6,7 +6,7 @@
 
 Actenon protects the place where AI agents become dangerous: the execution boundary.
 
-Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary — the API, MCP tool, service, database, payments rail, IAM control plane, release pipeline, clinical operation, infrastructure endpoint, or internal workflow — decides whether the action is allowed to happen.
+Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary, the API, MCP tool, service, database, payments rail, IAM control plane, release pipeline, clinical operation, infrastructure endpoint, or internal workflow, decides whether the action is allowed to happen.
 
 Actenon refuses consequential actions unless the caller presents a cryptographic proof bound to the **exact action** being attempted.
 
