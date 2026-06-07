@@ -281,6 +281,43 @@ class ActenonGate:
 
         return action
 
+
+    def mint_proof_after_preflight(self, action_intent, preflight, **mint_kwargs):
+        """Mint proof only after issuer/control-plane preflight policy allows it.
+
+        This is intentionally domain-neutral. Actenon does not hard-code business
+        rules such as refund limits or delete ceilings. Callers provide a
+        preflight callable that validates the action before proof issuance.
+
+        The preflight callable may:
+        - return True / None to allow proof issuance
+        - return False to deny proof issuance
+        - raise an exception to deny proof issuance with a domain-specific reason
+        - return an object or dict with allowed=False / decision='deny'
+        """
+        if preflight is None:
+            raise ValueError("mint_proof_after_preflight requires a preflight policy callable")
+
+        decision = preflight(action_intent)
+
+        if decision is False:
+            raise PermissionError("PREFLIGHT_POLICY_DENIED")
+
+        if isinstance(decision, dict):
+            allowed = decision.get("allowed")
+            status = str(decision.get("decision", decision.get("status", ""))).lower()
+            if allowed is False or status in {"deny", "denied", "refuse", "refused", "block", "blocked"}:
+                reason = decision.get("reason", "PREFLIGHT_POLICY_DENIED")
+                raise PermissionError(str(reason))
+
+        allowed_attr = getattr(decision, "allowed", None)
+        if allowed_attr is False:
+            reason = getattr(decision, "reason", "PREFLIGHT_POLICY_DENIED")
+            raise PermissionError(str(reason))
+
+        return self.mint_proof(action_intent, **mint_kwargs)
+
+
     @classmethod
     def local_dev(
         cls,
