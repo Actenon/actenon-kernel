@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import inspect
 import json
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Optional, Union
 
 from actenon.core import ContractValidationError
 from actenon.gate import ActenonGate, GateOutcome
@@ -25,10 +25,10 @@ except ImportError as exc:  # pragma: no cover - exercised without the optional 
 ACTENON_PROOF_HEADER = "X-Actenon-Proof"
 ACTENON_EVIDENCE_HEADER = "X-Actenon-Evidence"
 
-ActionBuilder = Callable[[Mapping[str, Any]], ActionIntent | dict[str, Any]]
+ActionBuilder = Callable[[Mapping[str, Any]], Union[ActionIntent, dict[str, Any]]]
 EvidenceBuilder = Callable[
     [Mapping[str, Any]],
-    Mapping[str, Any] | PreflightEvidence | None,
+    Optional[Union[Mapping[str, Any], PreflightEvidence]],
 ]
 SideEffect = Callable[[Mapping[str, Any]], Any]
 
@@ -59,8 +59,8 @@ def fastapi_dependency(
     action_builder: ActionBuilder,
     side_effect: SideEffect,
     body_model: type[Any] | None = None,
-    audience: str | None = None,
-    evidence_builder: EvidenceBuilder | None = None,
+    audience: Optional[str] = None,
+    evidence_builder: Optional[EvidenceBuilder] = None,
     proof_header: str = ACTENON_PROOF_HEADER,
     evidence_header: str = ACTENON_EVIDENCE_HEADER,
 ) -> Callable[[Request], Any]:
