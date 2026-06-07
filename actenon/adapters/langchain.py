@@ -51,10 +51,10 @@ def protected_structured_tool(
     domain_function: Callable[..., Any],
     *,
     action_builder: ActionBuilder,
-    audience: str | None = None,
-    evidence_builder: EvidenceBuilder | None = None,
-    name: str | None = None,
-    description: str | None = None,
+    audience: Optional[str] = None,
+    evidence_builder: Optional[EvidenceBuilder] = None,
+    name: Optional[str] = None,
+    description: Optional[str] = None,
     return_direct: bool = False,
 ) -> StructuredTool:
     """Wrap a plain sync function without exposing proof fields to the model."""
