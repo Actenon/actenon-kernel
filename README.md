@@ -1,6 +1,8 @@
 # actenon-kernel
 
-**The open proof gate for agentic execution.**
+**Stop AI agents from taking consequential actions they were never authorised to take.**
+
+Actenon Kernel is the open proof gate for agentic execution.
 
 > **No valid proof, no execution.**
 
@@ -20,21 +22,65 @@ It is an execution-edge control:
 
 ---
 
-## Why this exists
+## What this is
 
-AI agents are moving from chat to action.
+Actenon Kernel is a local, open-source Python execution gate for AI-agent actions.
 
-They can now call tools, issue refunds, deploy code, modify databases, update IAM roles, export data, restart infrastructure, administer workflows and coordinate with other agents.
+It verifies proof immediately before a side effect runs.
 
-That creates a new failure mode:
+Use it when an agent, workflow, automation or tool caller can trigger something consequential:
 
-> The model may be wrong, compromised, manipulated, over-authorised, prompt-injected or simply confused — but the side effect still happens.
+- refunding money;
+- sending a payment;
+- exporting data;
+- deleting a customer;
+- changing IAM permissions;
+- deploying to production;
+- mutating a database;
+- running an MCP tool with side effects.
 
-Actenon focuses on the moment that matters most:
+The core idea is simple:
 
-> The execution gap: the moment between an agent proposing an action and a system actually doing it.
+> A model can propose an action. A protected boundary must verify proof before that action can execute.
 
-At that point, the boundary must be deterministic.
+---
+
+## Where Actenon sits
+
+Actenon can be used in two complementary places.
+
+### 1. Agent framework boundary
+
+Use Actenon inside an agent/tool framework adapter when you control the tool wrapper.
+
+Examples:
+
+- MCP / FastMCP tool wrappers;
+- LangChain or LangGraph tools;
+- OpenAI / Claude / CrewAI / LlamaIndex tool adapters;
+- browser automation or coding-agent tool registries.
+
+This protects the point where an agent calls a tool.
+
+### 2. Resource boundary
+
+Use Actenon directly at the resource, service or API boundary when you own the system that performs the side effect.
+
+Examples:
+
+- refund API;
+- payment service;
+- data export endpoint;
+- IAM grant service;
+- deployment pipeline;
+- database mutation service;
+- internal workflow API.
+
+This is the stronger deployment pattern.
+
+Even if multiple agents, workflows or frameworks can reach the same resource, the resource itself refuses execution unless valid proof is bound to the exact action.
+
+> Protect the boundary you own. Do not rely on the agent to be safe.
 
 ---
 
@@ -76,9 +122,28 @@ This repo is designed to be evaluated locally: no cloud account, no external ser
 
 ---
 
-## First things to try
+## What just happened
 
-Start with the smallest proof:
+The demo creates one valid proof for one approved refund.
+
+Then it tries four execution paths:
+
+- approved refund: proof matches the exact action, so the side effect executes;
+- hallucinated refund: proof does not match the changed order and amount, so execution is refused;
+- replay: the same proof is reused, so execution is refused;
+- no proof: the action has no proof, so execution is refused.
+
+The ledger only contains the approved action.
+
+That is the guarantee Actenon is built around:
+
+> **No valid proof, no execution.**
+
+---
+
+## Try the core examples
+
+Run the smallest proof-bound path:
 
 ```bash
 python examples/quickstart_min.py
@@ -90,13 +155,13 @@ Run the interactive demo:
 python examples/interactive_execution_demo.py
 ```
 
-Run the issuer-side policy preflight evidence:
+Run issuer-side policy preflight:
 
 ```bash
 python -m pytest examples/protected_policy_preflight_refund -q
 ```
 
-Run the core evidence suite:
+Run core evidence examples:
 
 ```bash
 python -m pytest \
@@ -110,22 +175,46 @@ python -m pytest \
 
 ---
 
-## The mental model
+## The 3-line adoption model
 
-Every consequential action must present proof that says:
+Start here.
 
-- who authorised it;
-- what action was authorised;
-- what exact parameters were authorised;
-- which audience/service may execute it;
-- when the proof was issued;
-- when it expires;
-- whether it has already been used;
-- what policy evidence, if any, was required.
+```python
+from actenon import ActenonGate
 
-The protected boundary verifies that proof immediately before execution.
+gate = ActenonGate.local_dev(audience="service:refunds")
 
-If the attempted action does not match the proof exactly, the side effect does not run.
+action = gate.build_action(
+    "refund.issue",
+    "payment.refund",
+    {"order_id": "ord-123", "amount_cents": 2500},
+    target_type="order",
+    target_id="ord-123",
+    tenant_id="demo",
+    requester_id="support-agent",
+)
+
+proof = gate.mint_proof(action)  # Local demo only.
+
+outcome = gate.protect(
+    action,
+    proof,
+    lambda: issue_refund(order_id="ord-123", amount_cents=2500),
+    audience="service:refunds",
+)
+```
+
+The model is:
+
+1. Build the action intent.
+2. Present proof for that exact action.
+3. Protect the side effect.
+
+If the proof does not validate, the lambda is never called.
+
+In production, proof issuance belongs outside the protected tool or resource. Your issuer/control plane decides whether to mint proof after authentication, policy checks, tenant checks, evidence checks and any required approval.
+
+The protected boundary only verifies.
 
 ---
 
@@ -183,50 +272,6 @@ The security guarantee is not gated behind Actenon Cloud:
 
 ---
 
-## The 3-line adoption model
-
-Start here.
-
-The direct `gate.protect()` path is the lowest-friction way to understand and adopt Actenon.
-
-```python
-from actenon import ActenonGate
-
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-action = gate.build_action(
-    "refund.issue",
-    "payment.refund",
-    {"order_id": "ord-123", "amount_cents": 2500},
-    target_type="order",
-    target_id="ord-123",
-    tenant_id="demo",
-    requester_id="support-agent",
-)
-
-# Local demo only.
-# In production, your issuer/control plane mints proof after auth,
-# policy checks and any required approval. The protected tool only verifies it.
-proof = gate.mint_proof(action)
-
-outcome = gate.protect(
-    action,
-    proof,
-    lambda: issue_refund(order_id="ord-123", amount_cents=2500),
-    audience="service:refunds",
-)
-```
-
-That is the core mental model:
-
-1. Build the action intent.
-2. Present proof for that exact action.
-3. Protect the side effect.
-
-If the proof does not validate, the lambda is never called.
-
----
-
 ## Issuer-side policy preflight
 
 Proof should not be minted just because an action has the right shape.
@@ -244,7 +289,7 @@ A protected refund policy might enforce:
 - the requester must be allowed to request the refund;
 - required approval evidence must be present for high-risk actions.
 
-Run the policy preflight evidence:
+Run the evidence:
 
 ```bash
 python -m pytest examples/protected_policy_preflight_refund -q
@@ -263,150 +308,22 @@ The principle:
 
 ---
 
-## Framework adoption paths
+## Adoption paths
 
 Actenon is designed to be adopted at the execution boundary with low developer friction.
 
-Use the direct Python path first. Then use the framework adapter that matches your runtime.
+Common paths:
 
-Supported adoption patterns include:
-
-- Direct Python: proof passed to `gate.protect()`.
-- MCP / FastMCP: proof passed through request metadata/context.
-- LangChain / LangGraph: proof passed through `RunnableConfig`.
-- FastAPI / HTTP: proof passed through an `X-Actenon-Proof` header.
-- Express / HTTP: proof passed through a header or request metadata.
+- Direct Python: protect one function with `gate.protect()`.
+- MCP / FastMCP: protect model-visible MCP tools at the server boundary.
+- LangChain / LangGraph: pass proof through `RunnableConfig`, outside the model-visible tool schema.
+- FastAPI / HTTP: pass proof through an `X-Actenon-Proof` header.
+- Resource API: verify proof directly before the backend side effect.
+- Multi-agent systems: enforce replay protection with a shared durable replay store.
 
 The proof should not be exposed as a normal model-controlled argument.
 
----
-
-## LangChain / LangGraph sketch
-
-Keep proof outside the model-visible tool schema by passing it through `RunnableConfig`.
-
-```python
-from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import tool
-
-from actenon import ActenonGate
-
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-def issue_refund(order_id: str, amount_cents: int):
-    return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
-
-@tool
-def refund_order(order_id: str, amount_cents: int, config: RunnableConfig):
-    \"\"\"Issue an approved refund.\"\"\"
-    proof = config.get("configurable", {}).get("x-actenon-proof")
-
-    action = gate.build_action(
-        "refund.issue",
-        "payment.refund",
-        {"order_id": order_id, "amount_cents": amount_cents},
-        target_type="order",
-        target_id=order_id,
-        tenant_id="demo",
-        requester_id="support-agent",
-    )
-
-    return gate.protect(
-        action,
-        proof,
-        lambda: issue_refund(order_id, amount_cents),
-        audience="service:refunds",
-    )
-```
-
----
-
-## FastMCP sketch
-
-Protect model-visible MCP tools at the server boundary.
-
-```python
-from mcp.server.fastmcp import FastMCP
-
-from actenon import ActenonGate
-
-mcp = FastMCP("Protected Refund Server")
-gate = ActenonGate.local_dev(audience="mcp:refunds")
-
-def issue_refund(order_id: str, amount_cents: int):
-    return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
-
-@mcp.tool()
-def refund_order(order_id: str, amount_cents: int, ctx=None) -> str:
-    \"\"\"Issue an approved refund.\"\"\"
-    proof = None
-
-    if ctx is not None:
-        proof = getattr(getattr(ctx, "request", None), "meta", {}).get("X-Actenon-Proof")
-
-    action = gate.build_action(
-        "refund.issue",
-        "payment.refund",
-        {"order_id": order_id, "amount_cents": amount_cents},
-        target_type="order",
-        target_id=order_id,
-        tenant_id="demo",
-        requester_id="mcp-agent",
-    )
-
-    outcome = gate.protect(
-        action,
-        proof,
-        lambda: issue_refund(order_id, amount_cents),
-        audience="mcp:refunds",
-    )
-
-    status = getattr(outcome, "status", None)
-    reason = getattr(outcome, "reason", "refused")
-
-    return "Executed" if status == "EXECUTED" else f"Denied: {reason}"
-```
-
----
-
-## FastAPI / HTTP sketch
-
-Pass proof in a header, away from the request body the agent composes.
-
-```python
-from fastapi import FastAPI, Header
-
-from actenon import ActenonGate
-
-app = FastAPI()
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-def issue_refund(order_id: str, amount_cents: int):
-    return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
-
-@app.post("/refunds/{order_id}")
-def refund_order(
-    order_id: str,
-    amount_cents: int,
-    x_actenon_proof: str | None = Header(default=None),
-):
-    action = gate.build_action(
-        "refund.issue",
-        "payment.refund",
-        {"order_id": order_id, "amount_cents": amount_cents},
-        target_type="order",
-        target_id=order_id,
-        tenant_id="demo",
-        requester_id="agent-or-service",
-    )
-
-    return gate.protect(
-        action,
-        x_actenon_proof,
-        lambda: issue_refund(order_id, amount_cents),
-        audience="service:refunds",
-    )
-```
+See [`INTEGRATIONS.md`](INTEGRATIONS.md) and [`MCP_HERO_PATH.md`](MCP_HERO_PATH.md) for deeper integration patterns.
 
 ---
 
@@ -580,7 +497,7 @@ root = Path(".")
 s = Path("README.md").read_text(encoding="utf-8")
 missing = []
 
-for link in re.findall(r"\\[[^\\]]+\\]\\(([^)]+)\\)", s):
+for link in re.findall(r"\[[^\]]+\]\(([^)]+)\)", s):
     if link.startswith(("http://", "https://", "#", "mailto:")):
         continue
 
@@ -591,7 +508,7 @@ for link in re.findall(r"\\[[^\\]]+\\]\\(([^)]+)\\)", s):
 
 if missing:
     print("Missing README links:")
-    print("\\n".join(missing))
+    print("\n".join(missing))
     raise SystemExit(1)
 
 print("README links OK")
