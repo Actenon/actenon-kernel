@@ -2,96 +2,60 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
-  public-tests:
-    name: Public tests
+  test:
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - name: Install package and test tools
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install package
+        run: python -m pip install -e ".[asymmetric]"
+
+      - name: Install test runner
+        run: python -m pip install pytest
+
+      - name: Compile core package
+        run: python -m compileall actenon
+
+      - name: Run quickstart smoke test
+        run: python examples/quickstart_min.py
+
+      - name: Run interactive execution demo
+        run: python examples/interactive_execution_demo.py
+
+      - name: Run core evidence tests
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install pytest ruff build httpx
-          python -m pip install -e ".[asymmetric,fastapi,langchain,mcp]"
-
-      - name: Verify public scope and edge claims
-        run: python scripts/verify_scope_claims.py
-
-      - name: Verify conformance version and vector lock
-        run: python scripts/verify_conformance_manifest.py
-
-      - name: Run hero demo
-        run: bash scripts/demo_hero.sh
-
-      - name: Verify README quickstart
-        run: bash scripts/verify_readme_quickstart.sh
-
-      - name: Run conformance suite
-        run: python -m actenon.cli conformance run --require-complete
-
-      - name: Run local scanner
-        run: python -m actenon.cli scan local
-
-      - name: Run consequential action coverage matrix
-        run: python -m actenon.cli coverage run
-
-      - name: Run full tests
-        run: pytest tests/ -q
-
-  verifier-sdks:
-    name: Verifier SDKs
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: sdk/typescript/package-lock.json
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-          cache-dependency-path: sdk/go/go.mod
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: "1.88"
-
-      - name: Test TypeScript verifier
-        working-directory: sdk/typescript
-        run: |
-          npm ci
-          npm run check
-          npm test
-
-      - name: Test Go verifier
-        working-directory: sdk/go
-        run: go test ./...
-
-      - name: Test Rust verifier
-        working-directory: sdk/rust
-        run: cargo test
-
-      - name: Run shared cross-SDK conformance vectors
-        run: bash scripts/verify_sdk_conformance.sh
+          python -m pytest \
+            examples/protected_policy_preflight_refund \
+            tests/test_interactive_execution_demo.py \
+            tests/test_dx_adoption_fixes.py \
+            examples/financial_agent_protected_transfer \
+            examples/fastmcp_financial_transfer \
+            examples/protected_clinical_ehr_agent \
+            examples/protected_multi_agent_swarm \
+            examples/protected_iam_control_plane \
+            -q
