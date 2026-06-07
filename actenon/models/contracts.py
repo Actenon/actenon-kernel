@@ -839,3 +839,101 @@ class ExecutionAnchor:
         if self.metadata:
             payload["metadata"] = dict(self.metadata)
         return payload
+
+
+# ---------------------------------------------------------------------
+# Blessed PCCB proof transport API
+# ---------------------------------------------------------------------
+#
+# PCCB is a frozen dataclass. Do not attach runtime-only fields to a proof.
+# Use these methods when a proof crosses a process, service, API, MCP or HTTP
+# boundary.
+#
+#   wire = proof.to_wire()
+#   proof = PCCB.from_wire(wire)
+#
+
+def _actenon_pccb_value_to_wire(value):
+    from dataclasses import asdict, is_dataclass
+    from datetime import datetime
+
+    if isinstance(value, datetime):
+        return value.isoformat()
+
+    if is_dataclass(value):
+        return {
+            key: _actenon_pccb_value_to_wire(item)
+            for key, item in asdict(value).items()
+        }
+
+    if isinstance(value, dict):
+        return {
+            key: _actenon_pccb_value_to_wire(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, (list, tuple)):
+        return [_actenon_pccb_value_to_wire(item) for item in value]
+
+    return value
+
+
+def _actenon_pccb_value_from_wire(value):
+    from datetime import datetime
+
+    if isinstance(value, dict):
+        return {
+            key: _actenon_pccb_value_from_wire(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+        return [_actenon_pccb_value_from_wire(item) for item in value]
+
+    return value
+
+
+def _actenon_pccb_to_dict(self):
+    return _actenon_pccb_value_to_wire(self)
+
+
+@classmethod
+def _actenon_pccb_from_dict(cls, payload):
+    from datetime import datetime
+
+    data = dict(payload)
+
+    for key in ("issued_at", "expires_at"):
+        if isinstance(data.get(key), str):
+            data[key] = datetime.fromisoformat(data[key])
+
+    return cls(**data)
+
+
+def _actenon_pccb_to_wire(self):
+    import base64
+    import json
+
+    raw = json.dumps(
+        self.to_dict(),
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+@classmethod
+def _actenon_pccb_from_wire(cls, value):
+    import base64
+    import json
+
+    raw = base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8")
+    payload = json.loads(raw)
+    return cls.from_dict(payload)
+
+
+PCCB.to_dict = _actenon_pccb_to_dict
+PCCB.from_dict = _actenon_pccb_from_dict
+PCCB.to_wire = _actenon_pccb_to_wire
+PCCB.from_wire = _actenon_pccb_from_wire

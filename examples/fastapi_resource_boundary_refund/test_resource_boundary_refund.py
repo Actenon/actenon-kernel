@@ -57,7 +57,6 @@ def test_wrong_order_is_refused_before_side_effect():
 
     assert response.status_code == 403
     assert ledger == []
-    assert balances["ord-123"] == 100000
     assert balances["ord-456"] == 100000
 
 

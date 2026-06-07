@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
@@ -9,11 +9,11 @@ from actenon.models.contracts import PCCB
 
 AUDIENCE = "service:refunds"
 
-app = FastAPI(title="Actenon FastAPI Resource-Boundary Refund Demo")
+app = FastAPI(title="Actenon Verifier-Only FastAPI Demo")
 
-# Demo/local issuer + verifier for this resource-boundary example.
-# The verifier-only example keeps these separate.
-gate = ActenonGate.local_dev(audience=AUDIENCE)
+# This endpoint is verifier-only.
+# It does not expose mint_proof, mint_refund_proof or any issuer helper.
+verifier_gate = ActenonGate.local_dev(audience=AUDIENCE)
 
 ledger = []
 balances = {
@@ -37,8 +37,8 @@ def reset_ledger() -> None:
     )
 
 
-def build_refund_action(order_id: str, amount_cents: int) -> Dict[str, Any]:
-    return gate.build_action(
+def build_request_action(order_id: str, amount_cents: int) -> Dict[str, Any]:
+    return verifier_gate.build_action(
         "refund.issue",
         "payment.refund",
         {
@@ -48,24 +48,11 @@ def build_refund_action(order_id: str, amount_cents: int) -> Dict[str, Any]:
         target_type="order",
         target_id=order_id,
         tenant_id="demo",
-        requester_id="fastapi-demo-agent",
+        requester_id="verifier-only-api",
     )
 
 
 def bind_request_action_to_proof(action: Dict[str, Any], proof: PCCB) -> Dict[str, Any]:
-    """Bind request-derived action semantics to the proof metadata.
-
-    Actenon proofs are bound to the exact action intent. The HTTP endpoint must
-    verify the request semantics that are about to execute, but it must use the
-    proof-bound intent metadata rather than generating a fresh random intent.
-
-    This is the key resource-boundary pattern:
-
-    - request provides the live execution parameters
-    - proof provides intent_id / issued_at / expires_at
-    - verifier checks exact semantic match before the side effect
-    """
-
     action["intent_id"] = proof.intent_id
 
     if hasattr(proof.issued_at, "isoformat"):
@@ -79,24 +66,6 @@ def bind_request_action_to_proof(action: Dict[str, Any], proof: PCCB) -> Dict[st
         action["expires_at"] = proof.expires_at
 
     return action
-
-
-def proof_to_header(proof: PCCB) -> str:
-    return proof.to_wire()
-
-
-def proof_from_header(value: Optional[str]) -> Optional[PCCB]:
-    if value is None:
-        return None
-    return PCCB.from_wire(value)
-
-
-def mint_refund_proof(order_id: str, amount_cents: int) -> Tuple[Dict[str, Any], PCCB, str]:
-    """Local/demo issuer helper used only by tests and examples."""
-
-    action = build_refund_action(order_id, amount_cents)
-    proof = gate.mint_proof(action)
-    return action, proof, proof.to_wire()
 
 
 def issue_refund(order_id: str, amount_cents: int) -> Dict[str, Any]:
@@ -131,15 +100,16 @@ def refund_order(
     request: RefundRequest,
     x_actenon_proof: Optional[str] = Header(default=None),
 ):
-    proof = proof_from_header(x_actenon_proof)
+    if x_actenon_proof is None:
+        raise HTTPException(status_code=403, detail="PCCB_REQUIRED")
 
-    action = build_refund_action(order_id, request.amount_cents)
+    proof = PCCB.from_wire(x_actenon_proof)
 
-    if proof is not None:
-        action = bind_request_action_to_proof(action, proof)
+    action = build_request_action(order_id, request.amount_cents)
+    action = bind_request_action_to_proof(action, proof)
 
     try:
-        outcome = gate.protect(
+        outcome = verifier_gate.protect(
             action,
             proof,
             lambda: issue_refund(order_id, request.amount_cents),
