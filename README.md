@@ -26,6 +26,10 @@ It is an execution-edge control:
 
 > **The agent may ask. The protected boundary decides.**
 
+<p align="center">
+  <img src="docs/assets/actenon-demo.gif" alt="Actenon refusing hallucinated, replayed and no-proof agent actions before side effects" width="760">
+</p>
+
 ---
 
 ## 10-second read
