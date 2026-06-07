@@ -1,15 +1,10 @@
-from fastapi.testclient import TestClient
-
 from examples.fastapi_verifier_only_refund.app import (
-    app,
     balances,
+    client,
     ledger,
     reset_ledger,
 )
 from examples.fastapi_verifier_only_refund.issuer import mint_refund_proof
-
-
-client = TestClient(app)
 
 
 def test_verifier_only_endpoint_executes_valid_issuer_proof():

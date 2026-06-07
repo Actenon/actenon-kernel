@@ -1,15 +1,10 @@
-from fastapi.testclient import TestClient
-
 from examples.fastapi_resource_boundary_refund.app import (
-    app,
     balances,
+    client,
     ledger,
     mint_refund_proof,
     reset_ledger,
 )
-
-
-client = TestClient(app)
 
 
 def test_valid_proof_executes_once_at_resource_boundary():

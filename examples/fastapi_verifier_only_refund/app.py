@@ -1,6 +1,10 @@
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
 from actenon.gate import ActenonGate
@@ -9,17 +13,15 @@ from actenon.models.contracts import PCCB
 
 AUDIENCE = "service:refunds"
 
-app = FastAPI(title="Actenon Verifier-Only FastAPI Demo")
-
-# This endpoint is verifier-only.
-# It does not expose mint_proof, mint_refund_proof or any issuer helper.
+# This boundary verifies only. In production this would be configured with
+# public verification material / well-known keys, not issuer signing custody.
 verifier_gate = ActenonGate.local_dev(audience=AUDIENCE)
 
+app = FastAPI(title="Actenon verifier-only FastAPI refund boundary")
+client = TestClient(app)
+
 ledger = []
-balances = {
-    "ord-123": 100000,
-    "ord-456": 100000,
-}
+balances = {"ord-123": 100000, "ord-456": 100000}
 
 
 class RefundRequest(BaseModel):
@@ -29,69 +31,42 @@ class RefundRequest(BaseModel):
 def reset_ledger() -> None:
     ledger.clear()
     balances.clear()
-    balances.update(
-        {
-            "ord-123": 100000,
-            "ord-456": 100000,
-        }
-    )
+    balances.update({"ord-123": 100000, "ord-456": 100000})
 
 
-def build_request_action(order_id: str, amount_cents: int) -> Dict[str, Any]:
+def build_refund_action(order_id: str, amount_cents: int):
     return verifier_gate.build_action(
         "refund.issue",
         "payment.refund",
-        {
-            "order_id": order_id,
-            "amount_cents": amount_cents,
-        },
+        {"order_id": order_id, "amount_cents": amount_cents},
         target_type="order",
         target_id=order_id,
         tenant_id="demo",
-        requester_id="verifier-only-api",
+        requester_id="fastapi-agent",
     )
 
 
-def bind_request_action_to_proof(action: Dict[str, Any], proof: PCCB) -> Dict[str, Any]:
+def _iso(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+def action_for_request_bound_to_proof(order_id: str, amount_cents: int, proof: PCCB):
+    action = build_refund_action(order_id, amount_cents)
     action["intent_id"] = proof.intent_id
-
-    if hasattr(proof.issued_at, "isoformat"):
-        action["issued_at"] = proof.issued_at.isoformat()
-    else:
-        action["issued_at"] = proof.issued_at
-
-    if hasattr(proof.expires_at, "isoformat"):
-        action["expires_at"] = proof.expires_at.isoformat()
-    else:
-        action["expires_at"] = proof.expires_at
-
+    action["issued_at"] = _iso(proof.issued_at)
+    action["expires_at"] = _iso(proof.expires_at)
     return action
 
 
-def issue_refund(order_id: str, amount_cents: int) -> Dict[str, Any]:
-    balances[order_id] -= amount_cents
-    event = {
-        "order_id": order_id,
-        "amount_cents": amount_cents,
-    }
-    ledger.append(event)
-    return event
-
-
-def outcome_allowed(outcome: Any) -> bool:
-    if isinstance(outcome, dict):
-        return bool(outcome.get("allowed") or outcome.get("ok") or outcome.get("executed"))
-
-    if hasattr(outcome, "allowed"):
-        return bool(outcome.allowed)
-
-    if hasattr(outcome, "ok"):
-        return bool(outcome.ok)
-
-    if hasattr(outcome, "executed"):
-        return bool(outcome.executed)
-
-    return bool(outcome)
+def proof_from_header(value: Optional[str]) -> Optional[PCCB]:
+    if value is None:
+        return None
+    try:
+        return PCCB.from_wire(value)
+    except Exception as exc:
+        raise HTTPException(status_code=403, detail={"reason": "PCCB_MALFORMED"}) from exc
 
 
 @app.post("/refunds/{order_id}")
@@ -100,29 +75,35 @@ def refund_order(
     request: RefundRequest,
     x_actenon_proof: Optional[str] = Header(default=None),
 ):
-    if x_actenon_proof is None:
-        raise HTTPException(status_code=403, detail="PCCB_REQUIRED")
+    proof = proof_from_header(x_actenon_proof)
+    if proof is None:
+        raise HTTPException(status_code=403, detail={"reason": "PCCB_REQUIRED"})
 
-    proof = PCCB.from_wire(x_actenon_proof)
+    action = action_for_request_bound_to_proof(order_id, request.amount_cents, proof)
 
-    action = build_request_action(order_id, request.amount_cents)
-    action = bind_request_action_to_proof(action, proof)
+    def side_effect():
+        balances[order_id] = balances.get(order_id, 0) - request.amount_cents
+        event = {"order_id": order_id, "amount_cents": request.amount_cents}
+        ledger.append(event)
+        return event
 
-    try:
-        outcome = verifier_gate.protect(
-            action,
-            proof,
-            lambda: issue_refund(order_id, request.amount_cents),
-            audience=AUDIENCE,
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=403, detail=str(exc))
+    outcome = verifier_gate.protect(
+        action,
+        proof,
+        side_effect,
+        audience=AUDIENCE,
+    )
 
-    if not outcome_allowed(outcome):
-        raise HTTPException(status_code=403, detail=str(outcome))
+    allowed = getattr(outcome, "allowed", None)
+    if allowed is False:
+        reason = getattr(outcome, "reason", "REFUSED")
+        raise HTTPException(status_code=403, detail={"reason": reason})
+
+    if isinstance(outcome, dict) and outcome.get("allowed") is False:
+        raise HTTPException(status_code=403, detail={"reason": outcome.get("reason", "REFUSED")})
 
     return {
-        "status": "executed",
+        "ok": True,
         "ledger": ledger,
         "balance_cents": balances[order_id],
     }

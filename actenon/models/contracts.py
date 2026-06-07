@@ -528,6 +528,40 @@ class PCCB:
 
 
 @dataclass(frozen=True)
+
+    def to_dict(self):
+        """Return a JSON-safe dictionary representation of this proof."""
+        def convert(value):
+            if isinstance(value, datetime):
+                return value.isoformat()
+            if isinstance(value, dict):
+                return {k: convert(v) for k, v in value.items()}
+            if isinstance(value, list):
+                return [convert(v) for v in value]
+            return value
+
+        return convert(asdict(self))
+
+    @classmethod
+    def from_dict(cls, payload):
+        """Recreate a proof from a dictionary produced by to_dict()."""
+        data = dict(payload)
+        for key in ("issued_at", "expires_at"):
+            if isinstance(data.get(key), str):
+                data[key] = datetime.fromisoformat(data[key])
+        return cls(**data)
+
+    def to_wire(self):
+        """Serialize proof to a compact HTTP-header-safe string."""
+        raw = json.dumps(self.to_dict(), separators=(",", ":"), sort_keys=True)
+        return base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii")
+
+    @classmethod
+    def from_wire(cls, value):
+        """Deserialize proof from an HTTP-header-safe string."""
+        raw = base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8")
+        return cls.from_dict(json.loads(raw))
+
 class Receipt:
     receipt_id: str
     intent_id: str
@@ -937,3 +971,68 @@ PCCB.to_dict = _actenon_pccb_to_dict
 PCCB.from_dict = _actenon_pccb_from_dict
 PCCB.to_wire = _actenon_pccb_to_wire
 PCCB.from_wire = _actenon_pccb_from_wire
+
+
+# --- Actenon PCCB wire transport helpers ---
+#
+# These helpers are deliberately attached after class definition so they work
+# with the current frozen dataclass model without changing constructor semantics.
+
+def _actenon_wire_normalise(value):
+    from dataclasses import asdict, is_dataclass
+    from datetime import datetime
+
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if is_dataclass(value):
+        return {k: _actenon_wire_normalise(v) for k, v in asdict(value).items()}
+    if isinstance(value, dict):
+        return {k: _actenon_wire_normalise(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_actenon_wire_normalise(v) for v in value]
+    if isinstance(value, tuple):
+        return [_actenon_wire_normalise(v) for v in value]
+    return value
+
+
+def _actenon_parse_datetimes(payload):
+    from datetime import datetime
+
+    out = dict(payload)
+    for key in ("issued_at", "expires_at"):
+        value = out.get(key)
+        if isinstance(value, str):
+            out[key] = datetime.fromisoformat(value)
+    return out
+
+
+def _pccb_to_dict(self):
+    return _actenon_wire_normalise(self)
+
+
+@classmethod
+def _pccb_from_dict(cls, payload):
+    return cls(**_actenon_parse_datetimes(payload))
+
+
+def _pccb_to_wire(self):
+    import base64
+    import json
+
+    raw = json.dumps(self.to_dict(), sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+@classmethod
+def _pccb_from_wire(cls, token):
+    import base64
+    import json
+
+    raw = base64.urlsafe_b64decode(token.encode("ascii")).decode("utf-8")
+    return cls.from_dict(json.loads(raw))
+
+
+PCCB.to_dict = _pccb_to_dict
+PCCB.from_dict = _pccb_from_dict
+PCCB.to_wire = _pccb_to_wire
+PCCB.from_wire = _pccb_from_wire
