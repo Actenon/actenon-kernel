@@ -434,28 +434,40 @@ Actenon protects explicit consequential actions at the boundary you own.
 
 ---
 
-## Production model
+## Going to production: self-hosted or managed
 
-The local development signer is for development and evidence examples only.
+The local quickstart uses `ActenonGate.local_dev(...)` because it is the fastest way to understand the model. It is for development, demos, and local tests only.
 
-Production should use:
+For production, you need the same guarantee backed by production infrastructure: asymmetric signing, managed key custody, durable replay protection, issuer metadata, audit logging, policy evidence, and operational monitoring.
 
-- asymmetric signing
-- managed key custody
-- key rotation
-- durable replay protection
-- well-known issuer metadata
-- tenant-aware policy
-- auditable proof issuance
-- auditable receipts and refusals
-- control-plane approval workflows
+**You can run all of this yourself with the open kernel. None of it requires Actenon Cloud.**
 
-See:
+Actenon Cloud is an optional managed service that operates this trust infrastructure for you. It does not unlock a stronger guarantee than the open kernel provides; it removes the operational burden of running the issuer, approval workflows, key custody integrations, durable replay stores, audit trails, and transparency infrastructure yourself.
 
-- `docs/guides/PRODUCTION_SIGNING_CUSTODY.md`
-- `docs/guides/ISSUANCE_AND_APPROVAL.md`
+| Production capability | Self-hosted with `actenon-kernel` | Optional managed layer |
+|---|---|---|
+| Asymmetric signing | Use the kernel’s asymmetric signing support and your own signing process. | Hosted/managed proof issuance. |
+| Key custody | Use your own KMS/HSM, such as AWS KMS, GCP KMS, Azure Key Vault, or internal HSM. | Managed signing custody and rotation operations. |
+| Key rotation | Publish and rotate keys using your own `kid` / public-key metadata process. | Managed key rotation and issuer metadata. |
+| Durable replay protection | Use a shared durable replay store such as SQLite for local/single-node use or Postgres for production/shared boundaries. | Managed replay protection and operational monitoring. |
+| Issuer metadata | Host your own well-known issuer metadata and public verification keys. | Hosted issuer discovery endpoint. |
+| Tenant-aware policy | Use the open policy/preflight layer and evidence objects in this repo. | Managed policy configuration and governance workflows. |
+| Approval evidence | Build or integrate your own approval flow that emits verifiable approval evidence. | Hosted human approval UI and workflow engine. |
+| Receipts and refusals | Store the kernel’s structured receipts/refusals in your own logs, SIEM, data lake, or audit system. | Managed receipt/refusal storage, search, and reporting. |
+| Auditability | Wire issuance, approval, execution, refusal, and replay events into your own audit sink. | Managed audit trail and transparency reporting. |
 
----
+The open kernel provides the full proof-bound execution guarantee on infrastructure you control:
+
+> **No valid proof, no execution.**
+
+The managed service is for teams that want Actenon operated for them. The kernel remains the neutral enforcement layer that can be adopted, audited, and self-hosted without depending on Actenon Cloud.
+
+For production design details, see:
+
+- [`docs/guides/PRODUCTION_SIGNING_CUSTODY.md`](docs/guides/PRODUCTION_SIGNING_CUSTODY.md)
+- [`docs/guides/ISSUANCE_AND_APPROVAL.md`](docs/guides/ISSUANCE_AND_APPROVAL.md)
+- [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md)
+- [`SCOPE_AND_GUARANTEES.md`](SCOPE_AND_GUARANTEES.md)
 
 ## Architecture
 
