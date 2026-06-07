@@ -226,10 +226,7 @@ class ActenonGate:
         )
 
 
-        # DX helper note: defaults are for local development/examples only.
-    # Production callers should pass real tenant_id/requester_id/requester_type
-    # and target identifiers so receipts are attributable.
-def build_action(
+    def build_action(
         self,
         name,
         capability,
