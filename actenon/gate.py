@@ -193,6 +193,13 @@ class ActenonGate:
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
     ) -> None:
+        if verifier is None:
+            raise ValueError(
+                "ActenonGate requires a verifier. "
+                "Use ActenonGate.local_dev(...) for local development, or pass "
+                "a configured SignatureVerifier for production."
+            )
+
         self.audience = _coerce_audience(audience)
         self.issuer = _coerce_party(issuer)
         self.signer = signer
@@ -217,6 +224,62 @@ class ActenonGate:
             refusal_factory=self.refusal_factory,
             outcome_writer=self.outcome_writer,
         )
+
+
+    def build_action(
+        self,
+        name,
+        capability,
+        parameters,
+        *,
+        target_type,
+        target_id,
+        tenant_id="default",
+        requester_type="agent",
+        requester_id="agent",
+        ttl_minutes=10,
+        intent_id=None,
+        issued_at=None,
+        target_selectors=None,
+        context=None,
+    ):
+        """Build a standard action_intent envelope for common integrations.
+
+        This removes repetitive contract/timestamp/tenant/requester boilerplate
+        while keeping the important security decision explicit: action name,
+        capability, parameters, target, audience, and expiry.
+        """
+        from datetime import datetime, timedelta, timezone
+        from uuid import uuid4
+
+        now = issued_at or datetime.now(timezone.utc)
+        expires_at = now + timedelta(minutes=ttl_minutes)
+
+        action = {
+            "contract": {"name": "action_intent", "version": "v1"},
+            "intent_id": intent_id or "intent_" + uuid4().hex,
+            "issued_at": now.isoformat(),
+            "expires_at": expires_at.isoformat(),
+            "tenant": {"tenant_id": tenant_id},
+            "requester": {"type": requester_type, "id": requester_id},
+            "action": {
+                "name": name,
+                "capability": capability,
+                "parameters": dict(parameters),
+            },
+            "target": {
+                "resource_type": target_type,
+                "resource_id": target_id,
+            },
+        }
+
+        if target_selectors:
+            action["target"]["selectors"] = dict(target_selectors)
+
+        if context:
+            action["context"] = dict(context)
+
+        return action
 
     @classmethod
     def local_dev(

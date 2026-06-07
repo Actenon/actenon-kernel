@@ -128,6 +128,38 @@ If the proof does not validate, the lambda is never called.
 
 ---
 
+## Action helper: no hand-written envelopes
+
+Use `gate.build_action(...)` for first integrations so developers do not have to hand-write the full `action_intent` envelope.
+
+```python
+from actenon import ActenonGate
+
+gate = ActenonGate.local_dev(audience="service:refunds")
+
+action = gate.build_action(
+    "refund.issue",
+    "payment.refund",
+    {"order_id": "ord-123", "amount_cents": 2500},
+    target_type="order",
+    target_id="ord-123",
+    tenant_id="demo",
+    requester_id="support-agent",
+)
+
+proof = gate.mint_proof(action)
+outcome = gate.protect(
+    action,
+    proof,
+    lambda: issue_refund("ord-123", 2500),
+    audience="service:refunds",
+)
+```
+
+The helper fills the contract, timestamps, intent id, tenant, requester, action, and target envelope. You still explicitly bind the security-critical fields: capability, parameters, target, audience, and expiry.
+
+---
+
 ## Minimal example: protected refund
 
 ```python
