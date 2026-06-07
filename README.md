@@ -29,24 +29,20 @@ Run this and watch one approved action execute while a hallucinated/tampered act
 ```bash
 git clone https://github.com/Actenon/actenon-kernel.git
 cd actenon-kernel
-
 python3 -m venv .venv
 source .venv/bin/activate
-
 python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[asymmetric]"
-
 python examples/interactive_execution_demo.py
 ```
 
 Expected shape:
 
 ```text
-✅ approved refund: ord-123 £25.00              -> executed
-🛑 hallucinated refund: ord-456 £2,500.00       -> refused / INTENT_MISMATCH
-🛑 replay approved refund                       -> refused / DUPLICATE_REPLAY
-🛑 refund with no proof                         -> refused / PCCB_REQUIRED
-
+✅ approved refund: ord-123 £25.00 -> executed
+🛑 hallucinated refund: ord-456 £2,500.00 -> refused / INTENT_MISMATCH
+🛑 replay approved refund -> refused / DUPLICATE_REPLAY
+🛑 refund with no proof -> refused / PCCB_REQUIRED
 Final ledger events: [{'order_id': 'ord-123', 'amount_cents': 2500}]
 No valid proof, no execution.
 ```
@@ -75,24 +71,77 @@ The local examples use `ActenonGate.local_dev(...)` so the repo can be understoo
 
 That is not the production trust model.
 
-In production, the issuer/control plane and protected boundary should be separate trust domains:
+In production, the issuer/control plane and protected boundary should be separate trust domains.
+
+The issuer decides whether proof may exist. The protected boundary decides whether the side effect may happen.
+
+```mermaid
+flowchart TD
+    A[Agent / Workflow / Tool Caller] -->|Proposes action intent| B[Issuer / Control Plane]
+
+    B --> C{Policy, approval and evidence checks}
+
+    C -->|Denied| D[No proof issued]
+    C -->|Approved| E[Cryptographic proof issued]
+
+    E -->|Proof + exact action| F[Protected Boundary / Actenon Kernel Gate]
+
+    F --> G{Verify proof}
+
+    G -->|Missing proof| R[Refuse before side effect]
+    G -->|Expired proof| R
+    G -->|Replay detected| R
+    G -->|Audience mismatch| R
+    G -->|Parameter mismatch| R
+    G -->|Policy evidence missing| R
+
+    G -->|Valid proof for exact action| H[Execute side effect]
+
+    H --> I[Execution receipt]
+    R --> J[Structured refusal receipt]
+
+    I --> K[Audit / SIEM / Evidence Store]
+    J --> K
+
+    subgraph Issuer Trust Domain
+        B
+        C
+        D
+        E
+    end
+
+    subgraph Protected Execution Boundary
+        F
+        G
+        H
+        R
+    end
+
+    subgraph Evidence Layer
+        I
+        J
+        K
+    end
+```
+
+Text form:
 
 ```text
 agent / workflow
-    proposes Action Intent
+  proposes Action Intent
         |
         v
 issuer / control plane
-    evaluates policy, approvals, evidence, tenant, subject and target audience
-    issues proof for the target protected boundary
+  evaluates policy, approvals, evidence, tenant, subject and target audience
+  issues proof for the target protected boundary
         |
         v
 protected boundary / kernel gate
-    verifier-only
-    cannot mint proof
-    verifies exact action immediately before side effect
-    executes or refuses
-    emits receipt/refusal evidence
+  verifier-only
+  cannot mint proof
+  verifies exact action immediately before side effect
+  executes or refuses
+  emits receipt/refusal evidence
 ```
 
 Actenon Kernel is the open enforcement layer.
@@ -177,13 +226,10 @@ If the attempted action does not match the proof exactly, it refuses.
 ```bash
 git clone https://github.com/Actenon/actenon-kernel.git
 cd actenon-kernel
-
 python3 -m venv .venv
 source .venv/bin/activate
-
 python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[asymmetric]"
-
 python examples/quickstart_min.py
 ```
 
@@ -324,15 +370,17 @@ You still explicitly bind the security-critical fields: capability, parameters, 
 
 ```python
 from datetime import datetime, timedelta, timezone
+
 from actenon import ActenonGate
 
 now = datetime.now(timezone.utc)
-
 ledger = {"refunds": []}
+
 
 def issue_refund(order_id: str, amount_cents: int):
     ledger["refunds"].append({"order_id": order_id, "amount_cents": amount_cents})
     return {"refunded": order_id, "amount_cents": amount_cents}
+
 
 def refund_intent(order_id: str, amount_cents: int):
     return {
@@ -352,6 +400,7 @@ def refund_intent(order_id: str, amount_cents: int):
         },
         "target": {"resource_type": "order", "resource_id": order_id},
     }
+
 
 gate = ActenonGate.local_dev(audience="service:refunds")
 
@@ -415,19 +464,20 @@ Keep proof outside the model-visible tool schema by passing it through `Runnable
 ```python
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
+
 from actenon import ActenonGate
 
 gate = ActenonGate.local_dev(audience="service:refunds")
 
+
 def issue_refund(order_id: str, amount_cents: int):
     return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
+
 
 @tool
 def refund_order(order_id: str, amount_cents: int, config: RunnableConfig):
     """Issue an approved refund."""
-
     proof = config.get("configurable", {}).get("x-actenon-proof")
-
     action = gate.build_action(
         "refund.issue",
         "payment.refund",
@@ -437,7 +487,6 @@ def refund_order(order_id: str, amount_cents: int, config: RunnableConfig):
         tenant_id="demo",
         requester_id="support-agent",
     )
-
     return gate.protect(
         action,
         proof,
@@ -452,18 +501,20 @@ Protect model-visible MCP tools at the server boundary.
 
 ```python
 from mcp.server.fastmcp import FastMCP
+
 from actenon import ActenonGate
 
 mcp = FastMCP("Protected Refund Server")
 gate = ActenonGate.local_dev(audience="mcp:refunds")
 
+
 def issue_refund(order_id: str, amount_cents: int):
     return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
+
 
 @mcp.tool()
 def refund_order(order_id: str, amount_cents: int, ctx=None) -> str:
     """Issue an approved refund."""
-
     proof = None
     if ctx is not None:
         proof = getattr(getattr(ctx, "request", None), "meta", {}).get("X-Actenon-Proof")
@@ -477,17 +528,14 @@ def refund_order(order_id: str, amount_cents: int, ctx=None) -> str:
         tenant_id="demo",
         requester_id="mcp-agent",
     )
-
     outcome = gate.protect(
         action,
         proof,
         lambda: issue_refund(order_id, amount_cents),
         audience="mcp:refunds",
     )
-
     status = getattr(outcome, "status", None)
     reason = getattr(outcome, "reason", "refused")
-
     return "Executed" if status == "EXECUTED" else f"Denied: {reason}"
 ```
 
@@ -514,13 +562,13 @@ Run the evidence suite:
 
 ```bash
 python -m pytest \
-  examples/protected_policy_preflight_refund \
-  examples/financial_agent_protected_transfer \
-  examples/fastmcp_financial_transfer \
-  examples/protected_clinical_ehr_agent \
-  examples/protected_multi_agent_swarm \
-  examples/protected_iam_control_plane \
-  -q
+examples/protected_policy_preflight_refund \
+examples/financial_agent_protected_transfer \
+examples/fastmcp_financial_transfer \
+examples/protected_clinical_ehr_agent \
+examples/protected_multi_agent_swarm \
+examples/protected_iam_control_plane \
+-q
 ```
 
 If your checkout includes `examples/protected_cicd_pipeline`, include it in the command as well.
@@ -689,6 +737,8 @@ Actenon protects explicit consequential actions at the boundary you own.
 
 ---
 
+---
+
 ## Going to production: self-hosted or managed
 
 The local quickstart uses `ActenonGate.local_dev(...)` because it is the fastest way to understand the model. It is for development, demos, and local tests only.
@@ -723,7 +773,7 @@ For production design details, see:
 
 - [`docs/guides/ISSUANCE_AND_APPROVAL.md`](docs/guides/ISSUANCE_AND_APPROVAL.md)
 - [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md)
-- [`SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
+- [`docs/SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
 
 ---
 
@@ -731,13 +781,16 @@ For production design details, see:
 
 A typical Actenon deployment has three layers:
 
-1. **Issuer / control plane**  
+1. **Issuer / control plane**
+
    Decides whether a proposed action may be authorised and issues proof.
 
-2. **Protected boundary / kernel gate**  
+2. **Protected boundary / kernel gate**
+
    Verifies the proof immediately before the side effect.
 
-3. **Receipt / refusal evidence**  
+3. **Receipt / refusal evidence**
+
    Records what happened, what was refused, and why.
 
 ```text
@@ -795,6 +848,8 @@ Start with one high-risk action. Protect it. Run the evidence pattern. Expand fr
 
 ---
 
+---
+
 ## Local development commands
 
 Install:
@@ -822,13 +877,13 @@ Run evidence:
 
 ```bash
 python -m pytest \
-  examples/protected_policy_preflight_refund \
-  examples/financial_agent_protected_transfer \
-  examples/fastmcp_financial_transfer \
-  examples/protected_clinical_ehr_agent \
-  examples/protected_multi_agent_swarm \
-  examples/protected_iam_control_plane \
-  -q
+examples/protected_policy_preflight_refund \
+examples/financial_agent_protected_transfer \
+examples/fastmcp_financial_transfer \
+examples/protected_clinical_ehr_agent \
+examples/protected_multi_agent_swarm \
+examples/protected_iam_control_plane \
+-q
 ```
 
 Check README links:
