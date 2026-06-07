@@ -351,6 +351,7 @@ Core examples:
 - `examples/protected_multi_agent_swarm`
 - `examples/protected_iam_control_plane`
 - `examples/protected_clinical_ehr_agent`
+- `examples/fastapi_resource_boundary_refund`
 
 Run the core evidence suite:
 
@@ -458,6 +459,7 @@ Start here:
 - [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md) — exact kernel guarantee.
 - [`docs/SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md) — project scope and limits.
 - [`docs/guides/ISSUANCE_AND_APPROVAL.md`](docs/guides/ISSUANCE_AND_APPROVAL.md) — issuance and approval.
+- [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) — what the 60-second demo proves.
 - [`INTEGRATIONS.md`](INTEGRATIONS.md) — integration patterns.
 - [`MCP_HERO_PATH.md`](MCP_HERO_PATH.md) — MCP adoption path.
 - [`SDK_SELECTION_GUIDE.md`](SDK_SELECTION_GUIDE.md) — SDK path.
