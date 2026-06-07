@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Optional, Union
 
 from actenon.gate import ActenonGate
 from actenon.models import ActionIntent, PCCB
@@ -22,17 +22,17 @@ except ImportError as exc:  # pragma: no cover - exercised without the optional 
 
 
 ACTENON_CONFIG_KEY = "actenon"
-ActionBuilder = Callable[[Mapping[str, Any]], ActionIntent | dict[str, Any]]
+ActionBuilder = Callable[[Mapping[str, Any]], Union[ActionIntent, dict[str, Any]]]
 EvidenceBuilder = Callable[
     [Mapping[str, Any]],
-    Mapping[str, Any] | PreflightEvidence | None,
+    Optional[Union[Mapping[str, Any], PreflightEvidence]],
 ]
 
 
 def actenon_runnable_config(
-    proof: Mapping[str, Any] | PCCB | None,
+    proof: Optional[Union[Mapping[str, Any], PCCB]],
     *,
-    evidence: Mapping[str, Any] | PreflightEvidence | None = None,
+    evidence: Optional[Union[Mapping[str, Any], PreflightEvidence]] = None,
 ) -> RunnableConfig:
     """Build runtime-only LangChain config; it is excluded from tool schemas."""
 
