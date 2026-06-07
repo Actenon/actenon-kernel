@@ -39,7 +39,7 @@ Even if multiple agents, frameworks or workflows can reach the same refund API, 
 ## Run the tests
 
 ```bash
-python -m pytest examples/fastapi_resource_boundary_refund -q
+python -m pytest examples/fastapi_resource_boundary_refund -vv
 ```
 
 The tests prove:
