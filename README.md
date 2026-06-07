@@ -1,34 +1,54 @@
+<!--
+  REVIEWER NOTES — READ BEFORE COMMITTING (these are for you, delete before publishing):
+
+  ⚠️ VERIFY-AGAINST-CODE ITEMS (I could not run the code in this turn — confirm each before publishing,
+     because the #1 trust-killer is a copy/paste example that doesn't run verbatim):
+     1. OUTCOME ATTRIBUTES: This README uses `outcome.allowed`, `outcome.reason`, `outcome.result`
+        in the framework wrappers. Earlier in the build the shipped object exposed `.ok`,
+        `.reason_code`, and `.outcome`. CONFIRM the real attribute names on GateOutcome and make
+        EVERY code block consistent with the actual API. If the real names are .ok/.reason_code,
+        change them here.
+     2. DEMO FILE: confirm `examples/interactive_execution_demo.py` exists and prints exactly the
+        output shown (including the £ currency and the reason codes).
+     3. build_action SIGNATURE: confirm the positional/keyword args shown match the real signature.
+     4. All doc links (docs/adapters/*, docs/evidence/*) — create those files (moved out of this
+        README) or change the links to point where the content actually lives.
+
+  This version moves the three framework wrappers and the six per-evidence prose sections OUT of the
+  README into linked docs, so the first two screens are pure hook. Nothing was deleted — it was
+  relocated. Create docs/adapters/ and docs/evidence/ with the moved content.
+-->
+
 # actenon-kernel
 
-**The open proof gate for agentic execution.**
+**Stop AI agents from taking destructive actions they were never authorized to take.**
+The open proof gate for agentic execution — payments, deletes, deploys, access changes, and any other consequential action.
 
 > **No valid proof, no execution.**
 
-Actenon protects the place where AI agents become dangerous: the execution boundary.
+Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary — the API, MCP tool, database, payments rail, IAM control plane, release pipeline, or infrastructure endpoint — decides whether the action actually happens.
 
-Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary, the API, MCP tool, service, database, payments rail, IAM control plane, release pipeline, clinical operation, infrastructure endpoint, or internal workflow, decides whether the action is allowed to happen.
+Actenon refuses a consequential action unless the caller presents a cryptographic proof bound to the **exact action** being attempted. If the proof is missing, expired, replayed, audience-mismatched, policy-denied, malformed, or bound to different parameters, the action is refused **before the side effect**.
 
-Actenon refuses consequential actions unless the caller presents a cryptographic proof bound to the **exact action** being attempted.
+It is not a prompt filter, an output moderator, or another layer of "please behave" for an LLM. It is an execution-edge control:
 
-If the proof is missing, expired, replayed, audience-mismatched, policy-denied, malformed, or bound to different parameters, the action is refused **before the side effect**.
+> **The agent may ask. The protected boundary decides.**
 
-Actenon is not a prompt filter. It is not an output moderator. It is not another layer of “please behave” instructions for an LLM.
-
-It is an execution-edge control:
-
-> The agent may ask. The protected boundary decides.
+<!-- Add real badges here once confirmed true: Apache-2.0 license, CI status, Python version, conformance suite. Do NOT add a stars badge yet. -->
 
 ---
 
-## 3-minute interactive demo: watch a bad agent command get dropped
+## See it work in 3 minutes
 
-Developers should not have to read the whole repo to understand the guarantee. Run the tiny demo and watch the execution boundary accept one approved action, then refuse a hallucinated/tampered command, a replay, and a no-proof attempt before any side effect.
+Don't read the whole repo to understand the guarantee. Run the demo and watch the boundary accept one approved action, then refuse a hallucinated command, a replay, and a no-proof attempt — before any side effect.
 
 ```bash
+git clone https://github.com/Actenon/actenon-kernel.git
+cd actenon-kernel
+python3 -m venv .venv && source .venv/bin/activate
+python3 -m pip install -e ".[asymmetric]"
 python examples/interactive_execution_demo.py
 ```
-
-Expected shape:
 
 ```text
 ✅ approved refund: ord-123 £25.00              -> executed
@@ -40,93 +60,13 @@ Final ledger events: [{'order_id': 'ord-123', 'amount_cents': 2500}]
 No valid proof, no execution.
 ```
 
-The important part is not the demo domain. It is the invariant: the side-effect function only runs for the proof-bound action.
+The domain doesn't matter. The invariant does: **the side-effect function only runs for the proof-bound action.**
 
 ---
 
-## Why Actenon exists
+## The core idea, in one example
 
-AI agents are moving from chat to action.
-
-They can now call tools, issue refunds, deploy code, modify databases, update IAM roles, export data, restart infrastructure, administer workflows, and coordinate with other agents.
-
-That creates a new failure mode:
-
-> The model may be wrong, compromised, manipulated, over-authorised, prompt-injected, or simply confused — but the side effect still happens.
-
-Traditional AI safety work mostly focuses on what the model says or intends.
-
-Actenon focuses on the moment that matters most:
-
-> The execution gap: the moment between an agent proposing an action and a system actually doing it.
-
-At that point, the boundary must be deterministic.
-
-No valid proof, no execution.
-
----
-
-## What Actenon protects
-
-Actenon is designed for consequential actions, including:
-
-- payments, refunds, payouts, transfers, credits, and account adjustments
-- customer deletion, data export, record modification, and sensitive data movement
-- IAM grants, role changes, privileged access, and production permissions
-- CI/CD deployments, rollbacks, releases, and infrastructure changes
-- MCP tools, browser actions, coding-agent tools, and workflow automations
-- healthcare, finance, legal, compliance, and regulated operational actions
-- multi-agent swarms where multiple agents can act against shared resources
-
-Actenon does **not** inspect prompts, filter ordinary model output, or replace DLP. It protects explicit execution-edge actions that are routed through an Actenon-protected boundary.
-
-If an action is not routed through the protected boundary, Actenon cannot protect it.
-
----
-
-## The core idea
-
-Every consequential action must present proof that says:
-
-- who authorised it
-- what action was authorised
-- what exact parameters were authorised
-- which audience/service may execute it
-- when the proof was issued
-- when it expires
-- whether it has already been used
-- what policy evidence, if any, was required
-
-The protected boundary verifies that proof before executing.
-
-If the attempted action does not match the proof exactly, it refuses.
-
----
-
-## Quickstart
-
-```bash
-git clone https://github.com/Actenon/actenon-kernel.git
-cd actenon-kernel
-
-python3 -m venv .venv
-source .venv/bin/activate
-
-python3 -m pip install --upgrade pip
-python3 -m pip install -e ".[asymmetric]"
-
-python examples/quickstart_min.py
-```
-
-Expected outcome: the authorised action executes, and the tampered/replayed/unproven variants are refused.
-
----
-
-## Drop-in boundary model
-
-Start here.
-
-The direct `gate.protect()` path is the lowest-friction way to understand and adopt Actenon. It keeps the model’s proposed action separate from the protected side effect.
+The lowest-friction way to adopt Actenon is the direct `gate.protect()` path. It keeps the model's *proposed* action separate from the protected *side effect*.
 
 ```python
 from actenon import ActenonGate
@@ -134,12 +74,9 @@ from actenon import ActenonGate
 gate = ActenonGate.local_dev(audience="service:refunds")
 
 def issue_refund(order_id: str, amount_cents: int):
-    return {
-        "status": "refunded",
-        "order_id": order_id,
-        "amount_cents": amount_cents,
-    }
+    return {"status": "refunded", "order_id": order_id, "amount_cents": amount_cents}
 
+# 1. Build the action intent (the helper fills the envelope; you bind the security-critical fields).
 action = gate.build_action(
     "refund.issue",
     "payment.refund",
@@ -150,11 +87,12 @@ action = gate.build_action(
     requester_id="support-agent",
 )
 
-# Local demo only: mint a proof with the local development signer.
-# In production, your issuer/control plane mints proof after auth,
-# policy checks, and any required approval. The protected tool only verifies it.
+# 2. Present proof for that exact action.
+#    Local demo only: minted here with the dev signer. In production your issuer/control plane
+#    mints proof after auth, policy, and approval — the protected tool only verifies it.
 proof = gate.mint_proof(action)
 
+# 3. Protect the side effect. If the proof doesn't validate, the lambda is never called.
 outcome = gate.protect(
     action,
     proof,
@@ -163,351 +101,47 @@ outcome = gate.protect(
 )
 ```
 
-That is the core mental model:
+That's the whole mental model: **build the action → present proof for that exact action → protect the side effect.** The boundary does not care what the model "intended"; it verifies the exact action.
 
-1. Build the action intent.
-2. Present proof for that exact action.
-3. Protect the side effect.
-
-If the proof does not validate, the lambda is never called.
-
-In local demos, `gate.mint_proof(action)` is used only to simulate the issuer so the example is runnable end-to-end. In production, proof issuance belongs outside the protected tool: your auth layer, policy engine, approval workflow, or control plane decides whether to mint proof. The execution boundary receives that proof and verifies it immediately before the side effect.
+→ **Adapters for your runtime** (MCP/FastMCP, LangChain/LangGraph, FastAPI/HTTP): [`docs/adapters/`](docs/adapters/)
+→ **The action helper in depth** (`build_action`, production fields): [`docs/adapters/ACTION_HELPER.md`](docs/adapters/ACTION_HELPER.md)
 
 ---
 
-## Action helper: no hand-written envelopes
+## Why Actenon exists
 
-Use `gate.build_action` for first integrations so developers do not have to hand-write the full `action_intent` envelope.
+AI agents are moving from chat to action — issuing refunds, deploying code, modifying databases, updating IAM roles, exporting data, restarting infrastructure, coordinating with other agents. That creates a new failure mode:
 
-The helper has safe local-development defaults, but production callers should pass real `tenant_id`, `requester_id`, `requester_type`, `target_type`, and `target_id` values so every proof, receipt, refusal, and audit record is attributable to the correct tenant, agent, principal, and resource.
+> The model may be wrong, compromised, manipulated, over-authorized, or prompt-injected — but the side effect still happens.
 
-```python
-from actenon import ActenonGate
+Most AI-safety work focuses on what the model *says* or *intends*. Actenon focuses on the moment that matters most — **the execution gap: between an agent proposing an action and a system actually doing it.** At that point the boundary must be deterministic.
 
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-def issue_refund(order_id: str, amount_cents: int):
-    return {"refunded": order_id, "amount_cents": amount_cents}
-
-action = gate.build_action(
-    "refund.issue",
-    "payment.refund",
-    {"order_id": "ord-123", "amount_cents": 2500},
-    target_type="order",
-    target_id="ord-123",
-    tenant_id="demo",
-    requester_id="support-agent",
-)
-
-# Local demo only: mint a proof with the local development signer.
-# In production, your issuer/control plane mints the proof after auth,
-# policy checks, and any required approval. The protected tool only verifies it.
-proof = gate.mint_proof(action)
-
-outcome = gate.protect(
-    action,
-    proof,
-    lambda: issue_refund("ord-123", 2500),
-    audience="service:refunds",
-)
-```
-
-The helper fills the contract, timestamps, intent id, tenant, requester, action, and target envelope. You still explicitly bind the security-critical fields: capability, parameters, target, audience, and expiry.
+**If you're protecting MCP tools:** *MCP is how agents reach tools. Actenon is how tools decide whether the action is allowed.*
 
 ---
 
-## Drop-in framework wrappers
+## What Actenon protects — and what it doesn't
 
-These are copy/paste starting points for common agent runtimes. The proof travels through framework/runtime metadata, not as a normal model-visible tool argument.
+**Protects** explicit, consequential, execution-edge actions routed through a protected boundary: payments and refunds; data export and customer deletion; IAM grants and privileged access; CI/CD deploys and rollbacks; MCP/browser/coding-agent tools; regulated operational actions; and multi-agent swarms acting on shared resources.
 
-### LangChain / LangGraph
+**Does not** inspect prompts, filter ordinary model output, or replace DLP/IAM/SIEM/EDR. It does not make an LLM truthful or protect resources reachable through an unprotected route. *If an action isn't routed through the protected boundary, Actenon can't protect it.*
 
-Use `RunnableConfig` so the proof is supplied by the execution runtime rather than the LLM prompt or tool schema.
-
-```python
-from typing import Any
-
-from actenon import ActenonGate
-from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import tool
-
-gate = ActenonGate.local_dev(audience="service:billing")
-
-BALANCES: dict[str, int] = {}
-
-def update_balance_in_store(customer_id: str, delta_cents: int) -> dict[str, Any]:
-    BALANCES[customer_id] = BALANCES.get(customer_id, 0) + delta_cents
-    return {
-        "customer_id": customer_id,
-        "balance_cents": BALANCES[customer_id],
-    }
-
-@tool
-def update_customer_balance(
-    customer_id: str,
-    delta_cents: int,
-    config: RunnableConfig,
-) -> dict[str, Any]:
-    """Update a customer balance. The proof is supplied by runtime config, not by the LLM."""
-
-    proof = config.get("configurable", {}).get("x-actenon-proof")
-
-    action = gate.build_action(
-        "balance.update",
-        "financial.write",
-        {"customer_id": customer_id, "delta_cents": delta_cents},
-        target_type="customer",
-        target_id=customer_id,
-        tenant_id="demo",
-        requester_id="billing-agent",
-    )
-
-    return gate.protect(
-        action,
-        proof,
-        lambda: update_balance_in_store(customer_id, delta_cents),
-        audience="service:billing",
-    )
-```
-
-Example runtime call shape:
-
-```python
-# Local demo only. In production, this proof comes from your issuer/control plane.
-action = gate.build_action(
-    "balance.update",
-    "financial.write",
-    {"customer_id": "cus-123", "delta_cents": 5000},
-    target_type="customer",
-    target_id="cus-123",
-    tenant_id="demo",
-    requester_id="billing-agent",
-)
-proof = gate.mint_proof(action)
-
-update_customer_balance.invoke(
-    {"customer_id": "cus-123", "delta_cents": 5000},
-    config={"configurable": {"x-actenon-proof": proof}},
-)
-```
-
-### FastMCP / Claude tool server
-
-Protect MCP tools at the server boundary. If the agent calls the tool without valid proof, the side effect is refused before it runs.
-
-```python
-from typing import Any
-
-from actenon import ActenonGate
-from mcp.server.fastmcp import FastMCP
-
-mcp = FastMCP("Secure Customer Tools")
-gate = ActenonGate.local_dev(audience="mcp:customers")
-
-CUSTOMERS: dict[str, dict[str, Any]] = {
-    "cus-123": {"status": "active"},
-}
-
-def delete_customer_from_store(customer_id: str) -> dict[str, str]:
-    CUSTOMERS.pop(customer_id, None)
-    return {"deleted": customer_id}
-
-def proof_from_context(ctx: Any) -> str | None:
-    """Adapt this helper to your MCP transport/context object."""
-    if ctx is None:
-        return None
-
-    request = getattr(ctx, "request", None)
-    meta = getattr(request, "meta", None)
-
-    if isinstance(meta, dict):
-        return meta.get("x-actenon-proof") or meta.get("X-Actenon-Proof")
-
-    headers = getattr(request, "headers", None)
-    if isinstance(headers, dict):
-        return headers.get("x-actenon-proof") or headers.get("X-Actenon-Proof")
-
-    return None
-
-@mcp.tool()
-def delete_customer(customer_id: str, ctx: Any = None) -> dict[str, Any]:
-    proof = proof_from_context(ctx)
-
-    action = gate.build_action(
-        "customer.delete",
-        "customer.delete",
-        {"customer_id": customer_id},
-        target_type="customer",
-        target_id=customer_id,
-        tenant_id="demo",
-        requester_id="customer-agent",
-    )
-
-    outcome = gate.protect(
-        action,
-        proof,
-        lambda: delete_customer_from_store(customer_id),
-        audience="mcp:customers",
-    )
-
-    if not outcome.allowed:
-        return {
-            "status": "refused",
-            "reason": outcome.reason,
-        }
-
-    return {
-        "status": "executed",
-        "result": outcome.result,
-    }
-```
-
-### FastAPI / HTTP
-
-For service boundaries, keep proof out of the request body. Pass it in the `X-Actenon-Proof` header.
-
-```python
-from typing import Any
-
-from actenon import ActenonGate
-from fastapi import FastAPI, Header, HTTPException
-
-app = FastAPI()
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-def issue_refund(order_id: str, amount_cents: int) -> dict[str, Any]:
-    return {"refunded": order_id, "amount_cents": amount_cents}
-
-@app.post("/refunds/{order_id}")
-def refund(
-    order_id: str,
-    amount_cents: int,
-    x_actenon_proof: str | None = Header(default=None, alias="X-Actenon-Proof"),
-):
-    action = gate.build_action(
-        "refund.issue",
-        "payment.refund",
-        {"order_id": order_id, "amount_cents": amount_cents},
-        target_type="order",
-        target_id=order_id,
-        tenant_id="demo",
-        requester_id="support-agent",
-    )
-
-    outcome = gate.protect(
-        action,
-        x_actenon_proof,
-        lambda: issue_refund(order_id, amount_cents),
-        audience="service:refunds",
-    )
-
-    if not outcome.allowed:
-        raise HTTPException(status_code=403, detail=outcome.reason)
-
-    return outcome.result
-```
+→ Full guarantees and limits: [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md) · [`SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
 
 ---
 
-## Minimal example: protected refund
+## Proof it works: runnable evidence
 
-```python
-from datetime import datetime, timedelta, timezone
-
-from actenon import ActenonGate
-
-now = datetime.now(timezone.utc)
-
-ledger = {"refunds": []}
-
-def issue_refund(order_id: str, amount_cents: int):
-    ledger["refunds"].append({"order_id": order_id, "amount_cents": amount_cents})
-    return {"refunded": order_id, "amount_cents": amount_cents}
-
-def refund_intent(order_id: str, amount_cents: int):
-    return {
-        "contract": {"name": "action_intent", "version": "v1"},
-        "intent_id": f"intent_refund_{order_id}_{amount_cents}",
-        "issued_at": now.isoformat(),
-        "expires_at": (now + timedelta(minutes=10)).isoformat(),
-        "tenant": {"tenant_id": "demo"},
-        "requester": {"type": "agent", "id": "support-agent"},
-        "action": {
-            "name": "refund.issue",
-            "capability": "payment.refund",
-            "parameters": {
-                "order_id": order_id,
-                "amount_cents": amount_cents,
-            },
-        },
-        "target": {"resource_type": "order", "resource_id": order_id},
-    }
-
-gate = ActenonGate.local_dev(audience="service:refunds")
-
-approved = refund_intent("ord-123", 2500)
-proof = gate.mint_proof(approved)
-
-# Executes.
-ok = gate.protect(
-    approved,
-    proof,
-    lambda: issue_refund("ord-123", 2500),
-    audience="service:refunds",
-)
-
-# Refuses: same proof, different amount.
-tampered = gate.protect(
-    refund_intent("ord-123", 250000),
-    proof,
-    lambda: issue_refund("ord-123", 250000),
-    audience="service:refunds",
-)
-
-print(ok)
-print(tampered)
-print(ledger)
-```
-
-The protected boundary does not care what the model “intended”. It verifies the exact action.
-
----
-
-## Copy/paste adoption paths
-
-Actenon is designed to be adopted at the execution boundary with the lowest possible developer friction.
-
-Start with the direct `gate.protect()` path. It is the smallest mental model and the best first integration path.
-
-Once the direct path is understood, use the framework adapter that matches your runtime.
-
-| Runtime | Proof travels in | Use when |
-|---|---|---|
-| Direct Python | Argument to `gate.protect()` | First adoption, tests, services, jobs, workers |
-| MCP / FastMCP | Request metadata / context | Protecting MCP tools |
-| LangChain / LangGraph | `RunnableConfig` | Keeping proof out of model-visible tool schemas |
-| FastAPI / HTTP | `X-Actenon-Proof` header | Protecting HTTP APIs and service boundaries |
-
-The examples above are copy/paste wrappers. The evidence examples below are runnable proof cases that show how refusals behave locally.
-
----
-
-## Evidence examples
-
-Actenon includes runnable, self-verifying examples that demonstrate proof-bound execution across different frameworks, domains, and agent topologies.
-
-Run each example directly, or run the evidence suite with pytest.
+Actenon ships self-verifying examples that demonstrate proof-bound execution across frameworks, domains, and agent topologies. Each is runnable; together they're the evidence suite.
 
 | Example | What it proves |
 |---|---|
-| `examples/financial_agent_protected_transfer` | Financial transfer/refund actions are exact-action bound and replay-protected |
-| `examples/fastmcp_financial_transfer` | MCP/FastMCP tools refuse unproven consequential actions |
-| `examples/protected_clinical_ehr_agent` | FastAPI/HTTP boundary protects safety-critical medication administration |
-| `examples/protected_multi_agent_swarm` | Shared replay state enforces exactly one action across a multi-agent swarm, including real concurrency |
-| `examples/protected_iam_control_plane` | Policy layer blocks privileged IAM grants unless approval evidence is present |
-| `examples/protected_cicd_pipeline` | Release pipeline deploys only the approved artifact to the approved environment |
-
-Run the full evidence suite:
+| [`financial_agent_protected_transfer`](examples/financial_agent_protected_transfer) | Money moves only when proof is bound to the exact payee, amount, target, and capability (tampering, payee-swap, laundering, replay, expiry, malformed → all refused) |
+| [`fastmcp_financial_transfer`](examples/fastmcp_financial_transfer) | MCP/FastMCP tools refuse unproven consequential actions at the server boundary |
+| [`protected_clinical_ehr_agent`](examples/protected_clinical_ehr_agent) | FastAPI/HTTP boundary protects medication administration (wrong patient, overdose, wrong drug/route, double dose, stale order → refused) |
+| [`protected_multi_agent_swarm`](examples/protected_multi_agent_swarm) | Shared replay state enforces exactly one action across a swarm — verified with 32 workers racing the same proof |
+| [`protected_iam_control_plane`](examples/protected_iam_control_plane) | Policy layer blocks privileged IAM grants unless approval evidence is present |
+| [`protected_cicd_pipeline`](examples/protected_cicd_pipeline) | Release pipeline deploys only the approved artifact to the approved environment |
 
 ```bash
 python -m pytest \
@@ -520,379 +154,83 @@ python -m pytest \
   -q
 ```
 
----
+→ Detailed walkthrough of each evidence case: [`docs/evidence/`](docs/evidence/)
 
-## Evidence: financial agent
-
-The financial example demonstrates a protected agent that can move money only when proof is bound to the exact payee, amount, target, and capability.
-
-It verifies:
-
-- authorised payment executes
-- amount tampering is refused
-- payee swap is refused
-- cross-tool laundering is refused
-- missing proof is refused
-- replay is refused
-- expired proof is refused
-- malformed proof is refused
-
-This is the baseline “agent moves money” proof case.
+One adoption note worth surfacing here, because it's the easiest swarm mistake: **cross-agent single-use requires a shared/durable replay store.** With per-agent in-process state, a swarm can reopen the double-execution hole.
 
 ---
 
-## Evidence: MCP / FastMCP
+## How a deployment is shaped
 
-The MCP evidence demonstrates Actenon protecting an MCP tool boundary.
+```text
+agent / workflow / tool caller
+        |
+        |  proposed action + proof
+        v
+protected boundary  ──verify: exact action · parameters · audience · expiry · replay · policy──┐
+        |                                                                                       │
+        v                                                                                       │
+   side effect executes                                                          OR  refusal returned
+```
 
-It verifies that a model-visible tool call cannot execute a consequential side effect unless the runtime supplies valid proof through the protected request channel.
+1. **Issuer / control plane** — decides whether a proposed action may be authorized, and mints proof.
+2. **Protected boundary / kernel gate** — verifies the proof immediately before the side effect.
+3. **Receipt / refusal** — records what happened, what was refused, and why.
 
-This is important because MCP tools are becoming a common bridge between agents and real systems.
-
-Actenon’s position is simple:
-
-> MCP is how agents reach tools. Actenon is how tools decide whether the action is allowed.
-
----
-
-## Evidence: LangChain
-
-The LangChain pattern demonstrates proof injection through `RunnableConfig`.
-
-This matters because the proof is **not** a model-visible tool argument.
-
-The model can see business parameters such as order, amount, vendor, or action type. It does not need to see or manipulate the proof itself.
-
-This demonstrates that Actenon can sit underneath an agent framework without depending on model cooperation.
-
----
-
-## Evidence: FastAPI / clinical EHR
-
-The clinical EHR example demonstrates a protected medication-administration endpoint over real HTTP.
-
-Proof travels in the `X-Actenon-Proof` header, away from the request body the agent composes.
-
-It verifies that the one authorised administration runs, while wrong patient, overdose, wrong drug, wrong route, double dose, stale order, missing proof, and malformed proof are refused before the eMAR side effect.
-
-This example is illustrative and not clinical certification. Its purpose is to show exact-action enforcement in a safety-critical domain.
-
----
-
-## Evidence: multi-agent swarm
-
-The multi-agent swarm example demonstrates one of Actenon’s most important architectural claims:
-
-> Even when many agents can act, the protected boundary can still enforce exactly one correct action.
-
-The example uses:
-
-- an orchestrator
-- specialist sub-agents
-- a scaled-out worker pool
-- multiple Actenon gates
-- one shared replay store
-
-It attacks swarm-native failure modes:
-
-- delegation amplification
-- cross-agent proof laundering
-- confused-deputy / audience confusion
-- cross-agent replay
-- rogue swarm member with no proof
-- real concurrency with 32 workers racing the same proof
-
-The concurrency test is the critical evidence: exactly one worker executes and the other 31 are refused.
-
-Important adoption note: cross-agent single-use requires a shared/durable replay store. With per-agent in-process replay state, a swarm can reopen the double-execution hole.
-
----
-
-## Evidence: IAM / identity control plane
-
-The IAM example demonstrates Actenon protecting privilege changes.
-
-This is the policy-layer example.
-
-It verifies:
-
-- low-risk grants execute
-- privileged production/admin grants without approval are refused
-- the same privileged grant with documented approval evidence executes
-- privilege escalation is refused
-- parameter tampering is refused
-- missing proof is refused
-- replay is refused
-
-This demonstrates that Actenon is not only action-binding. It can also require policy evidence before execution.
-
----
-
-## Evidence: CI/CD release pipeline
-
-The CI/CD example demonstrates a protected autonomous release agent.
-
-The risk is shipping the wrong or unreviewed artifact to production.
-
-It verifies:
-
-- the approved reviewed/tested commit deploys once
-- unreviewed/untested commits are refused
-- staging-scoped proof cannot be used for production
-- rollback to a known-vulnerable commit is refused
-- missing proof is refused
-- double-deploy replay is refused
-- stale approval proof is refused
-
-This is the “agents deploying code” proof case.
-
----
-
-## What Actenon guarantees
-
-When a consequential action is routed through an Actenon-protected boundary, and the backend has no alternate unprotected route, Actenon can enforce:
-
-- exact-action binding
-- parameter binding
-- audience binding
-- time-bounded execution
-- single-use replay protection
-- structured refusal
-- policy evidence checks
-- receipt/refusal evidence
-- framework-agnostic enforcement
-
-The guarantee applies at the protected boundary.
-
-It does not rely on the model following instructions.
-
----
-
-## What Actenon does not guarantee
-
-Actenon does not claim to:
-
-- make an LLM truthful
-- prevent all bad model output
-- inspect arbitrary natural language responses
-- replace access control, DLP, SIEM, EDR, IAM, or application security
-- protect resources reachable through unprotected paths
-- certify production deployments by itself
-- prove real-world adoption, latency under load, or third-party audit status
-
-Actenon protects explicit consequential actions at the boundary you own.
+The agent can be cooperative, third-party, compromised, or unaware of Actenon. **The boundary enforces.** The adoption rule follows: *protect the boundary you own; don't try to make every agent safe; make the action surface safe.*
 
 ---
 
 ## Going to production: self-hosted or managed
 
-The local quickstart uses `ActenonGate.local_dev(...)` because it is the fastest way to understand the model. It is for development, demos, and local tests only.
-
-For production, you need the same guarantee backed by production infrastructure: asymmetric signing, managed key custody, durable replay protection, issuer metadata, audit logging, policy evidence, and operational monitoring.
+The quickstart uses `ActenonGate.local_dev(...)` because it's the fastest way to understand the model — it's for development and demos only (it uses a local HMAC signer). Production needs the same guarantee backed by asymmetric signing, managed key custody, durable replay, issuer metadata, audit logging, and policy evidence.
 
 **You can run all of this yourself with the open kernel. None of it requires Actenon Cloud.**
 
-Actenon Cloud is an optional managed service that operates this trust infrastructure for you. It does not unlock a stronger guarantee than the open kernel provides; it removes the operational burden of running the issuer, approval workflows, key custody integrations, durable replay stores, audit trails, and transparency infrastructure yourself.
+Actenon Cloud is an optional managed service that *operates* this trust infrastructure for you. It does not unlock a stronger guarantee than the open kernel — it removes the operational burden of running the issuer, approvals, key custody, durable replay, and audit/transparency yourself.
 
 | Production capability | Self-hosted with `actenon-kernel` | Optional managed layer |
 |---|---|---|
-| Asymmetric signing | Use the kernel’s asymmetric signing support and your own signing process. | Hosted/managed proof issuance. |
-| Key custody | Use your own KMS/HSM, such as AWS KMS, GCP KMS, Azure Key Vault, or internal HSM. | Managed signing custody and rotation operations. |
-| Key rotation | Publish and rotate keys using your own `kid` / public-key metadata process. | Managed key rotation and issuer metadata. |
-| Durable replay protection | Use a shared durable replay store such as SQLite for local/single-node use or Postgres for production/shared boundaries. | Managed replay protection and operational monitoring. |
-| Issuer metadata | Host your own well-known issuer metadata and public verification keys. | Hosted issuer discovery endpoint. |
-| Tenant-aware policy | Use the open policy/preflight layer and evidence objects in this repo. | Managed policy configuration and governance workflows. |
-| Approval evidence | Build or integrate your own approval flow that emits verifiable approval evidence. | Hosted human approval UI and workflow engine. |
-| Receipts and refusals | Store the kernel’s structured receipts/refusals in your own logs, SIEM, data lake, or audit system. | Managed receipt/refusal storage, search, and reporting. |
-| Auditability | Wire issuance, approval, execution, refusal, and replay events into your own audit sink. | Managed audit trail and transparency reporting. |
+| Asymmetric signing | Kernel's asymmetric signing + your own signing process | Hosted proof issuance |
+| Key custody | Your own KMS/HSM (AWS KMS, GCP KMS, Azure Key Vault, internal HSM) | Managed signing custody + rotation |
+| Key rotation | Your own `kid` / public-key metadata process | Managed rotation + issuer metadata |
+| Durable replay | Shared durable store (SQLite single-node, Postgres for shared boundaries) | Managed replay + monitoring |
+| Issuer metadata | Host your own well-known issuer metadata + public keys | Hosted issuer discovery |
+| Tenant-aware policy | Open policy/preflight layer + evidence objects in this repo | Managed policy + governance workflows |
+| Approval evidence | Your own approval flow emitting verifiable approval evidence | Hosted human-approval UI + workflow |
+| Receipts / refusals | Store the kernel's structured artifacts in your own logs/SIEM | Managed storage, search, reporting |
+| Auditability | Wire events into your own audit sink | Managed audit trail + transparency |
 
-The open kernel provides the full proof-bound execution guarantee on infrastructure you control:
+> The kernel remains the neutral enforcement layer that can be adopted, audited, and self-hosted without depending on Actenon Cloud.
 
-> **No valid proof, no execution.**
-
-The managed service is for teams that want Actenon operated for them. The kernel remains the neutral enforcement layer that can be adopted, audited, and self-hosted without depending on Actenon Cloud.
-
-For production design details, see:
-
-- [`docs/guides/ISSUANCE_AND_APPROVAL.md`](docs/guides/ISSUANCE_AND_APPROVAL.md)
-- [`KERNEL_GUARANTEES.md`](KERNEL_GUARANTEES.md)
-- [`SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md)
-
----
-
-## Architecture
-
-A typical Actenon deployment has three layers:
-
-1. **Issuer / control plane**  
-   Decides whether a proposed action may be authorised and issues proof.
-
-2. **Protected boundary / kernel gate**  
-   Verifies the proof immediately before the side effect.
-
-3. **Receipt / refusal evidence**  
-   Records what happened, what was refused, and why.
-
-```text
-agent / workflow / tool caller
-        |
-        | proposed action + proof
-        v
-protected boundary
-        |
-        | verify proof:
-        | - exact action
-        | - parameters
-        | - audience
-        | - expiry
-        | - replay
-        | - policy evidence
-        v
-side effect executes OR refusal returned
-```
-
-The agent can be cooperative, third-party, compromised, or unaware of Actenon.
-
-The boundary enforces.
-
----
-
-## Adoption rule
-
-Protect the boundary you own.
-
-Do not try to make every agent safe.
-
-Make the action surface safe.
-
-The agent may ask. The protected boundary decides.
-
----
-
-## When to use Actenon
-
-Use Actenon when an AI agent, workflow, tool, or automation can trigger a consequential side effect.
-
-Good first use cases:
-
-- refunds and payment operations
-- data exports
-- customer deletion
-- privileged IAM changes
-- production deployments
-- MCP tools with side effects
-- infrastructure provisioning
-- multi-agent worker pools
-
-Start with one high-risk action. Protect it. Run the evidence pattern. Expand from there.
-
----
-
-## Local development commands
-
-Install:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install --upgrade pip
-python3 -m pip install -e ".[asymmetric]"
-```
-
-Run quickstart:
-
-```bash
-python examples/quickstart_min.py
-```
-
-Run interactive demo:
-
-```bash
-python examples/interactive_execution_demo.py
-```
-
-Run evidence:
-
-```bash
-python -m pytest \
-  examples/financial_agent_protected_transfer \
-  examples/fastmcp_financial_transfer \
-  examples/protected_clinical_ehr_agent \
-  examples/protected_multi_agent_swarm \
-  examples/protected_iam_control_plane \
-  examples/protected_cicd_pipeline \
-  -q
-```
-
-Check README links:
-
-```bash
-python - <<'PY'
-from pathlib import Path
-import re
-
-root = Path(".")
-s = Path("README.md").read_text(encoding="utf-8")
-missing = []
-
-for link in re.findall(r"\[[^\]]+\]\(([^)]+)\)", s):
-    if link.startswith(("http://", "https://", "#", "mailto:")):
-        continue
-    target = link.split("#")[0]
-    if target and not (root / target).exists():
-        missing.append(link)
-
-if missing:
-    print("Missing README links:")
-    print("\n".join(missing))
-    raise SystemExit(1)
-
-print("README links OK")
-PY
-```
+→ Production design: [`docs/guides/ISSUANCE_AND_APPROVAL.md`](docs/guides/ISSUANCE_AND_APPROVAL.md) · [`docs/guides/PRODUCTION_SIGNING_CUSTODY.md`](docs/guides/PRODUCTION_SIGNING_CUSTODY.md)
 
 ---
 
 ## FAQ
 
-### Is Actenon an AI safety model?
+**Is Actenon an AI-safety model?** No. It's an execution-boundary control. It doesn't make the model safe; it makes the action boundary deterministic.
 
-No. Actenon is an execution-boundary control. It does not try to make the model safe. It makes the action boundary deterministic.
+**Does the agent need to cooperate?** No. The boundary enforces proof before execution. The agent can ask, but can't force the side effect without valid proof.
 
-### Does the agent need to cooperate?
+**Can this work with third-party agents?** Yes — if the agent must use a protected boundary to reach the resource.
 
-No. The boundary enforces proof before execution. The agent can ask, but it cannot force the side effect without valid proof.
+**Can Actenon stop data leakage in normal model output?** No. It can require proof for explicit export/transmit *actions*, but it doesn't inspect arbitrary model text.
 
-### Can this work with third-party agents?
+**What if the agent has another credential or route?** Then the resource isn't fully protected. The protected edge must be the only route to the side effect, or backend credentials must only be issued after verification.
 
-Yes, if the third-party agent must use a protected boundary to reach the resource.
+**Is the local signer production-ready?** No — development and demos only. Production uses asymmetric signing under managed key custody.
 
-### Can Actenon stop data leakage in normal model output?
+**Why not just use IAM?** Use IAM too. IAM answers *who has access*. Actenon answers *whether this exact action, with these exact parameters, has valid proof at execution time*.
 
-No. Actenon can require proof for explicit export/transmit actions, but it does not inspect arbitrary model text unless that text is routed through a protected action.
-
-### What happens if the agent has another credential or route?
-
-Then the resource is not fully protected by Actenon. The protected edge must be the only route to the side effect, or backend credentials must only be issued after verification.
-
-### Is the local signer production-ready?
-
-No. The local HMAC signer is for development and demos only. Production should use asymmetric signing under managed key custody.
-
-### Why not just use IAM?
-
-Use IAM too. IAM answers who or what has access. Actenon answers whether this exact agentic action, with these exact parameters, has a valid proof at execution time.
-
-### Why does replay protection matter?
-
-Because agents retry, workers scale horizontally, and swarms duplicate work. A valid proof must not become permission to execute the same side effect repeatedly.
+**Why does replay protection matter?** Agents retry, workers scale horizontally, swarms duplicate work. A valid proof must not become permission to execute the same side effect repeatedly.
 
 ---
 
 ## Project status
 
-Actenon Kernel is an open-source execution gate and evidence standard for proof-bound agentic actions.
+Actenon Kernel is an open-source execution gate and evidence standard for proof-bound agentic actions (Apache-2.0). The goal is to make proof-bound execution a normal default for high-risk AI-agent actions.
 
-The goal is to make proof-bound execution a normal default for high-risk AI-agent actions.
+Start with one high-risk action. Protect it. Run the evidence pattern. Expand from there.
 
-> No valid proof, no execution.
+> **No valid proof, no execution.**
