@@ -607,3 +607,41 @@ PCCB.from_dict = classmethod(_pccb_from_dict)
 PCCB.to_wire = _pccb_to_wire
 PCCB.from_wire = classmethod(_pccb_from_wire)
 
+# ---------------------------------------------------------------------------
+# # ACTENON_PCCB_WIRE_HELPERS_V1
+# ---------------------------------------------------------------------------
+
+def _pccb_to_wire(self) -> str:
+    """Return a URL/header-safe serialized PCCB.
+
+    This transports the proof credential block itself. API examples that need
+    exact-action verification should transport the ActionIntent alongside this
+    proof, because verification is intentionally bound to the exact action.
+    """
+    import base64
+    import json
+
+    raw = json.dumps(
+        self.to_dict(),
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+@classmethod
+def _pccb_from_wire(cls, value: str):
+    """Decode a URL/header-safe serialized PCCB."""
+    import base64
+    import json
+
+    if not isinstance(value, str) or not value:
+        raise ValueError("PCCB wire value must be a non-empty string")
+
+    padded = value + ("=" * (-len(value) % 4))
+    raw = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8")
+    return cls.from_dict(json.loads(raw))
+
+
+setattr(PCCB, "to_wire", _pccb_to_wire)
+setattr(PCCB, "from_wire", _pccb_from_wire)

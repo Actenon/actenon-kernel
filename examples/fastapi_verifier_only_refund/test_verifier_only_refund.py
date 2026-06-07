@@ -1,10 +1,16 @@
+
 from examples.fastapi_verifier_only_refund.app import (
     balances,
     client,
     ledger,
     reset_ledger,
+    verifier_gate,
 )
 from examples.fastapi_verifier_only_refund.issuer import mint_refund_proof
+
+
+def test_verifier_only_endpoint_cannot_mint_proof():
+    assert verifier_gate.signer is None
 
 
 def test_verifier_only_endpoint_executes_valid_issuer_proof():
@@ -30,7 +36,7 @@ def test_verifier_only_endpoint_refuses_tampered_request():
 
     response = client.post(
         "/refunds/ord-123",
-        json={"amount_cents": 250000},
+        json={"amount_cents": 999999},
         headers={"X-Actenon-Proof": proof_header},
     )
 

@@ -1,22 +1,33 @@
-from typing import Any, Dict, List, Optional, Tuple
+
+"""FastAPI resource-boundary refund example.
+
+This example deliberately transports the exact ActionIntent with the PCCB proof.
+That is the important point: the protected endpoint verifies the proof against
+the exact action that was approved, not a newly rebuilt lookalike action.
+"""
+
+from __future__ import annotations
+
+import base64
+import json
+from typing import Any, Dict, Optional, Tuple
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
-from actenon.gate import ActenonGate
-from actenon.models.contracts import PCCB
+from actenon import ActenonGate
+from actenon.models import PCCB
 
 
 AUDIENCE = "service:refunds"
 
 gate = ActenonGate.local_dev(audience=AUDIENCE)
 
-app = FastAPI(title="Actenon FastAPI Resource Boundary Refund Demo")
-client = TestClient(app)
+app = FastAPI(title="Actenon FastAPI resource-boundary refund demo")
 
-ledger: List[Dict[str, int]] = []
-balances: Dict[str, int] = {"ord-123": 100000, "ord-456": 100000}
+ledger = []
+balances = {"ord-123": 100000, "ord-456": 100000}
 
 
 class RefundRequest(BaseModel):
@@ -37,84 +48,104 @@ def build_refund_action(order_id: str, amount_cents: int) -> Dict[str, Any]:
         target_type="order",
         target_id=order_id,
         tenant_id="demo",
-        requester_id="fastapi-demo-agent",
+        requester_id="refund-agent",
     )
 
 
-def action_from_request_and_proof(order_id: str, amount_cents: int, proof: PCCB) -> Dict[str, Any]:
-    """Reconstruct the exact action intent being attempted at the boundary.
-
-    The endpoint receives the requested order/amount plus a serialized proof.
-    build_action creates the semantic action; the proof supplies the original
-    proof-bound metadata needed for exact canonical verification.
-    """
-    action = build_refund_action(order_id, amount_cents)
-    action["intent_id"] = proof.intent_id
-    action["issued_at"] = proof.issued_at.isoformat()
-    action["expires_at"] = proof.expires_at.isoformat()
-    return action
+def proof_to_header(action: Dict[str, Any], proof: PCCB) -> str:
+    """Serialize the exact action + proof as one HTTP-header-safe envelope."""
+    envelope = {
+        "action_intent": action,
+        "pccb": proof.to_dict(),
+    }
+    raw = json.dumps(envelope, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii")
 
 
-def mint_refund_proof(order_id: str, amount_cents: int) -> Tuple[Dict[str, Any], PCCB, str]:
+def proof_from_header(value: Optional[str]) -> Tuple[Dict[str, Any], PCCB]:
+    if not value:
+        raise ValueError("missing proof header")
+
+    padded = value + ("=" * (-len(value) % 4))
+    raw = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8")
+    envelope = json.loads(raw)
+
+    action = envelope["action_intent"]
+    proof = PCCB.from_dict(envelope["pccb"])
+    return action, proof
+
+
+def mint_refund_proof(order_id: str, amount_cents: int):
     action = build_refund_action(order_id, amount_cents)
     proof = gate.mint_proof(action)
-    return action, proof, proof.to_wire()
+    proof_header = proof_to_header(action, proof)
+    return action, proof, proof_header
 
 
-def outcome_allowed(outcome: Any) -> bool:
-    if outcome is True:
-        return True
-    if isinstance(outcome, dict):
-        return bool(outcome.get("allowed"))
-    return bool(getattr(outcome, "allowed", False))
+def _request_matches_approved_action(
+    action: Dict[str, Any],
+    *,
+    order_id: str,
+    amount_cents: int,
+) -> bool:
+    params = action.get("action", {}).get("parameters", {})
+    target = action.get("target", {})
 
-
-def outcome_reason(outcome: Any) -> str:
-    if isinstance(outcome, dict):
-        return str(outcome.get("reason") or outcome.get("code") or "REFUSED")
-    return str(getattr(outcome, "reason", None) or getattr(outcome, "code", None) or "REFUSED")
-
-
-def refuse(reason: str) -> None:
-    raise HTTPException(status_code=403, detail={"reason": reason})
+    return (
+        params.get("order_id") == order_id
+        and params.get("amount_cents") == amount_cents
+        and target.get("resource_id") == order_id
+    )
 
 
 @app.post("/refunds/{order_id}")
 def refund_order(
     order_id: str,
-    body: RefundRequest,
+    request: RefundRequest,
     x_actenon_proof: Optional[str] = Header(default=None),
 ):
-    if x_actenon_proof is None:
-        refuse("PCCB_REQUIRED")
-
     try:
-        proof = PCCB.from_wire(x_actenon_proof)
-    except ValueError:
-        refuse("PCCB_MALFORMED")
+        action, proof = proof_from_header(x_actenon_proof)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=403,
+            detail={"reason_code": "PCCB_REQUIRED", "message": str(exc)},
+        )
 
-    action = action_from_request_and_proof(order_id, body.amount_cents, proof)
+    if not _request_matches_approved_action(
+        action,
+        order_id=order_id,
+        amount_cents=request.amount_cents,
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail={"reason_code": "REQUEST_ACTION_MISMATCH"},
+        )
 
-    def side_effect() -> Dict[str, Any]:
-        if order_id not in balances:
-            balances[order_id] = 100000
-        balances[order_id] -= body.amount_cents
-        event = {"order_id": order_id, "amount_cents": body.amount_cents}
+    def execute_refund():
+        balances[order_id] -= request.amount_cents
+        event = {"order_id": order_id, "amount_cents": request.amount_cents}
         ledger.append(event)
         return event
 
     outcome = gate.protect(
         action,
         proof,
-        side_effect,
+        execute_refund,
         audience=AUDIENCE,
     )
 
-    if not outcome_allowed(outcome):
-        refuse(outcome_reason(outcome))
+    if not outcome.ok:
+        raise HTTPException(
+            status_code=403,
+            detail={"reason_code": outcome.reason_code},
+        )
 
     return {
         "ok": True,
         "ledger": ledger,
         "balance_cents": balances[order_id],
     }
+
+
+client = TestClient(app)

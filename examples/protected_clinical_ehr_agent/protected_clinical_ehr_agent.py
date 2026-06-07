@@ -106,22 +106,18 @@ def proof_header(patient_id: str, drug: str, dose_mcg: int, route: str):
 
 
 def refusal_reason(response):
-    """Return a stable refusal reason from JSON or non-JSON HTTP responses."""
     try:
         body = response.json()
     except Exception:
-        text = getattr(response, "text", "") or ""
-        return f"HTTP_{response.status_code}" if not text else f"HTTP_{response.status_code}: {text[:120]}"
+        return f"HTTP_{response.status_code}"
 
     if isinstance(body, dict):
-        detail = body.get("detail")
+        detail = body.get("detail", body)
         if isinstance(detail, dict):
-            return detail.get("reason") or detail.get("error") or str(detail)
-        if detail is not None:
-            return str(detail)
-        return body.get("reason") or body.get("error") or str(body)
+            return detail.get("reason_code") or detail.get("message") or str(detail)
+        return str(detail)
 
-    return str(body)
+    return f"HTTP_{response.status_code}"
 
 
 def main() -> int:
