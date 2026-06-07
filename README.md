@@ -20,6 +20,30 @@ It is an execution-edge control:
 
 ---
 
+## 3-minute interactive demo: watch a bad agent command get dropped
+
+Developers should not have to read the whole repo to understand the guarantee. Run the tiny demo and watch the execution boundary accept one approved action, then refuse a hallucinated/tampered command, a replay, and a no-proof attempt before any side effect.
+
+```bash
+python examples/interactive_execution_demo.py
+```
+
+Expected shape:
+
+```text
+✅ approved refund: ord-123 £25.00              -> executed
+🛑 hallucinated refund: ord-456 £2,500.00       -> refused / INTENT_MISMATCH
+🛑 replay approved refund                       -> refused / DUPLICATE_REPLAY
+🛑 refund with no proof                         -> refused / PCCB_REQUIRED
+
+Final ledger events: [{'order_id': 'ord-123', 'amount_cents': 2500}]
+No valid proof, no execution.
+```
+
+The important part is not the demo domain. It is the invariant: the side-effect function only runs for the proof-bound action.
+
+---
+
 ## Why Actenon exists
 
 AI agents are moving from chat to action.
