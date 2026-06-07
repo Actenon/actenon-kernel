@@ -1,24 +1,3 @@
-<!--
-  REVIEWER NOTES — READ BEFORE COMMITTING (these are for you, delete before publishing):
-
-  ⚠️ VERIFY-AGAINST-CODE ITEMS (I could not run the code in this turn — confirm each before publishing,
-     because the #1 trust-killer is a copy/paste example that doesn't run verbatim):
-     1. OUTCOME ATTRIBUTES: This README uses `outcome.allowed`, `outcome.reason`, `outcome.result`
-        in the framework wrappers. Earlier in the build the shipped object exposed `.ok`,
-        `.reason_code`, and `.outcome`. CONFIRM the real attribute names on GateOutcome and make
-        EVERY code block consistent with the actual API. If the real names are .ok/.reason_code,
-        change them here.
-     2. DEMO FILE: confirm `examples/interactive_execution_demo.py` exists and prints exactly the
-        output shown (including the £ currency and the reason codes).
-     3. build_action SIGNATURE: confirm the positional/keyword args shown match the real signature.
-     4. All doc links (docs/adapters/*, docs/evidence/*) — create those files (moved out of this
-        README) or change the links to point where the content actually lives.
-
-  This version moves the three framework wrappers and the six per-evidence prose sections OUT of the
-  README into linked docs, so the first two screens are pure hook. Nothing was deleted — it was
-  relocated. Create docs/adapters/ and docs/evidence/ with the moved content.
--->
-
 # actenon-kernel
 
 **Stop AI agents from taking destructive actions they were never authorized to take.**
@@ -26,7 +5,7 @@ The open proof gate for agentic execution — payments, deletes, deploys, access
 
 > **No valid proof, no execution.**
 
-Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary — the API, MCP tool, database, payments rail, IAM control plane, release pipeline, or infrastructure endpoint — decides whether the action actually happens.
+Your model can reason. Your agent can ask. Your tools can propose. But the protected boundary, the API, MCP tool, database, payments rail, IAM control plane, release pipeline, or infrastructure endpoint, decides whether the action actually happens.
 
 Actenon refuses a consequential action unless the caller presents a cryptographic proof bound to the **exact action** being attempted. If the proof is missing, expired, replayed, audience-mismatched, policy-denied, malformed, or bound to different parameters, the action is refused **before the side effect**.
 
@@ -40,7 +19,7 @@ It is not a prompt filter, an output moderator, or another layer of "please beha
 
 ## See it work in 3 minutes
 
-Don't read the whole repo to understand the guarantee. Run the demo and watch the boundary accept one approved action, then refuse a hallucinated command, a replay, and a no-proof attempt — before any side effect.
+Don't read the whole repo to understand the guarantee. Run the demo and watch the boundary accept one approved action, then refuse a hallucinated command, a replay, and a no-proof attempt, before any side effect.
 
 ```bash
 git clone https://github.com/Actenon/actenon-kernel.git
@@ -110,11 +89,11 @@ That's the whole mental model: **build the action → present proof for that exa
 
 ## Why Actenon exists
 
-AI agents are moving from chat to action — issuing refunds, deploying code, modifying databases, updating IAM roles, exporting data, restarting infrastructure, coordinating with other agents. That creates a new failure mode:
+AI agents are moving from chat to action, issuing refunds, deploying code, modifying databases, updating IAM roles, exporting data, restarting infrastructure, coordinating with other agents. That creates a new failure mode:
 
 > The model may be wrong, compromised, manipulated, over-authorized, or prompt-injected — but the side effect still happens.
 
-Most AI-safety work focuses on what the model *says* or *intends*. Actenon focuses on the moment that matters most — **the execution gap: between an agent proposing an action and a system actually doing it.** At that point the boundary must be deterministic.
+Most AI-safety work focuses on what the model *says* or *intends*. Actenon focuses on the moment that matters most, **the execution gap: between an agent proposing an action and a system actually doing it.** At that point the boundary must be deterministic.
 
 **If you're protecting MCP tools:** *MCP is how agents reach tools. Actenon is how tools decide whether the action is allowed.*
 
@@ -173,9 +152,9 @@ protected boundary  ──verify: exact action · parameters · audience · expi
    side effect executes                                                          OR  refusal returned
 ```
 
-1. **Issuer / control plane** — decides whether a proposed action may be authorized, and mints proof.
-2. **Protected boundary / kernel gate** — verifies the proof immediately before the side effect.
-3. **Receipt / refusal** — records what happened, what was refused, and why.
+1. **Issuer / control plane**: decides whether a proposed action may be authorized, and mints proof.
+2. **Protected boundary / kernel gate**: verifies the proof immediately before the side effect.
+3. **Receipt / refusal**: records what happened, what was refused, and why.
 
 The agent can be cooperative, third-party, compromised, or unaware of Actenon. **The boundary enforces.** The adoption rule follows: *protect the boundary you own; don't try to make every agent safe; make the action surface safe.*
 
@@ -183,11 +162,11 @@ The agent can be cooperative, third-party, compromised, or unaware of Actenon. *
 
 ## Going to production: self-hosted or managed
 
-The quickstart uses `ActenonGate.local_dev(...)` because it's the fastest way to understand the model — it's for development and demos only (it uses a local HMAC signer). Production needs the same guarantee backed by asymmetric signing, managed key custody, durable replay, issuer metadata, audit logging, and policy evidence.
+The quickstart uses `ActenonGate.local_dev(...)` because it's the fastest way to understand the model, it's for development and demos only (it uses a local HMAC signer). Production needs the same guarantee backed by asymmetric signing, managed key custody, durable replay, issuer metadata, audit logging, and policy evidence.
 
 **You can run all of this yourself with the open kernel. None of it requires Actenon Cloud.**
 
-Actenon Cloud is an optional managed service that *operates* this trust infrastructure for you. It does not unlock a stronger guarantee than the open kernel — it removes the operational burden of running the issuer, approvals, key custody, durable replay, and audit/transparency yourself.
+Actenon Cloud is an optional managed service that *operates* this trust infrastructure for you. It does not unlock a stronger guarantee than the open kernel, it removes the operational burden of running the issuer, approvals, key custody, durable replay, and audit/transparency yourself.
 
 | Production capability | Self-hosted with `actenon-kernel` | Optional managed layer |
 |---|---|---|
@@ -213,7 +192,7 @@ Actenon Cloud is an optional managed service that *operates* this trust infrastr
 
 **Does the agent need to cooperate?** No. The boundary enforces proof before execution. The agent can ask, but can't force the side effect without valid proof.
 
-**Can this work with third-party agents?** Yes — if the agent must use a protected boundary to reach the resource.
+**Can this work with third-party agents?** Yes, if the agent must use a protected boundary to reach the resource.
 
 **Can Actenon stop data leakage in normal model output?** No. It can require proof for explicit export/transmit *actions*, but it doesn't inspect arbitrary model text.
 
