@@ -55,3 +55,4 @@ artifacts/hero_demo_runtime/live/
 
 # Python virtual environments
 .venv/
+.aider.chat.history.md
