@@ -164,6 +164,10 @@ The agent should not be able to mint its own proof.
 
 ---
 
+<p align="center">
+  <img src="docs/assets/actenon-demo.gif" alt="Actenon refusing bad agent actions" width="850">
+</p>
+
 ## Run the proof in 60 seconds
 
 Run the local demo and watch one approved action execute while a hallucinated/tampered action, a replay and a no-proof attempt are refused before any side effect.
