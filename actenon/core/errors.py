@@ -62,6 +62,12 @@ class ProofVerificationError(RefusalException):
             details=details or {},
         )
 
+    @property
+    def failure_code(self) -> "FailureCode":  # type: ignore[name-defined]
+        """Map the granular refusal_code string to the canonical FailureCode enum."""
+        from actenon.outcomes import refusal_code_to_failure_code
+        return refusal_code_to_failure_code(self.refusal_code)
+
 
 class EscrowValidationError(RefusalException):
     def __init__(self, refusal_code: str, message: str, *, details: dict[str, Any] | None = None) -> None:
