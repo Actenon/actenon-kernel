@@ -378,7 +378,7 @@ Healthcare, clinical and safety-critical examples in this repository are illustr
 
 They are not certification or a recommended first deployment market.
 
-Actenon does not inspect prompts, filter ordinary model output or replace DLP.
+Actenon does not inspect prompts, filter ordinary model responses or replace DLP.
 
 It protects explicit execution-edge actions routed through an Actenon-protected boundary.
 
@@ -411,7 +411,7 @@ It does not rely on the model following instructions.
 Actenon does not claim to:
 
 - make an LLM truthful;
-- prevent all bad model output;
+- prevent all bad model responses;
 - inspect arbitrary natural language responses;
 - replace access control, DLP, SIEM, EDR, IAM or application security;
 - protect resources reachable through unprotected paths;
@@ -419,6 +419,14 @@ Actenon does not claim to:
 - prove real-world adoption, latency under load or third-party audit status.
 
 Actenon protects explicit consequential actions at the boundary you own.
+
+### Scope and boundary statements
+
+Actenon gates explicit execution-edge actions; it does not inspect or filter prompts, model output, or in-band response content.
+
+It can require proof for an explicit export or transmit action, but it does not stop data disclosed inside ordinary output unless that disclosure is itself modeled and routed as a protected action.
+
+The edge guarantee applies only when the protected edge is the only path to the resource, the backend accepts only brokered credentials issued after verification, and the agent has no standing credential or alternate route.
 
 ---
 
@@ -540,7 +548,7 @@ The agent can ask, but it cannot force the side effect without valid proof.
 
 Yes, if the third-party agent must use a protected boundary to reach the resource.
 
-### Can Actenon stop data leakage in normal model output?
+### Can Actenon stop data leakage in normal model responses?
 
 No. Actenon can require proof for explicit export/transmit actions, but it does not inspect arbitrary model text unless that text is routed through a protected action.
 
