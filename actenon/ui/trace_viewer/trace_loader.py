@@ -739,7 +739,8 @@ def _load_replay_entries(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
 
-    connection = sqlite3.connect(path)
+    connection = sqlite3.connect(path, timeout=30.0)
+    connection.execute("PRAGMA busy_timeout=30000")
     connection.row_factory = sqlite3.Row
     try:
         rows = connection.execute(

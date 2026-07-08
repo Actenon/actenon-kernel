@@ -26,6 +26,7 @@ class SqliteReplayStore(DbApiReplayStore):
         connection.execute("PRAGMA journal_mode=WAL")
         connection.execute("PRAGMA synchronous=FULL")
         connection.execute("PRAGMA foreign_keys=ON")
+        connection.execute(f"PRAGMA busy_timeout={int(self.timeout_seconds * 1000)}")
         return connection
 
     def _prepare_transaction(self, cursor: sqlite3.Cursor) -> None:

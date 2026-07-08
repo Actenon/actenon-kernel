@@ -755,7 +755,8 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
     runtime_replay_db = runtime_state_root / "replay.sqlite3"
     try:
         SqliteReplayStore(runtime_replay_db)
-        with sqlite3.connect(str(runtime_replay_db)) as connection:
+        with sqlite3.connect(str(runtime_replay_db), timeout=30.0) as connection:
+            connection.execute("PRAGMA busy_timeout=30000")
             connection.execute("SELECT COUNT(*) FROM action_consumption").fetchone()
         checks.append(
             RuntimeCheck(
@@ -779,7 +780,8 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
     runtime_escrow_db = runtime_state_root / "escrow.sqlite3"
     try:
         build_sqlite_capability_escrow(runtime_escrow_db)
-        with sqlite3.connect(str(runtime_escrow_db)) as connection:
+        with sqlite3.connect(str(runtime_escrow_db), timeout=30.0) as connection:
+            connection.execute("PRAGMA busy_timeout=30000")
             connection.execute("SELECT COUNT(*) FROM capability_escrow").fetchone()
         checks.append(
             RuntimeCheck(
