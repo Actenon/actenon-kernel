@@ -15,8 +15,16 @@ def default_replay_db_path(base_dir: str | Path | None = None) -> Path:
     configured = os.environ.get("ACTENON_REPLAY_DB")
     if configured:
         return Path(configured)
-    root = Path(base_dir) if base_dir is not None else Path.cwd() / ".actenon"
-    return root / "replay.sqlite3"
+    if base_dir is not None:
+        return Path(base_dir) / "replay.sqlite3"
+    # Use a process-unique temp directory by default so concurrent examples
+    # don't contend on the same SQLite file. Set ACTENON_REPLAY_DB or pass
+    # base_dir explicitly to use a shared path.
+    import tempfile
+    import atexit
+    tmpdir = tempfile.mkdtemp(prefix="actenon-replay-")
+    atexit.register(lambda d=tmpdir: __import__("shutil").rmtree(d, ignore_errors=True))
+    return Path(tmpdir) / "replay.sqlite3"
 
 
 def build_default_replay_store(base_dir: str | Path | None = None) -> ReplayStore:
