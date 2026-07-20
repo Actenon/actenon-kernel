@@ -2874,13 +2874,21 @@ def _bundle_file_hashes(paths: LocalRuntimePaths, entries: list[str]) -> dict[st
 
 
 def _bundle_file_entries(paths: LocalRuntimePaths, entries: list[str]) -> list[str]:
+    """Collect the list of files to hash for the bundle manifest.
+
+    SQLite WAL/SHM files (``*.sqlite3-wal``, ``*.sqlite3-shm``) are
+    excluded because they are ephemeral and may be checkpointed/deleted
+    between export and verify, causing false hash mismatches. The
+    authoritative integrity surface is the SQLite database file itself
+    (``*.sqlite3``), which is stable once checkpointed.
+    """
     resolved: list[str] = []
     seen: set[str] = set()
     for relative in entries:
         source = paths.root / relative
         if source.is_file():
             normalized = source.relative_to(paths.root).as_posix()
-            if normalized not in seen:
+            if normalized not in seen and not _is_ephemeral_sqlite_file(normalized):
                 seen.add(normalized)
                 resolved.append(normalized)
             continue
@@ -2891,9 +2899,27 @@ def _bundle_file_entries(paths: LocalRuntimePaths, entries: list[str]) -> list[s
                 normalized = child.relative_to(paths.root).as_posix()
                 if normalized in seen:
                     continue
+                if _is_ephemeral_sqlite_file(normalized):
+                    continue
                 seen.add(normalized)
                 resolved.append(normalized)
     return resolved
+
+
+def _is_ephemeral_sqlite_file(relative_path: str) -> bool:
+    """Return True for SQLite WAL/SHM/journal files that are ephemeral
+    and may not exist or may have different content between export and
+    verify. These files are excluded from the bundle hash manifest.
+    """
+    lower = relative_path.lower()
+    return (
+        lower.endswith(".sqlite3-wal")
+        or lower.endswith(".sqlite3-shm")
+        or lower.endswith(".sqlite3-journal")
+        or lower.endswith(".db-wal")
+        or lower.endswith(".db-shm")
+        or lower.endswith(".db-journal")
+    )
 
 
 def _bundle_evidence_chains(paths: LocalRuntimePaths) -> list[dict[str, Any]]:
