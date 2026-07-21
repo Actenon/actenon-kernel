@@ -10,7 +10,14 @@ from tempfile import TemporaryDirectory
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# The actenon-protocol dependency requires Python >= 3.10. The kernel's
+# CI matrix includes Python 3.9 (the kernel's own requires-python is
+# >=3.9). Skip this integration test on Python 3.9 because it installs
+# the protocol package from GitHub, which would fail on 3.9.
+_SKIP_PROTOCOL_INSTALL = sys.version_info < (3, 10)
 
+
+@unittest.skipIf(_SKIP_PROTOCOL_INSTALL, "actenon-protocol requires Python >= 3.10")
 class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
     def test_installed_actenon_console_script_and_packaged_viewer_work(self) -> None:
         with TemporaryDirectory() as tempdir:
@@ -21,6 +28,21 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             bin_dir = venv_dir / ("Scripts" if os.name == "nt" else "bin")
             python = bin_dir / ("python.exe" if os.name == "nt" else "python")
             actenon = bin_dir / ("actenon.exe" if os.name == "nt" else "actenon")
+
+            # Install the pinned actenon-protocol dependency first. The
+            # kernel's pyproject.toml pins it to ==1.0.0; pip install
+            # resolves it from GitHub because it is not on PyPI yet.
+            subprocess.run(
+                [
+                    str(python), "-m", "pip", "install",
+                    "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0",
+                ],
+                check=True,
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                timeout=180,
+            )
 
             subprocess.run(
                 [str(python), "-m", "pip", "install", ".[asymmetric]"],

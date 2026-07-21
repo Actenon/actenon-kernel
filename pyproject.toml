@@ -7,7 +7,7 @@ name = "actenon-kernel"
 version = "0.1.0"
 description = "Open proof-required execution kernel for consequential actions."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Ross Buckley" }]
@@ -18,14 +18,16 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Security",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+dependencies = [
+  "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0",
+  "pyyaml>=6.0,<7",
+]
 
 [project.optional-dependencies]
 asymmetric = ["cryptography>=42"]

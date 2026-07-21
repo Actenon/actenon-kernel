@@ -17,21 +17,35 @@ DEFAULT_MAX_CANONICAL_OUTPUT_BYTES = 1_048_576
 # Version: 1
 # Legacy identifier: RFC8785-JCS (historical proofs — same canonicalisation
 # logic, different label)
-CANONICALIZATION_PROFILE = "ACTENON-JCS-STRICT-1"
-CANONICALIZATION_PROFILE_VERSION = "1"
+#
+# The canonicalisation profile label is sourced from the pinned
+# actenon-protocol package to prevent drift. See
+# github.com/Actenon/actenon-protocol and
+# canonicalisation/ACTENON-JCS-STRICT-1.md for the authoritative
+# specification.
+from actenon_protocol import (
+    CANONICALISATION_PROFILE as _PROTOCOL_CANONICALISATION_PROFILE,
+    LEGACY_CANONICALISATION_PROFILE as _PROTOCOL_LEGACY_CANONICALISATION_PROFILE,
+    ACCEPTED_CANONICALISATION_PROFILES as _PROTOCOL_ACCEPTED_CANONICALISATION_PROFILES,
+    CANONICALISATION_PROFILE_VERSION as _PROTOCOL_CANONICALISATION_PROFILE_VERSION,
+)
+
+# Kernel uses US spelling (canonicalization) for backward compatibility.
+# The protocol uses British spelling (canonicalisation). The values are
+# identical; only the attribute name differs.
+CANONICALIZATION_PROFILE = _PROTOCOL_CANONICALISATION_PROFILE
+CANONICALIZATION_PROFILE_VERSION = _PROTOCOL_CANONICALISATION_PROFILE_VERSION
 
 # The legacy identifier used by historical proofs. The canonicalisation
 # logic is identical — only the label differs. Historical proofs with
 # this identifier continue to verify under the same logic.
-LEGACY_CANONICALIZATION_PROFILE = "RFC8785-JCS"
+LEGACY_CANONICALIZATION_PROFILE = _PROTOCOL_LEGACY_CANONICALISATION_PROFILE
 
 # All canonicalisation identifiers accepted by the verifier.
 # New proofs use CANONICALIZATION_PROFILE; historical proofs may use
 # LEGACY_CANONICALIZATION_PROFILE. Any other identifier is rejected.
-ACCEPTED_CANONICALIZATION_PROFILES = frozenset({
-    CANONICALIZATION_PROFILE,
-    LEGACY_CANONICALIZATION_PROFILE,
-})
+# Sourced from the protocol to prevent drift.
+ACCEPTED_CANONICALIZATION_PROFILES = _PROTOCOL_ACCEPTED_CANONICALISATION_PROFILES
 
 
 def _canonicalize_string(value: str) -> str:
