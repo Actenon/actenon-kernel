@@ -25,7 +25,7 @@ from .models import (
 
 LOCAL_ANCHOR_LOG_ENTRY_CONTRACT = {"name": "local_anchor_log_entry", "version": "v1"}
 ENTRY_HASH_ALGORITHM = "sha-256"
-ENTRY_HASH_CANONICALIZATION = "RFC8785-JCS"
+from actenon.proof.canonical import CANONICALIZATION_PROFILE as ENTRY_HASH_CANONICALIZATION
 
 
 def _hash_spec(value: Mapping[str, Any]) -> dict[str, str]:

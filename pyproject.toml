@@ -48,7 +48,7 @@ where = ["."]
 include = ["actenon*", "conformance*", "examples*", "schemas*"]
 
 [tool.setuptools.package-data]
-"actenon.conformance" = ["vectors/verifier_sdk_v1/*"]
+"actenon.conformance" = ["vectors/verifier_sdk_v1/*", "vectors/canonicalization_strict_v1/*"]
 "conformance" = [
   "CHANGELOG.md",
   "MATRIX.md",

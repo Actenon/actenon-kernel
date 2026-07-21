@@ -13,6 +13,7 @@ from typing import Any, Literal, Mapping, Sequence
 from actenon.models import ActionHashSpec, ActionIntent, PartyRef, SignatureSpec
 from actenon.models.contracts import parse_timestamp
 from actenon.proof import build_action_hash_input, canonicalize_bytes, sha256_hex
+from actenon.proof.canonical import ACCEPTED_CANONICALIZATION_PROFILES, CANONICALIZATION_PROFILE
 
 ISSUER_STATUS_CONTEXT = "actenon.issuer-status.v1"
 ISSUER_STATUS_KEY_USE = "issuer_status"
@@ -423,12 +424,12 @@ def _parse_action_hash(value: Any) -> ActionHashSpec:
         ) from exc
     if (
         action_hash.algorithm != "sha-256"
-        or action_hash.canonicalization != "RFC8785-JCS"
+        or action_hash.canonicalization not in ACCEPTED_CANONICALIZATION_PROFILES
         or _HEX_256_RE.fullmatch(action_hash.value) is None
     ):
         raise _error(
             "INVALID_APPROVAL_ARTIFACT",
-            "approval action_hash must declare sha-256, RFC8785-JCS, and lowercase hex",
+            "approval action_hash must declare sha-256, a known canonicalization profile, and lowercase hex",
         )
     return action_hash
 
@@ -441,7 +442,7 @@ def _resolve_expected_action_hash(
     if isinstance(value, ActionIntent):
         return ActionHashSpec(
             algorithm="sha-256",
-            canonicalization="RFC8785-JCS",
+            canonicalization=CANONICALIZATION_PROFILE,
             value=sha256_hex(build_action_hash_input(value)),
         )
     if {"algorithm", "canonicalization", "value"}.issubset(value):
@@ -507,7 +508,10 @@ def verify_approval_artifact(
     action_hash = _parse_action_hash(artifact.get("action_hash"))
     if expected_action is not None:
         expected_hash = _resolve_expected_action_hash(expected_action)
-        if action_hash != expected_hash:
+        # Compare only the hash VALUE, not the full ActionHashSpec.
+        # The canonicalization field may differ between legacy (RFC8785-JCS)
+        # and new (ACTENON-JCS-STRICT-1) proofs — both are accepted.
+        if action_hash.value != expected_hash.value:
             raise _error(
                 "APPROVAL_ACTION_MISMATCH",
                 "approval artifact is not bound to the expected action",

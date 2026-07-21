@@ -18,7 +18,7 @@ from actenon.models import (
     SignatureSpec,
 )
 from actenon.models.contracts import parse_timestamp
-from actenon.proof.canonical import canonicalize_bytes
+from actenon.proof.canonical import ACCEPTED_CANONICALIZATION_PROFILES, canonicalize_bytes
 
 
 CHECKPOINT_CONTEXT = "actenon.transparency-checkpoint.v1"
@@ -125,12 +125,12 @@ def _parse_digest(value: Any, field_name: str) -> DigestSpec:
     )
     if (
         algorithm != ARTIFACT_HASH_ALGORITHM
-        or canonicalization != ARTIFACT_HASH_CANONICALIZATION
+        or canonicalization not in ACCEPTED_CANONICALIZATION_PROFILES
         or _HEX_256_RE.fullmatch(digest_value) is None
     ):
         raise _error(
             "INVALID_LEAF_DIGEST",
-            "leaf digest must declare sha-256, RFC8785-JCS, and a lowercase 64-character hex value",
+            "leaf digest must declare sha-256, a known canonicalization profile, and a lowercase 64-character hex value",
         )
     return DigestSpec(
         algorithm=algorithm,

@@ -9,6 +9,30 @@ from actenon.core.json import DEFAULT_MAX_JSON_DEPTH, JSONInputTooLargeError, va
 
 DEFAULT_MAX_CANONICAL_OUTPUT_BYTES = 1_048_576
 
+# The canonicalisation profile used for all newly minted proofs, receipts,
+# and action hashes. This is a strict subset of RFC 8785 (JCS) that rejects
+# floating-point values entirely instead of canonicalising them.
+#
+# Profile name: ACTENON-JCS-STRICT-1
+# Version: 1
+# Legacy identifier: RFC8785-JCS (historical proofs — same canonicalisation
+# logic, different label)
+CANONICALIZATION_PROFILE = "ACTENON-JCS-STRICT-1"
+CANONICALIZATION_PROFILE_VERSION = "1"
+
+# The legacy identifier used by historical proofs. The canonicalisation
+# logic is identical — only the label differs. Historical proofs with
+# this identifier continue to verify under the same logic.
+LEGACY_CANONICALIZATION_PROFILE = "RFC8785-JCS"
+
+# All canonicalisation identifiers accepted by the verifier.
+# New proofs use CANONICALIZATION_PROFILE; historical proofs may use
+# LEGACY_CANONICALIZATION_PROFILE. Any other identifier is rejected.
+ACCEPTED_CANONICALIZATION_PROFILES = frozenset({
+    CANONICALIZATION_PROFILE,
+    LEGACY_CANONICALIZATION_PROFILE,
+})
+
 
 def _canonicalize_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)

@@ -20,7 +20,12 @@ from actenon.models.contracts import (
 )
 from actenon.models.runtime import DynamicContextInput, PolicyDecision
 from .audit import AuditLogSink, PCCBMintAuditRecord
-from .canonical import canonicalize_bytes, sha256_hex
+from .canonical import (
+    ACCEPTED_CANONICALIZATION_PROFILES,
+    CANONICALIZATION_PROFILE,
+    canonicalize_bytes,
+    sha256_hex,
+)
 from .refusal_messages import public_proof_refusal_message
 from .signing import SignatureVerifier, Signer
 
@@ -97,7 +102,7 @@ class PCCBMinter:
         )
         action_hash = ActionHashSpec(
             algorithm="sha-256",
-            canonicalization="RFC8785-JCS",
+            canonicalization=CANONICALIZATION_PROFILE,
             value=sha256_hex(build_action_hash_input(intent)),
         )
         unsigned = PCCB(
@@ -353,7 +358,7 @@ class PCCBVerifier:
                 context=context,
                 internal_detail=str(exc),
             )
-        if pccb.action_hash.algorithm != "sha-256" or pccb.action_hash.canonicalization != "RFC8785-JCS":
+        if pccb.action_hash.algorithm != "sha-256" or pccb.action_hash.canonicalization not in ACCEPTED_CANONICALIZATION_PROFILES:
             self._raise_post_auth_failure(
                 "ACTION_HASH_ALGORITHM_INVALID",
                 pccb=pccb,

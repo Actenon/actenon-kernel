@@ -18,7 +18,7 @@ from actenon.models import (
     build_artifact_digest,
 )
 from actenon.models.contracts import parse_timestamp
-from actenon.proof.canonical import canonicalize_bytes
+from actenon.proof.canonical import ACCEPTED_CANONICALIZATION_PROFILES, canonicalize_bytes
 
 
 COUNTERSIGNATURE_CONTRACT = {
@@ -96,12 +96,12 @@ def _parse_digest(value: Any, field_name: str) -> DigestSpec:
     digest_value = _require_string(data.get("value"), f"{field_name}.value")
     if (
         algorithm != ARTIFACT_HASH_ALGORITHM
-        or canonicalization != ARTIFACT_HASH_CANONICALIZATION
+        or canonicalization not in ACCEPTED_CANONICALIZATION_PROFILES
         or _HEX_256_RE.fullmatch(digest_value) is None
     ):
         raise CounterSignatureVerificationError(
             "INVALID_RECEIPT_DIGEST",
-            "receipt digest must declare sha-256, RFC8785-JCS, and a lowercase 64-character hex value",
+            "receipt digest must declare sha-256, a known canonicalization profile, and a lowercase 64-character hex value",
         )
     return DigestSpec(
         algorithm=algorithm,
@@ -344,7 +344,7 @@ def verify_countersignature(
         artifact.get("receipt_digest"),
         "countersignature.receipt_digest",
     )
-    if observed_digest != expected_digest:
+    if observed_digest.value != expected_digest.value:
         raise CounterSignatureVerificationError(
             "RECEIPT_DIGEST_MISMATCH",
             "counter-signature receipt digest does not match the supplied receipt or digest",

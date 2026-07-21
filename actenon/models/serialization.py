@@ -9,7 +9,7 @@ from .contracts import DigestSpec
 
 
 ARTIFACT_HASH_ALGORITHM = "sha-256"
-ARTIFACT_HASH_CANONICALIZATION = "RFC8785-JCS"
+from actenon.proof.canonical import CANONICALIZATION_PROFILE as ARTIFACT_HASH_CANONICALIZATION
 
 
 class ArtifactLike(Protocol):
