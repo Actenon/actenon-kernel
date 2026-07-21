@@ -19,7 +19,7 @@ from actenon.policy import (
     TenantWorkflowRule,
     TenantWorkflowRuleLayer,
 )
-from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier
+from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.canonical import canonicalize_bytes
 from actenon.proof.signers import HttpProofSealClient, NoOpProofSealClient, ProofSealError
 from actenon.receipts import InMemoryOutcomeWriter, ReceiptFactory, RefusalFactory
@@ -88,7 +88,7 @@ class ProofSealKernelTests(unittest.TestCase):
             ),
         )
         middleware = ProtectedEndpointMiddleware(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             escrow=escrow,
             receipt_factory=receipt_factory,
             refusal_factory=refusal_factory,

@@ -22,7 +22,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier
+from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.replay import ReplayProtector, SqliteReplayStore
 
 
@@ -94,7 +94,7 @@ class ReplayStoreHardeningIntegrationTests(unittest.TestCase):
 
     def _executor(self, replay_protector, **kwargs) -> ProtectedExecutor:
         return ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             **kwargs,

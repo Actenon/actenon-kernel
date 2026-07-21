@@ -81,7 +81,7 @@ class ConsequentialActionCoverageMatrixTests(unittest.TestCase):
 
         self.assertTrue(all(record.outcome == "refused" for record in by_key["missing_proof_refused"]))
         self.assertTrue(all(record.reason_code == "MISSING_PROOF" for record in by_key["missing_proof_refused"]))
-        self.assertTrue(all(record.reason_code == "ACTION_HASH_MISMATCH" for record in by_key["action_hash_mismatch_refused"]))
+        self.assertTrue(all(record.reason_code == "SIGNATURE_INVALID" for record in by_key["action_hash_mismatch_refused"]))
         self.assertTrue(all(record.reason_code == "PROOF_EXPIRED" for record in by_key["expired_proof_refused"]))
         self.assertTrue(all(record.reason_code == "DUPLICATE_REPLAY" for record in by_key["replay_attempt_refused"]))
         self.assertTrue(all(not record.side_effect_executed for record in by_key["replay_attempt_refused"]))

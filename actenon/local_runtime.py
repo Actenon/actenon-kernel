@@ -44,7 +44,7 @@ from actenon.policy import (
     TenantWorkflowRuleLayer,
     build_invoice_payment_policy_engine,
 )
-from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, build_action_hash_input, build_local_proof_signer
+from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_action_hash_input, build_local_proof_signer
 from actenon.proof.canonical import sha256_hex
 from actenon.preflight import PreflightDecision, PreflightEngine
 from actenon.receipts import (
@@ -589,7 +589,7 @@ def _bootstrap_portable_runtime(artifact_root: Path) -> dict[str, Any]:
         ),
         context=context,
     )
-    sdk = VerifierSDK(build_local_proof_signer())
+    sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
     verified = sdk.verify(intent=intent, pccb=pccb, context=context)
     response = HelloWorldProtectedResource().handle(verified)
 
@@ -907,7 +907,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
             try:
                 intent = ActionIntentIntakeService().parse(_load_json(portable_intent_path))
                 pccb = PCCB.from_dict(_load_json(portable_pccb_path))
-                sdk = VerifierSDK(build_local_proof_signer())
+                sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
                 verified = sdk.verify(
                     intent=intent,
                     pccb=pccb,
@@ -1535,7 +1535,7 @@ def _simulate_incident_proof_refusal(
         },
     )
 
-    sdk = VerifierSDK(build_local_proof_signer())
+    sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
     verify_context = sdk.build_context(
         request_id=f"req_incident_verify_{incident.name.replace('-', '_')}",
         audience=verify_audience,
@@ -1692,7 +1692,7 @@ def _simulate_openai_eggs_incident(paths: LocalRuntimePaths, scenario_dir: Path)
         ),
         escrow=escrow,
         middleware=ProtectedEndpointMiddleware(
-            proof_verifier=PCCBVerifier(signer),
+            proof_verifier=PCCBVerifier(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             escrow=escrow,
             receipt_factory=ReceiptFactory(receipt_id_factory=lambda: "rcpt_incident_openai_eggs_exec"),
             refusal_factory=RefusalFactory(refusal_id_factory=lambda: "rfsl_incident_openai_eggs_exec"),
@@ -2064,7 +2064,7 @@ def _simulate_named_incident(paths: LocalRuntimePaths, incident_name: str) -> Si
                 "target": payload["target"],
                 "operator_story": "The tool already had the power, so the widened action would reach the database anyway.",
             },
-            expected_refusal_code="ACTION_HASH_MISMATCH",
+            expected_refusal_code="SIGNATURE_INVALID",
             proof_bound_summary="Observed: the protected endpoint refused the mutated action because the presented PCCB no longer matched the Action Intent hash.",
             proof_only_gap_summary="Even a correctly signed destructive action would still need protected-endpoint replay and runtime controls. Signature alone does not make repeated or misrouted execution safe.",
             bounded_intent_summary="Observed: bounded intent froze the exact migration, target database, and change-set hash so the request could not silently widen into a destructive operation.",
@@ -2445,7 +2445,7 @@ def _simulate_portable_verifier_case(scenario_dir: Path, scenario_name: str) -> 
         request_id=f"req_unprotected_{scenario_name.replace('-', '_')}",
     )
 
-    sdk = VerifierSDK(build_local_proof_signer())
+    sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
     verify_context = sdk.build_context(
         request_id=f"req_verify_{scenario_name.replace('-', '_')}",
         audience=verification_audience,
@@ -2594,7 +2594,7 @@ def _simulate_replay_refused(scenario_dir: Path) -> SimulationScenarioResult:
     escrow = build_sqlite_capability_escrow(scenario_dir / "state" / "escrow.sqlite3")
     replay_protector = ReplayProtector(SqliteReplayStore(scenario_dir / "state" / "replay.sqlite3"))
     middleware = ProtectedEndpointMiddleware(
-        proof_verifier=PCCBVerifier(signer),
+        proof_verifier=PCCBVerifier(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
         escrow=escrow,
         receipt_factory=ReceiptFactory(receipt_id_factory=next_receipt_id),
         refusal_factory=RefusalFactory(refusal_id_factory=lambda: "rfsl_sim_replay_001"),
@@ -2638,7 +2638,7 @@ def _simulate_replay_refused(scenario_dir: Path) -> SimulationScenarioResult:
     if admission.intent is None or admission.pccb is None or admission.receipt is None:
         raise RuntimeError("replay simulation failed to create an allow-path admission result")
 
-    sdk = VerifierSDK(signer)
+    sdk = VerifierSDK(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
     proof_only_context = sdk.build_context(
         request_id="req_sim_replay_verify",
         audience=context.audience,

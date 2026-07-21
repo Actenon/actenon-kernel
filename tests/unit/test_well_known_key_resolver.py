@@ -28,6 +28,7 @@ from actenon.proof import (
     KeyPurposeMismatchError,
     PCCBVerifier,
     RevokedKeyError,
+    VerifierDisclosureMode,
     WellKnownKeyResolver,
     WellKnownKeySignatureVerifier,
     build_action_hash_input,
@@ -285,7 +286,7 @@ class WellKnownEdDsaPCCBVerificationTests(unittest.TestCase):
             issuer_origin="https://trust.acme.example",
             fetch_document=_StubFetcher(payload),
         )
-        return PCCBVerifier(WellKnownKeySignatureVerifier(resolver=resolver))
+        return PCCBVerifier(WellKnownKeySignatureVerifier(resolver=resolver), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
 
     def test_valid_ed25519_pccb_verifies_through_well_known_resolver(self) -> None:
         intent, pccb = self._signed_pccb()

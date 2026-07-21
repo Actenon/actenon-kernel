@@ -18,7 +18,7 @@ from actenon.core import ProtectedExecutionKernel
 from actenon.escrow import SqliteCapabilityEscrow
 from actenon.models import AudienceRef, DynamicContextInput, PartyRef
 from actenon.policy import build_invoice_payment_policy_engine, build_refund_policy_engine
-from actenon.proof import PCCBMinter, PCCBVerifier, build_local_proof_signer
+from actenon.proof import PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer
 from actenon.receipts import (
     CompositeOutcomeWriter,
     InMemoryOutcomeWriter,
@@ -101,7 +101,7 @@ def _build_kernel(artifact_root: Path, *, policy_engine) -> tuple[ProtectedExecu
     replay_store = SqliteReplayStore(artifact_root / "state" / "replay.sqlite3")
     escrow = SqliteCapabilityEscrow(artifact_root / "state" / "escrow.sqlite3")
     middleware = ProtectedEndpointMiddleware(
-        proof_verifier=PCCBVerifier(signer),
+        proof_verifier=PCCBVerifier(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
         escrow=escrow,
         receipt_factory=receipt_factory,
         refusal_factory=refusal_factory,

@@ -21,7 +21,7 @@ from actenon.models.contracts import ActionIntent, format_timestamp, parse_times
 from actenon.models.runtime import DynamicContextInput
 from actenon.policy import build_invoice_payment_policy_engine, build_refund_policy_engine
 from actenon.preflight import PreflightEngine
-from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, build_local_proof_signer
+from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer
 from actenon.proof.signers.well_known import WELL_KNOWN_KEYS_PATH
 from actenon.receipts import (
     JsonArtifactOutcomeWriter,
@@ -564,7 +564,7 @@ class LocalProofRuntimeService:
             ),
             escrow=self.escrow,
             middleware=ProtectedEndpointMiddleware(
-                proof_verifier=PCCBVerifier(self.signer),
+                proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
                 escrow=self.escrow,
                 receipt_factory=self.receipt_factory,
                 refusal_factory=self.refusal_factory,

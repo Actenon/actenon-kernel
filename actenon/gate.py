@@ -39,7 +39,7 @@ from actenon.preflight import (
     PreflightEvidence,
     Requirement,
 )
-from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, build_local_proof_signer
+from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, VerifierDisclosureMode, build_local_proof_signer
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
 
@@ -214,7 +214,7 @@ class ActenonGate:
         self._intake = ActionIntentIntakeService()
         self._minter = PCCBMinter(signer=signer, issuer=self.issuer) if signer is not None else None
         self._executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(verifier),
+            proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=credential_broker or InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             replay_protection=replay_protection,

@@ -3,7 +3,7 @@
   "conformance_version": "1.0.0",
   "files": {
     "actenon/conformance/vectors/verifier_sdk_v1/action_intent.json": "a4ddaa3d022461bf3726f7c1f111086544816ad4e013cc988b8f90b436ced63b",
-    "actenon/conformance/vectors/verifier_sdk_v1/cases.json": "691f19e60d9b63b4fc2b2491060df3c6bf1c43c83f7ca57672a0fe47c354682e",
+    "actenon/conformance/vectors/verifier_sdk_v1/cases.json": "6a5d0c3500772bcb597d1418091a4e76c09d0712420e5b80f7e6409bdb036b91",
     "actenon/conformance/vectors/verifier_sdk_v1/pccb.json": "bdde9a60fa92899244c792049e1f610773c182440cfb8029021f5835fee549a8",
     "conformance/vectors/cloud_invoice_payment_v1/action_intent.json": "74bb446c27d5457a7bb0838c04edef4f80bc37c4189ff70678442fb9a2b85f9b",
     "conformance/vectors/cloud_invoice_payment_v1/issuer_keys.json": "4bb865d9a8714151b52cec0673689cfce7c04c12f56676acbb657c4cd83759ea",

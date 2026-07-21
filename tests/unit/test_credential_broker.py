@@ -15,7 +15,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import PCCBMinter, PCCBVerifier
+from actenon.proof import PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.signers import HmacSha256Signer
 
 
@@ -58,7 +58,7 @@ class CredentialBrokerTests(unittest.TestCase):
             ),
             context=context,
         )
-        PCCBVerifier(signer).verify(intent, pccb, context)
+        PCCBVerifier(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG).verify(intent, pccb, context)
         return ProtectedExecutionRequest(intent=intent, pccb=pccb, context=context)
 
     def test_in_memory_broker_issues_short_lived_reference_without_raw_secret(self) -> None:

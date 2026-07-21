@@ -4,7 +4,7 @@ from .audit import AuditLogSink, LocalAppendOnlyAuditLogSink, PCCBMintAuditRecor
 from .canonical import canonicalize_bytes, canonicalize_json, sha256_hex
 from .local import LOCAL_HMAC_WARNING_MESSAGE, LOCAL_PROOF_KEY_ID, LocalHmacProductionGuardError, build_local_proof_signer
 from .refusal_messages import PUBLIC_PROOF_REFUSAL_MESSAGES, public_proof_refusal_message
-from .service import DEFAULT_CLOCK_SKEW_TOLERANCE, PCCBMinter, PCCBVerifier, build_action_hash_input
+from .service import DEFAULT_CLOCK_SKEW_TOLERANCE, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_action_hash_input
 from .signers import (
     ACTENON_ALLOW_PILOT_EDDSA_IN_PRODUCTION_ENV,
     ALLOWED_DISCOVERY_KEY_STATUSES,
@@ -113,6 +113,7 @@ __all__ = [
     "PCCBMinter",
     "PCCBMintAuditRecord",
     "PCCBVerifier",
+    "VerifierDisclosureMode",
     "PUBLIC_PROOF_REFUSAL_MESSAGES",
     "Signer",
     "UnsupportedVerificationAlgorithmError",

@@ -25,8 +25,17 @@ except Exception:  # pragma: no cover - exercised in core-only environments
 
 
 def _assert_signature_invalid(testcase: unittest.TestCase, pccb) -> None:
+    # Use local_debug mode to get granular pre-auth refusal codes
+    # (SIGNATURE_INVALID). In production (public_generic mode), all
+    # pre-auth failures collapse to PROOF_INVALID.
+    from actenon.proof import VerifierDisclosureMode
+
+    verifier = PCCBVerifier(
+        security_signer(),
+        disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+    )
     with testcase.assertRaisesRegex(ProofVerificationError, "SIGNATURE_INVALID"):
-        PCCBVerifier(security_signer()).verify(build_security_intent(), pccb, build_security_context())
+        verifier.verify(build_security_intent(), pccb, build_security_context())
 
 
 def _int_to_b64url(value: int) -> str:

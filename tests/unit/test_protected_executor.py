@@ -24,7 +24,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import PCCBMinter, PCCBVerifier
+from actenon.proof import PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.signers import HmacSha256Signer
 from actenon.receipts import InMemoryOutcomeWriter
 from actenon.replay import ReplayProtector, SqliteReplayStore, build_action_consumption_claim
@@ -131,7 +131,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         writer: InMemoryOutcomeWriter | None = None,
     ) -> ProtectedExecutor:
         return ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=broker or _RecordingBroker(),
             replay_protector=ReplayProtector(SqliteReplayStore(Path(self.tempdir.name) / "replay.sqlite3")),
             escrow=escrow,
@@ -314,7 +314,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         replay = ReplayProtector(SqliteReplayStore(Path(self.tempdir.name) / "replay.sqlite3"))
         first_broker = _RecordingBroker()
         first = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=first_broker,
             replay_protector=replay,
             outcome_writer=InMemoryOutcomeWriter(),
@@ -322,7 +322,7 @@ class ProtectedExecutorTests(unittest.TestCase):
         second_broker = _RecordingBroker()
 
         second = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=second_broker,
             replay_protector=replay,
             outcome_writer=InMemoryOutcomeWriter(),

@@ -29,7 +29,7 @@ from actenon.models import (
     TenantRef,
 )
 from actenon.policy import CapabilityScopeHardRule, HardRuleEngine, IntentChronologyHardRule, IntentTtlHardRule, PolicyEngine, TenantWorkflowRuleLayer
-from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier
+from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeAttestationService, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector, SqliteReplayStore, build_replay_key
 from actenon.verifier import ProtectedEndpointMiddleware
@@ -177,7 +177,7 @@ class _InProcessCloudLifecycleHarness:
 
     def _build_kernel(self, policy: PolicyEngine) -> ProtectedExecutionKernel:
         middleware = ProtectedEndpointMiddleware(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             escrow=self.escrow,
             receipt_factory=self.receipt_factory,
             refusal_factory=self.refusal_factory,
@@ -376,7 +376,7 @@ class CloudFullLifecycleIntegrationTests(unittest.TestCase):
         assert admission.pccb is not None
         request = self.harness.build_request(admission.intent, admission.pccb, context)
 
-        PCCBVerifier(self.harness.signer).verify(admission.intent, admission.pccb, context)
+        PCCBVerifier(self.harness.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG).verify(admission.intent, admission.pccb, context)
         result = self.harness.execute(request)
 
         self.assertIsNone(result.refusal)

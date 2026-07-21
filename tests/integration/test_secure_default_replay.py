@@ -22,7 +22,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier
+from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, VerifierDisclosureMode
 from actenon.replay import ReplayProtector, SqliteReplayStore
 
 
@@ -99,7 +99,7 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
 
         with patch.dict(os.environ, {"ACTENON_REPLAY_DB": str(replay_db)}, clear=False):
             executor = ProtectedExecutor(
-                proof_verifier=PCCBVerifier(self.signer),
+                proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
                 credential_broker=self._broker(),
             )
 
@@ -120,7 +120,7 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
 
         with self.assertLogs(level=logging.WARNING) as captured:
             executor = ProtectedExecutor(
-                proof_verifier=PCCBVerifier(self.signer),
+                proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
                 credential_broker=self._broker(),
                 replay_protection="disabled",
             )
@@ -145,7 +145,7 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
             "replay_protector cannot be supplied when replay_protection is 'disabled'",
         ):
             ProtectedExecutor(
-                proof_verifier=PCCBVerifier(self.signer),
+                proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
                 credential_broker=self._broker(),
                 replay_protector=replay,
                 replay_protection="disabled",
@@ -154,12 +154,12 @@ class SecureDefaultReplayIntegrationTests(unittest.TestCase):
     def test_two_executors_sharing_durable_store_reject_second_edge(self) -> None:
         shared_path = self.root / "shared-replay.sqlite3"
         first_executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=self._broker(),
             replay_protector=ReplayProtector(SqliteReplayStore(shared_path)),
         )
         second_executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=self._broker(),
             replay_protector=ReplayProtector(SqliteReplayStore(shared_path)),
         )

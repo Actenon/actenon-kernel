@@ -19,7 +19,7 @@ from actenon.policy import (
     TenantWorkflowRule,
     TenantWorkflowRuleLayer,
 )
-from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, build_local_proof_signer
+from actenon.proof import HmacSha256Signer, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer
 from actenon.receipts import InMemoryOutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector, SqliteReplayStore
 from actenon.verifier import ProtectedEndpointMiddleware, VerifierSDK
@@ -110,7 +110,7 @@ def build_replay_kernel(tempdir: str | PathLike[str]):
         ),
     )
     middleware = ProtectedEndpointMiddleware(
-        proof_verifier=PCCBVerifier(signer),
+        proof_verifier=PCCBVerifier(signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
         escrow=escrow,
         receipt_factory=receipt_factory,
         refusal_factory=refusal_factory,

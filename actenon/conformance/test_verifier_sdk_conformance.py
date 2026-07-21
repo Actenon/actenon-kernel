@@ -18,7 +18,7 @@ from actenon.demo.portable_local_proof import (
 )
 from actenon.models import AudienceRef, PolicyDecision
 from actenon.models.contracts import parse_timestamp
-from actenon.proof import PCCBMinter, build_local_proof_signer
+from actenon.proof import PCCBMinter, VerifierDisclosureMode, build_local_proof_signer
 from actenon.verifier import VerifierSDK
 
 
@@ -140,6 +140,13 @@ class VerifierSdkConformanceTests(unittest.TestCase):
                     clock_skew_tolerance=timedelta(
                         milliseconds=case["clock_skew_tolerance_ms"]
                     ),
+                    # Conformance vectors test granular refusal codes
+                    # including pre-authentication failures (e.g.,
+                    # SIGNATURE_INVALID, SCOPE_CAPABILITY_MISMATCH on
+                    # mutated PCCBs). Use local_debug mode to preserve
+                    # the pre-2B granular diagnostic codes the vectors
+                    # expect. Production deployments use public_generic.
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
                 )
                 context = sdk.build_context(
                     request_id=context_payload["request_id"],

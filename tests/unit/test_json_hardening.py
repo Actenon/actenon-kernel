@@ -29,7 +29,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import PCCBVerifier, build_local_proof_signer, canonicalize_bytes
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode, VerifierDisclosureMode, build_local_proof_signer, canonicalize_bytes
 from actenon.proof.canonical import DEFAULT_MAX_CANONICAL_OUTPUT_BYTES
 from actenon.receipts import JsonArtifactReceiptStore, JsonArtifactRefusalStore
 
@@ -167,8 +167,8 @@ class JsonHardeningTests(unittest.TestCase):
             now=now,
         )
 
-        with self.assertRaisesRegex(ProofVerificationError, "ACTION_HASH_INVALID"):
-            PCCBVerifier(build_local_proof_signer()).verify(intent, pccb, context)
+        with self.assertRaisesRegex(ProofVerificationError, "PROOF_PAYLOAD_INVALID"):
+            PCCBVerifier(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG).verify(intent, pccb, context)
 
 
 if __name__ == "__main__":

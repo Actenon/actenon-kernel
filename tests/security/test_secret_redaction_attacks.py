@@ -12,7 +12,7 @@ from actenon.credentials import BrokeredCredential, InMemoryCredentialBroker
 from actenon.escrow import InMemoryCapabilityEscrow
 from actenon.execution import ProtectedExecutor
 from actenon.models import ActionIntent, DynamicContextInput, PCCB, ProtectedExecutionRequest
-from actenon.proof import PCCBVerifier
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode, VerifierDisclosureMode
 from actenon.receipts import CompositeOutcomeWriter, InMemoryOutcomeWriter, JsonArtifactOutcomeWriter
 from actenon.replay import ReplayProtector, SqliteReplayStore
 
@@ -61,7 +61,7 @@ class SecretRedactionAttackTests(unittest.TestCase):
         escrow: InMemoryCapabilityEscrow | None = None,
     ) -> ProtectedExecutor:
         return ProtectedExecutor(
-            proof_verifier=PCCBVerifier(security_signer()),
+            proof_verifier=PCCBVerifier(security_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             credential_broker=broker,
             replay_protector=ReplayProtector(SqliteReplayStore(self.root / "replay.sqlite3")),
             escrow=escrow,

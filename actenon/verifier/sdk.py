@@ -6,7 +6,7 @@ from typing import Any, Mapping
 
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.models import ActionIntent, AudienceRef, DynamicContextInput, PCCB
-from actenon.proof.service import DEFAULT_CLOCK_SKEW_TOLERANCE, PCCBVerifier
+from actenon.proof.service import DEFAULT_CLOCK_SKEW_TOLERANCE, PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.signing import SignatureVerifier
 
 
@@ -24,14 +24,25 @@ class VerifierSDK:
     The SDK consumes any ``SignatureVerifier``-compatible implementation.
     Protected endpoints verify proofs; they do not need proof-minting
     capability in order to use this SDK.
+
+    The ``disclosure_mode`` parameter controls how much detail the verifier
+    exposes in refusal codes. Defaults to ``trusted_detailed`` for
+    backward compatibility with existing conformance vectors. Production
+    deployments should use ``public_generic`` to prevent proof-forging
+    oracles.
     """
 
     signer: SignatureVerifier
     clock_skew_tolerance: timedelta = DEFAULT_CLOCK_SKEW_TOLERANCE
+    disclosure_mode: VerifierDisclosureMode = VerifierDisclosureMode.TRUSTED_DETAILED
 
     def __post_init__(self) -> None:
         self._intake = ActionIntentIntakeService()
-        self._proof_verifier = PCCBVerifier(self.signer, clock_skew_tolerance=self.clock_skew_tolerance)
+        self._proof_verifier = PCCBVerifier(
+            self.signer,
+            clock_skew_tolerance=self.clock_skew_tolerance,
+            disclosure_mode=self.disclosure_mode,
+        )
 
     def parse_intent(self, payload: Mapping[str, Any]) -> ActionIntent:
         return self._intake.parse(payload)

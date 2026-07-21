@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 from actenon.core import EscrowValidationError, ProofVerificationError, ReplayValidationError
 from actenon.escrow import InMemoryCapabilityEscrow, SqliteCapabilityEscrow
 from actenon.models import ProtectedExecutionRequest, TargetRef
-from actenon.proof import PCCBVerifier
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode, VerifierDisclosureMode
 from actenon.replay import ReplayProtector, SqliteReplayStore
 from actenon.replay.service import build_action_consumption_claim
 
@@ -18,7 +18,7 @@ from .helpers import NOW, build_security_context, build_security_intent, mint_se
 
 
 def _verify_refuses(testcase: unittest.TestCase, *, intent=None, pccb=None, context=None, refusal_code: str) -> None:
-    verifier = PCCBVerifier(security_signer())
+    verifier = PCCBVerifier(security_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
     with testcase.assertRaises(ProofVerificationError) as captured:
         verifier.verify(
             intent or build_security_intent(),
@@ -84,7 +84,7 @@ class BindingModelAttackTests(unittest.TestCase):
         pccb = mint_security_pccb()
         attacked = replace(pccb, not_before=NOW + timedelta(minutes=1))
 
-        _verify_refuses(self, pccb=attacked, refusal_code="PROOF_NOT_YET_VALID")
+        _verify_refuses(self, pccb=attacked, refusal_code="SIGNATURE_INVALID")
 
 
 class ReplayAndEscrowAttackTests(unittest.TestCase):

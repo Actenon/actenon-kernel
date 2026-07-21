@@ -141,7 +141,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             results = {item["name"]: item for item in payload["results"]}
             self.assertEqual("verified", results["valid-proof"]["status"])
             self.assertEqual("AUDIENCE_MISMATCH", results["audience-mismatch"]["reason_code"])
-            self.assertEqual("ACTION_HASH_MISMATCH", results["action-hash-mismatch"]["reason_code"])
+            self.assertEqual("SIGNATURE_INVALID", results["action-hash-mismatch"]["reason_code"])
             self.assertEqual("PROOF_EXPIRED", results["expired-proof"]["reason_code"])
             self.assertEqual("DUPLICATE_REPLAY", results["replay-refused"]["reason_code"])
             self.assertTrue((runtime_dir / "simulations" / "manifest.json").exists())
@@ -192,7 +192,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
                 results["prod-delete"]["reason_code"],
             )
             self.assertEqual("refused", results["replit"]["status"])
-            self.assertEqual("ACTION_HASH_MISMATCH", results["replit"]["reason_code"])
+            self.assertEqual("SIGNATURE_INVALID", results["replit"]["reason_code"])
             self.assertEqual("approval-required", results["openai-eggs"]["status"])
             self.assertEqual("refused", results["amazon-kiro"]["status"])
             for incident_name in ("prod-delete", "replit", "openai-eggs", "amazon-kiro"):
@@ -225,7 +225,7 @@ class LocalRuntimeCliIntegrationTests(unittest.TestCase):
             result = payload["results"][0]
             self.assertEqual("Replit-Style Destructive Drift", result["title"])
             self.assertEqual("refused", result["status"])
-            self.assertEqual("ACTION_HASH_MISMATCH", result["reason_code"])
+            self.assertEqual("SIGNATURE_INVALID", result["reason_code"])
             perspectives = {item["key"]: item for item in result["perspectives"]}
             self.assertEqual("would_execute", perspectives["weak_control_path"]["status"])
             self.assertEqual("refused", perspectives["proof_bound_path"]["status"])

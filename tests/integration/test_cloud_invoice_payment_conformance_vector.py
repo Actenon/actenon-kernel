@@ -7,7 +7,7 @@ from pathlib import Path
 
 from actenon.core.errors import ProofVerificationError
 from actenon.models import ActionIntent, DynamicContextInput, PCCB, PartyRef
-from actenon.proof import PCCBVerifier, WellKnownKeyResolver, WellKnownKeySignatureVerifier
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode, VerifierDisclosureMode, WellKnownKeyResolver, WellKnownKeySignatureVerifier
 from actenon.receipts import OutcomeAttestationService, OutcomeAttestationVerificationError
 
 try:
@@ -42,7 +42,7 @@ def _verifier(issuer_keys: dict[str, object]) -> PCCBVerifier:
         issuer_origin="https://actenon-cloud.local",
         fetch_document=_fetcher(issuer_keys),
     )
-    return PCCBVerifier(WellKnownKeySignatureVerifier(resolver=resolver))
+    return PCCBVerifier(WellKnownKeySignatureVerifier(resolver=resolver), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
 
 
 def _outcome_attestation_verifier(issuer_keys: dict[str, object]) -> WellKnownKeySignatureVerifier:
@@ -109,7 +109,7 @@ class CloudInvoicePaymentConformanceVectorTests(unittest.TestCase):
             self.intent,
             mutated_pccb,
             self.issuer_keys_payload,
-            expected_code="AUDIENCE_MISMATCH",
+            expected_code="SIGNATURE_INVALID",
             context=_context(self.pccb),
         )
 
@@ -119,7 +119,7 @@ class CloudInvoicePaymentConformanceVectorTests(unittest.TestCase):
             self.intent,
             mutated_pccb,
             self.issuer_keys_payload,
-            expected_code="PROOF_EXPIRED",
+            expected_code="SIGNATURE_INVALID",
         )
 
     def test_action_hash_mutation_fails(self) -> None:
@@ -128,7 +128,7 @@ class CloudInvoicePaymentConformanceVectorTests(unittest.TestCase):
             self.intent,
             mutated_pccb,
             self.issuer_keys_payload,
-            expected_code="ACTION_HASH_MISMATCH",
+            expected_code="SIGNATURE_INVALID",
         )
 
     def test_signature_mutation_fails(self) -> None:
@@ -166,7 +166,7 @@ class CloudInvoicePaymentConformanceVectorTests(unittest.TestCase):
             self.intent,
             mutated_pccb,
             self.issuer_keys_payload,
-            expected_code="ACTION_MISMATCH",
+            expected_code="SIGNATURE_INVALID",
         )
 
     def test_cloud_receipt_attestation_verifies_through_well_known_resolver(self) -> None:

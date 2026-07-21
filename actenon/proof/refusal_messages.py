@@ -5,6 +5,7 @@ from types import MappingProxyType
 
 PUBLIC_PROOF_REFUSAL_MESSAGES = MappingProxyType(
     {
+        "PROOF_INVALID": "The proof could not be verified.",
         "PROOF_NOT_YET_VALID": "The proof is not yet valid.",
         "PROOF_EXPIRED": "The proof has expired.",
         "AUDIENCE_MISMATCH": "The proof audience does not match this endpoint.",

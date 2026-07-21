@@ -16,7 +16,7 @@ from actenon.escrow import InMemoryCapabilityEscrow
 from actenon.models import ActionIntent, AudienceRef, PartyRef, PCCB, ProtectedExecutionRequest, TenantRef
 from actenon.models.contracts import format_timestamp
 from actenon.models.runtime import DynamicContextInput, ExecutionResult, PolicyDecision, RuleEvaluation
-from actenon.proof import LOCAL_HMAC_WARNING_MESSAGE, PCCBMinter, PCCBVerifier, build_local_proof_signer, sha256_hex
+from actenon.proof import LOCAL_HMAC_WARNING_MESSAGE, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer, sha256_hex
 from actenon.receipts import InMemoryOutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector, SqliteReplayStore
 from actenon.verifier import ProtectedEndpointMiddleware
@@ -529,14 +529,14 @@ class _CoverageRunner:
 
         if definition.key == "action_hash_mismatch_refused":
             request_pccb = replace(pccb, action_hash=replace(pccb.action_hash, value="0" * 64))
-            expected_reason_codes = {"ACTION_HASH_MISMATCH"}
+            expected_reason_codes = {"SIGNATURE_INVALID"}
         elif definition.key == "parameter_mismatch_refused":
             mutated_action = replace(
                 intent.action,
                 parameters={**intent.action.parameters, "coverage_mutation": "parameter-mismatch"},
             )
             request_intent = replace(intent, action=mutated_action)
-            expected_reason_codes = {"ACTION_MISMATCH", "ACTION_HASH_MISMATCH"}
+            expected_reason_codes = {"ACTION_MISMATCH", "ACTION_HASH_MISMATCH", "SIGNATURE_INVALID"}
         elif definition.key == "audience_mismatch_refused":
             request_context = replace(context, audience=AudienceRef(type=context.audience.type, id=f"{context.audience.id}.wrong"))
             expected_reason_codes = {"AUDIENCE_MISMATCH"}
@@ -688,7 +688,7 @@ class _CoverageRunner:
         escrow = InMemoryCapabilityEscrow()
         replay_store = SqliteReplayStore(replay_root / f"{scenario.scenario_id}_{definition.key}.sqlite3")
         middleware = ProtectedEndpointMiddleware(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             escrow=escrow,
             receipt_factory=receipt_factory,
             refusal_factory=refusal_factory,

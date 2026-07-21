@@ -39,7 +39,10 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "context",
-        "path": ["audience", "id"],
+        "path": [
+          "audience",
+          "id"
+        ],
         "value": "wrong-endpoint"
       },
       "expected": {
@@ -53,13 +56,18 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "pccb",
-        "path": ["scope", "capabilities"],
-        "value": ["unrelated.read"]
+        "path": [
+          "scope",
+          "capabilities"
+        ],
+        "value": [
+          "unrelated.read"
+        ]
       },
       "expected": {
         "outcome": "refused",
-        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
-        "message": "The proof scope does not allow this capability."
+        "reason_code": "SIGNATURE_INVALID",
+        "message": "The proof signature could not be verified."
       }
     },
     {
@@ -67,7 +75,9 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "intent",
-        "path": ["intent_id"],
+        "path": [
+          "intent_id"
+        ],
         "value": "intent_other_001"
       },
       "expected": {
@@ -81,7 +91,10 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "intent",
-        "path": ["tenant", "tenant_id"],
+        "path": [
+          "tenant",
+          "tenant_id"
+        ],
         "value": "tenant_other"
       },
       "expected": {
@@ -95,7 +108,10 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "intent",
-        "path": ["requester", "id"],
+        "path": [
+          "requester",
+          "id"
+        ],
         "value": "other_actor"
       },
       "expected": {
@@ -109,7 +125,11 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "intent",
-        "path": ["action", "parameters", "message"],
+        "path": [
+          "action",
+          "parameters",
+          "message"
+        ],
         "value": "tampered hello world"
       },
       "expected": {
@@ -123,7 +143,10 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "intent",
-        "path": ["target", "resource_id"],
+        "path": [
+          "target",
+          "resource_id"
+        ],
         "value": "hello_resource_other"
       },
       "expected": {
@@ -137,13 +160,16 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "pccb",
-        "path": ["action_hash", "value"],
+        "path": [
+          "action_hash",
+          "value"
+        ],
         "value": "0000000000000000000000000000000000000000000000000000000000000000"
       },
       "expected": {
         "outcome": "refused",
-        "reason_code": "ACTION_HASH_MISMATCH",
-        "message": "The proof action hash does not match the action intent."
+        "reason_code": "SIGNATURE_INVALID",
+        "message": "The proof signature could not be verified."
       }
     },
     {
@@ -151,7 +177,10 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "pccb",
-        "path": ["signature", "value"],
+        "path": [
+          "signature",
+          "value"
+        ],
         "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       },
       "expected": {
@@ -165,7 +194,9 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T11:59:59Z"
       },
       "expected": {
@@ -179,7 +210,9 @@
       "clock_skew_tolerance_ms": 0,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T12:05:01Z"
       },
       "expected": {
@@ -193,7 +226,9 @@
       "clock_skew_tolerance_ms": 2000,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T11:59:58Z"
       },
       "expected": {
@@ -205,7 +240,9 @@
       "clock_skew_tolerance_ms": 2000,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T11:59:57Z"
       },
       "expected": {
@@ -219,7 +256,9 @@
       "clock_skew_tolerance_ms": 2000,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T12:05:02Z"
       },
       "expected": {
@@ -231,7 +270,9 @@
       "clock_skew_tolerance_ms": 2000,
       "mutation": {
         "document": "context",
-        "path": ["now"],
+        "path": [
+          "now"
+        ],
         "value": "2026-01-01T12:05:03Z"
       },
       "expected": {

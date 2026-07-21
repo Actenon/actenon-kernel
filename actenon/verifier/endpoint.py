@@ -18,7 +18,7 @@ from actenon.models import (
     Receipt,
     Refusal,
 )
-from actenon.proof import PCCBVerifier
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.signing import SignatureVerifier
 from actenon.receipts import OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector, ReplayStore
@@ -176,7 +176,7 @@ class PythonProtectedEndpoint:
         handler: Handler,
     ) -> ExecutionResult:
         middleware = ProtectedEndpointMiddleware(
-            proof_verifier=PCCBVerifier(self.signer),
+            proof_verifier=PCCBVerifier(self.signer, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
             escrow=self.escrow,
             receipt_factory=self.receipt_factory,
             refusal_factory=self.refusal_factory,

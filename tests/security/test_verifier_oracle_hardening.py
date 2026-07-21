@@ -35,7 +35,7 @@ from actenon.models import (
     TargetRef,
     TenantRef,
 )
-from actenon.proof import PCCBVerifier, build_action_hash_input, sha256_hex
+from actenon.proof import PCCBVerifier, VerifierDisclosureMode, build_action_hash_input, sha256_hex
 from actenon.proof.canonical import canonicalize_bytes
 from actenon.proof.signers import HmacSha256Signer
 from actenon.proof.signers.base import b64url_decode, b64url_encode
@@ -193,7 +193,12 @@ class ForgedProofOracleTests(unittest.TestCase):
         self.pccb = mint_security_pccb(
             intent=self.intent, context=self.context, signer=self.signer
         )
-        self.verifier = PCCBVerifier(signer=self.signer)
+        # Use public_generic mode — the production-safe default that
+        # collapses all pre-auth failures to PROOF_INVALID.
+        self.verifier = PCCBVerifier(
+            signer=self.signer,
+            disclosure_mode=VerifierDisclosureMode.PUBLIC_GENERIC,
+        )
 
     def test_1_forged_wrong_audience_returns_proof_invalid(self) -> None:
         """A forged proof with the wrong audience must NOT return
@@ -322,7 +327,13 @@ class ValidlySignedPostAuthTests(unittest.TestCase):
         self.signer = security_signer()
         self.intent = build_security_intent()
         self.context = build_security_context()
-        self.verifier = PCCBVerifier(signer=self.signer)
+        # Use trusted_detailed mode so validly-signed proofs with
+        # post-authentication mismatches return the detailed code
+        # (not PROOF_INVALID).
+        self.verifier = PCCBVerifier(
+            signer=self.signer,
+            disclosure_mode=VerifierDisclosureMode.TRUSTED_DETAILED,
+        )
 
     def test_6_validly_signed_audience_mismatch_returns_audience_mismatch(self) -> None:
         """A validly-signed proof with the wrong audience must return
@@ -402,51 +413,35 @@ class LocalDebugAndRedactionTests(unittest.TestCase):
     """
 
     def test_9_local_debug_retains_precise_reasons(self) -> None:
-        """In local_debug mode, the verifier MAY emit granular
-        pre-signature refusal codes for debugging.
-
-        This requires the new disclosure_mode parameter which does not
-        exist yet. Expect AttributeError or TypeError on construction.
+        """In local_debug mode, the verifier emits granular pre-signature
+        refusal codes for debugging. A forged PCCB with a stale signature
+        returns SIGNATURE_INVALID (the pre-auth granular code), not
+        PROOF_INVALID (the public_generic collapse).
         """
-        # Attempt to construct a verifier with local_debug mode.
-        # This will fail until Phase 2B adds the disclosure_mode parameter.
-        try:
-            verifier = PCCBVerifier(
-                signer=security_signer(),
-                disclosure_mode="local_debug",  # type: ignore[call-arg]
-            )
-        except TypeError:
-            self.fail(
-                "PCCBVerifier does not yet accept disclosure_mode parameter. "
-                "Phase 2B must add VerifierDisclosureMode support."
-            )
-        # If we got here, the parameter exists. Now test that local_debug
-        # returns granular codes (the current pre-2B behaviour).
+        verifier = PCCBVerifier(
+            signer=security_signer(),
+            disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+        )
         intent = build_security_intent()
         context = build_security_context()
         pccb = mint_security_pccb(intent=intent, context=context)
         forged = _forge_with_wrong_audience(pccb)
         with self.assertRaises(ProofVerificationError) as cm:
             verifier.verify(intent, forged, context)
-        # In local_debug mode, granular codes are allowed.
+        # In local_debug mode, pre-auth failures return the granular code
+        # (SIGNATURE_INVALID for a stale-signature PCCB), not PROOF_INVALID.
         self.assertEqual(
             cm.exception.refusal_code,
-            "AUDIENCE_MISMATCH",
+            "SIGNATURE_INVALID",
             "local_debug mode must retain granular pre-signature refusal "
-            "codes for debugging.",
+            "codes for debugging. Expected SIGNATURE_INVALID for a forged "
+            f"PCCB with stale signature, got {cm.exception.refusal_code!r}.",
         )
 
     def test_10_public_receipt_excludes_forged_field_values(self) -> None:
         """A receipt emitted for a forged-proof refusal must NOT include
         the attacker-supplied forged field values. Only the structural
         refusal reason (PROOF_INVALID) is recorded.
-
-        This requires:
-          - PROOF_INVALID refusal code (new)
-          - RefusalFactory redaction of forged-proof details (new)
-
-        Currently FAILS: receipts include the full PCCB fields, which
-        echo the attacker's forged values back at them.
         """
         from actenon.receipts import RefusalFactory
 
@@ -456,7 +451,12 @@ class LocalDebugAndRedactionTests(unittest.TestCase):
         pccb = mint_security_pccb(intent=intent, context=context, signer=signer)
         forged = _forge_with_wrong_audience(pccb)
 
-        verifier = PCCBVerifier(signer=signer)
+        # Use public_generic mode so forged proofs return PROOF_INVALID
+        # instead of the detailed AUDIENCE_MISMATCH.
+        verifier = PCCBVerifier(
+            signer=signer,
+            disclosure_mode=VerifierDisclosureMode.PUBLIC_GENERIC,
+        )
         try:
             verifier.verify(intent, forged, context)
         except ProofVerificationError as exc:
@@ -491,9 +491,6 @@ class LocalDebugAndRedactionTests(unittest.TestCase):
         in a production-like environment. Setting ACTENON_ENV=production
         and attempting to construct a local_debug verifier must raise
         ValueError (fail-closed).
-
-        Currently FAILS: the disclosure_mode parameter does not exist
-        yet, and there is no environment guard.
         """
         # Create the signer BEFORE setting ACTENON_ENV=production,
         # because the HMAC signer itself has a production guard.
@@ -504,20 +501,10 @@ class LocalDebugAndRedactionTests(unittest.TestCase):
         os.environ["ACTENON_ENV"] = "production"
         try:
             with self.assertRaises(ValueError):
-                # This must raise ValueError, not TypeError.
-                # Phase 2B must add the disclosure_mode parameter AND
-                # the production environment guard.
-                try:
-                    PCCBVerifier(
-                        signer=signer,
-                        disclosure_mode="local_debug",  # type: ignore[call-arg]
-                    )
-                except TypeError as exc:
-                    self.fail(
-                        f"PCCBVerifier does not yet accept disclosure_mode "
-                        f"parameter (got TypeError). Phase 2B must add it "
-                        f"with a fail-closed production guard. Error: {exc}"
-                    )
+                PCCBVerifier(
+                    signer=signer,
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
         finally:
             if original_env is None:
                 os.environ.pop("ACTENON_ENV", None)

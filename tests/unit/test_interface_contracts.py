@@ -9,7 +9,7 @@ from actenon.adapters import ProviderAdapterRequest
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.demo.portable_local_proof import build_hello_world_action_intent_payload
 from actenon.models import AudienceRef, PolicyBundle, PolicyBundleRule, PolicyDecision, ProtectedExecutionRequest
-from actenon.proof import PCCBMinter, PCCBVerifier, build_local_proof_signer
+from actenon.proof import PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer
 from actenon.proof.local import HmacSha256Signer as CompatHmacSha256Signer
 from actenon.proof.signers import HmacSha256Signer, HsmKeyHandle, HsmSigner, KmsKeyHandle, KmsSigner
 from actenon.reconciliation import ProviderReconciliationSnapshot, ProviderStateMapping, StaticReconciliationMapper
@@ -136,7 +136,7 @@ class InterfaceContractTests(unittest.TestCase):
         execution_request = self._build_execution_request()
         verifier = _MetadataAwareVerifier()
 
-        PCCBVerifier(verifier).verify(
+        PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG).verify(
             execution_request.intent,
             execution_request.pccb,
             execution_request.context,
