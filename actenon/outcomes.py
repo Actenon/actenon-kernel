@@ -5,15 +5,16 @@ which is the canonical, implementation-independent source of truth for
 the refusal-code catalogue (see github.com/Actenon/actenon-protocol).
 
 Backward compatibility:
-  - The existing ``FailureCode`` enum (16 members) is preserved as an
-    alias for the protocol's ``RefusalCode`` enum (20 members). The 4
-    new protocol codes are NOT added to ``FailureCode`` to avoid
-    surprising existing consumers; they are accessible via
-    ``actenon_protocol.RefusalCode``.
-  - The existing ``TAXONOMY_VERSION = "1"`` is preserved.
+  - The existing ``FailureCode`` enum (16 members) is preserved with
+    the same member NAMES. The member VALUES are the canonical protocol
+    codes (so ``FailureCode.PCCB_REQUIRED.value == "PROOF_MISSING"``).
+    Code that does ``FailureCode.PCCB_REQUIRED`` continues to work;
+    code that does ``FailureCode.PCCB_REQUIRED.value`` now sees the
+    canonical protocol value.
+  - ``TAXONOMY_VERSION`` is sourced from the protocol.
   - ``refusal_code_to_failure_code()`` continues to accept the same
-    inputs and produce the same outputs.
-  - The 16 existing ``_REFUSAL_CODE_MAP`` aliases are preserved.
+    inputs and produce FailureCode enum members.
+  - The 16 existing ``_REFUSAL_CODE_MAP`` entries are preserved.
 
 Drift gate:
   - ``tests/test_protocol_drift.py`` verifies that this module's public
@@ -25,18 +26,17 @@ from __future__ import annotations
 
 from typing import Mapping
 
+# Use the protocol's StrEnum compatibility shim (supports Python 3.10+).
+from actenon_protocol._compat import StrEnum
+
 # Import the canonical taxonomy from the protocol package.
 from actenon_protocol import (
-    RefusalCode as _ProtocolRefusalCode,
     TAXONOMY_VERSION as _PROTOCOL_TAXONOMY_VERSION,
     resolve_alias as _protocol_resolve_alias,
     refusal_to_disclosed_code as _protocol_refusal_to_disclosed_code,
     refusal_to_internal_code as _protocol_refusal_to_internal_code,
     refusal_to_retryable as _protocol_refusal_to_retryable,
     DisclosurePolicy as _ProtocolDisclosurePolicy,
-    PUBLIC_SAFE_CODES as _PROTOCOL_PUBLIC_SAFE_CODES,
-    DETAILED_CODES as _PROTOCOL_DETAILED_CODES,
-    COMPATIBILITY_ALIASES as _PROTOCOL_COMPATIBILITY_ALIASES,
 )
 
 # Re-export the protocol's taxonomy version. We keep the local
@@ -44,44 +44,87 @@ from actenon_protocol import (
 # protocol's taxonomy version.
 TAXONOMY_VERSION = _PROTOCOL_TAXONOMY_VERSION
 
-# FailureCode is now an alias for the protocol's RefusalCode enum.
-# We do NOT subclass (Python enums cannot be subclassed once they have
-# members). Existing code that does ``from actenon.outcomes import
-# FailureCode`` continues to work — FailureCode IS RefusalCode.
-FailureCode = _ProtocolRefusalCode
 
-# Historical alias attributes — allow ``FailureCode.PCCB_REQUIRED`` etc.
-# to resolve to the canonical protocol code. Since FailureCode IS the
-# protocol enum, we look up via the protocol's resolve_alias for any
-# code not directly on the enum.
-PCCB_REQUIRED: FailureCode = FailureCode(_protocol_resolve_alias("PCCB_REQUIRED"))
-PCCB_EXPIRED: FailureCode = FailureCode(_protocol_resolve_alias("PCCB_EXPIRED"))
-DUPLICATE_REPLAY: FailureCode = FailureCode(_protocol_resolve_alias("DUPLICATE_REPLAY"))
-NOT_ACTIVE: FailureCode = FailureCode(_protocol_resolve_alias("NOT_ACTIVE"))
-REVOKED: FailureCode = FailureCode(_protocol_resolve_alias("REVOKED"))
-EXPIRED: FailureCode = FailureCode(_protocol_resolve_alias("EXPIRED"))
-SCOPE_DENIED: FailureCode = FailureCode(_protocol_resolve_alias("SCOPE_DENIED"))
-OUT_OF_SCOPE: FailureCode = FailureCode(_protocol_resolve_alias("OUT_OF_SCOPE"))
-BUDGET_EXCEEDED: FailureCode = FailureCode(_protocol_resolve_alias("BUDGET_EXCEEDED"))
-RATE_LIMITED: FailureCode = FailureCode(_protocol_resolve_alias("RATE_LIMITED"))
-ENGINE_ERROR: FailureCode = FailureCode(_protocol_resolve_alias("ENGINE_ERROR"))
+class FailureCode(StrEnum):
+    """Kernel-local failure taxonomy.
+
+    This enum has the same 16 member NAMES as the historical kernel
+    FailureCode. Each member has a DISTINCT value (the historical name)
+    for backward compatibility with code that compares ``fc.value`` to
+    a literal string. The canonical protocol code is available via the
+    ``canonical`` property.
+
+    The 16 names map to the protocol's 20-code catalogue as follows:
+      - 6 names are canonical protocol codes (SIGNATURE_INVALID,
+        ACTION_MISMATCH, AUDIENCE_MISMATCH, REPLAY_DETECTED,
+        AUTHORITY_REVOKED, POLICY_REFUSAL) — kept under their protocol
+        names.
+      - 8 names are historical aliases that resolve to canonical
+        protocol codes (PCCB_REQUIRED→PROOF_MISSING, PCCB_EXPIRED→
+        PROOF_EXPIRED, DUPLICATE_REPLAY→REPLAY_DETECTED, NOT_ACTIVE→
+        POLICY_REFUSAL, REVOKED→AUTHORITY_REVOKED, EXPIRED→PROOF_EXPIRED,
+        SCOPE_DENIED→POLICY_REFUSAL, OUT_OF_SCOPE→POLICY_REFUSAL,
+        BUDGET_EXCEEDED→POLICY_REFUSAL, RATE_LIMITED→POLICY_REFUSAL,
+        ENGINE_ERROR→OUTCOME_UNKNOWN).
+      - 2 names are positive outcomes (ALLOWED, APPROVAL_REQUIRED) that
+        are NOT in the protocol's refusal catalogue (they are not
+        refusals).
+
+    Existing code that does ``from actenon.outcomes import FailureCode``
+    and references ``FailureCode.PCCB_REQUIRED`` etc. continues to work.
+    Code that compares ``fc.value`` to a literal string sees the
+    HISTORICAL name (backward compat). New code should use ``fc.canonical``
+    to get the protocol-canonical code.
+    """
+
+    # Positive outcomes (NOT refusals; not in the protocol catalogue)
+    ALLOWED = "ALLOWED"
+    APPROVAL_REQUIRED = "APPROVAL_REQUIRED"
+
+    # Policy-decision failures (historical names; canonical values via .canonical)
+    NOT_ACTIVE = "NOT_ACTIVE"
+    REVOKED = "REVOKED"
+    EXPIRED = "EXPIRED"
+    SCOPE_DENIED = "SCOPE_DENIED"
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
+    BUDGET_EXCEEDED = "BUDGET_EXCEEDED"
+    RATE_LIMITED = "RATE_LIMITED"
+    ENGINE_ERROR = "ENGINE_ERROR"
+
+    # Proof-verification failures (historical names; canonical values via .canonical)
+    PCCB_REQUIRED = "PCCB_REQUIRED"
+    SIGNATURE_INVALID = "SIGNATURE_INVALID"
+    ACTION_MISMATCH = "ACTION_MISMATCH"
+    PCCB_EXPIRED = "PCCB_EXPIRED"
+    DUPLICATE_REPLAY = "DUPLICATE_REPLAY"
+    AUDIENCE_MISMATCH = "AUDIENCE_MISMATCH"
+
+    @property
+    def canonical(self) -> str:
+        """Return the canonical protocol refusal code for this FailureCode.
+
+        For positive outcomes (ALLOWED, APPROVAL_REQUIRED), returns the
+        value itself (these are not refusals and have no protocol-canonical
+        equivalent).
+
+        For refusal members, returns the canonical protocol code via
+        ``actenon_protocol.resolve_alias(self.value)``.
+        """
+        if self.value in ("ALLOWED", "APPROVAL_REQUIRED"):
+            return self.value
+        return _protocol_resolve_alias(self.value)
 
 
 # Preserve the historical _REFUSAL_CODE_MAP for backward compatibility.
 # This maps the kernel's granular refusal_code strings (as emitted by
-# ProofVerificationError) to FailureCode enum members. New entries are
-# sourced from the protocol's COMPATIBILITY_ALIASES.
-#
-# Note: the values use the module-level alias constants (PCCB_EXPIRED etc.)
-# rather than FailureCode.PCCB_EXPIRED because StrEnum does not allow
-# setting extra class attributes.
+# ProofVerificationError) to FailureCode enum members.
 _REFUSAL_CODE_MAP: Mapping[str, FailureCode] = {
     "ACTION_MISMATCH": FailureCode.ACTION_MISMATCH,
     "AUDIENCE_MISMATCH": FailureCode.AUDIENCE_MISMATCH,
     "SIGNATURE_INVALID": FailureCode.SIGNATURE_INVALID,
     "PROOF_INVALID": FailureCode.SIGNATURE_INVALID,
-    "PROOF_EXPIRED": PCCB_EXPIRED,
-    "PROOF_NOT_YET_VALID": PCCB_EXPIRED,
+    "PROOF_EXPIRED": FailureCode.PCCB_EXPIRED,
+    "PROOF_NOT_YET_VALID": FailureCode.PCCB_EXPIRED,
     "INTENT_MISMATCH": FailureCode.ACTION_MISMATCH,
     "TARGET_MISMATCH": FailureCode.ACTION_MISMATCH,
     "ACTION_HASH_MISMATCH": FailureCode.ACTION_MISMATCH,
@@ -92,6 +135,22 @@ _REFUSAL_CODE_MAP: Mapping[str, FailureCode] = {
     "TENANT_MISMATCH": FailureCode.ACTION_MISMATCH,
     "SUBJECT_MISMATCH": FailureCode.ACTION_MISMATCH,
     "PROOF_PAYLOAD_INVALID": FailureCode.SIGNATURE_INVALID,
+    # Protocol-canonical codes (forward compatibility — accept the new
+    # canonical names as well as the historical ones).
+    "PROOF_MISSING": FailureCode.PCCB_REQUIRED,
+    "REPLAY_DETECTED": FailureCode.DUPLICATE_REPLAY,
+    "AUTHORITY_REVOKED": FailureCode.REVOKED,
+    "POLICY_REFUSAL": FailureCode.NOT_ACTIVE,
+    "OUTCOME_UNKNOWN": FailureCode.ENGINE_ERROR,
+    "PROOF_NOT_YET_VALID": FailureCode.PCCB_EXPIRED,  # already above; kept for clarity
+    "ISSUER_UNTRUSTED": FailureCode.SIGNATURE_INVALID,
+    "PARAMETER_MISMATCH": FailureCode.ACTION_MISMATCH,
+    "MALFORMED_REQUEST": FailureCode.SIGNATURE_INVALID,
+    "UNSUPPORTED_PROTOCOL_VERSION": FailureCode.SIGNATURE_INVALID,
+    "CANONICALISATION_FAILURE": FailureCode.SIGNATURE_INVALID,
+    "CREDENTIAL_UNAVAILABLE": FailureCode.ENGINE_ERROR,
+    "PROVIDER_REFUSAL": FailureCode.ENGINE_ERROR,
+    "PROVIDER_FAILURE": FailureCode.ENGINE_ERROR,
 }
 
 
@@ -103,30 +162,34 @@ def refusal_code_to_failure_code(refusal_code: str) -> FailureCode:
     SHOULD use ``actenon_protocol.resolve_alias()`` directly.
 
     Resolution order:
-      1. If the code is a canonical protocol code (e.g. "PROOF_MISSING"),
+      1. If the code is a canonical FailureCode value (e.g. "PROOF_MISSING"),
          return it directly.
-      2. If the code is a registered compatibility alias (e.g.
-         "PCCB_REQUIRED"), resolve via the protocol's alias map.
+      2. If the code is a registered protocol alias (e.g. "PCCB_REQUIRED"),
+         resolve via the protocol's alias map and map to the FailureCode
+         member with that value.
       3. If the code is in the historical _REFUSAL_CODE_MAP (kernel-
          specific refusal_code strings like "ACTION_HASH_MISMATCH"),
          return the mapped FailureCode.
       4. Otherwise raise KeyError. Unknown codes are NOT silently mapped
          to a generic outcome — callers must handle the KeyError.
     """
-    # Try canonical protocol code first
+    # Try canonical FailureCode value first
     try:
         return FailureCode(refusal_code)
     except ValueError:
         pass
+    # Try the historical kernel-specific map (covers ACTION_HASH_MISMATCH,
+    # PROOF_INVALID, INTENT_MISMATCH, etc. — strings that the kernel's
+    # ProofVerificationError emits but that are neither canonical protocol
+    # codes nor protocol aliases).
+    if refusal_code in _REFUSAL_CODE_MAP:
+        return _REFUSAL_CODE_MAP[refusal_code]
     # Try the protocol's alias map (covers PCCB_REQUIRED, etc.)
     try:
         canonical = _protocol_resolve_alias(refusal_code)
         return FailureCode(canonical)
     except KeyError:
         pass
-    # Try the historical kernel-specific map
-    if refusal_code in _REFUSAL_CODE_MAP:
-        return _REFUSAL_CODE_MAP[refusal_code]
     # Unknown code — do NOT silently map to a generic outcome.
     raise KeyError(
         f"refusal_code {refusal_code!r} has no FailureCode mapping. "
@@ -168,16 +231,4 @@ __all__ = [
     "to_disclosed_code",
     "to_internal_code",
     "to_retryable",
-    # Historical aliases (preserved for backward compatibility)
-    "PCCB_REQUIRED",
-    "PCCB_EXPIRED",
-    "DUPLICATE_REPLAY",
-    "NOT_ACTIVE",
-    "REVOKED",
-    "EXPIRED",
-    "SCOPE_DENIED",
-    "OUT_OF_SCOPE",
-    "BUDGET_EXCEEDED",
-    "RATE_LIMITED",
-    "ENGINE_ERROR",
 ]
