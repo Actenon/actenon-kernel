@@ -1,0 +1,142 @@
+{
+  "profile": "ACTENON-JCS-STRICT-1",
+  "version": "1",
+  "cases": [
+    {
+      "id": "deterministic_key_ordering",
+      "description": "Keys must be sorted lexicographically by Unicode code point",
+      "input": {"c": 3, "a": 1, "b": 2},
+      "expected_output": "{\"a\":1,\"b\":2,\"c\":3}",
+      "expected_pass": true
+    },
+    {
+      "id": "unicode_strings",
+      "description": "Unicode strings must be preserved as UTF-8 (ensure_ascii=False)",
+      "input": {"name": "héllo wörld 日本語"},
+      "expected_output": "{\"name\":\"héllo wörld 日本語\"}",
+      "expected_pass": true
+    },
+    {
+      "id": "nested_objects_and_lists",
+      "description": "Nested objects and lists must be canonicalised recursively with sorted keys",
+      "input": {"outer": {"z": [3, 1, 2], "a": {"d": 4, "b": "x"}}},
+      "expected_output": "{\"outer\":{\"a\":{\"b\":\"x\",\"d\":4},\"z\":[3,1,2]}}",
+      "expected_pass": true
+    },
+    {
+      "id": "maximum_accepted_depth",
+      "description": "Nesting at the maximum depth (128) must be accepted",
+      "input": "<<<128-deep nested object>>>",
+      "expected_output": "<<<computed at test time>>>",
+      "expected_pass": true,
+      "generator": "max_depth"
+    },
+    {
+      "id": "excessive_depth_rejection",
+      "description": "Nesting deeper than 128 levels must be rejected with JSONNestingDepthError",
+      "input": "<<<129-deep nested object>>>",
+      "expected_error": "JSONNestingDepthError",
+      "expected_pass": false,
+      "generator": "excessive_depth"
+    },
+    {
+      "id": "maximum_canonical_output_size",
+      "description": "Canonical output at the maximum size (1 MB) must be accepted",
+      "input": "<<<1MB string>>>",
+      "expected_output": "<<<computed at test time>>>",
+      "expected_pass": true,
+      "generator": "max_output_size"
+    },
+    {
+      "id": "excessive_output_size_rejection",
+      "description": "Canonical output exceeding 1 MB must be rejected with JSONInputTooLargeError",
+      "input": "<<<2MB string>>>",
+      "expected_error": "JSONInputTooLargeError",
+      "expected_pass": false,
+      "generator": "excessive_output_size"
+    },
+    {
+      "id": "normal_integer_values",
+      "description": "Normal integer values must be serialized as decimal digits",
+      "input": {"zero": 0, "positive": 42, "negative": -17, "large": 9007199254740993},
+      "expected_output": "{\"large\":9007199254740993,\"negative\":-17,\"positive\":42,\"zero\":0}",
+      "expected_pass": true
+    },
+    {
+      "id": "integer_boundaries",
+      "description": "Integer boundaries (0, max int64+1, min int64-1) must be handled without float coercion",
+      "input": {"min_int64_minus1": -9223372036854775809, "zero": 0, "max_int64_plus1": 9223372036854775808},
+      "expected_output": "{\"max_int64_plus1\":9223372036854775808,\"min_int64_minus1\":-9223372036854775809,\"zero\":0}",
+      "expected_pass": true
+    },
+    {
+      "id": "floating_point_rejection",
+      "description": "Any float value must be rejected with TypeError before canonicalisation",
+      "input": {"value": 3.14},
+      "expected_error": "TypeError",
+      "expected_pass": false
+    },
+    {
+      "id": "nan_rejection",
+      "description": "NaN must be rejected before canonicalisation (Python float('nan'))",
+      "input": "float('nan')",
+      "expected_error": "TypeError",
+      "expected_pass": false,
+      "generator": "nan"
+    },
+    {
+      "id": "positive_infinity_rejection",
+      "description": "Positive Infinity must be rejected before canonicalisation",
+      "input": "float('inf')",
+      "expected_error": "TypeError",
+      "expected_pass": false,
+      "generator": "positive_inf"
+    },
+    {
+      "id": "negative_infinity_rejection",
+      "description": "Negative Infinity must be rejected before canonicalisation",
+      "input": "float('-inf')",
+      "expected_error": "TypeError",
+      "expected_pass": false,
+      "generator": "negative_inf"
+    },
+    {
+      "id": "non_string_object_key_rejection",
+      "description": "Non-string object keys (int, bool, None) must be rejected with TypeError",
+      "input": "<<<dict with int key>>>",
+      "expected_error": "TypeError",
+      "expected_pass": false,
+      "generator": "non_string_key"
+    },
+    {
+      "id": "legacy_proof_verification",
+      "description": "Proofs with action_hash.canonicalization='RFC8785-JCS' must continue to verify using the same canonicalisation logic",
+      "input": "<<<valid PCCB with legacy identifier>>>",
+      "expected_pass": true,
+      "generator": "legacy_proof"
+    },
+    {
+      "id": "new_profile_proof_minting_and_verification",
+      "description": "New proofs must be minted with action_hash.canonicalization='ACTENON-JCS-STRICT-1' and verify successfully",
+      "input": "<<<new PCCB>>>",
+      "expected_canonicalization": "ACTENON-JCS-STRICT-1",
+      "expected_pass": true,
+      "generator": "new_profile_proof"
+    },
+    {
+      "id": "unsupported_profile_rejection",
+      "description": "Proofs with an unsupported canonicalization identifier (e.g., 'JSON-LD' or 'CBOR') must be rejected",
+      "input": "<<<PCCB with unsupported canonicalization>>>",
+      "expected_error": "ProofVerificationError",
+      "expected_pass": false,
+      "generator": "unsupported_profile"
+    },
+    {
+      "id": "cross_language_portability",
+      "description": "The canonical output must be deterministic across implementations: sorted keys, UTF-8, no floats, no whitespace, no NaN/Infinity",
+      "input": {"z": "α", "a": "Ω", "m": [null, true, false, 0, ""]},
+      "expected_output": "{\"a\":\"Ω\",\"m\":[null,true,false,0,\"\"],\"z\":\"α\"}",
+      "expected_pass": true
+    }
+  ]
+}

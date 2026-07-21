@@ -1,0 +1,24 @@
+{
+  "profile": "ACTENON-JCS-STRICT-1",
+  "version": "1",
+  "description": "Actenon strict JSON canonicalisation profile. A strict subset of RFC 8785 (JCS) that rejects floating-point values entirely instead of canonicalising them. All signed and digested cross-repo artifacts use this profile.",
+  "normative_rules": {
+    "encoding": "UTF-8",
+    "object_keys": "string only; non-string keys are rejected",
+    "key_ordering": "lexicographic byte order (sorted by Unicode code point)",
+    "integer_support": "full; serialized as decimal digits with optional leading minus",
+    "float_support": "prohibited; any float value raises TypeError before canonicalisation",
+    "nan_support": "prohibited; NaN is rejected before canonicalisation",
+    "infinity_support": "prohibited; +Infinity and -Infinity are rejected before canonicalisation",
+    "list_handling": "deterministic; elements canonicalised in order; tuples treated as lists",
+    "boolean_handling": "true and false are canonical; serialized as lowercase",
+    "null_handling": "null is canonical; serialized as lowercase",
+    "string_handling": "RFC 8259 string encoding; ensure_ascii=False (UTF-8 output); no insignificant whitespace",
+    "separators": "(',', ':')",
+    "max_nesting_depth": 128,
+    "max_canonical_output_bytes": 1048576,
+    "numeric_coercion": "none; integers stay integers; no implicit float conversion; no implementation-dependent numeric coercion"
+  },
+  "legacy_identifier": "RFC8785-JCS",
+  "legacy_note": "The identifier 'RFC8785-JCS' was used by historical proofs. It represented Actenon's strict subset (float rejection) but was mislabelled as full RFC 8785. New proofs use ACTENON-JCS-STRICT-1. Historical proofs with 'RFC8785-JCS' continue to verify under the same canonicalisation logic."
+}
