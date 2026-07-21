@@ -68,27 +68,42 @@ def test_taxonomy_versions_agree():
 
 
 def test_kernel_failure_code_is_protocol_refusal_code():
-    """FailureCode must be identical to the protocol's RefusalCode.
+    """FailureCode's 16 historical member NAMES and VALUES are preserved
+    (backward compat). The ``canonical`` property maps each member to
+    its canonical protocol code.
 
-    The kernel's FailureCode is now a direct alias for the protocol's
-    RefusalCode enum. Every canonical protocol code must be accessible via
-    FailureCode.
+    The kernel's FailureCode is a separate StrEnum (it has positive
+    outcomes ALLOWED and APPROVAL_REQUIRED that are NOT in the protocol's
+    refusal catalogue). Every refusal member's ``canonical`` value must
+    be a canonical protocol code.
     """
-    assert FailureCode is RefusalCode, (
-        "FailureCode should be identical to RefusalCode (the kernel no "
-        "longer maintains its own copy of the taxonomy)"
-    )
-    for code in RefusalCode:
-        # Every canonical protocol code must be reachable via FailureCode
-        assert FailureCode(code.value) == code, (
-            f"FailureCode({code.value!r}) does not resolve to the protocol code"
+    # Positive outcomes — not in the protocol's refusal catalogue.
+    positive_outcomes = {"ALLOWED", "APPROVAL_REQUIRED"}
+    from actenon_protocol import RefusalCode
+    protocol_values = {c.value for c in RefusalCode}
+
+    for fc in FailureCode:
+        if fc.value in positive_outcomes:
+            # Positive outcome — not a refusal, .canonical returns itself.
+            assert fc.canonical == fc.value
+            continue
+        # Refusal members' .canonical must be a canonical protocol code.
+        assert fc.canonical in protocol_values, (
+            f"FailureCode.{fc.name}.canonical = {fc.canonical!r} is not a "
+            f"canonical protocol refusal code."
         )
 
 
 def test_historical_aliases_resolve_to_canonical():
-    """Historical kernel aliases (PCCB_REQUIRED etc.) must resolve to the
-    canonical protocol codes via the protocol's alias map."""
-    # Each (historical_alias, expected_canonical) pair
+    """Historical kernel FailureCode members' ``canonical`` values must
+    equal the protocol's canonical codes.
+
+    The kernel's FailureCode keeps the historical NAMES and VALUES
+    (PCCB_REQUIRED.value == "PCCB_REQUIRED") for backward compatibility.
+    The ``canonical`` property maps each to the protocol's canonical code
+    (PCCB_REQUIRED.canonical == "PROOF_MISSING").
+    """
+    # Each (FailureCode member name, expected canonical protocol value)
     expected = {
         "PCCB_REQUIRED": "PROOF_MISSING",
         "PCCB_EXPIRED": "PROOF_EXPIRED",
@@ -101,19 +116,25 @@ def test_historical_aliases_resolve_to_canonical():
         "BUDGET_EXCEEDED": "POLICY_REFUSAL",
         "RATE_LIMITED": "POLICY_REFUSAL",
         "ENGINE_ERROR": "OUTCOME_UNKNOWN",
+        # Canonical names (value == canonical)
+        "SIGNATURE_INVALID": "SIGNATURE_INVALID",
+        "ACTION_MISMATCH": "ACTION_MISMATCH",
+        "AUDIENCE_MISMATCH": "AUDIENCE_MISMATCH",
     }
-    for alias, canonical in expected.items():
-        # Via the protocol's resolve_alias
-        from actenon_protocol import resolve_alias
-        assert resolve_alias(alias) == canonical, (
-            f"protocol alias {alias!r} should resolve to {canonical!r}, "
-            f"got {resolve_alias(alias)!r}"
+    for member_name, canonical_value in expected.items():
+        fc = getattr(FailureCode, member_name)
+        assert fc.canonical == canonical_value, (
+            f"FailureCode.{member_name}.canonical = {fc.canonical!r}, "
+            f"expected {canonical_value!r}"
         )
-        # Via the kernel's refusal_code_to_failure_code
-        fc = refusal_code_to_failure_code(alias)
-        assert fc.value == canonical, (
-            f"kernel refusal_code_to_failure_code({alias!r}) should return "
-            f"{canonical!r}, got {fc.value!r}"
+    # The protocol's resolve_alias must also resolve the historical
+    # value to the same canonical value.
+    from actenon_protocol import resolve_alias
+    for member_name, canonical in expected.items():
+        fc = getattr(FailureCode, member_name)
+        assert resolve_alias(fc.value) == canonical, (
+            f"protocol resolve_alias({fc.value!r}) = {resolve_alias(fc.value)!r}, "
+            f"expected {canonical!r}"
         )
 
 
