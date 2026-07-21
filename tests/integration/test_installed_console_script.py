@@ -22,6 +22,21 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             python = bin_dir / ("python.exe" if os.name == "nt" else "python")
             actenon = bin_dir / ("actenon.exe" if os.name == "nt" else "actenon")
 
+            # Install the pinned actenon-protocol dependency first. The
+            # kernel's pyproject.toml pins it to ==1.0.0; pip install
+            # resolves it from GitHub because it is not on PyPI yet.
+            subprocess.run(
+                [
+                    str(python), "-m", "pip", "install",
+                    "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0",
+                ],
+                check=True,
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                timeout=180,
+            )
+
             subprocess.run(
                 [str(python), "-m", "pip", "install", ".[asymmetric]"],
                 check=True,

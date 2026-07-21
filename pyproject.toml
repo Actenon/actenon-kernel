@@ -25,7 +25,10 @@ classifiers = [
   "Topic :: Security",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+dependencies = [
+  "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0",
+  "pyyaml>=6.0,<7",
+]
 
 [project.optional-dependencies]
 asymmetric = ["cryptography>=42"]

@@ -1,0 +1,108 @@
+name: Protocol drift gate
+
+# This workflow fails when the pinned actenon-protocol package and this
+# repository disagree on:
+#   - refusal-code taxonomy (canonical codes + compatibility aliases)
+#   - canonicalisation profile label and accepted aliases
+#   - canonicalisation byte output for shared test vectors
+#   - identifier-prefix regex
+#   - protocol version pin
+#
+# It also enforces boundary preservation:
+#   - Kernel MUST NOT import Cloud or Permit.
+#   - Protocol MUST NOT import Kernel.
+#
+# See tests/test_protocol_drift.py for the full gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Nightly drift check against the pinned protocol version.
+    - cron: "0 4 * * *"
+
+jobs:
+  drift-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package and protocol
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[asymmetric]"
+          python -m pip install -e git+https://github.com/Actenon/actenon-protocol.git@v1.0.0#egg=actenon-protocol
+          python -m pip install pydantic pyyaml jsonschema
+
+      - name: Run protocol drift gate
+        run: python -m pytest tests/test_protocol_drift.py -v --tb=short
+
+      - name: Verify protocol version pin in pyproject.toml
+        run: |
+          python -c "
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              data = tomllib.load(f)
+          deps = data['project']['dependencies']
+          assert any('actenon-protocol' in d and 'v1.0.0' in d for d in deps), (
+              f'actenon-protocol @ v1.0.0 not pinned in dependencies: {deps}'
+          )
+          print('OK: actenon-protocol @ v1.0.0 pinned')
+          "
+
+      - name: Verify no unregistered refusal codes are emitted
+        run: |
+          python -c "
+          import re
+          from pathlib import Path
+          from actenon_protocol import resolve_alias, RefusalCode
+          # Scan all .py files for refusal-code-like strings and verify
+          # each one resolves via the protocol.
+          KNOWN_NON_REFUSAL = {
+              'ALLOWED', 'APPROVAL_REQUIRED',  # not refusal codes (positive outcomes)
+              'EXECUTED', 'REFUSED', 'PARTIAL', 'UNKNOWN',  # execution outcomes, not refusals
+          }
+          pattern = re.compile(r'[\"\\']([A-Z][A-Z_]{3,})[\"\\']')
+          unresolved = set()
+          for path in Path('actenon').rglob('*.py'):
+              text = path.read_text()
+              for match in pattern.finditer(text):
+                  code = match.group(1)
+                  if code in KNOWN_NON_REFUSAL:
+                      continue
+                  try:
+                      resolve_alias(code)
+                  except KeyError:
+                      # Not a refusal code (could be a constant, an enum value, etc.)
+                      # We only flag codes that LOOK like refusal codes (uppercase,
+                      # underscore-separated, and in a refusal-code context).
+                      if any(needle in code for needle in ('INVALID', 'MISMATCH', 'EXPIRED', 'REQUIRED', 'DENIED', 'REFUSAL', 'REVOKED', 'REPLAY')):
+                          unresolved.add(code)
+          if unresolved:
+              raise SystemExit(f'Potentially unregistered refusal codes: {sorted(unresolved)}')
+          print('OK: no unregistered refusal codes detected')
+          "
+
+      - name: Verify canonicalisation byte consistency
+        run: |
+          python -c "
+          from actenon_protocol import canonicalize_json
+          from actenon.proof.canonical import canonicalize_json as kernel_canonicalize_json
+          test_inputs = [
+              {'action': 'payment.refund', 'amount_cents': 2500, 'currency': 'GBP'},
+              {'nested': {'z': 1, 'a': 2}},
+              ['a', 'b', 'c'],
+              'café',
+              42,
+          ]
+          for inp in test_inputs:
+              k = kernel_canonicalize_json(inp)
+              p = canonicalize_json(inp)
+              assert k == p, f'mismatch for {inp!r}: kernel={k!r} protocol={p!r}'
+          print('OK: kernel and protocol produce byte-identical canonicalisation')
+          "
