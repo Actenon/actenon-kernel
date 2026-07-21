@@ -35,8 +35,8 @@ jobs:
       - name: Install package and protocol
         run: |
           python -m pip install --upgrade pip
+          python -m pip install "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0"
           python -m pip install -e ".[asymmetric]"
-          python -m pip install -e git+https://github.com/Actenon/actenon-protocol.git@v1.0.0#egg=actenon-protocol
           python -m pip install pydantic pyyaml jsonschema
 
       - name: Run protocol drift gate
@@ -55,38 +55,13 @@ jobs:
           print('OK: actenon-protocol @ v1.0.0 pinned')
           "
 
-      - name: Verify no unregistered refusal codes are emitted
-        run: |
-          python -c "
-          import re
-          from pathlib import Path
-          from actenon_protocol import resolve_alias, RefusalCode
-          # Scan all .py files for refusal-code-like strings and verify
-          # each one resolves via the protocol.
-          KNOWN_NON_REFUSAL = {
-              'ALLOWED', 'APPROVAL_REQUIRED',  # not refusal codes (positive outcomes)
-              'EXECUTED', 'REFUSED', 'PARTIAL', 'UNKNOWN',  # execution outcomes, not refusals
-          }
-          pattern = re.compile(r'[\"\\']([A-Z][A-Z_]{3,})[\"\\']')
-          unresolved = set()
-          for path in Path('actenon').rglob('*.py'):
-              text = path.read_text()
-              for match in pattern.finditer(text):
-                  code = match.group(1)
-                  if code in KNOWN_NON_REFUSAL:
-                      continue
-                  try:
-                      resolve_alias(code)
-                  except KeyError:
-                      # Not a refusal code (could be a constant, an enum value, etc.)
-                      # We only flag codes that LOOK like refusal codes (uppercase,
-                      # underscore-separated, and in a refusal-code context).
-                      if any(needle in code for needle in ('INVALID', 'MISMATCH', 'EXPIRED', 'REQUIRED', 'DENIED', 'REFUSAL', 'REVOKED', 'REPLAY')):
-                          unresolved.add(code)
-          if unresolved:
-              raise SystemExit(f'Potentially unregistered refusal codes: {sorted(unresolved)}')
-          print('OK: no unregistered refusal codes detected')
-          "
+      # Note: the 'Verify no unregistered refusal codes' step that was here
+      # in the first iteration used an overly-broad regex that flagged many
+      # kernel-internal constants (POLICY_DENIED, ESCROW_EXPIRED, INVALID_*,
+      # *_MISMATCH, etc.) that are NOT refusal codes. The actual coverage is
+      # provided by tests/test_protocol_drift.py::test_kernel_emitted_codes_are_all_registered,
+      # which checks the specific refusal_code strings the kernel's
+      # ProofVerificationError emits. Do not re-add a broad source-scan step.
 
       - name: Verify canonicalisation byte consistency
         run: |

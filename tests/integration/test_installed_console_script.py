@@ -10,7 +10,14 @@ from tempfile import TemporaryDirectory
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# The actenon-protocol dependency requires Python >= 3.10. The kernel's
+# CI matrix includes Python 3.9 (the kernel's own requires-python is
+# >=3.9). Skip this integration test on Python 3.9 because it installs
+# the protocol package from GitHub, which would fail on 3.9.
+_SKIP_PROTOCOL_INSTALL = sys.version_info < (3, 10)
 
+
+@unittest.skipIf(_SKIP_PROTOCOL_INSTALL, "actenon-protocol requires Python >= 3.10")
 class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
     def test_installed_actenon_console_script_and_packaged_viewer_work(self) -> None:
         with TemporaryDirectory() as tempdir:
