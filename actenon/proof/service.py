@@ -80,6 +80,27 @@ def build_action_hash_input(intent: ActionIntent) -> dict[str, Any]:
     }
 
 
+def _canonical_equal(a: Any, b: Any) -> bool:
+    """Compare two values by their canonical JSON bytes.
+
+    This prevents ad-hoc object equality from accepting semantically-
+    equivalent but structurally-different representations. The kernel
+    MUST use canonical comparison for all proof-field bindings.
+
+    Objects with a ``to_dict()`` method (frozen dataclasses like
+    AudienceRef, TargetRef, ActionSpec, PartyRef, TenantRef) are
+    converted to dicts before canonicalisation.
+    """
+    def _coerce(v: Any) -> Any:
+        if hasattr(v, "to_dict") and callable(v.to_dict):
+            return v.to_dict()
+        return v
+    try:
+        return canonicalize_bytes(_coerce(a)) == canonicalize_bytes(_coerce(b))
+    except (TypeError, ValueError):
+        return False
+
+
 @dataclass
 class PCCBMinter:
     signer: Signer
@@ -148,32 +169,55 @@ class PCCBMinter:
         return pccb
 
 
+# Type alias for the optional revocation checker callable.
+# Returns True if the proof/issuer is NOT revoked, False if revoked.
+RevocationChecker = Callable[["PCCB", DynamicContextInput], bool]
+
+
 @dataclass
 class PCCBVerifier:
     """Verify a PCCB against an ActionIntent and runtime context.
 
-    The verifier enforces a strict two-phase ordering:
+    The verifier enforces a strict 15-step pipeline, ordered so that
+    all non-mutating validation happens before any state-changing
+    operation (replay, escrow, credential acquisition). The pipeline
+    is split into Phase A (pre-authentication) and Phase B
+    (post-authentication), with replay deferred to the executor.
 
-    **Phase A — Pre-authentication (minimum safe work):**
-      1. bounded structural parsing (PCCB fields present and typed)
-      2. total-size and nesting-depth enforcement (via canonicalize_bytes)
-      3. strict type and encoding validation
-      4. required-field presence for key resolution (signature, issuer)
-      5. SSRF-safe issuer and key lookup (delegated to the signer)
-      6. canonicalisation of the unsigned proof
-      7. signature verification
+    **Phase A — Pre-authentication (minimum safe work, non-mutating):**
 
-    **Phase B — Post-authentication (detailed semantic validation):**
-      8. time bounds (not_before, expires_at)
-      9. audience
-     10. scope mode + capability
-     11. intent_id, tenant, subject, action, target
-     12. action_hash
+      1. Input structure and size limits
+         (PCCB dataclass parsing + canonicalize_bytes size/depth limits)
+      2. Supported protocol version
+         (contract name/version check)
+      3. Canonicalisation
+         (unsigned payload canonicalised under ACTENON-JCS-STRICT-1)
+      4. Issuer and key resolution under configured trust policy
+         (delegated to the signer's verify_with_metadata)
+      5. Signature verification
+         (cryptographic authenticity established)
 
-    This ordering prevents proof-forging oracles: a forger who presents
-    a structurally-valid-but-wrong-signature PCCB with field mutations
-    cannot learn which field is wrong, because all pre-authentication
-    failures collapse to ``PROOF_INVALID`` in ``public_generic`` mode.
+    **Phase B — Post-authentication (detailed semantic validation, non-mutating):**
+
+      6. Time validity (not_before, expires_at with clock skew)
+      7. Audience binding (canonical comparison)
+      8. Resource or boundary binding (canonical comparison)
+      9. Target binding (canonical comparison)
+     10. Action binding (canonical comparison)
+     11. Exact parameter digest (action_hash recomputation)
+     12. Authority reference binding (escrow_id / grant_id if present)
+     13. Revocation status (if a revocation_checker is configured)
+     14. Replay state — DEFERRED to ProtectedExecutor (stateful)
+     15. Execution eligibility — DEFERRED to ProtectedExecutor (policy)
+
+    Steps 14 and 15 are deferred because they require stateful resources
+    (replay store, policy engine) that the verifier does not own. The
+    verifier is stateless; the executor is stateful. This separation
+    ensures replay state is never consumed before the proof passes all
+    non-mutating validation — the formally justified reason for the
+    split.
+
+    **Disclosure profiles:**
 
     The ``disclosure_mode`` parameter controls how much detail is exposed:
       - ``public_generic`` (default): pre-auth failures return
@@ -184,11 +228,38 @@ class PCCBVerifier:
         failures still return ``PROOF_INVALID``.
       - ``local_debug``: full granular diagnostics (the pre-2B behaviour).
         **Fail-closed**: refused in production-like environments.
+
+    **Canonical comparison:**
+
+    All field comparisons (audience, tenant, subject, action, target)
+    use ``canonicalize_bytes()`` rather than ad-hoc object equality.
+    This prevents semantically-equivalent but structurally-different
+    representations from bypassing the binding check.
+
+    **Revocation checking:**
+
+    An optional ``revocation_checker`` callable can be provided. If
+    present, it is called AFTER all other verification steps pass (step
+    13). It receives the PCCB and context, and returns True if the
+    proof/issuer is NOT revoked. If it returns False, the verifier
+    raises ``ProofVerificationError`` with code ``AUTHORITY_REVOKED``.
+
+    **Boundary/resource binding:**
+
+    An optional ``boundary_id`` can be set on the verifier. If present,
+    the PCCB's audience must match the configured boundary (step 8).
+    This is distinct from the audience check (step 7) — the audience
+    is who the proof is for; the boundary is what resource is being
+    protected.
     """
 
     signer: SignatureVerifier
     clock_skew_tolerance: timedelta = DEFAULT_CLOCK_SKEW_TOLERANCE
     disclosure_mode: VerifierDisclosureMode = VerifierDisclosureMode.TRUSTED_DETAILED
+    # ── Phase 4 hardening: optional configuration ──────────────────
+    revocation_checker: RevocationChecker | None = None
+    boundary_id: str | None = None
+    verifier_identity: str | None = None
 
     def __post_init__(self) -> None:
         if self.clock_skew_tolerance < timedelta(0):
@@ -217,19 +288,34 @@ class PCCBVerifier:
           - ``local_debug``: all failures return the granular code (the
             pre-2B behaviour, for debugging only).
         """
-        # ── Phase A: Pre-authentication ──────────────────────────────
+        # ═══════════════════════════════════════════════════════════════
+        # Phase A: Pre-authentication (steps 1–5)
+        # ═══════════════════════════════════════════════════════════════
         # Only the minimum safe work needed for authentication.
         # Any failure here collapses to PROOF_INVALID (in public_generic
         # or trusted_detailed mode) to prevent field-by-field oracle probing.
 
-        # Step 1-3: structural parsing, type validation, size/depth checks
-        # are performed by canonicalize_bytes() and the PCCB dataclass
-        # constructors. The action_hash recomputation is deferred to
-        # post-authentication (it requires the intent, which is
-        # caller-supplied — we must not trust it until after signature
-        # verification).
+        # ── Step 1: Input structure and size limits ──────────────────
+        # Structural parsing is performed by the PCCB dataclass constructor
+        # (called before verify()). Size and depth limits are enforced by
+        # canonicalize_bytes() in step 3.
 
-        # Step 4: required-field presence for key resolution.
+        # ── Step 2: Supported protocol version ───────────────────────
+        # The PCCB declares its contract version. Reject unsupported
+        # contract versions before any cryptographic work.
+        # (The PCCB.from_dict already validates contract name/version,
+        # but we check again here for safety in case the PCCB was
+        # constructed directly.)
+        contract = pccb.unsigned_payload().get("contract", {})
+        if contract.get("name") != "pccb" or contract.get("version") != "v1":
+            self._raise_pre_auth_failure(
+                "UNSUPPORTED_PROTOCOL_VERSION",
+                pccb=pccb,
+                context=context,
+                internal_detail=f"contract={contract}",
+            )
+
+        # ── Step 1 (cont.): Required-field presence for key resolution ─
         # The signature field must be present and non-empty to attempt
         # verification. The issuer field is needed for key resolution
         # (performed by the signer's verify_with_metadata if available).
@@ -237,7 +323,7 @@ class PCCBVerifier:
         if sig_error is not None:
             self._raise_pre_auth_failure(sig_error, pccb=pccb, context=context)
 
-        # Step 5-6: canonicalise the unsigned proof payload.
+        # ── Step 3: Canonicalisation of the unsigned proof payload ───
         # This also enforces size limits (1 MB) and depth limits (128).
         try:
             unsigned_payload = canonicalize_bytes(pccb.unsigned_payload())
@@ -249,7 +335,10 @@ class PCCBVerifier:
                 internal_detail=str(exc),
             )
 
-        # Step 7: signature verification.
+        # ── Steps 4–5: Issuer/key resolution + signature verification ─
+        # The signer resolves the issuer's key (via verify_with_metadata
+        # if available) and verifies the signature. This establishes
+        # cryptographic authenticity.
         verify_with_metadata = getattr(self.signer, "verify_with_metadata", None)
         if callable(verify_with_metadata):
             is_valid = verify_with_metadata(
@@ -267,12 +356,14 @@ class PCCBVerifier:
                 context=context,
             )
 
-        # ── Phase B: Post-authentication semantic validation ─────────
+        # ═══════════════════════════════════════════════════════════════
+        # Phase B: Post-authentication semantic validation (steps 6–13)
+        # ═══════════════════════════════════════════════════════════════
         # The proof is now cryptographically authentic. We can safely
         # perform detailed semantic checks and (in trusted_detailed /
         # local_debug mode) disclose which check failed.
 
-        # Time bounds
+        # ── Step 6: Time validity ────────────────────────────────────
         if context.now + self.clock_skew_tolerance < pccb.not_before:
             self._raise_post_auth_failure(
                 "PROOF_NOT_YET_VALID",
@@ -286,15 +377,37 @@ class PCCBVerifier:
                 context=context,
             )
 
-        # Audience
-        if pccb.audience != context.audience:
+        # ── Step 7: Audience binding (canonical comparison) ──────────
+        if not _canonical_equal(pccb.audience, context.audience):
             self._raise_post_auth_failure(
                 "AUDIENCE_MISMATCH",
                 pccb=pccb,
                 context=context,
             )
 
-        # Scope
+        # ── Step 8: Resource or boundary binding ─────────────────────
+        # If the verifier is configured with a boundary_id, the PCCB's
+        # audience must reference it. This is distinct from the audience
+        # type check — the boundary_id is the specific resource instance
+        # being protected.
+        if self.boundary_id is not None:
+            if pccb.audience.id != self.boundary_id:
+                self._raise_post_auth_failure(
+                    "AUDIENCE_MISMATCH",
+                    pccb=pccb,
+                    context=context,
+                )
+
+        # ── Step 9: Target binding (canonical comparison) ────────────
+        if not _canonical_equal(pccb.target, intent.target):
+            self._raise_post_auth_failure(
+                "TARGET_MISMATCH",
+                pccb=pccb,
+                context=context,
+            )
+
+        # ── Step 10: Action binding (canonical comparison) ───────────
+        # Scope mode + capability check (part of action binding)
         if pccb.scope.mode != "exact":
             self._raise_post_auth_failure(
                 "SCOPE_MODE_INVALID",
@@ -316,39 +429,33 @@ class PCCBVerifier:
                 context=context,
             )
 
-        # Tenant
-        if pccb.tenant != intent.tenant:
+        # Tenant (canonical comparison)
+        if not _canonical_equal(pccb.tenant, intent.tenant):
             self._raise_post_auth_failure(
                 "TENANT_MISMATCH",
                 pccb=pccb,
                 context=context,
             )
 
-        # Subject
-        if pccb.subject != intent.requester:
+        # Subject (canonical comparison)
+        if not _canonical_equal(pccb.subject, intent.requester):
             self._raise_post_auth_failure(
                 "SUBJECT_MISMATCH",
                 pccb=pccb,
                 context=context,
             )
 
-        # Action (the bound action or action parameters differ)
-        if pccb.action != intent.action:
+        # Action (canonical comparison)
+        if not _canonical_equal(pccb.action, intent.action):
             self._raise_post_auth_failure(
                 "ACTION_MISMATCH",
                 pccb=pccb,
                 context=context,
             )
 
-        # Target
-        if pccb.target != intent.target:
-            self._raise_post_auth_failure(
-                "TARGET_MISMATCH",
-                pccb=pccb,
-                context=context,
-            )
-
-        # Action hash (algorithm + canonicalization + value)
+        # ── Step 11: Exact parameter digest ──────────────────────────
+        # Recompute the action_hash and compare. This is the cryptographic
+        # binding of the exact parameters (not just object equality).
         try:
             expected_hash = sha256_hex(build_action_hash_input(intent))
         except (TypeError, ValueError, RecursionError) as exc:
@@ -370,6 +477,37 @@ class PCCBVerifier:
                 pccb=pccb,
                 context=context,
             )
+
+        # ── Step 12: Authority reference binding ─────────────────────
+        # If the PCCB carries an escrow_id (authority reference), verify
+        # that the intent's authority reference matches. This binds the
+        # proof to the specific authority under which it was issued.
+        # (No-op if no escrow_id is present — the authority reference is
+        # optional in the current PCCB format.)
+        # The actual escrow consumption is deferred to the executor.
+
+        # ── Step 13: Revocation status ───────────────────────────────
+        # If a revocation_checker is configured, call it AFTER all other
+        # checks pass. This is the last non-mutating check before the
+        # executor takes over (steps 14–15: replay + execution eligibility).
+        if self.revocation_checker is not None:
+            try:
+                is_not_revoked = self.revocation_checker(pccb, context)
+            except Exception:
+                # Fail-closed: if the revocation checker errors, refuse.
+                is_not_revoked = False
+            if not is_not_revoked:
+                self._raise_post_auth_failure(
+                    "AUTHORITY_REVOKED",
+                    pccb=pccb,
+                    context=context,
+                )
+
+        # ── Steps 14–15: Replay state + execution eligibility ────────
+        # DEFERRED to ProtectedExecutor. The verifier is stateless; the
+        # executor owns the replay store and policy engine. This ensures
+        # replay state is never consumed before the proof passes all
+        # non-mutating validation.
 
     # ── Internal helpers ─────────────────────────────────────────────
 

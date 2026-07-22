@@ -187,7 +187,7 @@ def main() -> int:
             evidence=ev,
         ),
         "refused",
-        "INTENT_MISMATCH",
+        "TARGET_MISMATCH",
     )
 
     # 5) PARAMETER TAMPERING: proof bound to read_only, body escalates same principal.
@@ -202,7 +202,7 @@ def main() -> int:
             evidence=ev,
         ),
         "refused",
-        "INTENT_MISMATCH",
+        "TARGET_MISMATCH",
     )
 
     # 6) NO PROOF: agent tries to grant with nothing.

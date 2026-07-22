@@ -162,7 +162,7 @@ def main() -> int:
             headers=good_headers,
         ),
         403,
-        "INTENT_MISMATCH",
+        "TARGET_MISMATCH",
     )
 
     run(

@@ -21,6 +21,8 @@ PUBLIC_PROOF_REFUSAL_MESSAGES = MappingProxyType(
         "ACTION_HASH_MISMATCH": "The proof action hash does not match the action intent.",
         "PROOF_PAYLOAD_INVALID": "The proof payload could not be canonicalized safely.",
         "SIGNATURE_INVALID": "The proof signature could not be verified.",
+        "UNSUPPORTED_PROTOCOL_VERSION": "The proof declares an unsupported protocol version.",
+        "AUTHORITY_REVOKED": "The proof authority has been revoked.",
     }
 )
 

@@ -323,11 +323,21 @@ class CorrelationRef:
     receipt_id: str | None = None
     request_id: str | None = None
     action_hash: ActionHashSpec | None = None
+    # ── Verification-boundary linkage (Phase 4 hardening) ──────────
+    # These fields prove what the boundary verified and enforced. They
+    # do NOT prove that the authority should have been issued — only
+    # what the verifier checked at execution time.
+    execution_attempt_id: str | None = None
+    protocol_version: str | None = None
+    execution_mode: str | None = None
+    verifier_identity: str | None = None
+    target_digest: ActionHashSpec | None = None
 
     @classmethod
     def from_dict(cls, raw: Any) -> "CorrelationRef":
         data = expect_mapping(raw, "correlation")
         action_hash = data.get("action_hash")
+        target_digest = data.get("target_digest")
         return cls(
             pccb_id=data.get("pccb_id"),
             escrow_id=data.get("escrow_id"),
@@ -335,6 +345,11 @@ class CorrelationRef:
             receipt_id=data.get("receipt_id"),
             request_id=data.get("request_id"),
             action_hash=ActionHashSpec.from_dict(action_hash, "correlation.action_hash") if action_hash else None,
+            execution_attempt_id=data.get("execution_attempt_id"),
+            protocol_version=data.get("protocol_version"),
+            execution_mode=data.get("execution_mode"),
+            verifier_identity=data.get("verifier_identity"),
+            target_digest=ActionHashSpec.from_dict(target_digest, "correlation.target_digest") if target_digest else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -351,6 +366,16 @@ class CorrelationRef:
             payload["request_id"] = self.request_id
         if self.action_hash is not None:
             payload["action_hash"] = self.action_hash.to_dict()
+        if self.execution_attempt_id is not None:
+            payload["execution_attempt_id"] = self.execution_attempt_id
+        if self.protocol_version is not None:
+            payload["protocol_version"] = self.protocol_version
+        if self.execution_mode is not None:
+            payload["execution_mode"] = self.execution_mode
+        if self.verifier_identity is not None:
+            payload["verifier_identity"] = self.verifier_identity
+        if self.target_digest is not None:
+            payload["target_digest"] = self.target_digest.to_dict()
         return payload
 
 

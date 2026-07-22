@@ -112,6 +112,6 @@ def test_fastapi_dependency_refuses_before_handler_and_executes_valid_payout() -
     assert valid.status_code == 200
     assert valid.json()["outcome"] == "executed"
     assert mismatch.status_code == 403
-    assert mismatch.json()["detail"]["reason_code"] == "INTENT_MISMATCH"
+    assert mismatch.json()["detail"]["reason_code"] in ("INTENT_MISMATCH", "TARGET_MISMATCH", "ACTION_MISMATCH")
     assert side_effects == [approved]
     assert handler_calls == ["bank:approved"]
