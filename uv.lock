@@ -44,7 +44,7 @@ postgres = [
 
 [package.metadata]
 requires-dist = [
-    { name = "actenon-protocol", git = "https://github.com/Actenon/actenon-protocol.git?rev=v1.1.0" },
+    { name = "actenon-protocol", specifier = ">=1.1.0,<2" },
     { name = "build", marker = "extra == 'dev'" },
     { name = "cryptography", marker = "extra == 'asymmetric'", specifier = ">=42" },
     { name = "fastapi", marker = "extra == 'fastapi'", specifier = ">=0.115,<1" },
@@ -61,12 +61,16 @@ provides-extras = ["asymmetric", "dev", "fastapi", "langchain", "mcp", "postgres
 [[package]]
 name = "actenon-protocol"
 version = "1.1.0"
-source = { git = "https://github.com/Actenon/actenon-protocol.git?rev=v1.1.0#5b5017be439930a1254a46b9407e22b8a517b797" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonschema" },
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "rfc8785" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/83/5b/c886710d55e03146f3b94ad9391ce9fd9d2daba0f6bd29b04d083d58dd05/actenon_protocol-1.1.0.tar.gz", hash = "sha256:94395185508a0cbb23ea375c7079c70ed40a12ee73111971360ef21d61802994", size = 36700, upload-time = "2026-07-22T19:09:52.618Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/35/9bf7b40600fe725295125e6a554ec6bcd12fb1060b287feb7f19118a72f3/actenon_protocol-1.1.0-py3-none-any.whl", hash = "sha256:ee6d1dbf8bd5c8a01a942d6e3e852d3d3e1f90aa6b83112631f0102d2643682c", size = 45902, upload-time = "2026-07-22T19:09:51.29Z" },
 ]
 
 [[package]]
