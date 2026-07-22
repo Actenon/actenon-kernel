@@ -60,6 +60,7 @@ def _build_executor(*, tempdir: str) -> ProtectedExecutor:
     Returns (executor, escrow) so tests can issue escrow records before execution.
     """
     import tempfile
+    from actenon.idempotency import IdempotencyStore
     replay_db = tempfile.mktemp(suffix=".sqlite3", dir=tempdir)
     executor = ProtectedExecutor(
         proof_verifier=PCCBVerifier(
@@ -72,6 +73,7 @@ def _build_executor(*, tempdir: str) -> ProtectedExecutor:
         receipt_factory=ReceiptFactory(),
         refusal_factory=RefusalFactory(),
         outcome_writer=InMemoryOutcomeWriter(),
+        idempotency_store=IdempotencyStore(),
     )
     return executor
 

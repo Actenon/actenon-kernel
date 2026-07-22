@@ -12,6 +12,7 @@ from actenon.core.redaction import (
 )
 from actenon.credentials import BrokeredCredential, CredentialBroker
 from actenon.escrow import CapabilityEscrow
+from actenon.idempotency import IdempotencyStore, OutcomeState
 from actenon.models.runtime import ExecutionResult, PolicyDecision, ProtectedExecutionRequest
 from actenon.proof import PCCBVerifier
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
@@ -65,6 +66,18 @@ class ProtectedExecutor:
     a PCCB before acquiring brokered execution authority, passes only the
     brokered credential reference into the handler, and emits kernel Receipt or
     Refusal artifacts for the outcome.
+
+    Idempotency:
+      If the intent's metadata contains an `operation_id`, the executor checks
+      the idempotency store BEFORE claiming replay. If a prior result exists
+      for the same operation_id + same action_hash, the prior result is
+      returned without re-executing the handler (idempotent replay). If the
+      same operation_id has a different action_hash, IDEMPOTENCY_CONFLICT is
+      raised.
+
+    Outcome states:
+      The executor tracks outcome states per the 8-state reconciliation model
+      (see actenon.idempotency.OutcomeState).
     """
 
     proof_verifier: PCCBVerifier
@@ -76,6 +89,7 @@ class ProtectedExecutor:
     outcome_writer: OutcomeWriter = field(default_factory=InMemoryOutcomeWriter)
     replay_protection: Literal["default", "disabled"] = "default"
     replay_store_failure: Literal["fail_closed", "fail_open"] = "fail_closed"
+    idempotency_store: IdempotencyStore | None = None
 
     def __post_init__(self) -> None:
         if self.replay_protection not in {"default", "disabled"}:
@@ -164,6 +178,59 @@ class ProtectedExecutor:
         *,
         policy_decision: PolicyDecision | None = None,
     ) -> ExecutionResult:
+        # ── Idempotency check (before replay claim) ──────────────────
+        # If the intent has an operation_id, check the idempotency store
+        # BEFORE claiming replay. This allows safe retry of the same
+        # operation with a NEW proof (the old proof was consumed).
+        operation_id = request.intent.metadata.get("operation_id")
+        action_hash_value = request.pccb.action_hash.value
+        if operation_id is not None and self.idempotency_store is not None:
+            prior = self.idempotency_store.lookup(operation_id)
+            if prior is not None:
+                if prior["action_hash"] != action_hash_value:
+                    # Same operation_id + different action_hash → conflict
+                    refusal = self.refusal_factory.create_from_exception(
+                        RefusalException(
+                            category="idempotency",
+                            refusal_code="IDEMPOTENCY_CONFLICT",
+                            message=(
+                                f"Operation {operation_id!r} was already executed "
+                                f"with a different action_hash."
+                            ),
+                            retryable=False,
+                            details={
+                                "operation_id": operation_id,
+                                "expected_action_hash": prior["action_hash"],
+                                "actual_action_hash": action_hash_value,
+                            },
+                        ),
+                        occurred_at=request.context.now,
+                        intent=request.intent,
+                        context=request.context,
+                        pccb_id=request.pccb.pccb_id,
+                        action_hash=request.pccb.action_hash,
+                    )
+                    receipt = self.refusal_factory.create_refused_receipt(  # type: ignore[attr-defined]
+                        request.intent, request.context, refusal
+                    ) if hasattr(self.refusal_factory, 'create_refused_receipt') else self.receipt_factory.create_refused_receipt(
+                        request.intent, request.context, refusal
+                    )
+                    self.outcome_writer.write_refusal(refusal)
+                    return ExecutionResult(receipt=receipt, refusal=refusal, payload=None)
+                # Same operation_id + same action_hash → idempotent replay
+                # Return the prior result without re-executing.
+                prior_result = prior["result"]
+                receipt = self.receipt_factory.create_execution_receipt(
+                    request.intent,
+                    request.context,
+                    pccb_id=request.pccb.pccb_id,
+                    escrow_id=request.pccb.escrow_id,
+                    payload=prior_result,
+                    action_hash=request.pccb.action_hash,
+                )
+                self.outcome_writer.write_receipt(receipt)
+                return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
+
         replay_state = None
         replay_consumed = False
         brokered_credential: BrokeredCredential | None = None
@@ -207,6 +274,9 @@ class ProtectedExecutor:
                 action_hash=request.pccb.action_hash,
             )
             self.outcome_writer.write_receipt(receipt)
+            # ── Record in idempotency store ──────────────────────────
+            if operation_id is not None and self.idempotency_store is not None:
+                self.idempotency_store.record(operation_id, action_hash_value, payload)
             return ExecutionResult(receipt=receipt, refusal=None, payload=payload)
         except RefusalException as exc:
             self._release_credential(
