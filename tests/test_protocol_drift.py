@@ -46,7 +46,7 @@ from actenon.proof.canonical import (
 # 0. Pinned protocol version
 # ---------------------------------------------------------------------------
 
-EXPECTED_PROTOCOL_VERSION = "1.0.0"
+EXPECTED_PROTOCOL_VERSION = "1.1.0"
 
 
 def test_protocol_version_is_pinned():
