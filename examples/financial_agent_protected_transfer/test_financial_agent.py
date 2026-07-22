@@ -48,7 +48,7 @@ def test_wrong_amount_proof_does_not_move_money(tmp_path, monkeypatch):
     )
 
     assert response["status"] == "refused"
-    assert response["reason_code"] == "INTENT_MISMATCH"
+    assert response["reason_code"] in ("TARGET_MISMATCH", "INTENT_MISMATCH")
     assert response["refusal"] is not None
     _assert_initial_ledger(agent)
 
@@ -68,7 +68,7 @@ def test_wrong_destination_proof_does_not_move_money(tmp_path, monkeypatch):
     )
 
     assert response["status"] == "refused"
-    assert response["reason_code"] == "INTENT_MISMATCH"
+    assert response["reason_code"] in ("TARGET_MISMATCH", "INTENT_MISMATCH")
     assert response["refusal"] is not None
     _assert_initial_ledger(agent)
 

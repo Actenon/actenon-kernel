@@ -17,5 +17,5 @@ def test_protected_iam_control_plane_example_passes() -> None:
     assert "RESULT: ALL CHECKS PASSED" in result.stdout
     assert "No valid proof, no execution." in result.stdout
     assert "PREFLIGHT_PRIVILEGED_ACCESS_APPROVAL_REQUIRED" in result.stdout
-    assert "INTENT_MISMATCH" in result.stdout
+    assert "TARGET_MISMATCH" in result.stdout
     assert "DUPLICATE_REPLAY" in result.stdout

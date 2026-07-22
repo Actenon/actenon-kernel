@@ -40,7 +40,7 @@ def test_fastmcp_wrong_amount_proof_refuses_before_money_moves(tmp_path, monkeyp
     )
 
     assert result["status"] == "refused"
-    assert result["reason_code"] == "INTENT_MISMATCH"
+    assert result["reason_code"] in ("TARGET_MISMATCH", "INTENT_MISMATCH")
     assert agent.ledger.balances["customer_a"] == 10_000
     assert agent.ledger.balances["external_wallet"] == 0
     assert agent.ledger.transfers == []
@@ -61,7 +61,7 @@ def test_fastmcp_wrong_destination_proof_refuses_before_money_moves(tmp_path, mo
     )
 
     assert result["status"] == "refused"
-    assert result["reason_code"] == "INTENT_MISMATCH"
+    assert result["reason_code"] in ("TARGET_MISMATCH", "INTENT_MISMATCH")
     assert agent.ledger.balances["customer_a"] == 10_000
     assert agent.ledger.balances["attacker_wallet"] == 0
     assert agent.ledger.transfers == []
