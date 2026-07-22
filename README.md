@@ -1,13 +1,14 @@
 # Actenon Kernel
 
-> The open verifier for proof-bound consequential execution. Defines what a valid proof is. Verifies proofs; issues nothing; enforces nothing.
+> The open verifier for proof-bound consequential execution. Defines what a valid proof is. Verifies proofs at the execution edge; issues no grants; runs no policy decisions.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.9–3.12](https://img.shields.io/badge/Python-3.9%E2%80%933.12-blue.svg)](https://www.python.org/)
+[![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
 [![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0-51%20vectors-success.svg)](CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](SPEC_INDEX.md)
 [![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](SDK_SELECTION_GUIDE.md)
-[![CI](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions)
+[![CI](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml)
 [![Code style: ruff](https://img.shields.io/badge/Code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![No runtime cloud dependency](https://img.shields.io/badge/Runtime-no%20cloud%20calls-2ea44f.svg)](#independence)
 
@@ -34,12 +35,12 @@ Every repo can be adopted independently. The Kernel in particular can be wired i
 The Kernel is the **trust anchor** of the Actenon ecosystem. It is:
 
 - **Independent** — runs without Permit, Cloud, or Scan. Zero network calls during verification.
-- **Stateless** at the verifier — the verifier is pure; the executor holds replay state.
+- **The verifier at the execution edge** — the `PCCBVerifier` is pure and stateless; the `ProtectedExecutor` enforces replay, escrow, idempotency, and credential brokering at the edge before any side effect, then emits the Receipt or Refusal.
 - **Conformance-locked** — 51 conformance vectors define exactly what "a valid PCCB" means, in any language.
 - **Multi-language** — Python reference, plus TypeScript, Go, and Rust verifier SDKs that all conform to the same vectors.
 - **Framework-agnostic** — proof verification is a function call, not a framework. The same verifier runs inside a LangChain `_run`, an MCP tool handler, an Express route, or a Go HTTP handler.
 
-The Kernel does **one thing**: it verifies that a `PCCB` (Proof of Constrained Capability Bound) authorizes an exact `Action Intent` for this caller, this target, this audience, this scope, this time window, and this single execution attempt. If verification fails, the protected endpoint refuses before any side effect.
+The Kernel does **one thing**: it verifies that a `PCCB` (Proof of Constrained Capability Bound) authorizes an exact `Action Intent` for this caller, this target, this audience, this scope, this time window, and this single execution attempt — and the `ProtectedExecutor` refuses the attempt (no side effect, structured Refusal emitted) if verification fails. The Kernel does **not** issue grants or make policy decisions — that's Permit's job.
 
 ## Why it exists
 
@@ -251,7 +252,9 @@ actenon up
 # → http://127.0.0.1:8421
 ```
 
-See [`TRACE_VIEWER.md`](TRACE_VIEWER.md).
+![Actenon Trace Viewer](docs/assets/trace_viewer.png)
+
+The viewer renders local artefacts produced by the repo's existing proof paths — Intent Record, Action Intent, PCCB, Receipt, Refusal, replay entries, protected-endpoint state, and execution flow reconstructed from those artefacts. It requires no hosted services, operator workflow state, or paid-layer runtime infrastructure. See [`TRACE_VIEWER.md`](TRACE_VIEWER.md).
 
 ## Multi-agent execution model
 
