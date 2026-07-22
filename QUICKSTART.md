@@ -8,7 +8,7 @@ The quickstart uses local demo signing only. If warnings mention the local HMAC 
 
 Get from clone to a complete local trust runtime, a memorable execution-gap simulation, and a first proof-bound protected-endpoint success in a few minutes, with no external accounts, provider sandboxes, or API keys.
 
-If you want the category problem first, read [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md) before this guide. Quickstart is the shortest path to seeing the answer, not the full argument for why the answer is needed.
+If you want the category problem first, read [THE_EXECUTION_GAP.md](docs/THE_EXECUTION_GAP.md) before this guide. Quickstart is the shortest path to seeing the answer, not the full argument for why the answer is needed.
 
 For the exact protection boundary and deployment conditions, read
 [Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
@@ -160,9 +160,9 @@ Use this order if you want the cleanest adoption path after the first five comma
 
 1. inspect the first incident pack under `artifacts/local_runtime/simulations/replit/`
 2. inspect the first local runtime Intent Record, Receipt, and Refusal under `artifacts/local_runtime/artifacts/`
-3. open the read-only [TRACE_VIEWER.md](TRACE_VIEWER.md) at `http://127.0.0.1:8421` to inspect Action Intent, Intent Record, PCCB, Receipt, Refusal, replay entries, and protected-endpoint state
+3. open the read-only [TRACE_VIEWER.md](docs/TRACE_VIEWER.md) at `http://127.0.0.1:8421` to inspect Action Intent, Intent Record, PCCB, Receipt, Refusal, replay entries, and protected-endpoint state
 4. read [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md) for the exact first-run flow
-5. move to [MCP_HERO_PATH.md](MCP_HERO_PATH.md) for the strongest agent-tool integration path
+5. move to [MCP_HERO_PATH.md](docs/MCP_HERO_PATH.md) for the strongest agent-tool integration path
 6. run `python3 -m actenon.cli conformance run`
 
 ## What Success Looks Like
@@ -358,23 +358,23 @@ Then open `http://127.0.0.1:8421`.
 
 | If you want to... | Start here |
 | --- | --- |
-| understand the category and boundary first | [CATEGORY.md](CATEGORY.md), [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md), [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md) |
-| inspect the first run visually before integrating anything | [TRACE_VIEWER.md](TRACE_VIEWER.md), [docs/guides/TRACE_VIEWER_LOCAL.md](docs/guides/TRACE_VIEWER_LOCAL.md) |
+| understand the category and boundary first | [CATEGORY.md](docs/CATEGORY.md), [KERNEL_GUARANTEES.md](docs/KERNEL_GUARANTEES.md), [OPEN_SOURCE_BOUNDARY.md](docs/OPEN_SOURCE_BOUNDARY.md) |
+| inspect the first run visually before integrating anything | [TRACE_VIEWER.md](docs/TRACE_VIEWER.md), [docs/guides/TRACE_VIEWER_LOCAL.md](docs/guides/TRACE_VIEWER_LOCAL.md) |
 | adopt the protected-endpoint pattern in an existing service | [docs/guides/INTEGRATION_QUICKSTART.md](docs/guides/INTEGRATION_QUICKSTART.md) |
-| adopt the strongest agent-tool path in this repo | [MCP_HERO_PATH.md](MCP_HERO_PATH.md), [examples/mcp_server_protected_tool/README.md](examples/mcp_server_protected_tool/README.md) |
+| adopt the strongest agent-tool path in this repo | [MCP_HERO_PATH.md](docs/MCP_HERO_PATH.md), [examples/mcp_server_protected_tool/README.md](examples/mcp_server_protected_tool/README.md) |
 | start with the smallest verifier-first demo | [docs/reference/verifier/HELLO_WORLD_PROTECTED_RESOURCE.md](docs/reference/verifier/HELLO_WORLD_PROTECTED_RESOURCE.md) |
-| evaluate compatibility claims and run the suite | [CONFORMANCE.md](CONFORMANCE.md), [docs/guides/CONFORMANCE_TESTS_GUIDE.md](docs/guides/CONFORMANCE_TESTS_GUIDE.md) |
-| choose a verifier-edge SDK | [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md), [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
-| jump into framework and agent examples | [INTEGRATIONS.md](INTEGRATIONS.md) |
+| evaluate compatibility claims and run the suite | [CONFORMANCE.md](docs/CONFORMANCE.md), [docs/guides/CONFORMANCE_TESTS_GUIDE.md](docs/guides/CONFORMANCE_TESTS_GUIDE.md) |
+| choose a verifier-edge SDK | [SDK_SELECTION_GUIDE.md](docs/SDK_SELECTION_GUIDE.md), [docs/reference/verifier/VERIFIER_SDK_REFERENCE.md](docs/reference/verifier/VERIFIER_SDK_REFERENCE.md) |
+| jump into framework and agent examples | [INTEGRATIONS.md](docs/INTEGRATIONS.md) |
 
 ## Read First If You Are Evaluating The Project
 
-- [THE_EXECUTION_GAP.md](THE_EXECUTION_GAP.md)
-- [CATEGORY.md](CATEGORY.md)
-- [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md)
-- [SPEC_INDEX.md](SPEC_INDEX.md)
-- [OPEN_SOURCE_BOUNDARY.md](OPEN_SOURCE_BOUNDARY.md)
-- [CONFORMANCE.md](CONFORMANCE.md)
+- [THE_EXECUTION_GAP.md](docs/THE_EXECUTION_GAP.md)
+- [CATEGORY.md](docs/CATEGORY.md)
+- [KERNEL_GUARANTEES.md](docs/KERNEL_GUARANTEES.md)
+- [SPEC_INDEX.md](docs/SPEC_INDEX.md)
+- [OPEN_SOURCE_BOUNDARY.md](docs/OPEN_SOURCE_BOUNDARY.md)
+- [CONFORMANCE.md](docs/CONFORMANCE.md)
 
 ## If You Want The Kernel Gate First
 
@@ -386,9 +386,9 @@ make judge
 ## Read Next
 
 - [docs/guides/FIRST_10_MINUTES.md](docs/guides/FIRST_10_MINUTES.md)
-- [TRACE_VIEWER.md](TRACE_VIEWER.md)
-- [MCP_HERO_PATH.md](MCP_HERO_PATH.md)
-- [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md)
+- [TRACE_VIEWER.md](docs/TRACE_VIEWER.md)
+- [MCP_HERO_PATH.md](docs/MCP_HERO_PATH.md)
+- [SDK_SELECTION_GUIDE.md](docs/SDK_SELECTION_GUIDE.md)
 - [docs/guides/INTEGRATION_QUICKSTART.md](docs/guides/INTEGRATION_QUICKSTART.md)
 - [docs/guides/CONFORMANCE_TESTS_GUIDE.md](docs/guides/CONFORMANCE_TESTS_GUIDE.md)
-- [INTEGRATIONS.md](INTEGRATIONS.md)
+- [INTEGRATIONS.md](docs/INTEGRATIONS.md)

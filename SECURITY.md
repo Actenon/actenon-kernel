@@ -17,8 +17,8 @@ Security review is still important because the code covers:
 
 Related documents:
 
-- [THREAT_MODEL.md](THREAT_MODEL.md)
-- [KERNEL_GUARANTEES.md](KERNEL_GUARANTEES.md)
+- [THREAT_MODEL.md](docs/THREAT_MODEL.md)
+- [KERNEL_GUARANTEES.md](docs/KERNEL_GUARANTEES.md)
 - [docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md)
 - [spec/protected-endpoint/SPEC.md](spec/protected-endpoint/SPEC.md)
 - [spec/replay/SPEC.md](spec/replay/SPEC.md)

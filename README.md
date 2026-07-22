@@ -5,9 +5,9 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.9–3.12](https://img.shields.io/badge/Python-3.9%E2%80%933.12-blue.svg)](https://www.python.org/)
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
-[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0-51%20vectors-success.svg)](CONFORMANCE.md)
-[![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](SPEC_INDEX.md)
-[![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](SDK_SELECTION_GUIDE.md)
+[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0-51%20vectors-success.svg)](docs/CONFORMANCE.md)
+[![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
+[![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](docs/SDK_SELECTION_GUIDE.md)
 [![CI](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml)
 [![Code style: ruff](https://img.shields.io/badge/Code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![No runtime cloud dependency](https://img.shields.io/badge/Runtime-no%20cloud%20calls-2ea44f.svg)](#independence)
@@ -50,7 +50,7 @@ Modern agent stacks already answer the upstream question — *should this reques
 
 That unanswered question is the **execution gap**. It is where parameter mutation between approval and execution, replay of valid-looking proof, presentation to the wrong endpoint, tenant/subject rebinding, and stale-proof reuse actually happen. The Kernel closes it.
 
-Read the canonical problem statement in [`THE_EXECUTION_GAP.md`](THE_EXECUTION_GAP.md).
+Read the canonical problem statement in [`THE_EXECUTION_GAP.md`](docs/THE_EXECUTION_GAP.md).
 
 ## The two places you can wire it in
 
@@ -68,7 +68,7 @@ agent → framework tool (LangChain / MCP / Claude / CrewAI / ...)
        Receipt or Refusal
 ```
 
-This is the path you take when you control the agent framework and want to bind every tool call to proof. See [`INTEGRATIONS.md`](INTEGRATIONS.md) for the six ranked framework paths.
+This is the path you take when you control the agent framework and want to bind every tool call to proof. See [`INTEGRATIONS.md`](docs/INTEGRATIONS.md) for the six ranked framework paths.
 
 ### Placement B — independently at the resource boundary (resource-owned mode)
 
@@ -126,7 +126,7 @@ Both are **structured, hash-chained, and stable at the contract level**. They an
 - **What it did or tried to do** — the exact `Action Intent` (action name, target, tenant, subject, audience, parameters), the action-hash (SHA-256 over RFC 8785 canonical JSON), and the execution state (`succeeded`, `failed`, `refused`, `outcome_unknown`).
 - **How it did it** — the brokered or resource-owned execution mode, the credential reference (not the secret), the adapter / endpoint that performed the side effect, the provider response or refusal code, and the receipt's own signature.
 
-For deployments that need portable cryptographic attestation of origin, the Kernel can wrap any v1 Receipt or Refusal in an **Outcome Attestation** envelope (`v2alpha1`, opt-in). The attestation is signed with an Ed25519 key whose lifecycle (active / retired / suspended / soft-revoked / hard-revoked) is itself part of the public contract. A hard-revoked key's historical artefacts remain verifiable only if an independently verified external anchor proves the artefact digest existed before the compromise — see [`REVOCATION_AND_RECEIPT_DURABILITY.md`](REVOCATION_AND_RECEIPT_DURABILITY.md).
+For deployments that need portable cryptographic attestation of origin, the Kernel can wrap any v1 Receipt or Refusal in an **Outcome Attestation** envelope (`v2alpha1`, opt-in). The attestation is signed with an Ed25519 key whose lifecycle (active / retired / suspended / soft-revoked / hard-revoked) is itself part of the public contract. A hard-revoked key's historical artefacts remain verifiable only if an independently verified external anchor proves the artefact digest existed before the compromise — see [`REVOCATION_AND_RECEIPT_DURABILITY.md`](docs/REVOCATION_AND_RECEIPT_DURABILITY.md).
 
 ## Install
 
@@ -188,7 +188,7 @@ python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runt
 | **Go** | Verifier-edge proof checking in Go HTTP services | [`sdk/go/`](sdk/go/README.md) |
 | **Rust** | Verifier-edge proof checking in systems components | [`sdk/rust/`](sdk/rust/README.md) |
 
-Every SDK runs against the same 51 conformance vectors. See [`SDK_SELECTION_GUIDE.md`](SDK_SELECTION_GUIDE.md).
+Every SDK runs against the same 51 conformance vectors. See [`SDK_SELECTION_GUIDE.md`](docs/SDK_SELECTION_GUIDE.md).
 
 ## Framework & platform adapters
 
@@ -243,7 +243,7 @@ actenon simulate --scenario data-export
 | **IAM privilege escalation** | An agent attempts `put_user_policy` / `attach_role_policy` without exact-action proof. | [`docs/incidents/IAM_PRIVILEGE_ESCALATION_PATTERN.md`](docs/incidents/IAM_PRIVILEGE_ESCALATION_PATTERN.md) |
 | **Data export exfiltration** | A sensitive export action attempted without audience/scoped proof. | [`docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md`](docs/incidents/DATA_EXPORT_EXFILTRATION_PATTERN.md) |
 
-These pages are **source-disciplined**: they use incident names as pattern language, not as factual incident reports, and they explicitly do not assert uncited facts about any named incident. They show where the execution gap appears and how a protected Actenon boundary would require preflight, proof, credential brokering, and Receipt/Refusal artefacts before side effects. Use [`INCIDENT_ANALYSIS_TEMPLATE.md`](INCIDENT_ANALYSIS_TEMPLATE.md) to write your own.
+These pages are **source-disciplined**: they use incident names as pattern language, not as factual incident reports, and they explicitly do not assert uncited facts about any named incident. They show where the execution gap appears and how a protected Actenon boundary would require preflight, proof, credential brokering, and Receipt/Refusal artefacts before side effects. Use [`INCIDENT_ANALYSIS_TEMPLATE.md`](docs/INCIDENT_ANALYSIS_TEMPLATE.md) to write your own.
 
 Then open the local **Trace Viewer** to inspect the Intent Record, Action Intent, PCCB, Receipt, Refusal, replay entries, and protected-endpoint state for any simulation:
 
@@ -254,7 +254,7 @@ actenon up
 
 ![Actenon Trace Viewer](docs/assets/trace_viewer.png)
 
-The viewer renders local artefacts produced by the repo's existing proof paths — Intent Record, Action Intent, PCCB, Receipt, Refusal, replay entries, protected-endpoint state, and execution flow reconstructed from those artefacts. It requires no hosted services, operator workflow state, or paid-layer runtime infrastructure. See [`TRACE_VIEWER.md`](TRACE_VIEWER.md).
+The viewer renders local artefacts produced by the repo's existing proof paths — Intent Record, Action Intent, PCCB, Receipt, Refusal, replay entries, protected-endpoint state, and execution flow reconstructed from those artefacts. It requires no hosted services, operator workflow state, or paid-layer runtime infrastructure. See [`TRACE_VIEWER.md`](docs/TRACE_VIEWER.md).
 
 ## Multi-agent execution model
 
@@ -262,7 +262,7 @@ In a multi-agent system, every additional hop between decision and execution cre
 
 > **Each protected execution edge verifies its own proof before side effects.**
 
-A PCCB is bound to a specific audience, tenant, subject, action, target, scope, expiry, and nonce. Forwarding it across an agent boundary does not make it valid for a different tool. Full doctrine in [`MULTI_AGENT_EXECUTION_MODEL.md`](MULTI_AGENT_EXECUTION_MODEL.md).
+A PCCB is bound to a specific audience, tenant, subject, action, target, scope, expiry, and nonce. Forwarding it across an agent boundary does not make it valid for a different tool. Full doctrine in [`MULTI_AGENT_EXECUTION_MODEL.md`](docs/MULTI_AGENT_EXECUTION_MODEL.md).
 
 ## Key lifecycle & receipt durability
 
@@ -276,7 +276,7 @@ Issuer signing keys move through five states, each with explicit verification se
 | `revoked` (soft) | No | Yes, if issued before `revoked_at` | No |
 | `hard_revoked` | No | Only with independent external anchor | No |
 
-Hard revoke is used only when key compromise means the issuer's own timestamps can no longer separate legitimate historical artefacts from backdated ones. The Kernel's external-anchor MVP lets a deployment preserve verifiability of historical artefacts even after hard revoke, without changing the issuer-signed bytes. Full lifecycle in [`REVOCATION_AND_RECEIPT_DURABILITY.md`](REVOCATION_AND_RECEIPT_DURABILITY.md).
+Hard revoke is used only when key compromise means the issuer's own timestamps can no longer separate legitimate historical artefacts from backdated ones. The Kernel's external-anchor MVP lets a deployment preserve verifiability of historical artefacts even after hard revoke, without changing the issuer-signed bytes. Full lifecycle in [`REVOCATION_AND_RECEIPT_DURABILITY.md`](docs/REVOCATION_AND_RECEIPT_DURABILITY.md).
 
 ## Compliance mappings (partial, honest)
 
@@ -288,7 +288,7 @@ The Kernel maps cleanly to the execution-edge portions of common frameworks. It 
 | **OWASP Top 10 for Agentic Applications** | ASI01 Goal Hijack, ASI02 Tool Misuse, ASI03 Identity & Privilege Abuse, ASI07 Insecure Inter-Agent Comms, ASI08 Cascading Failures, ASI10 Rogue Agents | Does not secure framework runtime outside the protected execution path |
 | **NIST AI RMF 1.0** | GOVERN 1, MAP 1, MEASURE 1 / 2.4 / 2.7 / 2.8 / 2.9, MANAGE 1 | Not a full measurement program; not enterprise risk register |
 
-Full mapping in [`COMPLIANCE_MAPPING.md`](COMPLIANCE_MAPPING.md).
+Full mapping in [`COMPLIANCE_MAPPING.md`](docs/COMPLIANCE_MAPPING.md).
 
 ## Conformance
 
@@ -297,17 +297,19 @@ actenon conformance run --require-complete
 # → 51 tests pass. Mark: Actenon Verified (Conformance 1.0.0)
 ```
 
-The active v1 compatibility surface is: Action Intent, PCCB, Receipt, Refusal, Protected Endpoint, Replay. Reserved surfaces (Reconciliation, Policy Bundle) are **not** active v1 conformance targets. Third-party verifier implementers should target these surfaces and run the same suite. See [`CONFORMANCE.md`](CONFORMANCE.md).
+The active v1 compatibility surface is: Action Intent, PCCB, Receipt, Refusal, Protected Endpoint, Replay. Reserved surfaces (Reconciliation, Policy Bundle) are **not** active v1 conformance targets. Third-party verifier implementers should target these surfaces and run the same suite. See [`CONFORMANCE.md`](docs/CONFORMANCE.md).
 
 ## Audit responses
 
-The repo ships an auditor-readable [`THREAT_MODEL.md`](THREAT_MODEL.md) and an [`AUDIT_RESPONSES.md`](AUDIT_RESPONSES.md) that ties common diligence questions to specific source files:
+The repo ships an auditor-readable [`THREAT_MODEL.md`](docs/THREAT_MODEL.md) and an [`AUDIT_RESPONSES.md`](docs/AUDIT_RESPONSES.md) that ties common diligence questions to specific source files:
 
 - **Payload tampering** — strict RFC 8785 JCS canonicalisation; floats rejected; duplicate object keys rejected before canonicalisation.
 - **Clock drift** — configurable, validated `clock_skew_tolerance` on `not_before` and `expires_at`; **strict zero by default**.
 - **Concurrency replay (double-spend)** — atomic transactional claim against a unique `replay_key` in a durable store, plus mutation lock and monotonicity assertion. Verified under a 32-worker concurrency race: exactly one execution succeeds; the rest are refused with `REPLAY_DETECTED`.
 
 ## What the Kernel does NOT do
+
+Actenon gates explicit execution-edge actions; it does not inspect or filter prompts, model output, or in-band response content. It can require proof for an explicit export or transmit action, but it does not stop data disclosed inside ordinary output unless that disclosure is itself modeled and routed as a protected action.
 
 - Issue grants or proofs — that's Permit's job.
 - Resolve credentials — that's the broker's job.
@@ -319,7 +321,7 @@ The repo ships an auditor-readable [`THREAT_MODEL.md`](THREAT_MODEL.md) and an [
 - Stop a malicious or buggy adapter that lies after control passes to it.
 - Replace production key custody or HSM-backed signing (the interface is ready; the deployment wires the provider).
 
-The edge guarantee applies **only when** the protected edge is the only path to the resource, the backend accepts only brokered credentials issued after verification, and the agent has no standing credential or alternate route. Full scope in [`docs/SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md).
+The edge guarantee applies only when the protected edge is the only path to the resource, the backend accepts only brokered credentials issued after verification, and the agent has no standing credential or alternate route. Full scope in [`docs/SCOPE_AND_GUARANTEES.md`](docs/SCOPE_AND_GUARANTEES.md).
 
 ## Signing backends
 
@@ -329,7 +331,7 @@ The edge guarantee applies **only when** the protected edge is the only path to 
 | `pilot_local_eddsa` | Pilot-ready | Real Ed25519, key on disk. Requires `ACTENON_ALLOW_PILOT_LOCAL_EDDSA_IN_PRODUCTION=1` |
 | `external_managed` | Interface ready | AWS KMS / GCP KMS / Azure Key Vault / HSM (PKCS#11). Deployment wires the provider. |
 
-See [`PRODUCTION_INTEGRATION.md`](../actenon-cloud/PRODUCTION_INTEGRATION.md) in the Cloud repo for the exact wiring paths.
+See [`docs/PRODUCTION_INTEGRATION.md`](https://github.com/Actenon/actenon-cloud/blob/main/docs/PRODUCTION_INTEGRATION.md) in the Cloud repo for the exact wiring paths.
 
 ## What's in this repo
 
