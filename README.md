@@ -3,7 +3,9 @@
 > The open verifier for proof-bound consequential execution. Defines what a valid proof is. Verifies proofs at the execution edge; issues no grants; runs no policy decisions.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-[![Python 3.9–3.12](https://img.shields.io/badge/Python-3.9%E2%80%933.12-blue.svg)](https://www.python.org/)
+<!-- PYTHON-BADGE:START -->
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+<!-- PYTHON-BADGE:END -->
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
 [![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0--51%20vectors-success.svg)](docs/CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
@@ -129,6 +131,8 @@ Both are **structured, hash-chained, and stable at the contract level**. They an
 For deployments that need portable cryptographic attestation of origin, the Kernel can wrap any v1 Receipt or Refusal in an **Outcome Attestation** envelope (`v2alpha1`, opt-in). The attestation is signed with an Ed25519 key whose lifecycle (active / retired / suspended / soft-revoked / hard-revoked) is itself part of the public contract. A hard-revoked key's historical artefacts remain verifiable only if an independently verified external anchor proves the artefact digest existed before the compromise — see [`REVOCATION_AND_RECEIPT_DURABILITY.md`](docs/REVOCATION_AND_RECEIPT_DURABILITY.md).
 
 ## Install
+
+Python 3.10+ for the Kernel alone. The full stack including Permit requires 3.11+.
 
 ```bash
 pip install actenon-kernel            # core verifier (pure Python, no asymmetric extra)
