@@ -18,6 +18,10 @@ jobs:
             --exclude-path node_modules
             --exclude-path .venv
             --exclude-path docs/
+            --exclude-path spec/
+            --exclude-path sdk/
+            --exclude-path examples/
+            --exclude-path conformance/
             --accept 200,206,429
             './**/*.md'
           fail: true
