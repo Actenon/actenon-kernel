@@ -113,7 +113,7 @@ bash "$ACTENON_CLOUD_REPO/scripts/verify_cloud_to_kernel.sh"
 
 Read the details in
 [docs/guides/CLOUD_TO_KERNEL_VERIFICATION.md](docs/guides/CLOUD_TO_KERNEL_VERIFICATION.md)
-and [ACTENON_V2_KEYSTONE_ACCEPTANCE.md](ACTENON_V2_KEYSTONE_ACCEPTANCE.md).
+and `ACTENON_V2_KEYSTONE_ACCEPTANCE.md`.
 
 ## Why This Path Works
 

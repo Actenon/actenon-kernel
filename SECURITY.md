@@ -73,6 +73,6 @@ This repository does not claim provider-backed production execution.
 
 Receipts and refusals are structured public artifacts, but they are not cryptographically authenticated public attestations in the active v1 contract set.
 
-Draft attestation groundwork for a future Receipt/Refusal v2 path is described in [RECEIPT_V2_DESIGN.md](RECEIPT_V2_DESIGN.md), but it is not an active default or a substitute for the current v1 security statement.
+Draft attestation groundwork for a future Receipt/Refusal v2 path is described in `RECEIPT_V2_DESIGN.md`, but it is not an active default or a substitute for the current v1 security statement.
 
 Findings related to hypothetical hosted control-plane features should be clearly marked as future-layer concerns, not current implemented behavior.
