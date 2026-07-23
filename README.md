@@ -331,7 +331,7 @@ The edge guarantee applies only when the protected edge is the only path to the 
 | `pilot_local_eddsa` | Pilot-ready | Real Ed25519, key on disk. Requires `ACTENON_ALLOW_PILOT_LOCAL_EDDSA_IN_PRODUCTION=1` |
 | `external_managed` | Interface ready | AWS KMS / GCP KMS / Azure Key Vault / HSM (PKCS#11). Deployment wires the provider. |
 
-See [`docs/PRODUCTION_INTEGRATION.md`](https://github.com/Actenon/actenon-cloud/blob/main/docs/PRODUCTION_INTEGRATION.md) in the Cloud repo for the exact wiring paths.
+See the signing backends table above for the exact wiring paths. The full production integration guide lives in the Cloud repo at [`docs/PRODUCTION_INTEGRATION.md`](https://github.com/Actenon/actenon-cloud/blob/main/docs/PRODUCTION_INTEGRATION.md).
 
 ## What's in this repo
 
