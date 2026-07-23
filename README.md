@@ -5,7 +5,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.9–3.12](https://img.shields.io/badge/Python-3.9%E2%80%933.12-blue.svg)](https://www.python.org/)
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
-[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0-51%20vectors-success.svg)](docs/CONFORMANCE.md)
+[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0--51%20vectors-success.svg)](docs/CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
 [![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](docs/SDK_SELECTION_GUIDE.md)
 [![CI](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml)
