@@ -1,5 +1,5 @@
 
-.PHONY: test demo fastapi-demo
+.PHONY: test demo fastapi-demo ecosystem
 
 test:
 	python -m pytest \

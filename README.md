@@ -20,13 +20,16 @@
 
 The Kernel is one of five independent repositories that together close the **execution gap** — the gap between *upstream authorization* and the *execution edge* that actually performs a consequential side effect.
 
-| Repo | Role | Depends on |
-|---|---|---|
-| **`actenon-protocol`** | The neutral wire contract — what every artefact looks like on the wire | *nothing* |
-| **`actenon-kernel`** ← you are here | The open verifier — defines what a valid proof is | `actenon-protocol` |
-| **`actenon-permit`** | The developer on-ramp + authority broker — issues grants, runs the PDP, brokers credentials | `actenon-kernel`, `actenon-protocol` |
-| **`actenon-cloud`** | The optional managed control plane — multi-tenant, hosted, evidence bundles | `actenon-kernel`, `actenon-permit` |
-| **`actenon-scan`** | The independent static-analysis scanner — finds the execution gap in any codebase | *nothing* |
+<!-- ECOSYSTEM-TABLE:START -->
+| Repository | Role | Depends on | Packages |
+|---|---|---|---|
+| **`actenon-protocol`** | The neutral wire contract — what every artefact looks like on the wire | — | `actenon-protocol` (PyPI) · `@actenon/protocol-types` (npm) |
+| **`actenon-kernel`** ← you are here | The open verifier — defines what a valid proof is | `actenon-protocol` | `actenon-kernel` (PyPI) |
+| **`actenon-permit`** | The developer on-ramp and authority broker | `actenon-kernel`, `actenon-protocol` | `actenon-permit` (PyPI) · `@actenon/sdk` (npm) |
+| **`actenon-scan`** | The independent static-analysis scanner | — | `actenon-scan` (PyPI) |
+
+**Optional:** [`actenon-cloud`](https://github.com/Actenon/actenon-cloud) — a managed control plane (source-available; see its LICENSE). Not required by any component above; every capability in this ecosystem works without it.
+<!-- ECOSYSTEM-TABLE:END -->
 
 Every repo can be adopted independently. The Kernel in particular can be wired in **at the agent framework** (LangChain tool, MCP tool, Claude Managed Agents custom tool, etc.) **or independently at the resource boundary** (FastAPI route, Express route, Go HTTP handler). Both placements are first-class.
 
