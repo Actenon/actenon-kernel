@@ -116,7 +116,7 @@ gate configured with escrow. This is the recommended setup because proof
 minting and escrow issuance cannot drift apart:
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 from actenon.escrow import InMemoryCapabilityEscrow
 
 gate = ActenonGate.local_dev(
@@ -218,7 +218,7 @@ deployment logs instead of retrying the same proof.
 
 ## Scanner Signals For Bypass Review
 
-`actenon scan repo` and `actenon scan mcp` report candidate standing-authority
+`actenon-kernel scan repo` and `actenon-kernel scan mcp` report candidate standing-authority
 signals when agent/tool paths appear to load or construct direct credentials.
 Review findings for:
 

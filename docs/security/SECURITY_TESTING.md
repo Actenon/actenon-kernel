@@ -65,7 +65,7 @@ When `pytest` and `ruff` are installed, maintainers may also run:
 
 ```bash
 python3 -m pytest tests/ -q
-python3 -m ruff check actenon tests
+python3 -m ruff check actenon-kernel tests
 ```
 
 ## Test Coverage Map

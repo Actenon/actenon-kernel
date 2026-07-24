@@ -57,7 +57,7 @@ See [`../../spec/outcome-attestation/SPEC.md`](../../spec/outcome-attestation/SP
 
 ```bash
 make install
-actenon conformance run
+actenon-kernel conformance run
 ```
 
 Start there before broader demo, packaging, or framework-integration work.

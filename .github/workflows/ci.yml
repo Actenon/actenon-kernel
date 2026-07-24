@@ -1,12 +1,14 @@
-
 name: CI
 
 on:
   push:
+    branches: [main, master]
   pull_request:
+    branches: [main, master]
 
 jobs:
   test:
+    name: Python tests (${{ matrix.python-version }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,32 +17,21 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Check generated Python badge
-        if: matrix.python-version == '3.12'
-        run: python scripts/sync_badges.py --check
-
-      - name: Check README registry installs
-        if: matrix.python-version == '3.12'
-        run: python scripts/check_readme_installs.py
-      - name: Check README ecosystem table in sync with ecosystem.yaml
-        if: matrix.python-version == '3.12'
-        run: |
-          pip install actenon-protocol --quiet
-          python -m actenon_protocol.ecosystem --check README.md --repo actenon-kernel
-
+          cache: pip
 
       - name: Install package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0"
-          python -m pip install -e ".[asymmetric]"
-          python -m pip install pytest fastapi httpx
+          # Install the protocol package first so the kernel's pyproject
+          # constraint `actenon-protocol>=1.1.0,<2` resolves cleanly.
+          python -m pip install "actenon-protocol>=1.1.0,<2"
+          python -m pip install -e ".[asymmetric,dev]"
+          python -m pip install fastapi httpx
 
       - name: Compile package and examples
         run: |
@@ -49,5 +40,186 @@ jobs:
       - name: Run demo
         run: make demo
 
-      - name: Run tests
-        run: make test
+      - name: Run full test suite
+        # The full test suite (561+ tests) runs on every supported Python
+        # version, not just one. Previously only a narrow subset ran in CI;
+        # Fable 5's Part 3A flagged this as a drift between docs and reality.
+        run: python -m pytest tests/ -q
+
+      - name: Run conformance suite
+        # The conformance suite MUST run on every push and PR, not just on
+        # conformance-v* tags. This is the public compatibility gate.
+        run: python -m pytest tests/conformance/ -q
+
+      # The following claim-verification steps run only on the latest Python
+      # to avoid redundant work; they are CI gates, not compatibility checks.
+      - name: Check generated Python badge
+        if: matrix.python-version == '3.12'
+        run: python scripts/sync_badges.py --check
+
+      - name: Check README registry installs
+        if: matrix.python-version == '3.12'
+        run: python scripts/check_readme_installs.py
+
+      - name: Check README ecosystem table in sync with ecosystem.yaml
+        if: matrix.python-version == '3.12'
+        run: |
+          python -m pip install actenon-protocol --quiet
+          python -m actenon_protocol.ecosystem --check README.md --repo actenon-kernel
+
+      - name: Verify SUPPORT_AND_COMPATIBILITY_STATUS.md reflects actual CI matrix
+        # Fable 5 Part 3A: the support doc previously claimed a Python 3.9–3.12
+        # matrix while the actual CI ran 3.10–3.12 only. This gate enforces
+        # that the doc and the workflow stay aligned.
+        if: matrix.python-version == '3.12'
+        run: |
+          python - <<'EOF'
+          import re, sys, pathlib
+          doc = pathlib.Path('docs/SUPPORT_AND_COMPATIBILITY_STATUS.md').read_text()
+          # Extract the python matrix claim from the doc
+          m = re.search(r'a Python matrix over ([\d.,\s]+)', doc)
+          if not m:
+              print('FAIL: could not find Python matrix claim in SUPPORT_AND_COMPATIBILITY_STATUS.md', file=sys.stderr)
+              sys.exit(1)
+          claimed = sorted({v.strip() for v in m.group(1).split(',') if v.strip()})
+          actual = ['3.10', '3.11', '3.12']
+          if claimed != actual:
+              print(f'FAIL: doc claims Python matrix {claimed} but CI runs {actual}', file=sys.stderr)
+              sys.exit(1)
+          print(f'OK: doc and CI agree on Python matrix {actual}')
+          EOF
+
+  typescript-verifier:
+    name: TypeScript verifier SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/typescript
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: sdk/typescript/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Test
+        run: npm test
+
+  go-verifier:
+    name: Go verifier SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/go
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+          cache-dependency-path: sdk/go/go.sum
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./... -v
+
+  rust-verifier:
+    name: Rust verifier SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/rust
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.81'
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: sdk/rust
+
+      - name: Format check
+        run: cargo fmt -- --check
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+
+      - name: Test
+        run: cargo test --verbose
+
+  verify-claims:
+    name: Verify README claims (machine-enforced)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "actenon-protocol>=1.1.0,<2"
+          python -m pip install -e ".[asymmetric,dev]"
+
+      - name: Check generated Python badge
+        run: python scripts/sync_badges.py --check
+
+      - name: Check README registry installs
+        run: python scripts/check_readme_installs.py
+
+      - name: Check README ecosystem table
+        run: python -m actenon_protocol.ecosystem --check README.md --repo actenon-kernel
+
+      - name: Verify no Cloud or Permit imports in kernel
+        # The kernel must never depend on Cloud or Permit. Cloud may depend
+        # on the kernel. This is invariant #1 from the north star.
+        run: |
+          python - <<'EOF'
+          import pathlib, sys
+          forbidden = ['actenon_cloud', 'actenon_permit']
+          violations = []
+          for p in pathlib.Path('actenon').rglob('*.py'):
+              text = p.read_text()
+              for pkg in forbidden:
+                  if f'import {pkg}' in text or f'from {pkg}' in text:
+                      violations.append(f'{p}: imports {pkg}')
+          if violations:
+              print('FAIL: kernel imports Cloud or Permit (invariant #1 violation):', file=sys.stderr)
+              for v in violations:
+                  print(f'  {v}', file=sys.stderr)
+              sys.exit(1)
+          print('OK: kernel does not import Cloud or Permit')
+          EOF
+
+      - name: Verify protocol version pin
+        run: |
+          python -c "
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              data = tomllib.load(f)
+          deps = data['project']['dependencies']
+          assert any('actenon-protocol' in d and '1.1.0' in d for d in deps), (
+              f'actenon-protocol >= 1.1.0 not pinned in dependencies: {deps}'
+          )
+          print('OK: actenon-protocol >= 1.1.0 pinned')
+          "

@@ -235,11 +235,11 @@ Every example keeps the same boundary: the protected endpoint receives an Action
 The repo ships a local simulator that lets you watch real-world incident patterns unfold, then watch the same pattern get refused at a protected endpoint. Run any of them in seconds:
 
 ```bash
-actenon simulate --incident replit           # Replit-style destructive DB drift
-actenon simulate --incident prod-delete      # Generic production destructive action
-actenon simulate --scenario mcp-tool-proof-laundering
-actenon simulate --scenario iam-escalation
-actenon simulate --scenario data-export
+actenon-kernel simulate --incident replit           # Replit-style destructive DB drift
+actenon-kernel simulate --incident prod-delete      # Generic production destructive action
+actenon-kernel simulate --scenario mcp-tool-proof-laundering
+actenon-kernel simulate --scenario iam-escalation
+actenon-kernel simulate --scenario data-export
 ```
 
 | Pattern | What it shows | Source-disciplined writeup |
@@ -255,7 +255,7 @@ These pages are **source-disciplined**: they use incident names as pattern langu
 Then open the local **Trace Viewer** to inspect the Intent Record, Action Intent, PCCB, Receipt, Refusal, replay entries, and protected-endpoint state for any simulation:
 
 ```bash
-actenon up
+actenon-kernel up
 # → http://127.0.0.1:8421
 ```
 
@@ -300,7 +300,7 @@ Full mapping in [`COMPLIANCE_MAPPING.md`](docs/COMPLIANCE_MAPPING.md).
 ## Conformance
 
 ```bash
-actenon conformance run --require-complete
+actenon-kernel conformance run --require-complete
 # → 51 tests pass. Mark: Actenon Verified (Conformance 1.0.0)
 ```
 
@@ -354,7 +354,7 @@ See the signing backends table above for the exact wiring paths. The full produc
 | `actenon/policy/` | Policy preflight |
 | `actenon/preflight/` | Action preflight checks |
 | `actenon/conformance/` | 51 conformance vectors + suite |
-| `actenon/cli.py` | Unified CLI (`actenon verify-proof`, `actenon up`, `actenon simulate`, `actenon conformance run`) |
+| `actenon/cli.py` | Unified CLI (`actenon-kernel verify-proof`, `actenon-kernel up`, `actenon-kernel simulate`, `actenon-kernel conformance run`) |
 | `actenon/local_runtime.py` | Local trust runtime (no external accounts) |
 | `sdk/typescript/` `sdk/go/` `sdk/rust/` | Verifier-only SDKs |
 | `examples/` | 20+ framework & platform adapters (see above) |

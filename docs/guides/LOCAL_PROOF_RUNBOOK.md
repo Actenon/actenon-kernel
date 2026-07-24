@@ -42,7 +42,7 @@ For embedded local deployments, the same durable escrow default is available pro
 Start the complete local single-node runtime:
 
 ```bash
-actenon up
+actenon-kernel up
 ```
 
 That command starts the local issuer/verifier HTTP surface on `http://127.0.0.1:8787` by default, exposes `POST /v1/intents`, serves `GET /healthz`, and starts the read-only trace viewer on `http://127.0.0.1:8421` when available.
@@ -54,21 +54,21 @@ The local runtime also exposes the well-known key-discovery URLs, but default lo
 If you only want the labs and runtime files without starting the HTTP services:
 
 ```bash
-actenon up --bootstrap-only
+actenon-kernel up --bootstrap-only
 ```
 
 Check the local runtime health:
 
 ```bash
-actenon doctor
+actenon-kernel doctor
 ```
 
-That command is local-runtime aware. In default mode it stays fast and checks the signer, replay store, escrow store, artifact writability, runtime-server health, key-discovery response, and trace-viewer reachability. Use `actenon doctor --deep` when you also want slower receipt/refusal writer, evidence lookup, portable verifier, and scanner-harness checks. If you only ran `actenon up --bootstrap-only`, doctor should report that the runtime is prepared but not actively serving yet.
+That command is local-runtime aware. In default mode it stays fast and checks the signer, replay store, escrow store, artifact writability, runtime-server health, key-discovery response, and trace-viewer reachability. Use `actenon-kernel doctor --deep` when you also want slower receipt/refusal writer, evidence lookup, portable verifier, and scanner-harness checks. If you only ran `actenon-kernel up --bootstrap-only`, doctor should report that the runtime is prepared but not actively serving yet.
 
 Run the built-in local incident simulator:
 
 ```bash
-actenon simulate --incident replit
+actenon-kernel simulate --incident replit
 ```
 
 That simulator is meant to be explanatory, not just demonstrative. Named incident runs are educational simulations inspired by public incidents, not exact forensic reconstructions. Each incident or scenario writes an `INCIDENT_SUMMARY.md` file under `artifacts/local_runtime/simulations/<name>/` that compares:
@@ -87,9 +87,9 @@ Named incidents also write four top-level explanation artifacts:
 
 They also write `intent_record.json`, which is the additive bounded-delegation artifact for the simulated action.
 
-Run `actenon simulate --incident all` if you want the full named set: `replit`, `openai-eggs`, and `amazon-kiro`. Run `actenon simulate --scenario all` if you want the lower-level technical cases instead.
+Run `actenon-kernel simulate --incident all` if you want the full named set: `replit`, `openai-eggs`, and `amazon-kiro`. Run `actenon-kernel simulate --scenario all` if you want the lower-level technical cases instead.
 
-If `actenon up` is already serving the local trace viewer, refresh it after a simulation run and open the `Incident Simulator` run to inspect the incident artifacts interactively.
+If `actenon-kernel up` is already serving the local trace viewer, refresh it after a simulation run and open the `Incident Simulator` run to inspect the incident artifacts interactively.
 
 Protect a real consequential endpoint:
 
@@ -100,20 +100,20 @@ python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runt
 Export the runtime as a portable bundle:
 
 ```bash
-actenon bundle export --runtime-dir artifacts/local_runtime
+actenon-kernel bundle export --runtime-dir artifacts/local_runtime
 ```
 
 Verify the exported bundle:
 
 ```bash
-actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
+actenon-kernel bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
 ```
 
 The `.actenon` bundle is the kernel's portable execution evidence class for local single-node mode. It carries manifest-linked file hashes, canonical artifact digests, and proof-chain metadata where available. In v1 it is tamper-evident relative to the manifest, not a cryptographic attestation of origin.
 
 ## Local Issuer API
 
-The foreground runtime started by `actenon up` is also a local issuer.
+The foreground runtime started by `actenon-kernel up` is also a local issuer.
 
 Current supported capabilities:
 
@@ -213,7 +213,7 @@ bash ./scripts/first_run.sh
 Export the current local runtime as a portable bundle:
 
 ```bash
-actenon bundle export
+actenon-kernel bundle export
 ```
 
 ## Refund Scenarios
@@ -329,7 +329,7 @@ Single-node runtime path equivalents:
 Reset options:
 
 - classic demo path: `bash ./scripts/reset_demo_state.sh`
-- full single-node runtime reset: remove `artifacts/local_runtime/` or rerun `actenon up --runtime-dir <fresh-dir>`
+- full single-node runtime reset: remove `artifacts/local_runtime/` or rerun `actenon-kernel up --runtime-dir <fresh-dir>`
 - live execution reset while keeping seeded labs: remove `artifacts/local_runtime/artifacts/`, `artifacts/local_runtime/state/`, and `artifacts/local_runtime/service_manifest.json`
 - simulation cleanup only: remove `artifacts/local_runtime/simulations/`
 - bundle cleanup only: remove `artifacts/local_runtime/bundles/`

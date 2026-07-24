@@ -46,11 +46,11 @@ Actenon does not claim to reconstruct any named incident. It also does not prove
 The current simulator keeps the existing compatibility command:
 
 ```bash
-actenon simulate --incident replit
+actenon-kernel simulate --incident replit
 ```
 
 For the generic production destructive-action hero path, run:
 
 ```bash
-actenon simulate --incident prod-delete
+actenon-kernel simulate --incident prod-delete
 ```

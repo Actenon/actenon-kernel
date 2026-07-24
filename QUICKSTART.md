@@ -238,7 +238,7 @@ python3 -m actenon.cli verify-receipt \
 Verify a refusal from the refund local proof run:
 
 ```bash
-actenon verify-refusal \
+actenon-kernel verify-refusal \
   --refusal artifacts/local_proof/scenarios/deny/refusal.json \
   --intent artifacts/local_proof/scenarios/deny/action_intent.json \
   --receipt artifacts/local_proof/scenarios/deny/decision_receipt.json

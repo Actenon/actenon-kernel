@@ -515,12 +515,12 @@ def bootstrap_local_runtime(runtime_dir: str | Path | None = None) -> dict[str, 
             "portable_local_proof_manifest": str(paths.portable_proof_root / "manifest.json"),
         },
         "commands": {
-            "serve": "actenon up",
-            "bootstrap_only": "actenon up --bootstrap-only",
-            "doctor": "actenon doctor",
-            "simulate": "actenon simulate --scenario all",
-            "bundle_export": "actenon bundle export",
-            "evidence_query": f"actenon evidence query --intent-id intent_allow --artifacts-dir {paths.local_proof_root}",
+            "serve": "actenon-kernel up",
+            "bootstrap_only": "actenon-kernel up --bootstrap-only",
+            "doctor": "actenon-kernel doctor",
+            "simulate": "actenon-kernel simulate --scenario all",
+            "bundle_export": "actenon-kernel bundle export",
+            "evidence_query": f"actenon-kernel evidence query --intent-id intent_allow --artifacts-dir {paths.local_proof_root}",
         },
         "manifests": {
             "local_proof": local_manifest,
@@ -552,7 +552,7 @@ def bootstrap_local_runtime(runtime_dir: str | Path | None = None) -> dict[str, 
                 f"Simulations dir: {paths.simulations_root}",
                 f"Bundle export dir: {paths.bundles_root}",
                 f"Keys dir: {paths.keys_root}",
-                "Start the local issuer/verifier HTTP surface with: actenon up",
+                "Start the local issuer/verifier HTTP surface with: actenon-kernel up",
             ]
         )
         + "\n",
@@ -691,8 +691,8 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
         RuntimeCheck(
             name="runtime_manifest",
             status="ok" if manifest is not None else "fail",
-            summary="Runtime manifest is present." if manifest is not None else "Runtime manifest is missing. Run `actenon up` first.",
-            remediation="Run `actenon up` to prepare the local runtime." if manifest is None else None,
+            summary="Runtime manifest is present." if manifest is not None else "Runtime manifest is missing. Run `actenon-kernel up` first.",
+            remediation="Run `actenon-kernel up` to prepare the local runtime." if manifest is None else None,
         )
     )
 
@@ -718,8 +718,8 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="ok" if local_lab_ok else "fail",
                 summary="Local proof lab artifacts, refusal/receipt outputs, replay DB, and durable escrow DB are present."
                 if local_lab_ok
-                else "Local proof lab is incomplete. Run `actenon up` first.",
-                remediation="Run `actenon up --bootstrap-only` or `actenon up` to rebuild the shipped proof labs." if not local_lab_ok else None,
+                else "Local proof lab is incomplete. Run `actenon-kernel up` first.",
+                remediation="Run `actenon-kernel up --bootstrap-only` or `actenon-kernel up` to rebuild the shipped proof labs." if not local_lab_ok else None,
             )
         )
 
@@ -748,7 +748,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                         status="fail",
                         summary="Durable local runtime storage could not be inspected cleanly.",
                         details={"error": str(exc)},
-                        remediation="Delete the local runtime directory and rebuild it with `actenon up` if the storage files are corrupted.",
+                        remediation="Delete the local runtime directory and rebuild it with `actenon-kernel up` if the storage files are corrupted.",
                     )
                 )
 
@@ -773,7 +773,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="fail",
                 summary="Runtime replay store is not accessible.",
                 details={"path": str(runtime_replay_db), "error": str(exc)},
-                remediation="Start the runtime with `actenon up` to initialize the durable replay store, or remove the runtime directory to rebuild it.",
+                remediation="Start the runtime with `actenon-kernel up` to initialize the durable replay store, or remove the runtime directory to rebuild it.",
             )
         )
 
@@ -798,7 +798,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="fail",
                 summary="Runtime capability escrow is not accessible.",
                 details={"path": str(runtime_escrow_db), "error": str(exc)},
-                remediation="Start the runtime with `actenon up` to initialize the durable escrow store, or remove the runtime directory to rebuild it.",
+                remediation="Start the runtime with `actenon-kernel up` to initialize the durable escrow store, or remove the runtime directory to rebuild it.",
             )
         )
 
@@ -898,8 +898,8 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
             RuntimeCheck(
                 name="portable_verifier_lab",
                 status="ok" if portable_ok else "fail",
-                summary="Portable verifier lab artifacts are present." if portable_ok else "Portable verifier lab is incomplete. Run `actenon up` first.",
-                remediation="Run `actenon up --bootstrap-only` or `actenon up` to rebuild the portable verifier lab." if not portable_ok else None,
+                summary="Portable verifier lab artifacts are present." if portable_ok else "Portable verifier lab is incomplete. Run `actenon-kernel up` first.",
+                remediation="Run `actenon-kernel up --bootstrap-only` or `actenon-kernel up` to rebuild the portable verifier lab." if not portable_ok else None,
             )
         )
 
@@ -935,7 +935,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                         status="fail",
                         summary="Portable verifier path failed against the local runtime proof pair.",
                         details={"error": str(exc)},
-                        remediation="Rebuild the runtime with `actenon up` and inspect the portable proof artifacts if this keeps failing.",
+                        remediation="Rebuild the runtime with `actenon-kernel up` and inspect the portable proof artifacts if this keeps failing.",
                     )
                 )
 
@@ -960,7 +960,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                         status="fail",
                         summary="Local evidence query failed against the runtime artifact set.",
                         details={"error": str(exc)},
-                        remediation="Check the receipt/refusal artifact roots under the local proof lab and rerun `actenon up` if they are incomplete.",
+                        remediation="Check the receipt/refusal artifact roots under the local proof lab and rerun `actenon-kernel up` if they are incomplete.",
                     )
                 )
 
@@ -971,7 +971,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="fail",
                 summary="Local proof server has not been started for this runtime directory.",
                 details={"manifest": str(runtime_service_manifest_path)},
-                remediation="Start the foreground runtime with `actenon up` so the local issuer HTTP surface is available.",
+                remediation="Start the foreground runtime with `actenon-kernel up` so the local issuer HTTP surface is available.",
             )
         )
         checks.append(
@@ -980,7 +980,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="fail",
                 summary="Key discovery is not being served because the local runtime server is not running.",
                 details={"manifest": str(runtime_service_manifest_path)},
-                remediation="Start the runtime with `actenon up`; local HS256 mode will then serve an explicit unavailable response unless you add publishable key material.",
+                remediation="Start the runtime with `actenon-kernel up`; local HS256 mode will then serve an explicit unavailable response unless you add publishable key material.",
             )
         )
         checks.append(
@@ -989,7 +989,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                 status="fail",
                 summary="Trace viewer is not running because the local runtime session is not active.",
                 details={"manifest": str(runtime_service_manifest_path)},
-                remediation="Start the runtime with `actenon up` to launch the read-only local trace viewer, unless you intentionally disable it.",
+                remediation="Start the runtime with `actenon-kernel up` to launch the read-only local trace viewer, unless you intentionally disable it.",
             )
         )
     else:
@@ -1008,7 +1008,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                         "status_code": health_status,
                         "issuer_url": service_runtime.get("issuer_url"),
                     },
-                    remediation="Start the runtime with `actenon up` and keep that process running." if not server_ok else None,
+                    remediation="Start the runtime with `actenon-kernel up` and keep that process running." if not server_ok else None,
                 )
             )
         except Exception as exc:
@@ -1018,7 +1018,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                     status="fail",
                     summary="Local proof server is not reachable.",
                     details={"health_url": health_url, "error": str(exc)},
-                    remediation="Start the runtime with `actenon up` and keep that process running.",
+                    remediation="Start the runtime with `actenon-kernel up` and keep that process running.",
                 )
             )
 
@@ -1051,7 +1051,7 @@ def doctor_local_runtime(runtime_dir: str | Path | None = None, *, deep: bool = 
                     status="fail",
                     summary="Key discovery route is not reachable.",
                     details={"url": key_url, "error": str(exc)},
-                    remediation="Start the runtime with `actenon up`; add a publishable key-discovery document only if you need public verification material.",
+                    remediation="Start the runtime with `actenon-kernel up`; add a publishable key-discovery document only if you need public verification material.",
                 )
             )
 
@@ -1156,7 +1156,7 @@ def _trace_viewer_follow_up(paths: LocalRuntimePaths, *, label: str, scenario_di
     return {
         "available": False,
         "url": None,
-        "summary": "Start `actenon up` if you want a local trace viewer after the simulation finishes.",
+        "summary": "Start `actenon-kernel up` if you want a local trace viewer after the simulation finishes.",
         "artifact_dir": str(scenario_dir),
         "run_title": "Incident Simulator",
         "scenario_label": label,
@@ -2748,7 +2748,7 @@ def export_local_runtime_bundle(
 ) -> dict[str, Any]:
     paths = resolve_local_runtime_paths(runtime_dir)
     if not paths.runtime_manifest_path.exists():
-        raise ValueError("local runtime manifest is missing; run `actenon up` before exporting a bundle")
+        raise ValueError("local runtime manifest is missing; run `actenon-kernel up` before exporting a bundle")
 
     target = (
         Path(output_path).resolve()

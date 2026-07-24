@@ -70,7 +70,7 @@ After generating the local artifacts, verify the pair from the terminal:
 The CLI requires the protected endpoint audience explicitly. It does not treat the proof's own audience field as enough local verifier context.
 
 ```bash
-actenon verify-proof \
+actenon-kernel verify-proof \
   --intent artifacts/portable_local_proof/action_intent.json \
   --pccb artifacts/portable_local_proof/pccb.json \
   --audience service:portable-hello-world-endpoint \

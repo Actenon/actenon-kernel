@@ -8,7 +8,7 @@ behind one call.
 ## Local development
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 
 gate = ActenonGate.local_dev(audience="service:protected-endpoint")
 proof = gate.mint_proof(action_intent)
@@ -27,7 +27,7 @@ A production protected endpoint needs a trusted `SignatureVerifier`; it does
 not need proof-minting authority:
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 
 gate = ActenonGate(
     verifier=well_known_or_managed_verifier,
@@ -62,7 +62,7 @@ Configure the same `CapabilityEscrow` on the gate that mints and protects the
 action:
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 from actenon.escrow import InMemoryCapabilityEscrow
 
 gate = ActenonGate.local_dev(

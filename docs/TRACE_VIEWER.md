@@ -46,8 +46,8 @@ From the repo root:
 
 ```bash
 make install
-actenon up
-actenon simulate --incident replit
+actenon-kernel up
+actenon-kernel simulate --incident replit
 ```
 
 Then open:

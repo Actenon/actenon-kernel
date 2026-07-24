@@ -65,11 +65,11 @@ The Protected Endpoint is the central behavioral compatibility surface: a conseq
 
 ```bash
 make install
-actenon conformance run
+actenon-kernel conformance run
 make public-verify
 ```
 
-Use `actenon conformance run` when you want the active compatibility suite only.
+Use `actenon-kernel conformance run` when you want the active compatibility suite only.
 
 Use `make public-verify` when you want the broader public-release gate for installability, packaging, and archive hygiene as well.
 
@@ -77,7 +77,7 @@ If you are building an external compatible implementation, the fastest operation
 
 1. target the active `/spec` surfaces in [SPEC_INDEX.md](SPEC_INDEX.md)
 2. implement Protected Endpoint and Replay behavior before provider-specific integrations
-3. run `actenon conformance run`
+3. run `actenon-kernel conformance run`
 4. use the broader repo verification path only if you are validating this repository's packaged distribution
 
 ## Reserved Surfaces Are Not Compatibility Targets
@@ -118,7 +118,7 @@ The shipped [EXECUTION_GAP_SCANNER.md](EXECUTION_GAP_SCANNER.md) is related to c
 Local scanner command:
 
 ```bash
-actenon scan --target replay-harness
+actenon-kernel scan --target replay-harness
 ```
 
 GitHub Action wrapper:
@@ -128,7 +128,7 @@ GitHub Action wrapper:
 ## Run The Suite
 
 ```bash
-actenon conformance run --require-complete
+actenon-kernel conformance run --require-complete
 ```
 
 Equivalent direct test command:

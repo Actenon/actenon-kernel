@@ -35,7 +35,7 @@ Start the complete local trust runtime:
 
 ```bash
 make install
-actenon up
+actenon-kernel up
 ```
 
 In a second terminal, start the tiny local protected refund endpoint:
@@ -182,7 +182,7 @@ If those checks do not hold, the endpoint does not mutate local state.
 Run the incident simulator:
 
 ```bash
-actenon simulate --scenario all
+actenon-kernel simulate --scenario all
 ```
 
 Then open:

@@ -205,7 +205,7 @@ class ScanCliIntegrationTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(1, code)
-            self.assertIn("actenon scan:", stderr)
+            self.assertIn("actenon-kernel scan:", stderr)
             payload = json.loads(stdout)
             self.assertEqual(1, payload["metadata"]["files_scanned"])
             self.assertTrue(payload["metadata"]["partial"])

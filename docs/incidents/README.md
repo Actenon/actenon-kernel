@@ -11,15 +11,15 @@ No receipt, no prod delete.
 Run the hero simulation:
 
 ```bash
-actenon simulate --incident prod-delete
+actenon-kernel simulate --incident prod-delete
 ```
 
 Run the additional pattern scenarios:
 
 ```bash
-actenon simulate --scenario mcp-tool-proof-laundering
-actenon simulate --scenario iam-escalation
-actenon simulate --scenario data-export
+actenon-kernel simulate --scenario mcp-tool-proof-laundering
+actenon-kernel simulate --scenario iam-escalation
+actenon-kernel simulate --scenario data-export
 ```
 
 ## Pattern Pages

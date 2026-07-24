@@ -86,7 +86,7 @@ IAM providers, export destinations, or payment providers.
 Print the native wrapper shape:
 
 ```bash
-actenon mcp wrap --tool filesystem.delete
+actenon-kernel mcp wrap --tool filesystem.delete
 ```
 
 The output keeps domain fields in the tool schema and proof in FastMCP request

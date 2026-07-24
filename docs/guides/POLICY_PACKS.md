@@ -12,7 +12,7 @@ They do not replace proof verification at the protected endpoint.
 pack explicitly:
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 from actenon.preflight import build_data_privacy_policy_pack
 
 gate = ActenonGate.local_dev(

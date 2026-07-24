@@ -38,7 +38,13 @@ mcp = ["mcp>=1.9,<2; python_version>='3.10'"]
 postgres = ["psycopg[binary]>=3.1"]
 
 [project.scripts]
-actenon = "actenon.cli:main"
+# The kernel's CLI is `actenon-kernel`. The unified developer CLI `actenon`
+# is owned by `actenon-permit` (which depends on this package). Previously
+# both repos registered `actenon` as a console script, which produced an
+# install-order-dependent binary collision (Fable 5 Part 3A).
+# Permit owns `actenon` because it is the documented hero CLI; the kernel
+# is the lower-level verifier and its CLI is `actenon-kernel`.
+actenon-kernel = "actenon.cli:main"
 actenon-local-proof = "actenon.demo.local_proof:main"
 actenon-portable-local-proof = "actenon.demo.portable_local_proof:main"
 

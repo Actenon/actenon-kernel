@@ -22,7 +22,7 @@ The central behavioral compatibility surface is the Protected Endpoint. External
 
 ```bash
 make install
-actenon conformance run --require-complete
+actenon-kernel conformance run --require-complete
 ```
 
 Broader public-release validation:
@@ -37,7 +37,7 @@ Before a launch build, run the explicit release gate:
 bash scripts/verify_release_gate.sh
 ```
 
-If you are evaluating compatibility rather than the full demo path, stop here first. `actenon conformance run` is the shortest meaningful operational signal for the active public kernel surface.
+If you are evaluating compatibility rather than the full demo path, stop here first. `actenon-kernel conformance run` is the shortest meaningful operational signal for the active public kernel surface.
 
 ## Test Location
 
@@ -93,7 +93,7 @@ python3 -m unittest discover -s tests/conformance -p 'test_*.py'
 CLI shortcut:
 
 ```bash
-actenon conformance run
+actenon-kernel conformance run
 ```
 
 Public-release gate:

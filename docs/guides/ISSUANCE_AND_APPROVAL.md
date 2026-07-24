@@ -57,7 +57,7 @@ development. It does not turn the calling agent into an approver and does not
 replace the policy or human-approval step.
 
 ```python
-from actenon import ActenonGate
+from actenon-kernel import ActenonGate
 
 issuer_gate = ActenonGate(
     signer=kms_or_hsm_signer,
