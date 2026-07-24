@@ -155,6 +155,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: '1.81'
+          components: rustfmt, clippy
 
       - uses: Swatinem/rust-cache@v2
         with:
