@@ -14,6 +14,7 @@ Security review is still important because the code covers:
 - protected-endpoint behavior
 - receipt and refusal generation
 - local proof examples
+- key custody (AWS KMS backend, key-lifecycle state machine)
 
 Related documents:
 
@@ -22,6 +23,40 @@ Related documents:
 - [docs/SECURITY_ASSURANCE.md](docs/SECURITY_ASSURANCE.md)
 - [spec/protected-endpoint/SPEC.md](spec/protected-endpoint/SPEC.md)
 - [spec/replay/SPEC.md](spec/replay/SPEC.md)
+- [docs/reference/ecosystem/SIGNER_KMS_SPEC.md](docs/reference/ecosystem/SIGNER_KMS_SPEC.md)
+- [docs/reference/ecosystem/KMS_ROTATION_RUNBOOK.md](docs/reference/ecosystem/KMS_ROTATION_RUNBOOK.md)
+
+## Supply Chain Posture
+
+The kernel is the trust anchor that the entire ecosystem depends on. Its
+supply chain must be the strictest in the ecosystem, not the loosest
+(Fable 5 Part 3G).
+
+The kernel's supply chain is enforced by
+[`.github/workflows/supply-chain.yml`](.github/workflows/supply-chain.yml),
+which runs on every push, PR, and release tag:
+
+- **SBOM (CycloneDX)** — generated for every build; uploaded as an
+  artefact; attested with build provenance on release tags.
+- **pip-audit** — runs against the OSV vulnerability database on every
+  build. Fails the build on any known vulnerability. SARIF output is
+  uploaded to the GitHub Security tab.
+- **Sigstore signing** — on release tags, the wheel and sdist are
+  signed with keyless Sigstore (OIDC-bound). Signatures and certificates
+  are uploaded as artefacts. Anyone can verify a published wheel was
+  built by this workflow.
+- **Build provenance attestation** — on release tags, the SBOM and
+  wheel both get SLSA build provenance attestations.
+
+What this does NOT yet do:
+
+- Reproducible builds (the wheel is not byte-reproducible across
+  builds; this requires additional hermeticity work and is on the
+  roadmap).
+- SLSA Level 3 (currently Level 2: build provenance exists; Level 3
+  requires a hardened build platform).
+- Pinned hashes in `pyproject.toml` (transitive deps are pinned by
+  version range; hash-pinning is on the roadmap).
 
 ## What Usually Counts As A Kernel Security Issue
 

@@ -1,0 +1,176 @@
+name: Supply chain
+
+# Fable 5 Part 3G: 'the kernel — the trust anchor everyone is asked to
+# depend on — has neither SBOM nor pip-audit. It should have the strictest
+# supply chain in the ecosystem, not the loosest. Sigstore-signed releases,
+# SLSA provenance, and reproducible builds are table stakes for something
+# positioning as neutral infrastructure.'
+#
+# This workflow runs on every push and PR, and on every release tag. It:
+#   1. Generates an SBOM (CycloneDX) for the kernel package.
+#   2. Runs pip-audit against the kernel's dependencies.
+#   3. On release tags, attests the SBOM and wheel build provenance.
+#
+# Cloud already has SBOM + pip-audit; this brings the kernel to parity
+# and makes the kernel's supply chain the strictest in the ecosystem.
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  sbom:
+    name: Generate SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install cyclonedx-bom
+        run: |
+          python -m pip install --upgrade pip
+          pip install cyclonedx-bom
+
+      - name: Install kernel package (with all extras)
+        run: |
+          pip install "actenon-protocol>=1.1.0,<2"
+          pip install -e ".[asymmetric,aws,dev]"
+
+      - name: Generate SBOM
+        # CycloneDX generates an SBOM from the installed environment.
+        # The output is a JSON file listing every transitive dependency
+        # with its version, hash, and license.
+        run: |
+          cyclonedx-py environment \
+            --output-format json \
+            --output-file sbom.kernel.cdx.json \
+            --no-validate
+          # Pretty-print for human review.
+          python -c "import json; d=json.load(open('sbom.kernel.cdx.json')); print(f'SBOM: {len(d.get(\"components\", []))} components')"
+
+      - name: Upload SBOM artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-kernel
+          path: sbom.kernel.cdx.json
+          retention-days: 90
+
+      - name: Attest SBOM provenance (on tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: sbom.kernel.cdx.json
+
+  pip-audit:
+    name: Audit dependencies (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Install kernel package
+        run: |
+          pip install "actenon-protocol>=1.1.0,<2"
+          pip install -e ".[asymmetric,aws,dev]"
+
+      - name: Audit dependencies for known vulnerabilities
+        # pip-audit checks installed packages against the PyPI advisory
+        # database. Fails the build on any known vulnerability.
+        # --strict stops on any unfixable vulnerability.
+        # --vulnerability-service osv uses the OSV.dev service.
+        run: |
+          pip-audit \
+            --strict \
+            --vulnerability-service osv \
+            --format columns \
+            || (
+              echo "::error::pip-audit found known vulnerabilities in the kernel's dependencies."
+              echo "::error::See the table above. Patch or pin the affected packages."
+              exit 1
+            )
+
+      - name: Audit (sarif output for Security tab)
+        if: always()
+        run: |
+          pip-audit --vulnerability-service osv --format sarif -o pip-audit.sarif || true
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: pip-audit.sarif
+          category: pip-audit
+        continue-on-error: true
+
+  sigstore-release:
+    # Sigstore-sign the wheel on release tags. This is what lets a
+    # third-party verifier confirm that a published kernel wheel was
+    # built by this workflow, not by someone with PyPI credentials.
+    name: Sigstore-sign release wheel
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install build + sigstore
+        run: |
+          python -m pip install --upgrade pip
+          pip install build sigstore
+
+      - name: Build wheel + sdist
+        run: python -m build --sdist --wheel --outdir dist/
+
+      - name: Sigstore-sign the wheel and sdist
+        # Sigstore uses OIDC-based keyless signing. The signature is
+        # bound to the workflow's identity, so anyone can verify the
+        # artefact was built by this workflow.
+        run: |
+          for artefact in dist/*; do
+            echo "Signing $artefact..."
+            sigstore sign "$artefact" \
+              --bundle "${artefact}.sigstore.json" \
+              --output-certificate "${artefact}.crt.pem"
+          done
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
+
+      - name: Upload signed artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-release
+          path: |
+            dist/*
+            dist/*.sigstore.json
+            dist/*.crt.pem
+          retention-days: 365
