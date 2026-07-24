@@ -612,13 +612,7 @@ fn normalize_signature_spec(
 fn normalize_escrow_reference(
     reference: Option<crate::types::EscrowReference>,
 ) -> Option<crate::types::EscrowReference> {
-    reference.and_then(|value| {
-        if value.escrow_id.trim().is_empty() {
-            None
-        } else {
-            Some(value)
-        }
-    })
+    reference.filter(|value| !value.escrow_id.trim().is_empty())
 }
 
 fn build_action_hash_input(intent: &ActionIntent) -> Value {
