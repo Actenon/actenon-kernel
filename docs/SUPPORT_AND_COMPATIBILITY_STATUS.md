@@ -92,7 +92,7 @@ This supports the honest public Go claim for launch:
 
 The Rust verifier SDK declares:
 
-- Rust `1.85`
+- Rust stable (1.88+)
 
 For launch, the repository CI covers:
 
