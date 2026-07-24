@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: actenon
+      POSTGRES_USER: actenon
+      POSTGRES_PASSWORD: actenon-dev-password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U actenon"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  verifier:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ACTENON_REPLAY_DB_URL: "postgresql://actenon:actenon-dev-password@db:5432/actenon"
+      ACTENON_ENV: "production-reference"
+    ports:
+      - "8000:8000"
+    command: python verifier_service.py

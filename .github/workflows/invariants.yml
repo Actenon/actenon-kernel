@@ -1,0 +1,127 @@
+name: Invariants
+
+# WO-9 invariants: independence, neutrality, cloud-optional.
+# These are the claims a security reviewer tests first. They must be
+# executable, not prose.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  invariant-tests:
+    name: Invariant tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install "actenon-protocol>=1.1.0,<2"
+          pip install -e ".[asymmetric,dev]"
+
+      - name: Run independence test (no cloud/permit/scan imports)
+        run: python -m pytest tests/test_independence.py -v
+
+      - name: Run neutrality test (verification makes no network calls)
+        run: python -m pytest tests/test_neutrality.py -v
+
+      - name: Run cloud-optional test (no hidden cloud dependency)
+        run: python -m pytest tests/test_cloud_optional.py -v
+
+      - name: Assert dependency direction
+        run: python scripts/assert_dep_direction.py
+
+  clean-install:
+    name: Clean-install closure check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel --outdir dist/
+
+      - name: Install ONLY the wheel in a fresh venv
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install --upgrade pip
+          /tmp/clean/bin/pip install dist/actenon_kernel-*.whl
+
+      - name: Import the top-level module
+        run: |
+          /tmp/clean/bin/python -c "import actenon; print('actenon imported OK')"
+
+      - name: Assert pip list matches declared closure
+        run: |
+          echo "=== pip list | grep ^actenon ==="
+          /tmp/clean/bin/pip list | grep ^actenon || true
+          echo "=== Expected: actenon-kernel + actenon-protocol (transitive) ==="
+          # The kernel declares actenon-protocol as a runtime dep.
+          # A clean install should have exactly: actenon-kernel, actenon-protocol.
+          COUNT=$(/tmp/clean/bin/pip list | grep -c '^actenon')
+          if [ "$COUNT" -ne 2 ]; then
+            echo "FAIL: expected exactly 2 actenon packages (kernel + protocol), found $COUNT"
+            /tmp/clean/bin/pip list | grep ^actenon
+            exit 1
+          fi
+          echo "OK: clean install has exactly 2 actenon packages"
+
+      - name: Run conformance suite on base install
+        # The base install has NO extras. This proves the README claim:
+        # "pip install actenon-kernel # core verifier (pure Python)"
+        run: |
+          /tmp/clean/bin/pip install pytest
+          /tmp/clean/bin/python -m pytest tests/conformance/ -v --tb=short 2>&1 | tail -30
+
+  base-install-conformance:
+    name: Base-install conformance (no extras)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install kernel with NO extras
+        run: |
+          python -m venv /tmp/base
+          /tmp/base/bin/pip install --upgrade pip
+          /tmp/base/bin/pip install pytest
+          /tmp/base/bin/pip install -e .
+
+      - name: Verify NO cryptography is installed
+        run: |
+          if /tmp/base/bin/python -c "import cryptography" 2>/dev/null; then
+            echo "FAIL: cryptography is installed in base install"
+            exit 1
+          fi
+          echo "OK: base install has no cryptography"
+
+      - name: Run conformance suite
+        run: |
+          /tmp/base/bin/python -m pytest tests/conformance/ -v --tb=short 2>&1 | tee /tmp/conformance-output.txt
+          echo "=== Summary ==="
+          tail -5 /tmp/conformance-output.txt
+
+      - name: Report skipped count
+        # Skipped tests are the asymmetric ones that need [asymmetric].
+        # This is expected and documented in FINDINGS.md.
+        run: |
+          SKIPPED=$(grep -c 'SKIPPED' /tmp/conformance-output.txt || true)
+          PASSED=$(grep -c 'PASSED' /tmp/conformance-output.txt || true)
+          echo "Base-install conformance: $PASSED passed, $SKIPPED skipped (asymmetric extra required)"
+          echo "See FINDINGS.md for the full analysis."

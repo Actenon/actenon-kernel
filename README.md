@@ -9,10 +9,14 @@
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
 [![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0--51%20vectors-success.svg)](docs/CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
+[![Versioning: SemVer 1.x](https://img.shields.io/badge/Versioning-SemVer%201.x-blue.svg)](VERSIONING.md)
 [![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](docs/SDK_SELECTION_GUIDE.md)
 [![CI](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions/workflows/ci.yml)
+[![Invariants](https://github.com/Actenon/actenon-kernel/actions/workflows/invariants.yml/badge.svg)](https://github.com/Actenon/actenon-kernel/actions/workflows/invariants.yml)
 [![Code style: ruff](https://img.shields.io/badge/Code%20style-ruff-black.svg)](https://docs.astral.sh/ruff/)
 [![No runtime cloud dependency](https://img.shields.io/badge/Runtime-no%20cloud%20calls-2ea44f.svg)](#independence)
+[![Offline verification](https://img.shields.io/badge/Verify-offline%20capable-2ea44f.svg)](tests/test_neutrality.py)
+[![Kernel independence](https://img.shields.io/badge/Deps-kernel%20independent-2ea44f.svg)](tests/test_independence.py)
 
 ---
 
@@ -133,6 +137,11 @@ Both are **structured, hash-chained, and stable at the contract level**. They an
 
 For deployments that need portable cryptographic attestation of origin, the Kernel can wrap any v1 Receipt or Refusal in an **Outcome Attestation** envelope (`v2alpha1`, opt-in). The attestation is signed with an Ed25519 key whose lifecycle (active / retired / suspended / soft-revoked / hard-revoked) is itself part of the public contract. A hard-revoked key's historical artefacts remain verifiable only if an independently verified external anchor proves the artefact digest existed before the compromise — see [`REVOCATION_AND_RECEIPT_DURABILITY.md`](docs/REVOCATION_AND_RECEIPT_DURABILITY.md).
 
+> **Outcome Attestation is v2alpha1 and is excluded from the 1.0
+> compatibility promise.** It is opt-in, alpha, and may change or be
+> removed in any release until it reaches v2. See
+> [VERSIONING.md](VERSIONING.md) §1.2.
+
 ## Install
 
 Python 3.10+ for the Kernel alone. The full stack including Permit requires 3.11+.
@@ -147,12 +156,22 @@ pip install "actenon-kernel[asymmetric]"   # Ed25519 + Outcome Attestation verif
 ```python
 from actenon.proof import PCCBVerifier, build_local_proof_signer
 
-signer = build_local_proof_signer()    # pilot: local Ed25519 (set ACTENON_ALLOW_PILOT_LOCAL_EDDSA_IN_PRODUCTION=1 to use in prod)
+# For production, use a file-based or KMS-backed signer (see
+# docs/PRODUCTION_INTEGRATION.md §1). The local HMAC signer below is
+# development-only — it uses a public test secret.
+signer = build_local_proof_signer()    # development only
 verifier = PCCBVerifier(signer=signer)
 
 # Raises ProofVerificationError on any failure; returns silently on success.
 verifier.verify(intent, pccb, context)
 ```
+
+> **Production key custody:** the local HMAC signer above is for
+> development only. For production, use a file-based Ed25519 key or a
+> KMS-backed signer. See
+> [`docs/PRODUCTION_INTEGRATION.md`](docs/PRODUCTION_INTEGRATION.md) §1
+> for the three custody tiers and the `ACTENON_ALLOW_PILOT_LOCAL_EDDSA_IN_PRODUCTION`
+> flag documentation.
 
 ## Use as a boundary verifier (Boundary Kit, resource-owned mode)
 
@@ -338,7 +357,7 @@ The edge guarantee applies only when the protected edge is the only path to the 
 | `pilot_local_eddsa` | Pilot-ready | Real Ed25519, key on disk. Requires `ACTENON_ALLOW_PILOT_LOCAL_EDDSA_IN_PRODUCTION=1` |
 | `external_managed` | Interface ready | AWS KMS / GCP KMS / Azure Key Vault / HSM (PKCS#11). Deployment wires the provider. |
 
-See the signing backends table above for the exact wiring paths. The full production integration guide lives in the Cloud repo at [`docs/PRODUCTION_INTEGRATION.md`](https://github.com/Actenon/actenon-cloud/blob/main/docs/PRODUCTION_INTEGRATION.md).
+See the signing backends table above for the exact wiring paths. The full production integration guide is in this repo at [`docs/PRODUCTION_INTEGRATION.md`](docs/PRODUCTION_INTEGRATION.md) (Apache-2.0, self-contained, does not require actenon-cloud).
 
 ## What's in this repo
 
