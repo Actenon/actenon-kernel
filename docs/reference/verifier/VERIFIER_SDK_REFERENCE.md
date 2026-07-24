@@ -24,7 +24,7 @@ If you only need the smallest protected-endpoint walkthrough, start with [HELLO_
 If you want to verify a specific Action Intent and PCCB pair from the terminal without writing code, use:
 
 ```bash
-actenon verify-proof --intent /path/to/action_intent.json --pccb /path/to/pccb.json --audience service:protected-endpoint
+actenon-kernel verify-proof --intent /path/to/action_intent.json --pccb /path/to/pccb.json --audience service:protected-endpoint
 ```
 
 ## Public API
@@ -90,7 +90,7 @@ The verifier does not run by itself. A Protected Endpoint still has to supply:
 - the current verification time
 - any parameter or resource constraints the endpoint treats as security-relevant
 
-The `actenon verify-proof` CLI is a thin wrapper over this same verifier path. It asks you for the artifact paths plus the explicit local audience identity needed to evaluate the proof in verifier context. It does not silently inherit that verifier identity from the PCCB.
+The `actenon-kernel verify-proof` CLI is a thin wrapper over this same verifier path. It asks you for the artifact paths plus the explicit local audience identity needed to evaluate the proof in verifier context. It does not silently inherit that verifier identity from the PCCB.
 
 ## Production Verification Model
 
@@ -223,7 +223,7 @@ and
 Human-readable success output:
 
 ```bash
-actenon verify-proof \
+actenon-kernel verify-proof \
   --intent artifacts/portable_local_proof/action_intent.json \
   --pccb artifacts/portable_local_proof/pccb.json \
   --audience service:portable-hello-world-endpoint \
@@ -233,7 +233,7 @@ actenon verify-proof \
 Structured JSON failure output:
 
 ```bash
-actenon verify-proof \
+actenon-kernel verify-proof \
   --intent artifacts/portable_local_proof/action_intent.json \
   --pccb artifacts/portable_local_proof/pccb.json \
   --audience service:wrong-endpoint \

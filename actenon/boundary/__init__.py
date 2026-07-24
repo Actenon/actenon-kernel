@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -62,7 +62,7 @@ class BoundaryVerificationResult:
             reason="verified",
             proof_id=proof_id,
             receipt_id=receipt_id,
-            verified_at=datetime.now(UTC).isoformat(),
+            verified_at=datetime.now(timezone.utc).isoformat(),
         )
 
     @classmethod
@@ -73,7 +73,7 @@ class BoundaryVerificationResult:
             valid=False,
             reason=reason,
             refusal_code=refusal_code,
-            verified_at=datetime.now(UTC).isoformat(),
+            verified_at=datetime.now(timezone.utc).isoformat(),
         )
 
 
@@ -205,7 +205,7 @@ class BoundaryVerifier:
             "action_hash": request.action_hash[:16] + "...",
             "proof_id": result.proof_id,
             "outcome": outcome,
-            "executed_at": datetime.now(UTC).isoformat(),
+            "executed_at": datetime.now(timezone.utc).isoformat(),
             "execution_mode": "resource_owned",
             "verified_at": result.verified_at,
         }

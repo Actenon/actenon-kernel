@@ -1482,8 +1482,8 @@ def _cmd_keys_generate(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="actenon",
-        description="Local CLI for bootstrapping the single-node trust runtime, verifying proof, generating local key material, creating execution anchors, publishing key-discovery documents, querying execution evidence, scanning execution gaps, running coverage matrices, validating artifacts, and running conformance.",
+        prog="actenon-kernel",
+        description="Kernel CLI for bootstrapping the single-node trust runtime, verifying proof, generating local key material, creating execution anchors, publishing key-discovery documents, querying execution evidence, scanning execution gaps, running coverage matrices, validating artifacts, and running conformance. The unified developer CLI `actenon` is provided by the actenon-permit package.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

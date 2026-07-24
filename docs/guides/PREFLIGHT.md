@@ -22,19 +22,19 @@ gateway in front of consequential actions.
 Run a preflight check against an Action Intent:
 
 ```bash
-actenon preflight check --intent intent.json
+actenon-kernel preflight check --intent intent.json
 ```
 
 Emit JSON:
 
 ```bash
-actenon preflight check --intent intent.json --json
+actenon-kernel preflight check --intent intent.json --json
 ```
 
 Pass local evidence context:
 
 ```bash
-actenon preflight check \
+actenon-kernel preflight check \
   --intent intent.json \
   --evidence-json '{"change_ticket":"CHG-123","backup_verified":true}' \
   --json
@@ -48,13 +48,13 @@ default policy contract.
 Explain a saved decision:
 
 ```bash
-actenon preflight explain --decision decision.json
+actenon-kernel preflight explain --decision decision.json
 ```
 
 Run the built-in destructive infrastructure simulation:
 
 ```bash
-actenon preflight simulate --wedge infra_delete --json
+actenon-kernel preflight simulate --wedge infra_delete --json
 ```
 
 ## Local Endpoint

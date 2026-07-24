@@ -29,18 +29,23 @@ Reserved public surfaces such as Reconciliation and Policy Bundle are not active
 
 The Python package metadata declares:
 
-- `requires-python >=3.9`
+- `requires-python >=3.10`
 
-The public Python support claim for launch is:
+The public Python support claim is:
 
-- Python 3.9 through 3.12 are active support targets for the OSS kernel path
+- Python 3.10, 3.11, and 3.12 are active support targets for the OSS kernel path
 
-GitHub Actions now reflects that claim with:
+GitHub Actions reflects that claim with:
 
-- a Python matrix over 3.9, 3.10, 3.11, and 3.12
+- a Python matrix over 3.10, 3.11, and 3.12
 - package build on each matrix entry
-- `python -m unittest discover -s tests -p 'test_*.py'` on each matrix entry
-- a separate public release gate on Python 3.11 via `scripts/public_repo_verify.sh`
+- `python -m pytest tests/ -q` on each matrix entry
+- the conformance suite (`tests/conformance/`) runs on every push and PR, not just on `conformance-v*` tags
+- a separate public release gate via the `conformance-release.yml` workflow on `conformance-v*` tags
+
+### Why not Python 3.9?
+
+Python 3.9 reached end-of-life in October 2025. The kernel uses `match` statements, PEP 604 union syntax, and other 3.10+ features. If you need 3.9 support, file an issue — but the default posture is to track supported Python versions.
 
 ## TypeScript Verifier Support
 
@@ -87,7 +92,7 @@ This supports the honest public Go claim for launch:
 
 The Rust verifier SDK declares:
 
-- Rust `1.81`
+- Rust stable (1.88+)
 
 For launch, the repository CI covers:
 
@@ -111,7 +116,7 @@ Conformance is the public compatibility check for the active OSS surface.
 
 Contributors and adopters should rely on:
 
-- `actenon conformance run`
+- `actenon-kernel conformance run`
 - the tests under `tests/conformance/`
 
 ## Replay Store Support

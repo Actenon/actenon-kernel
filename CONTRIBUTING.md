@@ -114,7 +114,7 @@ make portable-verify
 If you touch active public surface behavior, also run:
 
 ```bash
-actenon conformance run
+actenon-kernel conformance run
 ```
 
 ## Documentation To Update When Needed

@@ -25,7 +25,7 @@ Choose the Python path if you want:
 - the canonical open-kernel reference implementation
 - local proof mode and artifact generation
 - the CLI for proof, receipt, refusal, and conformance checks
-- a standalone `actenon verify-proof` command for verifying an Action Intent and PCCB pair from the terminal with explicit local audience context
+- a standalone `actenon-kernel verify-proof` command for verifying an Action Intent and PCCB pair from the terminal with explicit local audience context
 - protected-endpoint examples in the same language as the kernel
 - the fastest way to inspect the full Action Intent -> PCCB -> Protected Endpoint -> Receipt or Refusal flow
 

@@ -439,6 +439,19 @@ export class VerifierSDK {
     if (now.getTime() - this.clockSkewToleranceMs > expiresAt.getTime()) {
       throw new VerificationError("PROOF_EXPIRED", "The proof has expired.");
     }
+
+    // ── Signature verification (before semantic checks) ──────────────
+    // Security principle: verify cryptographic integrity BEFORE interpreting
+    // semantic fields. Any mutation to the signed PCCB payload (scope,
+    // action_hash, etc.) must produce SIGNATURE_INVALID, not a semantic
+    // mismatch error. This matches the Python reference verifier (steps 4-5
+    // in PCCBVerifier.verify) and the conformance vector expectations.
+    const unsignedPayload = canonicalizeBytes(buildUnsignedPccbPayload(pccb) as Record<string, JsonValue>);
+    if (!this.signatureVerifier.verify(unsignedPayload, pccb.signature)) {
+      throw new VerificationError("SIGNATURE_INVALID", "The proof signature could not be verified.");
+    }
+
+    // ── Semantic checks (after signature is verified) ────────────────
     if (!isDeepStrictEqual(pccb.audience, context.audience)) {
       throw new VerificationError("AUDIENCE_MISMATCH", "The proof audience does not match this endpoint.");
     }
@@ -472,10 +485,6 @@ export class VerifierSDK {
     const expectedHash = sha256Hex(buildActionHashInput(intent) as Record<string, JsonValue>);
     if (pccb.action_hash.value !== expectedHash) {
       throw new VerificationError("ACTION_HASH_MISMATCH", "The proof action hash does not match the action intent.");
-    }
-    const unsignedPayload = canonicalizeBytes(buildUnsignedPccbPayload(pccb) as Record<string, JsonValue>);
-    if (!this.signatureVerifier.verify(unsignedPayload, pccb.signature)) {
-      throw new VerificationError("SIGNATURE_INVALID", "The proof signature could not be verified.");
     }
     return { intent, pccb, context };
   }

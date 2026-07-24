@@ -44,6 +44,6 @@ Actenon does not prove the requested role is appropriate, that downstream IAM pr
 ## Simulate
 
 ```bash
-actenon simulate --scenario iam-escalation
+actenon-kernel simulate --scenario iam-escalation
 ```
 

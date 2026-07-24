@@ -2205,14 +2205,14 @@ def _collect_scan_files(root: Path, options: ScannerOptions | None = None) -> _S
             continue
         files.append(path)
         if len(files) % 500 == 0:
-            _emit_progress(options, f"actenon scan: files discovered={discovered} files queued={len(files)} skipped={skipped_files}")
+            _emit_progress(options, f"actenon-kernel scan: files discovered={discovered} files queued={len(files)} skipped={skipped_files}")
         if options.max_files is not None and len(files) >= options.max_files:
             partial = True
             timeout_reason = f"stopped after max_files={options.max_files}"
             break
     _emit_progress(
         options,
-        f"actenon scan: discovery complete files discovered={discovered} files scanned={len(files)} skipped_files={skipped_files} skipped_dirs={skipped_dirs}",
+        f"actenon-kernel scan: discovery complete files discovered={discovered} files scanned={len(files)} skipped_files={skipped_files} skipped_dirs={skipped_dirs}",
     )
     return _ScanInventory(
         files=tuple(files),
@@ -2907,7 +2907,7 @@ def _detect_repository_candidates(
             continue
         scanned_files += 1
         if scanned_files % 250 == 0:
-            _emit_progress(options, f"actenon scan: current phase=scanning files_scanned={scanned_files} findings_so_far={len(findings)}")
+            _emit_progress(options, f"actenon-kernel scan: current phase=scanning files_scanned={scanned_files} findings_so_far={len(findings)}")
         lines = content.splitlines()
         path_context = _path_context(path, scan_root, content)
         path_context_counts[path_context] = path_context_counts.get(path_context, 0) + 1

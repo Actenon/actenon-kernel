@@ -74,6 +74,6 @@ Actenon does not claim the business decision is correct, that downstream provide
 ## Simulate
 
 ```bash
-actenon simulate --incident prod-delete
+actenon-kernel simulate --incident prod-delete
 ```
 

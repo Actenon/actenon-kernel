@@ -44,6 +44,6 @@ Actenon does not claim the upstream planner made the right decision or that all 
 ## Simulate
 
 ```bash
-actenon simulate --scenario mcp-tool-proof-laundering
+actenon-kernel simulate --scenario mcp-tool-proof-laundering
 ```
 

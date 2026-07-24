@@ -11,15 +11,13 @@ from tempfile import TemporaryDirectory
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # The actenon-protocol dependency requires Python >= 3.10. The kernel's
-# CI matrix includes Python 3.9 (the kernel's own requires-python is
-# >=3.9). Skip this integration test on Python 3.9 because it installs
-# the protocol package from GitHub, which would fail on 3.9.
+# requires-python is >=3.10; this test runs on all supported versions.
 _SKIP_PROTOCOL_INSTALL = sys.version_info < (3, 10)
 
 
 @unittest.skipIf(_SKIP_PROTOCOL_INSTALL, "actenon-protocol requires Python >= 3.10")
 class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
-    def test_installed_actenon_console_script_and_packaged_viewer_work(self) -> None:
+    def test_installed_actenon_kernel_console_script_and_packaged_viewer_work(self) -> None:
         with TemporaryDirectory() as tempdir:
             temp_root = Path(tempdir)
             venv_dir = temp_root / "venv"
@@ -27,7 +25,11 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
 
             bin_dir = venv_dir / ("Scripts" if os.name == "nt" else "bin")
             python = bin_dir / ("python.exe" if os.name == "nt" else "python")
-            actenon = bin_dir / ("actenon.exe" if os.name == "nt" else "actenon")
+            # The kernel's CLI is `actenon-kernel`. The `actenon` console script
+            # is owned by actenon-permit (which depends on this package) to
+            # avoid the install-order-dependent binary collision flagged in
+            # Fable 5 Part 3A.
+            actenon_kernel = bin_dir / ("actenon-kernel.exe" if os.name == "nt" else "actenon-kernel")
 
             # Install the pinned actenon-protocol dependency first. The
             # kernel's pyproject.toml pins it to ==1.0.0; pip install
@@ -54,17 +56,17 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             )
 
             help_result = subprocess.run(
-                [str(actenon), "--help"],
+                [str(actenon_kernel), "--help"],
                 check=True,
                 cwd=temp_root,
                 text=True,
                 capture_output=True,
                 timeout=30,
             )
-            self.assertIn("Local CLI", help_result.stdout)
+            self.assertIn("Kernel CLI", help_result.stdout)
 
             conformance_result = subprocess.run(
-                [str(actenon), "conformance", "run", "--require-complete"],
+                [str(actenon_kernel), "conformance", "run", "--require-complete"],
                 check=True,
                 cwd=temp_root,
                 text=True,

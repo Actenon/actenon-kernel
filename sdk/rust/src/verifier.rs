@@ -7,24 +7,15 @@ use crate::canonical::{canonicalize_bytes, sha256_hex};
 use crate::errors::{VerificationError, VerificationErrorCode};
 use crate::signers::SignatureVerifier;
 use crate::types::{
-    ActionIntent,
-    ActionSpec,
-    AudienceRef,
-    PCCB,
-    PartyRef,
-    ScopeSpec,
-    SignatureSpec,
-    TargetRef,
-    TenantRef,
-    VerificationContext,
-    VerificationContextInput,
-    VerifiedProtectedRequest,
+    ActionIntent, ActionSpec, AudienceRef, PartyRef, ScopeSpec, SignatureSpec, TargetRef,
+    TenantRef, VerificationContext, VerificationContextInput, VerifiedProtectedRequest, PCCB,
 };
 
 pub const DEFAULT_CLOCK_SKEW_TOLERANCE: Duration = Duration::ZERO;
 
 pub fn parse_action_intent_json(raw: &[u8]) -> Result<ActionIntent, VerificationError> {
-    let intent: ActionIntent = decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
+    let intent: ActionIntent =
+        decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
     normalize_action_intent(intent)
 }
 
@@ -115,6 +106,31 @@ impl<V: SignatureVerifier> Verifier<V> {
                 "The proof has expired.",
             ));
         }
+
+        // ── Signature verification (before semantic checks) ──────────────
+        // Security principle: verify cryptographic integrity BEFORE interpreting
+        // semantic fields. Any mutation to the signed PCCB payload (scope,
+        // action_hash, etc.) must produce SIGNATURE_INVALID, not a semantic
+        // mismatch error. This matches the Python reference verifier (steps 4-5
+        // in PCCBVerifier.verify) and the conformance vector expectations.
+        let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
+            .map_err(|_error| {
+            VerificationError::new(
+                VerificationErrorCode::InvalidPccb,
+                "The proof cannot be canonicalized for signature verification.",
+            )
+        })?;
+        if !self
+            .signature_verifier
+            .verify(&unsigned_payload, &normalized_pccb.signature)
+        {
+            return Err(VerificationError::new(
+                VerificationErrorCode::SignatureInvalid,
+                "The proof signature could not be verified.",
+            ));
+        }
+
+        // ── Semantic checks (after signature is verified) ────────────────
         if normalized_pccb.audience != normalized_context.audience {
             return Err(VerificationError::new(
                 VerificationErrorCode::AudienceMismatch,
@@ -190,23 +206,6 @@ impl<V: SignatureVerifier> Verifier<V> {
             return Err(VerificationError::new(
                 VerificationErrorCode::ActionHashMismatch,
                 "The proof action hash does not match the action intent.",
-            ));
-        }
-
-        let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
-            .map_err(|_error| {
-                VerificationError::new(
-                    VerificationErrorCode::InvalidPccb,
-                    "The proof cannot be canonicalized for signature verification.",
-                )
-            })?;
-        if !self
-            .signature_verifier
-            .verify(&unsigned_payload, &normalized_pccb.signature)
-        {
-            return Err(VerificationError::new(
-                VerificationErrorCode::SignatureInvalid,
-                "The proof signature could not be verified.",
             ));
         }
 
@@ -373,7 +372,11 @@ fn normalize_pccb(pccb: PCCB) -> Result<PCCB, VerificationError> {
         "pccb.pccb_id",
         VerificationErrorCode::InvalidPccb,
     )?;
-    require_non_empty(&pccb.nonce, "pccb.nonce", VerificationErrorCode::InvalidPccb)?;
+    require_non_empty(
+        &pccb.nonce,
+        "pccb.nonce",
+        VerificationErrorCode::InvalidPccb,
+    )?;
 
     Ok(PCCB {
         contract: crate::types::Contract {
@@ -436,7 +439,9 @@ fn normalize_pccb(pccb: PCCB) -> Result<PCCB, VerificationError> {
     })
 }
 
-fn normalize_context(input: VerificationContextInput) -> Result<VerificationContext, VerificationError> {
+fn normalize_context(
+    input: VerificationContextInput,
+) -> Result<VerificationContext, VerificationError> {
     require_non_empty(
         &input.request_id,
         "context.request_id",
@@ -500,7 +505,11 @@ fn normalize_action_spec(
     code: VerificationErrorCode,
 ) -> Result<ActionSpec, VerificationError> {
     require_non_empty(&action.name, &format!("{field_name}.name"), code)?;
-    require_non_empty(&action.capability, &format!("{field_name}.capability"), code)?;
+    require_non_empty(
+        &action.capability,
+        &format!("{field_name}.capability"),
+        code,
+    )?;
     Ok(action)
 }
 
@@ -509,12 +518,23 @@ fn normalize_target_ref(
     field_name: &str,
     code: VerificationErrorCode,
 ) -> Result<TargetRef, VerificationError> {
-    require_non_empty(&target.resource_type, &format!("{field_name}.resource_type"), code)?;
-    require_non_empty(&target.resource_id, &format!("{field_name}.resource_id"), code)?;
+    require_non_empty(
+        &target.resource_type,
+        &format!("{field_name}.resource_type"),
+        code,
+    )?;
+    require_non_empty(
+        &target.resource_id,
+        &format!("{field_name}.resource_id"),
+        code,
+    )?;
     Ok(target)
 }
 
-fn normalize_scope_spec(scope: ScopeSpec, field_name: &str) -> Result<ScopeSpec, VerificationError> {
+fn normalize_scope_spec(
+    scope: ScopeSpec,
+    field_name: &str,
+) -> Result<ScopeSpec, VerificationError> {
     if scope.mode != "exact" {
         return Err(VerificationError::new(
             VerificationErrorCode::InvalidPccb,
@@ -592,13 +612,7 @@ fn normalize_signature_spec(
 fn normalize_escrow_reference(
     reference: Option<crate::types::EscrowReference>,
 ) -> Option<crate::types::EscrowReference> {
-    reference.and_then(|value| {
-        if value.escrow_id.trim().is_empty() {
-            None
-        } else {
-            Some(value)
-        }
-    })
+    reference.filter(|value| !value.escrow_id.trim().is_empty())
 }
 
 fn build_action_hash_input(intent: &ActionIntent) -> Value {

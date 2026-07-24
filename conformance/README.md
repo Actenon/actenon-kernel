@@ -49,7 +49,7 @@ included.
 ## Fastest Commands
 
 ```bash
-actenon conformance run --require-complete
+actenon-kernel conformance run --require-complete
 ```
 
 ```bash
@@ -62,7 +62,7 @@ Broader public-release gate:
 make public-verify
 ```
 
-For most external implementers, `actenon conformance run` is the fastest path to a meaningful compatibility signal. `make public-verify` delegates to `scripts/verify_release_gate.sh` and is the full release blocker for this distribution.
+For most external implementers, `actenon-kernel conformance run` is the fastest path to a meaningful compatibility signal. `make public-verify` delegates to `scripts/verify_release_gate.sh` and is the full release blocker for this distribution.
 
 `--require-complete` fails if an optional cryptographic dependency is absent
 and a mandatory check would otherwise be skipped. It is required for use of

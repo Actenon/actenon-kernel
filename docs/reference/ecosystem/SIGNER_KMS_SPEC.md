@@ -138,7 +138,7 @@ Actual asymmetric signature verification from discovered JWKs currently requires
 
 For issuer-side publication, the CLI also exposes:
 
-- `actenon keys publish`
+- `actenon-kernel keys publish`
 
 That command generates a conformant `key_discovery` `v1` JSON document for a single verification key from supplied public JWK material. It is intentionally small: it helps an issuer publish the well-known document shape, but it does not provide rotation orchestration or hosted lifecycle management.
 

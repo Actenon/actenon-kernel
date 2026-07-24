@@ -233,9 +233,9 @@ For readers who want to inspect the open reference implementation after understa
 
 ```bash
 make install
-actenon up
-actenon doctor
-actenon simulate --incident replit
+actenon-kernel up
+actenon-kernel doctor
+actenon-kernel simulate --incident replit
 python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runtime
 ```
 

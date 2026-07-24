@@ -27,9 +27,9 @@ make install
 ## Exact First Commands
 
 ```bash
-actenon up
-actenon doctor
-actenon simulate --incident replit
+actenon-kernel up
+actenon-kernel doctor
+actenon-kernel simulate --incident replit
 ```
 
 Those commands do three important things immediately:
@@ -96,19 +96,19 @@ That matters because a real execution-edge control is not just "it executed." It
 
 ## What To Do In Order
 
-1. run `actenon up`, `actenon doctor`, and `actenon simulate --incident replit`
+1. run `actenon-kernel up`, `actenon-kernel doctor`, and `actenon-kernel simulate --incident replit`
 2. open `artifacts/local_runtime/simulations/replit/INCIDENT_SUMMARY.md`
 3. open `artifacts/local_runtime/simulations/replit/intent_record.json` and compare it to the refusal or receipt artifacts beside it
 4. start the protected refund endpoint from [../../examples/refund_guard_local/README.md](../../examples/refund_guard_local/README.md)
 5. inspect the resulting local runtime Receipt or Refusal under `artifacts/local_runtime/artifacts/outcomes/`
-6. run `actenon bundle export --runtime-dir artifacts/local_runtime` when you want to prove the runtime is portable
-7. run `actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon` when you want to inspect the exported artifact class seriously
+6. run `actenon-kernel bundle export --runtime-dir artifacts/local_runtime` when you want to prove the runtime is portable
+7. run `actenon-kernel bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon` when you want to inspect the exported artifact class seriously
 7. move to [../../MCP_HERO_PATH.md](../../MCP_HERO_PATH.md) if you want the clearest agent-tool integration path
-8. run `actenon conformance run` when you want the public compatibility check
+8. run `actenon-kernel conformance run` when you want the public compatibility check
 
 If you want to explain the point of this demo to someone else in one sentence: it shows that upstream approval is not enough, and that the execution edge must verify the exact action before it acts.
 
-The fastest unforgettable explanation of that point is still `actenon simulate --incident replit`, because it writes:
+The fastest unforgettable explanation of that point is still `actenon-kernel simulate --incident replit`, because it writes:
 
 - the weak-control counterfactual
 - the proof-bound protected outcome
@@ -136,13 +136,13 @@ The full step-by-step path is in [../../examples/refund_guard_local/README.md](.
 When you are done, export the runtime:
 
 ```bash
-actenon bundle export --runtime-dir artifacts/local_runtime
+actenon-kernel bundle export --runtime-dir artifacts/local_runtime
 ```
 
 Then verify the exported `.actenon` bundle:
 
 ```bash
-actenon bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
+actenon-kernel bundle verify artifacts/local_runtime/bundles/actenon-local-runtime.actenon
 ```
 
 That bundle is portable execution evidence with internal tamper checks, not attestation-of-origin in active v1.
@@ -165,7 +165,7 @@ If you want the clearest agent-stack adoption path after the local proof run, mo
 ## First Conformance Run
 
 ```bash
-actenon conformance run
+actenon-kernel conformance run
 ```
 
 ## Full Repo Check

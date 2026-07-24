@@ -52,5 +52,5 @@ filter or general data-loss-prevention system.
 ## Simulate
 
 ```bash
-actenon simulate --scenario data-export
+actenon-kernel simulate --scenario data-export
 ```

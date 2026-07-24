@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use time::OffsetDateTime;
 
-
 pub type JsonObject = Map<String, Value>;
 
 fn map_is_empty(value: &JsonObject) -> bool {
