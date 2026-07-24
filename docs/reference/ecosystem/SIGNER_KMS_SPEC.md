@@ -14,14 +14,40 @@ This document defines:
 - the local reference signer
 - abstract KMS-backed and HSM-backed signer adapters
 - the Python well-known key resolver for verifier-side trust distribution
+- the concrete AWS KMS backend (`actenon/proof/signers/aws_kms.py`)
+- the key-lifecycle state machine (`actenon/proof/signers/key_lifecycle.py`)
 - stable expectations for `algorithm`, `key_id`, and signature encoding
 
 This document does not define:
 
-- cloud-vendor KMS APIs
-- production key-rotation workflows
+- concrete GCP KMS, Azure Key Vault, or PKCS#11 HSM backends (AWS KMS is the first concrete backend; others are follow-ups)
+- production key-rotation workflows (see [`KMS_ROTATION_RUNBOOK.md`](KMS_ROTATION_RUNBOOK.md) for the executed procedure)
 - HSM operational procedures
 - hosted key-custody services
+
+## Concrete AWS KMS Backend
+
+The kernel ships a concrete AWS KMS backend at
+`actenon/proof/signers/aws_kms.py`. It implements the
+`ExternalManagedSigningBackend` Protocol from
+`actenon/proof/signers/external_managed.py`.
+
+The backend:
+
+- Uses `boto3` as an optional dependency (install with `pip install actenon-kernel[aws]`).
+- Enforces the key-lifecycle state machine on every sign and verify operation.
+- Maps AWS KMS `KeyState` values to Actenon lifecycle states.
+- Never sees private key material — AWS KMS signs inside the HSM.
+- Is testable without real AWS (the constructor accepts a mock `kms_client`).
+
+The key-lifecycle state machine (`actenon/proof/signers/key_lifecycle.py`)
+defines five states: `active`, `retired`, `suspended`, `revoked`,
+`hard_revoked`. Only `active` keys can sign. Every state except
+`hard_revoked` can verify (hard-revoking deliberately breaks historical
+verifiability — only safe with an external anchor).
+
+See [`KMS_ROTATION_RUNBOOK.md`](KMS_ROTATION_RUNBOOK.md) for the operator
+procedure to rotate keys against AWS KMS.
 
 ## Normative Interface
 

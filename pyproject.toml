@@ -31,7 +31,8 @@ dependencies = [
 
 [project.optional-dependencies]
 asymmetric = ["cryptography>=42"]
-dev = ["build", "ruff>=0.8", "pytest>=8.0", "httpx>=0.27"]
+aws = ["boto3>=1.34"]  # for actenon.proof.signers.aws_kms (AWS KMS signing backend)
+dev = ["build", "ruff>=0.8", "pytest>=8.0", "httpx>=0.27", "boto3>=1.34"]
 fastapi = ["fastapi>=0.115,<1"]
 langchain = ["langchain-core>=0.3,<2"]
 mcp = ["mcp>=1.9,<2; python_version>='3.10'"]
