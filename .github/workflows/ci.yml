@@ -76,12 +76,15 @@ jobs:
           python - <<'EOF'
           import re, sys, pathlib
           doc = pathlib.Path('docs/SUPPORT_AND_COMPATIBILITY_STATUS.md').read_text()
-          # Extract the python matrix claim from the doc
-          m = re.search(r'a Python matrix over ([\d.,\s]+)', doc)
+          # Extract the python matrix claim from the doc.
+          # The doc says "a Python matrix over 3.10, 3.11, and 3.12".
+          # Match to end of line, then normalise "and" -> "," before parsing.
+          m = re.search(r'a Python matrix over (.+)', doc)
           if not m:
               print('FAIL: could not find Python matrix claim in SUPPORT_AND_COMPATIBILITY_STATUS.md', file=sys.stderr)
               sys.exit(1)
-          claimed = sorted({v.strip() for v in m.group(1).split(',') if v.strip()})
+          raw = m.group(1).replace('and', ',')
+          claimed = sorted({v.strip() for v in raw.split(',') if v.strip()})
           actual = ['3.10', '3.11', '3.12']
           if claimed != actual:
               print(f'FAIL: doc claims Python matrix {claimed} but CI runs {actual}', file=sys.stderr)
