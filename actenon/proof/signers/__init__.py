@@ -20,6 +20,15 @@ from .external_managed import (
     validate_signing_backend_for_environment,
 )
 from .hsm import HsmKeyHandle, HsmSigningBackend, HsmSigner
+from .key_lifecycle import (
+    ALLOWED_TRANSITIONS,
+    DEFAULT_MACHINE,
+    KeyLifecycleError,
+    KeyLifecycleMachine,
+    KeyLifecycleState,
+    SIGN_ALLOWED_STATES,
+    VERIFY_ALLOWED_STATES,
+)
 from .kms import KmsKeyHandle, KmsSigningBackend, KmsSigner
 from .local import (
     HmacSha256Signer,
@@ -63,8 +72,10 @@ from .well_known import (
 __all__ = [
     "ALLOWED_DISCOVERY_KEY_STATUSES",
     "ALLOWED_DISCOVERY_KEY_USES",
+    "ALLOWED_TRANSITIONS",
     "ACTENON_ALLOW_PILOT_EDDSA_IN_PRODUCTION_ENV",
     "ACTIVE_KEY_STATUS",
+    "DEFAULT_MACHINE",
     "DEFAULT_WELL_KNOWN_CACHE_MAX_AGE_SECONDS",
     "DEVELOPMENT_LOCAL_HMAC_BACKEND",
     "DiscoveredVerificationKey",
@@ -82,6 +93,9 @@ __all__ = [
     "KeyDiscoveryDocument",
     "KeyDiscoveryFetchError",
     "KeyDiscoveryFormatError",
+    "KeyLifecycleError",
+    "KeyLifecycleMachine",
+    "KeyLifecycleState",
     "KeyNotFoundError",
     "KeyNotYetValidError",
     "KeyPurposeMismatchError",
@@ -105,6 +119,8 @@ __all__ = [
     "ProofSealError",
     "ResolvedVerificationKey",
     "RevokedKeyError",
+    "SIGN_ALLOWED_STATES",
+    "VERIFY_ALLOWED_STATES",
     "SignatureVerifier",
     "Signer",
     "UnsupportedVerificationAlgorithmError",
