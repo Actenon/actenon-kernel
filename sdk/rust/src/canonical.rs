@@ -4,7 +4,6 @@ use serde::Serialize;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-
 pub fn canonicalize_bytes<T: Serialize>(value: &T) -> Result<Vec<u8>, String> {
     let value = serde_json::to_value(value).map_err(|error| error.to_string())?;
     let canonical = canonicalize_value(&value)?;
@@ -43,7 +42,10 @@ fn write_canonical_json(output: &mut String, value: &Value) -> Result<(), String
             } else if let Some(unsigned) = number.as_u64() {
                 write!(output, "{unsigned}").map_err(|error| error.to_string())?;
             } else {
-                return Err("floating-point values are not supported in canonical action hashing".to_string());
+                return Err(
+                    "floating-point values are not supported in canonical action hashing"
+                        .to_string(),
+                );
             }
         }
         Value::Array(items) => {

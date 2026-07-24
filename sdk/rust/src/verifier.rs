@@ -7,24 +7,15 @@ use crate::canonical::{canonicalize_bytes, sha256_hex};
 use crate::errors::{VerificationError, VerificationErrorCode};
 use crate::signers::SignatureVerifier;
 use crate::types::{
-    ActionIntent,
-    ActionSpec,
-    AudienceRef,
-    PCCB,
-    PartyRef,
-    ScopeSpec,
-    SignatureSpec,
-    TargetRef,
-    TenantRef,
-    VerificationContext,
-    VerificationContextInput,
-    VerifiedProtectedRequest,
+    ActionIntent, ActionSpec, AudienceRef, PartyRef, ScopeSpec, SignatureSpec, TargetRef,
+    TenantRef, VerificationContext, VerificationContextInput, VerifiedProtectedRequest, PCCB,
 };
 
 pub const DEFAULT_CLOCK_SKEW_TOLERANCE: Duration = Duration::ZERO;
 
 pub fn parse_action_intent_json(raw: &[u8]) -> Result<ActionIntent, VerificationError> {
-    let intent: ActionIntent = decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
+    let intent: ActionIntent =
+        decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
     normalize_action_intent(intent)
 }
 
@@ -124,11 +115,11 @@ impl<V: SignatureVerifier> Verifier<V> {
         // in PCCBVerifier.verify) and the conformance vector expectations.
         let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
             .map_err(|_error| {
-                VerificationError::new(
-                    VerificationErrorCode::InvalidPccb,
-                    "The proof cannot be canonicalized for signature verification.",
-                )
-            })?;
+            VerificationError::new(
+                VerificationErrorCode::InvalidPccb,
+                "The proof cannot be canonicalized for signature verification.",
+            )
+        })?;
         if !self
             .signature_verifier
             .verify(&unsigned_payload, &normalized_pccb.signature)
@@ -381,7 +372,11 @@ fn normalize_pccb(pccb: PCCB) -> Result<PCCB, VerificationError> {
         "pccb.pccb_id",
         VerificationErrorCode::InvalidPccb,
     )?;
-    require_non_empty(&pccb.nonce, "pccb.nonce", VerificationErrorCode::InvalidPccb)?;
+    require_non_empty(
+        &pccb.nonce,
+        "pccb.nonce",
+        VerificationErrorCode::InvalidPccb,
+    )?;
 
     Ok(PCCB {
         contract: crate::types::Contract {
@@ -444,7 +439,9 @@ fn normalize_pccb(pccb: PCCB) -> Result<PCCB, VerificationError> {
     })
 }
 
-fn normalize_context(input: VerificationContextInput) -> Result<VerificationContext, VerificationError> {
+fn normalize_context(
+    input: VerificationContextInput,
+) -> Result<VerificationContext, VerificationError> {
     require_non_empty(
         &input.request_id,
         "context.request_id",
@@ -508,7 +505,11 @@ fn normalize_action_spec(
     code: VerificationErrorCode,
 ) -> Result<ActionSpec, VerificationError> {
     require_non_empty(&action.name, &format!("{field_name}.name"), code)?;
-    require_non_empty(&action.capability, &format!("{field_name}.capability"), code)?;
+    require_non_empty(
+        &action.capability,
+        &format!("{field_name}.capability"),
+        code,
+    )?;
     Ok(action)
 }
 
@@ -517,12 +518,23 @@ fn normalize_target_ref(
     field_name: &str,
     code: VerificationErrorCode,
 ) -> Result<TargetRef, VerificationError> {
-    require_non_empty(&target.resource_type, &format!("{field_name}.resource_type"), code)?;
-    require_non_empty(&target.resource_id, &format!("{field_name}.resource_id"), code)?;
+    require_non_empty(
+        &target.resource_type,
+        &format!("{field_name}.resource_type"),
+        code,
+    )?;
+    require_non_empty(
+        &target.resource_id,
+        &format!("{field_name}.resource_id"),
+        code,
+    )?;
     Ok(target)
 }
 
-fn normalize_scope_spec(scope: ScopeSpec, field_name: &str) -> Result<ScopeSpec, VerificationError> {
+fn normalize_scope_spec(
+    scope: ScopeSpec,
+    field_name: &str,
+) -> Result<ScopeSpec, VerificationError> {
     if scope.mode != "exact" {
         return Err(VerificationError::new(
             VerificationErrorCode::InvalidPccb,

@@ -2,22 +2,15 @@ use std::fs;
 use std::path::PathBuf;
 
 use actenon_verifier_sdk::{
-    build_local_proof_verifier,
-    parse_action_intent_json,
-    parse_pccb_json,
-    AudienceRef,
-    JsonObject,
-    VerificationContextInput,
-    VerificationErrorCode,
-    Verifier,
+    build_local_proof_verifier, parse_action_intent_json, parse_pccb_json, AudienceRef, JsonObject,
+    VerificationContextInput, VerificationErrorCode, Verifier,
 };
 use serde_json::Value;
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
 fn fixtures_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../go/fixtures/portable-local-proof")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../go/fixtures/portable-local-proof")
 }
 
 fn load_fixture(name: &str) -> Vec<u8> {
@@ -64,7 +57,8 @@ fn build_verifier_with_skew(seconds: i64) -> Verifier<actenon_verifier_sdk::Hmac
 #[test]
 fn verifier_accepts_valid_local_proof() {
     let verifier = build_verifier();
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let context = verifier
         .build_context(build_context_input())
@@ -79,20 +73,26 @@ fn verifier_accepts_valid_local_proof() {
 #[test]
 fn verifier_refuses_audience_mismatch() {
     let verifier = build_verifier();
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let mut context_input = build_context_input();
     context_input.audience.id = "wrong-endpoint".to_string();
-    let context = verifier.build_context(context_input).expect("valid context");
+    let context = verifier
+        .build_context(context_input)
+        .expect("valid context");
 
-    let error = verifier.verify(intent, pccb, context).expect_err("expected audience mismatch");
+    let error = verifier
+        .verify(intent, pccb, context)
+        .expect_err("expected audience mismatch");
     assert_eq!(error.code(), VerificationErrorCode::AudienceMismatch);
 }
 
 #[test]
 fn verifier_refuses_action_mutation() {
     let verifier = build_verifier();
-    let mut intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let mut intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let context = verifier
         .build_context(build_context_input())
@@ -103,14 +103,17 @@ fn verifier_refuses_action_mutation() {
         Value::String("tampered hello world".to_string()),
     );
 
-    let error = verifier.verify(intent, pccb, context).expect_err("expected action mismatch");
+    let error = verifier
+        .verify(intent, pccb, context)
+        .expect_err("expected action mismatch");
     assert_eq!(error.code(), VerificationErrorCode::ActionMismatch);
 }
 
 #[test]
 fn verifier_refuses_action_hash_mismatch() {
     let verifier = build_verifier();
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let mut pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let context = verifier
         .build_context(build_context_input())
@@ -131,24 +134,34 @@ fn verifier_refuses_action_hash_mismatch() {
 #[test]
 fn verifier_refuses_expired_proof() {
     let verifier = build_verifier();
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let mut context_input = build_context_input();
-    context_input.now = OffsetDateTime::parse("2026-01-01T12:06:00Z", &Rfc3339).expect("valid time");
-    let context = verifier.build_context(context_input).expect("valid context");
+    context_input.now =
+        OffsetDateTime::parse("2026-01-01T12:06:00Z", &Rfc3339).expect("valid time");
+    let context = verifier
+        .build_context(context_input)
+        .expect("valid context");
 
-    let error = verifier.verify(intent, pccb, context).expect_err("expected proof expiry");
+    let error = verifier
+        .verify(intent, pccb, context)
+        .expect_err("expected proof expiry");
     assert_eq!(error.code(), VerificationErrorCode::ProofExpired);
 }
 
 #[test]
 fn verifier_keeps_strict_not_before_behavior_by_default() {
     let verifier = build_verifier();
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
     let mut context_input = build_context_input();
-    context_input.now = OffsetDateTime::parse("2026-01-01T11:59:59Z", &Rfc3339).expect("valid time");
-    let context = verifier.build_context(context_input).expect("valid context");
+    context_input.now =
+        OffsetDateTime::parse("2026-01-01T11:59:59Z", &Rfc3339).expect("valid time");
+    let context = verifier
+        .build_context(context_input)
+        .expect("valid context");
 
     let error = verifier
         .verify(intent, pccb, context)
@@ -159,11 +172,13 @@ fn verifier_keeps_strict_not_before_behavior_by_default() {
 #[test]
 fn verifier_accepts_proof_within_clock_skew_tolerance() {
     let verifier = build_verifier_with_skew(2);
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
 
     let mut early_context_input = build_context_input();
-    early_context_input.now = OffsetDateTime::parse("2026-01-01T11:59:59Z", &Rfc3339).expect("valid time");
+    early_context_input.now =
+        OffsetDateTime::parse("2026-01-01T11:59:59Z", &Rfc3339).expect("valid time");
     let early_context = verifier
         .build_context(early_context_input)
         .expect("valid context");
@@ -172,7 +187,8 @@ fn verifier_accepts_proof_within_clock_skew_tolerance() {
         .expect("early proof within tolerance");
 
     let mut late_context_input = build_context_input();
-    late_context_input.now = OffsetDateTime::parse("2026-01-01T12:05:01Z", &Rfc3339).expect("valid time");
+    late_context_input.now =
+        OffsetDateTime::parse("2026-01-01T12:05:01Z", &Rfc3339).expect("valid time");
     let late_context = verifier
         .build_context(late_context_input)
         .expect("valid context");
@@ -184,11 +200,13 @@ fn verifier_accepts_proof_within_clock_skew_tolerance() {
 #[test]
 fn verifier_refuses_proof_beyond_clock_skew_tolerance() {
     let verifier = build_verifier_with_skew(2);
-    let intent = parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
+    let intent =
+        parse_action_intent_json(&load_fixture("action_intent.json")).expect("valid intent");
     let pccb = parse_pccb_json(&load_fixture("pccb.json")).expect("valid pccb");
 
     let mut early_context_input = build_context_input();
-    early_context_input.now = OffsetDateTime::parse("2026-01-01T11:59:57Z", &Rfc3339).expect("valid time");
+    early_context_input.now =
+        OffsetDateTime::parse("2026-01-01T11:59:57Z", &Rfc3339).expect("valid time");
     let early_context = verifier
         .build_context(early_context_input)
         .expect("valid context");
@@ -198,7 +216,8 @@ fn verifier_refuses_proof_beyond_clock_skew_tolerance() {
     assert_eq!(early_error.code(), VerificationErrorCode::ProofNotYetValid);
 
     let mut late_context_input = build_context_input();
-    late_context_input.now = OffsetDateTime::parse("2026-01-01T12:05:03Z", &Rfc3339).expect("valid time");
+    late_context_input.now =
+        OffsetDateTime::parse("2026-01-01T12:05:03Z", &Rfc3339).expect("valid time");
     let late_context = verifier
         .build_context(late_context_input)
         .expect("valid context");

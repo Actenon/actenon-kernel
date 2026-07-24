@@ -5,7 +5,6 @@ use sha2::Sha256;
 
 use crate::types::SignatureSpec;
 
-
 type HmacSha256 = Hmac<Sha256>;
 
 pub const LOCAL_PROOF_KEY_ID: &str = "local-proof-v1";

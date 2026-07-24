@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::fmt;
 
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VerificationErrorCode {
     InvalidIntent,
