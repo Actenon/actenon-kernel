@@ -17,7 +17,7 @@ screens, subscription plans, or Cloud identity.
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
 import pytest
@@ -61,8 +61,8 @@ def _make_intent(
 ) -> ActionIntent:
     return ActionIntent(
         intent_id=intent_id,
-        issued_at=datetime.now(UTC),
-        expires_at=datetime.now(UTC) + timedelta(minutes=15),
+        issued_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=15),
         tenant=TenantRef(tenant_id="tenant-test"),
         requester=PartyRef(type="agent", id="agent-test-001"),
         action=ActionSpec(
@@ -83,7 +83,7 @@ def _make_context(
         request_id="req_test_001",
         audience=AudienceRef(type="service", id=audience_id),
         scope_capabilities=scope_capabilities,
-        now=datetime.now(UTC),
+        now=datetime.now(timezone.utc),
     )
 
 

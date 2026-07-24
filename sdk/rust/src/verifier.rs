@@ -115,6 +115,31 @@ impl<V: SignatureVerifier> Verifier<V> {
                 "The proof has expired.",
             ));
         }
+
+        // ── Signature verification (before semantic checks) ──────────────
+        // Security principle: verify cryptographic integrity BEFORE interpreting
+        // semantic fields. Any mutation to the signed PCCB payload (scope,
+        // action_hash, etc.) must produce SIGNATURE_INVALID, not a semantic
+        // mismatch error. This matches the Python reference verifier (steps 4-5
+        // in PCCBVerifier.verify) and the conformance vector expectations.
+        let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
+            .map_err(|_error| {
+                VerificationError::new(
+                    VerificationErrorCode::InvalidPccb,
+                    "The proof cannot be canonicalized for signature verification.",
+                )
+            })?;
+        if !self
+            .signature_verifier
+            .verify(&unsigned_payload, &normalized_pccb.signature)
+        {
+            return Err(VerificationError::new(
+                VerificationErrorCode::SignatureInvalid,
+                "The proof signature could not be verified.",
+            ));
+        }
+
+        // ── Semantic checks (after signature is verified) ────────────────
         if normalized_pccb.audience != normalized_context.audience {
             return Err(VerificationError::new(
                 VerificationErrorCode::AudienceMismatch,
@@ -190,23 +215,6 @@ impl<V: SignatureVerifier> Verifier<V> {
             return Err(VerificationError::new(
                 VerificationErrorCode::ActionHashMismatch,
                 "The proof action hash does not match the action intent.",
-            ));
-        }
-
-        let unsigned_payload = canonicalize_bytes(&build_unsigned_pccb_payload(&normalized_pccb))
-            .map_err(|_error| {
-                VerificationError::new(
-                    VerificationErrorCode::InvalidPccb,
-                    "The proof cannot be canonicalized for signature verification.",
-                )
-            })?;
-        if !self
-            .signature_verifier
-            .verify(&unsigned_payload, &normalized_pccb.signature)
-        {
-            return Err(VerificationError::new(
-                VerificationErrorCode::SignatureInvalid,
-                "The proof signature could not be verified.",
             ));
         }
 

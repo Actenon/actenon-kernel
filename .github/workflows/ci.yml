@@ -112,6 +112,9 @@ jobs:
         run: npm run typecheck --if-present
 
       - name: Test
+        # The test files use node:test (not bun:test), so we must use
+        # `npm test` (which runs `node --import tsx --test`) rather than
+        # `bun test` (which doesn't support nested node:test calls).
         run: npm test
 
   go-verifier:

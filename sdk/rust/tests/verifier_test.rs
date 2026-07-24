@@ -120,8 +120,12 @@ fn verifier_refuses_action_hash_mismatch() {
 
     let error = verifier
         .verify(intent, pccb, context)
-        .expect_err("expected action hash mismatch");
-    assert_eq!(error.code(), VerificationErrorCode::ActionHashMismatch);
+        .expect_err("expected signature invalid (mutation to signed PCCB payload detected by signature check first)");
+    // After the fix that moved signature verification before semantic checks,
+    // any mutation to a signed PCCB field (including action_hash.value) must
+    // produce SIGNATURE_INVALID, not the semantic mismatch error. This matches
+    // the Python reference verifier and the conformance vector expectations.
+    assert_eq!(error.code(), VerificationErrorCode::SignatureInvalid);
 }
 
 #[test]
