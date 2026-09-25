@@ -69,7 +69,8 @@ class ProtectedExecutor:
 
     Idempotency:
       If the intent's metadata contains an `operation_id`, the executor checks
-      the idempotency store BEFORE claiming replay. If a prior result exists
+      the idempotency store AFTER the proof verifies (and any policy decision
+      allows) and BEFORE claiming replay. If a prior result exists
       for the same operation_id + same action_hash, the prior result is
       returned without re-executing the handler (idempotent replay). If the
       same operation_id has a different action_hash, IDEMPOTENCY_CONFLICT is
@@ -178,19 +179,28 @@ class ProtectedExecutor:
         *,
         policy_decision: PolicyDecision | None = None,
     ) -> ExecutionResult:
-        # ── Idempotency check (before replay claim) ──────────────────
-        # If the intent has an operation_id, check the idempotency store
-        # BEFORE claiming replay. This allows safe retry of the same
-        # operation with a NEW proof (the old proof was consumed).
         operation_id = request.intent.metadata.get("operation_id")
         action_hash_value = request.pccb.action_hash.value
-        if operation_id is not None and self.idempotency_store is not None:
-            prior = self.idempotency_store.lookup(operation_id)
-            if prior is not None:
-                if prior["action_hash"] != action_hash_value:
-                    # Same operation_id + different action_hash → conflict
-                    refusal = self.refusal_factory.create_from_exception(
-                        RefusalException(
+
+        replay_state = None
+        replay_consumed = False
+        brokered_credential: BrokeredCredential | None = None
+        escrow_id = request.pccb.escrow_id
+        try:
+            self.proof_verifier.verify(request.intent, request.pccb, request.context)
+            if policy_decision is not None and not policy_decision.allowed:
+                raise _policy_refusal(policy_decision)
+            # ── Idempotency check (after verification, before replay claim) ──
+            # A retry of the same operation_id + action_hash returns the
+            # prior result without re-executing. It runs only after the
+            # presented proof has verified: an idempotency key is never a
+            # substitute for proof, and neither the prior result nor the
+            # prior action_hash is disclosed to an unverified caller.
+            if operation_id is not None and self.idempotency_store is not None:
+                prior = self.idempotency_store.lookup(operation_id)
+                if prior is not None:
+                    if prior["action_hash"] != action_hash_value:
+                        raise RefusalException(
                             category="idempotency",
                             refusal_code="IDEMPOTENCY_CONFLICT",
                             message=(
@@ -203,42 +213,20 @@ class ProtectedExecutor:
                                 "expected_action_hash": prior["action_hash"],
                                 "actual_action_hash": action_hash_value,
                             },
-                        ),
-                        occurred_at=request.context.now,
-                        intent=request.intent,
-                        context=request.context,
+                        )
+                    # Same operation_id + same action_hash → idempotent replay.
+                    # Return the prior result without re-executing.
+                    prior_result = prior["result"]
+                    receipt = self.receipt_factory.create_execution_receipt(
+                        request.intent,
+                        request.context,
                         pccb_id=request.pccb.pccb_id,
+                        escrow_id=request.pccb.escrow_id,
+                        payload=prior_result,
                         action_hash=request.pccb.action_hash,
                     )
-                    receipt = self.refusal_factory.create_refused_receipt(  # type: ignore[attr-defined]
-                        request.intent, request.context, refusal
-                    ) if hasattr(self.refusal_factory, 'create_refused_receipt') else self.receipt_factory.create_refused_receipt(
-                        request.intent, request.context, refusal
-                    )
-                    self.outcome_writer.write_refusal(refusal)
-                    return ExecutionResult(receipt=receipt, refusal=refusal, payload=None)
-                # Same operation_id + same action_hash → idempotent replay
-                # Return the prior result without re-executing.
-                prior_result = prior["result"]
-                receipt = self.receipt_factory.create_execution_receipt(
-                    request.intent,
-                    request.context,
-                    pccb_id=request.pccb.pccb_id,
-                    escrow_id=request.pccb.escrow_id,
-                    payload=prior_result,
-                    action_hash=request.pccb.action_hash,
-                )
-                self.outcome_writer.write_receipt(receipt)
-                return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
-
-        replay_state = None
-        replay_consumed = False
-        brokered_credential: BrokeredCredential | None = None
-        escrow_id = request.pccb.escrow_id
-        try:
-            self.proof_verifier.verify(request.intent, request.pccb, request.context)
-            if policy_decision is not None and not policy_decision.allowed:
-                raise _policy_refusal(policy_decision)
+                    self.outcome_writer.write_receipt(receipt)
+                    return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
             replay_state = self._claim_replay(request)
             if self.escrow is not None:
                 if escrow_id is None:
