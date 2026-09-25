@@ -31,18 +31,20 @@ and never logged.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from secrets import token_bytes
 from typing import Any
 
+from actenon.api import ActionIntentIntakeService
 from actenon.core import RefusalException
+from actenon.core.json import loads_no_duplicate_keys
 from actenon.gate import ActenonGate
 from actenon.models import PCCB, ActionIntent, DynamicContextInput
 from actenon.proof import PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.canonical import CANONICALIZATION_PROFILE, sha256_hex
+from actenon.proof.service import default_disclosure_mode
 from actenon.proof.signers.external_managed import (
     ProductionSigningGuardError,
     is_production_like_environment,
@@ -128,8 +130,21 @@ def _coerce_proof(proof: Any) -> PCCB | None:
     if isinstance(proof, PCCB):
         return proof
     if isinstance(proof, str):
-        proof = json.loads(proof)
+        # Strict parse: duplicate object keys, oversized, and over-deep
+        # input are refused (ACTENON-JCS-STRICT-1 §4.12), not last-wins.
+        # Note: over stdio the MCP SDK decodes the JSON-RPC envelope (and
+        # pre-parses JSON-looking string arguments) before this runs.
+        proof = loads_no_duplicate_keys(proof)
     return PCCB.from_dict(proof)
+
+
+def _intent_refusal(exc: Exception, **extra: Any) -> dict[str, Any]:
+    reason = exc.message if isinstance(exc, RefusalException) else str(exc)
+    return _refusal_response(
+        reason_code="INTENT_MALFORMED",
+        reason=f"The supplied intent is not a valid Action Intent: {reason}",
+        extra=extra,
+    )
 
 
 def _verifier_context(gate: ActenonGate, intent: ActionIntent) -> DynamicContextInput:
@@ -193,7 +208,10 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
         """
 
         if intent is not None:
-            return json.loads(intent) if isinstance(intent, str) else dict(intent)
+            payload = loads_no_duplicate_keys(intent) if isinstance(intent, str) else intent
+            if not isinstance(payload, dict):
+                raise ValueError("intent must be a JSON object")
+            return dict(payload)
         return gate.build_action(
             action_name,
             capability,
@@ -222,9 +240,13 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
         proof: dict[str, Any] | str,
         intent: dict[str, Any] | str | None = None,
     ) -> dict[str, Any]:
-        intent_payload = _build_intent(
-            action_name, capability, parameters, target_type, target_id, intent
-        )
+        try:
+            intent_payload = _build_intent(
+                action_name, capability, parameters, target_type, target_id, intent
+            )
+            parsed_intent = ActionIntentIntakeService().parse(intent_payload)
+        except (RefusalException, ValueError, TypeError) as exc:
+            return _intent_refusal(exc, valid=False)
         try:
             pccb = _coerce_proof(proof)
         # A model can hand us anything. Malformed proof must become a typed
@@ -243,7 +265,7 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
                 "consequential action needs a proof bound to that exact action.",
                 extra={"outcome": "INVALID", "valid": False},
             )
-        intent = ActionIntent.from_dict(intent_payload)
+        intent = parsed_intent
         context = _verifier_context(gate, intent)
         try:
             verifier.verify(intent, pccb, context)
@@ -290,9 +312,13 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
         proof: dict[str, Any] | str | None = None,
         intent: dict[str, Any] | str | None = None,
     ) -> dict[str, Any]:
-        intent_payload = _build_intent(
-            action_name, capability, parameters, target_type, target_id, intent
-        )
+        try:
+            intent_payload = _build_intent(
+                action_name, capability, parameters, target_type, target_id, intent
+            )
+            parsed_intent = ActionIntentIntakeService().parse(intent_payload)
+        except (RefusalException, ValueError, TypeError) as exc:
+            return _intent_refusal(exc)
         try:
             pccb = _coerce_proof(proof)
         # A model can hand us anything. Malformed proof must become a typed
@@ -305,7 +331,7 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
             )
 
         outcome = gate.protect(
-            intent_payload,
+            parsed_intent,
             proof=pccb,
             side_effect=lambda **kwargs: {
                 "simulated": True,
@@ -508,11 +534,18 @@ def main(argv: list[str] | None = None) -> int:
 
     # stdout is the MCP transport. Everything human-facing goes to stderr.
     if args.demo:
-        if is_production_like_environment():
+        # Refuse on either definition of "production-like": the signing
+        # guard's (ACTENON_ENV=prod/production/staging/..., production
+        # flags) or the verifier's, which only permits local/dev/test/demo.
+        if (
+            is_production_like_environment()
+            or default_disclosure_mode() is not VerifierDisclosureMode.LOCAL_DEBUG
+        ):
             raise SystemExit(
                 "actenon-mcp: --demo refused in a production-like environment "
-                "(ACTENON_ENV/ACTENON_PRODUCTION is set). The demo signs with an "
-                "ephemeral development key and must never run in production."
+                "(ACTENON_ENV is not local/dev/test/demo, or an Actenon production "
+                "flag is set). The demo signs with an ephemeral development key "
+                "and must never run in production."
             )
         try:
             gate, signer = build_demo_gate(args.audience)

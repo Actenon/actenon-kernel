@@ -112,7 +112,13 @@ for an offline demo server with an ephemeral key.
 ```
 
 Demo mode is itself refused if the process looks production-like
-(`ACTENON_ENV=production` or an Actenon production flag).
+(`ACTENON_ENV` set to anything other than `local`, `dev`, `test`, or `demo`,
+or an Actenon production flag such as `ACTENON_PRODUCTION=1`).
+
+An unparseable or schema-invalid `intent` or `proof` is answered with a typed
+refusal (`INTENT_MALFORMED` / `PROOF_MALFORMED`) rather than a tool error, and
+does not consume the proof. Arguments that fail the tool's own JSON-schema
+validation are rejected by the MCP SDK before the tool runs.
 
 ## A real conversation
 

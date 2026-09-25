@@ -300,5 +300,75 @@ class DocumentedLaunchCommandTests(unittest.TestCase):
                     self.assertIn("'actenon-kernel[mcp]'", line)
 
 
+@requires_mcp
+class MalformedModelInputTests(unittest.TestCase):
+    """A model can hand the tools anything; every bad input is a typed refusal."""
+
+    def setUp(self) -> None:
+        self.tools = _tools()
+        self.granted = self.tools["actenon_demo_grant"](**REFUND)
+
+    def _duplicate_key_proof(self) -> str:
+        raw = json.dumps(self.granted["proof"])
+        # A second `nonce` member: Python's json.loads keeps the last one,
+        # other parsers keep the first. The protocol requires rejection.
+        return raw[:-1] + ', "nonce": ' + json.dumps(self.granted["proof"]["nonce"]) + "}"
+
+    def test_duplicate_json_keys_in_a_proof_are_refused(self) -> None:
+        for tool in ("actenon_verify", "actenon_gate"):
+            with self.subTest(tool=tool):
+                response = self.tools[tool](
+                    **REFUND, proof=self._duplicate_key_proof(), intent=self.granted["intent"]
+                )
+                self.assertEqual("PROOF_MALFORMED", response["reason_code"])
+                self.assertFalse(response.get("valid", response.get("allowed")))
+
+    def test_deeply_nested_proof_is_refused(self) -> None:
+        deep = "[" * 100_000 + "]" * 100_000
+        for tool in ("actenon_verify", "actenon_gate"):
+            with self.subTest(tool=tool):
+                response = self.tools[tool](**REFUND, proof=deep, intent=self.granted["intent"])
+                self.assertEqual("PROOF_MALFORMED", response["reason_code"])
+
+    def test_malformed_intent_is_a_typed_refusal(self) -> None:
+        bad_intents = (
+            "not json",
+            "[1, 2]",
+            {"contract": "nope"},
+            '{"a": 1, "a": 2}',
+        )
+        for tool in ("actenon_verify", "actenon_gate"):
+            for intent in bad_intents:
+                with self.subTest(tool=tool, intent=intent):
+                    response = self.tools[tool](
+                        **REFUND, proof=self.granted["proof"], intent=intent
+                    )
+                    self.assertEqual("REFUSED", response["outcome"])
+                    self.assertEqual("INTENT_MALFORMED", response["reason_code"])
+                    self.assertTrue(response["reason"])
+
+    def test_a_rejected_input_does_not_consume_the_proof(self) -> None:
+        self.tools["actenon_gate"](**REFUND, proof=self.granted["proof"], intent="not json")
+        allowed = self.tools["actenon_gate"](
+            **REFUND, proof=self.granted["proof"], intent=self.granted["intent"]
+        )
+        self.assertEqual("ALLOW", allowed["outcome"])
+
+
+class DemoRefusedOutsideDevelopmentTests(unittest.TestCase):
+    def test_demo_is_refused_cleanly_for_any_non_development_environment(self) -> None:
+        import os
+
+        for value in ("prd", "live", "uat", "preprod"):
+            with self.subTest(ACTENON_ENV=value):
+                os.environ["ACTENON_ENV"] = value
+                try:
+                    with self.assertRaises(SystemExit) as raised:
+                        main(["--demo"])
+                finally:
+                    del os.environ["ACTENON_ENV"]
+                self.assertIn("--demo refused", str(raised.exception))
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
