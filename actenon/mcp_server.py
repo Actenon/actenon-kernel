@@ -38,12 +38,12 @@ from secrets import token_bytes
 from typing import Any
 
 from actenon.api import ActionIntentIntakeService
-from actenon.core import RefusalException
+from actenon.core import ProofVerificationError, RefusalException
 from actenon.core.json import loads_no_duplicate_keys
 from actenon.gate import ActenonGate
 from actenon.models import PCCB, ActionIntent, DynamicContextInput
 from actenon.proof import PCCBVerifier, VerifierDisclosureMode
-from actenon.proof.canonical import CANONICALIZATION_PROFILE, sha256_hex
+from actenon.proof.canonical import CANONICALIZATION_PROFILE, canonicalize_bytes, sha256_hex
 from actenon.proof.service import default_disclosure_mode
 from actenon.proof.signers.external_managed import (
     ProductionSigningGuardError,
@@ -138,6 +138,51 @@ def _coerce_proof(proof: Any) -> PCCB | None:
     return PCCB.from_dict(proof)
 
 
+def _argument_mismatch(
+    intent: ActionIntent,
+    *,
+    action_name: str,
+    capability: str,
+    parameters: Any,
+    target_type: str,
+    target_id: str,
+) -> tuple[str, str] | None:
+    """Return (reason_code, reason) when the tool arguments differ from the intent.
+
+    The tool arguments describe the action the caller is about to perform;
+    a supplied ``intent`` only says which authorised intent the proof was
+    issued for. Verifying the intent while the host executes the arguments
+    would let a caller spend a narrow proof on a wider action, so the two
+    must be identical. Parameters are compared by their canonical bytes
+    (ACTENON-JCS-STRICT-1), so ``2500`` vs ``2500.0`` or a reordered
+    lookalike is never "close enough".
+    """
+
+    if intent.action.name != action_name or intent.action.capability != capability:
+        return (
+            "ACTION_MISMATCH",
+            "The tool's action_name/capability do not match the supplied intent.",
+        )
+    try:
+        same_parameters = canonicalize_bytes(dict(parameters)) == canonicalize_bytes(
+            intent.action.parameters
+        )
+    except (TypeError, ValueError):
+        same_parameters = False
+    if not same_parameters:
+        return (
+            "ACTION_MISMATCH",
+            "The tool's parameters do not exactly match the supplied intent "
+            "(canonical comparison; floats are never accepted).",
+        )
+    if intent.target.resource_type != target_type or intent.target.resource_id != target_id:
+        return (
+            "TARGET_MISMATCH",
+            "The tool's target_type/target_id do not match the supplied intent.",
+        )
+    return None
+
+
 def _intent_refusal(exc: Exception, **extra: Any) -> dict[str, Any]:
     reason = exc.message if isinstance(exc, RefusalException) else str(exc)
     return _refusal_response(
@@ -204,7 +249,8 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
         window. A caller retrying with a granted proof MUST pass back the
         intent that proof was issued for — building a lookalike here would
         produce a new intent_id and the proof would (correctly) be refused
-        as INTENT_MISMATCH.
+        as INTENT_MISMATCH. A supplied intent never overrides the tool
+        arguments: callers check it with ``_argument_mismatch`` first.
         """
 
         if intent is not None:
@@ -247,6 +293,20 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
             parsed_intent = ActionIntentIntakeService().parse(intent_payload)
         except (RefusalException, ValueError, TypeError) as exc:
             return _intent_refusal(exc, valid=False)
+        mismatch = _argument_mismatch(
+            parsed_intent,
+            action_name=action_name,
+            capability=capability,
+            parameters=parameters,
+            target_type=target_type,
+            target_id=target_id,
+        )
+        if mismatch is not None:
+            return _refusal_response(
+                reason_code=mismatch[0],
+                reason=mismatch[1],
+                extra={"outcome": "INVALID", "valid": False, "intent_id": parsed_intent.intent_id},
+            )
         try:
             pccb = _coerce_proof(proof)
         # A model can hand us anything. Malformed proof must become a typed
@@ -298,7 +358,8 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
             "(on allow) or Refusal (on deny) retrievable via actenon_receipt. "
             "Call it WITHOUT a proof to see the default-deny behaviour and the "
             "exact reason. When retrying with a proof, pass back the `intent` it "
-            "was issued for — a proof is bound to one exact intent. The proof "
+            "was issued for — a proof is bound to one exact intent — with tool "
+            "arguments identical to that intent; any difference is refused. The proof "
             "must come from your trusted host or authority broker; a model must "
             "never mint its own authority."
         ),
@@ -330,15 +391,32 @@ def build_server(*, demo: bool, gate: ActenonGate, signer: Any, audience: str) -
                 reason=f"The supplied proof could not be parsed as a PCCB: {exc}",
             )
 
-        outcome = gate.protect(
+        mismatch = _argument_mismatch(
             parsed_intent,
-            proof=pccb,
-            side_effect=lambda **kwargs: {
-                "simulated": True,
-                "note": "actenon-mcp does not perform your side effect; it decides "
-                "whether your side effect is allowed to run.",
-            },
+            action_name=action_name,
+            capability=capability,
+            parameters=parameters,
+            target_type=target_type,
+            target_id=target_id,
         )
+        if mismatch is not None:
+            # An enforcement decision like any other: recorded in the chain,
+            # and no replay state is consumed.
+            outcome = gate._refuse(
+                parsed_intent,
+                _verifier_context(gate, parsed_intent),
+                ProofVerificationError(mismatch[0], mismatch[1]),
+            )
+        else:
+            outcome = gate.protect(
+                parsed_intent,
+                proof=pccb,
+                side_effect=lambda **kwargs: {
+                    "simulated": True,
+                    "note": "actenon-mcp does not perform your side effect; it decides "
+                    "whether your side effect is allowed to run.",
+                },
+            )
 
         if outcome.refusal is not None:
             artifact = outcome.refusal.to_dict()

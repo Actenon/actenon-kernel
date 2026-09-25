@@ -139,10 +139,10 @@ scope, succeeds, replays the proof, is refused, and fetches the receipt.
    pccb_id     : pccb_2ae82ea48d144adc8215df41de2233fe
    scoped to   : {'amount_cents': 2500, 'currency': 'USD'}
 
-3. The agent widens the amount to $5,000.00 and presents the SAME proof.
+3. The agent widens the amount to $5,000.00 and presents the SAME proof and granted intent.
    outcome     : REFUSED
    reason_code : ACTION_MISMATCH
-   reason      : The proof action does not exactly match the action intent.
+   reason      : The tool's parameters do not exactly match the supplied intent (canonical comparison; floats are never accepted).
    refusal_id  : rfsl_8d475ed4b4f044b3b4dd0e3351bc538c
 
 4. The agent retries the refund it was actually approved for.
@@ -195,6 +195,13 @@ window. When you retry, pass back the `intent` the proof was issued for:
 
 Rebuilding a lookalike intent produces a new `intent_id` and is refused as
 `INTENT_MISMATCH`. That is not a rough edge — it is the binding working.
+
+The `intent` only identifies which authorisation the proof was issued for; it
+never replaces the tool arguments. `action_name`, `capability`, `parameters`
+(compared canonically: `2500` is not `2500.0`), `target_type`, and `target_id`
+must equal the intent exactly, or the call is refused as `ACTION_MISMATCH` /
+`TARGET_MISMATCH` before any replay state is consumed. Widening the amount while
+passing back the granted intent is exactly the case step 3 shows.
 
 ## The Execution Gap
 
