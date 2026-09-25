@@ -23,6 +23,26 @@ other MCP client):
 }
 ```
 
+In Claude Code, one command registers the same server:
+
+```bash
+claude mcp add actenon -- uvx --from 'actenon-kernel[mcp]' actenon-mcp --demo
+```
+
+`claude mcp list` then health-checks it and should report `actenon` as
+connected. Add `--scope user` before the name to make it available in every
+project rather than only the current one. If you write this command by hand,
+two details matter:
+
+- **`--from` goes before `actenon-mcp`.** `uvx` treats the first word that is
+  not one of its own options as the command to run, and passes everything
+  after it to that command. `uvx actenon-kernel --from ...` therefore runs
+  the kernel CLI rather than the MCP server, and the client reports the
+  connection as closed.
+- **Quote `'actenon-kernel[mcp]'`.** zsh (the macOS default shell) treats the
+  brackets as a glob and aborts with `no matches found` before the command
+  runs.
+
 `uvx` fetches and runs the package on demand, so there is nothing to install
 first. Verified from a clean machine — this is the real client handshake, not
 a mock-up:

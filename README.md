@@ -206,6 +206,12 @@ else that speaks MCP):
 }
 ```
 
+Using Claude Code? One command registers the same server:
+
+```bash
+claude mcp add actenon -- uvx --from 'actenon-kernel[mcp]' actenon-mcp --demo
+```
+
 `uvx` fetches and runs it — nothing to install first. `--demo` runs offline
 with an ephemeral key and in-memory state; it is clearly marked **DEMO MODE**
 in every tool description and must not be used in production.

@@ -9,6 +9,9 @@ transcript in docs/integrations/MCP_QUICKSTART.md.
 from __future__ import annotations
 
 import copy
+import json
+import re
+import shlex
 import socket
 import unittest
 from importlib.util import find_spec
@@ -38,6 +41,14 @@ REFUND = {
     "target_type": "payment",
     "target_id": "pay_9f2c",
 }
+
+ROOT = Path(__file__).resolve().parents[2]
+
+# The launch command every copy-paste form in the docs must resolve to. uvx
+# only reads its own options before the command name, so `--from` has to
+# precede `actenon-mcp`; placed after it, uvx runs the wrong command.
+LAUNCH_ARGV = ["uvx", "--from", "actenon-kernel[mcp]", "actenon-mcp", "--demo"]
+LAUNCH_DOCS = ("README.md", "docs/integrations/MCP_QUICKSTART.md")
 
 
 def _tools(demo: bool = True) -> dict:
@@ -247,6 +258,46 @@ class DemoModeIsOfflineTests(unittest.TestCase):
         # A proof minted by one demo process must not verify in another.
         outcome = gate_b.protect(intent, proof=proof, side_effect=lambda **kw: {})
         self.assertEqual("refused", outcome.outcome)
+
+
+class DocumentedLaunchCommandTests(unittest.TestCase):
+    """The launch commands people copy from the docs start the server.
+
+    A misordered or unquoted command does not fail here; it fails inside the
+    user's MCP client as a closed connection, or in their shell. Pin every
+    documented form to one argv. Plain text parsing, so no `mcp` extra needed.
+    """
+
+    def _docs(self) -> dict[str, str]:
+        return {name: (ROOT / name).read_text(encoding="utf-8") for name in LAUNCH_DOCS}
+
+    def test_mcp_client_config_blocks_launch_the_server(self) -> None:
+        for name, text in self._docs().items():
+            blocks = [
+                json.loads(block)
+                for block in re.findall(r"```json\n(.*?)```", text, re.DOTALL)
+                if '"mcpServers"' in block
+            ]
+            with self.subTest(doc=name):
+                self.assertTrue(blocks, "no mcpServers config block found")
+                for block in blocks:
+                    for server in block["mcpServers"].values():
+                        self.assertEqual(
+                            LAUNCH_ARGV, [server["command"], *server["args"]]
+                        )
+
+    def test_claude_code_one_liner_launches_the_server(self) -> None:
+        for name, text in self._docs().items():
+            lines = [
+                line for line in text.splitlines() if line.startswith("claude mcp add ")
+            ]
+            with self.subTest(doc=name):
+                self.assertTrue(lines, "no `claude mcp add` one-liner found")
+                for line in lines:
+                    argv = shlex.split(line)
+                    self.assertEqual(LAUNCH_ARGV, argv[argv.index("--") + 1 :])
+                    # Unquoted, zsh treats [mcp] as a glob and aborts.
+                    self.assertIn("'actenon-kernel[mcp]'", line)
 
 
 if __name__ == "__main__":  # pragma: no cover
