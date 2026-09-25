@@ -3101,6 +3101,24 @@ def _bundle_candidate_chain_dirs(paths: LocalRuntimePaths) -> tuple[Path, ...]:
     return tuple(directories)
 
 
+def _bundle_member(root: Path, relative: str) -> Path | None:
+    """Resolve a manifest-declared path, or None if it escapes the bundle.
+
+    The manifest is attacker-controlled: an absolute path or a ``..``
+    path would otherwise make verification read (and vouch for) files on
+    the verifying host instead of files carried in the bundle.
+    """
+
+    try:
+        resolved_root = root.resolve()
+        target = (root / relative).resolve()
+    except (OSError, RuntimeError, ValueError):
+        return None
+    if target != resolved_root and resolved_root not in target.parents:
+        return None
+    return target
+
+
 def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_kind: str) -> dict[str, Any]:
     manifest_path = root / "bundle_manifest.json"
     if not manifest_path.exists():
@@ -3120,7 +3138,10 @@ def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_k
         if not isinstance(relative, str):
             errors.append("bundle manifest contains a non-string entry path")
             continue
-        path = root / relative
+        path = _bundle_member(root, relative)
+        if path is None:
+            errors.append(f"bundle manifest entry path points outside the bundle: {relative}")
+            continue
         if path.exists():
             continue
         # Zip archives do not reliably preserve empty directory roots.
@@ -3134,7 +3155,10 @@ def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_k
         if not isinstance(relative, str):
             errors.append("bundle manifest file_hashes contains a non-string path")
             continue
-        target = root / relative
+        target = _bundle_member(root, relative)
+        if target is None:
+            errors.append(f"Hashed file path points outside the bundle: {relative}")
+            continue
         if not target.exists() or not target.is_file():
             errors.append(f"Missing hashed file: {relative}")
             continue
@@ -3303,7 +3327,9 @@ def _verify_bundle_artifact(
     path_value = payload.get("path")
     if not isinstance(path_value, str):
         return [f"bundle {expected_type} entry is missing a path"]
-    target = root / path_value
+    target = _bundle_member(root, path_value)
+    if target is None:
+        return [f"bundle {expected_type} artifact path points outside the bundle: {path_value}"]
     if not target.exists():
         return [f"bundle {expected_type} artifact is missing: {path_value}"]
     artifact = loader(target)
