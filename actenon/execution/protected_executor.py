@@ -69,8 +69,10 @@ class ProtectedExecutor:
 
     Idempotency:
       If the intent's metadata contains an `operation_id`, the executor checks
-      the idempotency store AFTER the proof verifies (and any policy decision
-      allows) and BEFORE claiming replay. If a prior result exists
+      the idempotency store AFTER the proof verifies, any policy decision
+      allows, and the proof's single-use replay claim succeeds. A replayed
+      proof is therefore DUPLICATE_REPLAY; a NEW proof for the same
+      operation_id + action_hash is spent and, if a prior result exists
       for the same operation_id + same action_hash, the prior result is
       returned without re-executing the handler (idempotent replay). If the
       same operation_id has a different action_hash, IDEMPOTENCY_CONFLICT is
@@ -190,12 +192,15 @@ class ProtectedExecutor:
             self.proof_verifier.verify(request.intent, request.pccb, request.context)
             if policy_decision is not None and not policy_decision.allowed:
                 raise _policy_refusal(policy_decision)
-            # ── Idempotency check (after verification, before replay claim) ──
-            # A retry of the same operation_id + action_hash returns the
-            # prior result without re-executing. It runs only after the
-            # presented proof has verified: an idempotency key is never a
-            # substitute for proof, and neither the prior result nor the
-            # prior action_hash is disclosed to an unverified caller.
+            replay_state = self._claim_replay(request)
+            # ── Idempotency check (after verification AND the replay claim) ──
+            # A retry of the same operation_id + action_hash with a NEW
+            # proof returns the prior result without re-executing. It runs
+            # only after the presented proof has verified and its single-use
+            # claim succeeded: an idempotency key is never a substitute for
+            # proof, a replayed proof is DUPLICATE_REPLAY like any other, and
+            # neither the prior result nor the prior action_hash is disclosed
+            # to an unverified caller.
             if operation_id is not None and self.idempotency_store is not None:
                 prior = self.idempotency_store.lookup(operation_id)
                 if prior is not None:
@@ -214,8 +219,9 @@ class ProtectedExecutor:
                                 "actual_action_hash": action_hash_value,
                             },
                         )
-                    # Same operation_id + same action_hash → idempotent replay.
-                    # Return the prior result without re-executing.
+                    # Same operation_id + same action_hash → idempotent retry.
+                    # The new proof is spent; the prior result is returned.
+                    replay_consumed = self._mark_replay_consumed(replay_state, request=request)
                     prior_result = prior["result"]
                     receipt = self.receipt_factory.create_execution_receipt(
                         request.intent,
@@ -227,7 +233,6 @@ class ProtectedExecutor:
                     )
                     self.outcome_writer.write_receipt(receipt)
                     return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
-            replay_state = self._claim_replay(request)
             if self.escrow is not None:
                 if escrow_id is None:
                     raise RefusalException(

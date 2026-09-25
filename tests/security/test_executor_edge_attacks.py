@@ -139,17 +139,39 @@ class IdempotencyRequiresVerifiedProofTests(unittest.TestCase):
             self.assertEqual("AUDIENCE_MISMATCH", result.refusal.reason_code)
             self.assertIsNone(result.payload)
 
-    def test_verified_idempotent_retry_still_returns_prior_result(self) -> None:
+    def test_replaying_the_same_proof_is_duplicate_replay_not_an_executed_receipt(self) -> None:
+        # E2E B6: an idempotency key is not permission to reuse a proof.
         with tempfile.TemporaryDirectory() as tempdir:
-            executor, _writer, intent, context, pccb = self._prime(tempdir)
+            executor, writer, intent, context, pccb = self._prime(tempdir)
+            executed_before = sum(1 for r in writer.receipts if r.outcome == "executed")
             calls = []
             result = executor.execute(
                 ProtectedExecutionRequest(intent=intent, pccb=pccb, context=context),
                 lambda request, credential: calls.append(1) or {},
             )
+            self.assertEqual("DUPLICATE_REPLAY", result.refusal.reason_code)
+            self.assertIsNone(result.payload)
+            self.assertEqual([], calls)
+            self.assertEqual(executed_before, sum(1 for r in writer.receipts if r.outcome == "executed"))
+
+    def test_new_proof_for_the_same_operation_returns_prior_result_without_re_executing(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            executor, _writer, intent, context, _pccb = self._prime(tempdir)
+            fresh = mint_security_pccb(intent=intent, context=context, pccb_id="pccb_retry_002", nonce="nonce-retry-002")
+            calls = []
+            result = executor.execute(
+                ProtectedExecutionRequest(intent=intent, pccb=fresh, context=context),
+                lambda request, credential: calls.append(1) or {},
+            )
             self.assertIsNone(result.refusal)
             self.assertEqual({"transfer_id": "tr_confidential_123"}, result.payload)
             self.assertEqual([], calls)
+            # ...and that new proof is now spent too.
+            again = executor.execute(
+                ProtectedExecutionRequest(intent=intent, pccb=fresh, context=context),
+                lambda request, credential: calls.append(1) or {},
+            )
+            self.assertEqual("DUPLICATE_REPLAY", again.refusal.reason_code)
 
 
 def _race_worker(replay_db: str, counter_path: str, barrier, results) -> None:

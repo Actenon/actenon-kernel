@@ -165,17 +165,13 @@ def _make_request(intent, pccb, context):
 class IdempotentReplayTests(unittest.TestCase):
     """Test 2: same operation_id + same action_hash returns prior outcome.
 
-    Currently the replay store rejects the same PCCB as DUPLICATE_REPLAY.
-    The proposed idempotency layer should return the prior RESULT instead
-    of a refusal, with an IDEMPOTENT_REPLAY marker.
+    Per actenon.idempotency, an idempotency key is NOT permission to reuse a
+    proof: presenting the SAME proof again is DUPLICATE_REPLAY. Idempotency
+    applies when a NEW proof is minted for the same operation_id + action_hash
+    — that retry returns the prior result without re-executing the handler.
     """
 
     def test_2_same_operation_same_action_returns_prior_outcome(self) -> None:
-        """Presenting the same operation_id + action_hash twice should
-        return the prior recorded result, not a DUPLICATE_REPLAY refusal.
-
-        Currently FAILS: the replay store returns DUPLICATE_REPLAY.
-        """
         import tempfile
         with tempfile.TemporaryDirectory() as tempdir:
             executor = _build_executor(tempdir=tempdir)
@@ -183,8 +179,11 @@ class IdempotentReplayTests(unittest.TestCase):
             context = build_security_context()
             pccb = mint_security_pccb(intent=intent, context=context)
             request = _make_request(intent, pccb, context)
+            calls = 0
 
             def handler(req, cred):
+                nonlocal calls
+                calls += 1
                 return {"result": "executed", "amount": 100}
 
             # First execution
@@ -192,23 +191,24 @@ class IdempotentReplayTests(unittest.TestCase):
             self.assertIsNone(result1.refusal, "First execution should succeed")
             self.assertIsNotNone(result1.receipt)
 
-            # Second execution with same operation_id + action_hash
-            result2 = executor.execute(request, handler)
-            # Should return prior result, not a new execution
-            if result2.refusal is not None:
-                self.assertNotEqual(
-                    result2.refusal.reason_code,
-                    "DUPLICATE_REPLAY",
-                    "Same operation + same action should return prior result, "
-                    "not DUPLICATE_REPLAY refusal.",
-                )
-            # The payload should match the first execution's payload
-            if result2.payload is not None:
-                self.assertEqual(
-                    result2.payload.get("result"),
-                    "executed",
-                    "Idempotent replay should return the prior result payload.",
-                )
+            # Replaying the same proof is refused, whatever the operation_id.
+            replayed = executor.execute(request, handler)
+            self.assertIsNotNone(replayed.refusal)
+            self.assertEqual("DUPLICATE_REPLAY", replayed.refusal.reason_code)
+
+            # A new proof for the same operation_id + action_hash returns the
+            # prior result without re-executing the handler.
+            retry_pccb = mint_security_pccb(
+                intent=intent, context=context, pccb_id="pccb_security_retry", nonce="nonce-security-retry"
+            )
+            result2 = executor.execute(_make_request(intent, retry_pccb, context), handler)
+            self.assertIsNone(result2.refusal)
+            self.assertEqual(
+                "executed",
+                result2.payload.get("result"),
+                "Idempotent retry should return the prior result payload.",
+            )
+            self.assertEqual(1, calls, "The handler must not run again for an idempotent retry.")
 
 
 class IdempotencyConflictTests(unittest.TestCase):
