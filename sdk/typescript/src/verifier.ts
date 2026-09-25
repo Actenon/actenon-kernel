@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { canonicalizeBytes, sha256Hex } from "./canonical.js";
 import { VerificationError } from "./errors.js";
+import { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
 import type {
   ActionIntent,
   ActionSpec,
@@ -178,8 +179,11 @@ function parseActionHashSpec(raw: unknown, fieldName: string): PCCB["action_hash
   const algorithm = requireString(data.algorithm, `${fieldName}.algorithm`, "INVALID_PCCB");
   const canonicalization = requireString(data.canonicalization, `${fieldName}.canonicalization`, "INVALID_PCCB");
   const value = requireString(data.value, `${fieldName}.value`, "INVALID_PCCB");
-  if (algorithm !== "sha-256" || canonicalization !== "RFC8785-JCS") {
-    throw new VerificationError("INVALID_PCCB", `${fieldName} must declare sha-256 and RFC8785-JCS.`);
+  if (algorithm !== "sha-256" || !isAcceptedCanonicalizationProfile(canonicalization)) {
+    throw new VerificationError(
+      "INVALID_PCCB",
+      `${fieldName} must declare sha-256 and ${ACCEPTED_CANONICALIZATION_PROFILES.join(" or ")}.`,
+    );
   }
   return {
     algorithm,
@@ -476,7 +480,10 @@ export class VerifierSDK {
     if (!isDeepStrictEqual(pccb.target, intent.target)) {
       throw new VerificationError("TARGET_MISMATCH", "The proof target does not exactly match the action intent.");
     }
-    if (pccb.action_hash.algorithm !== "sha-256" || pccb.action_hash.canonicalization !== "RFC8785-JCS") {
+    if (
+      pccb.action_hash.algorithm !== "sha-256" ||
+      !isAcceptedCanonicalizationProfile(pccb.action_hash.canonicalization)
+    ) {
       throw new VerificationError(
         "ACTION_HASH_ALGORITHM_INVALID",
         "The proof action hash metadata is invalid.",

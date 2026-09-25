@@ -13,6 +13,12 @@ use crate::types::{
 
 pub const DEFAULT_CLOCK_SKEW_TOLERANCE: Duration = Duration::ZERO;
 
+/// Canonicalization profile labels a verifier accepts for a PCCB action hash.
+/// New proofs carry `ACTENON-JCS-STRICT-1`; `RFC8785-JCS` is the legacy alias
+/// for the same serialisation (actenon-protocol
+/// `ACCEPTED_CANONICALISATION_PROFILES`).
+pub const ACCEPTED_CANONICALIZATION_PROFILES: [&str; 2] = ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"];
+
 pub fn parse_action_intent_json(raw: &[u8]) -> Result<ActionIntent, VerificationError> {
     let intent: ActionIntent =
         decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
@@ -187,7 +193,8 @@ impl<V: SignatureVerifier> Verifier<V> {
             ));
         }
         if normalized_pccb.action_hash.algorithm != "sha-256"
-            || normalized_pccb.action_hash.canonicalization != "RFC8785-JCS"
+            || !ACCEPTED_CANONICALIZATION_PROFILES
+                .contains(&normalized_pccb.action_hash.canonicalization.as_str())
         {
             return Err(VerificationError::new(
                 VerificationErrorCode::ActionHashAlgorithmInvalid,

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -6,12 +7,15 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildLocalProofVerifier,
+  canonicalizeBytes,
+  LOCAL_PROOF_SECRET,
   VerificationError,
   VerifierSDK,
   type ActionIntent,
   type PCCB,
   type VerificationContext,
 } from "../src/index.js";
+import type { CanonicalValue } from "../src/canonical.js";
 
 interface Mutation {
   document: "intent" | "pccb" | "context";
@@ -97,5 +101,53 @@ test("shared verifier SDK conformance vectors", async (t) => {
         },
       );
     });
+  }
+});
+
+// The kernel mints every new PCCB with the ACTENON-JCS-STRICT-1 action-hash
+// label (actenon-protocol >= 1.1); RFC8785-JCS is the accepted legacy alias.
+// The shared vectors only carry the legacy label, so re-label the base proof,
+// re-sign it with the public local development key, and require the same
+// verdicts the Python reference gives.
+function relabelAndResign(pccb: PCCB, canonicalization: string): PCCB {
+  const relabelled = structuredClone(pccb) as unknown as Record<string, unknown>;
+  (relabelled.action_hash as Record<string, unknown>).canonicalization = canonicalization;
+  const { signature, ...unsigned } = relabelled;
+  const value = createHmac("sha256", LOCAL_PROOF_SECRET)
+    .update(canonicalizeBytes(unsigned as CanonicalValue))
+    .digest("base64url");
+  return { ...relabelled, signature: { ...(signature as object), value } } as unknown as PCCB;
+}
+
+test("verifier accepts both accepted canonicalization profile labels", async () => {
+  const manifest = await loadJson<VectorManifest>("cases.json");
+  const intent = await loadJson<ActionIntent>(manifest.base.intent);
+  const basePccb = await loadJson<PCCB>(manifest.base.pccb);
+  for (const label of ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"]) {
+    const sdk = new VerifierSDK(buildLocalProofVerifier());
+    const verified = sdk.verify({
+      intent: structuredClone(intent),
+      pccb: relabelAndResign(basePccb, label),
+      context: structuredClone(manifest.base.context),
+    });
+    assert.equal(verified.pccb.action_hash.canonicalization, label);
+  }
+});
+
+test("verifier refuses an unknown canonicalization profile label", async () => {
+  const manifest = await loadJson<VectorManifest>("cases.json");
+  const intent = await loadJson<ActionIntent>(manifest.base.intent);
+  const basePccb = await loadJson<PCCB>(manifest.base.pccb);
+  for (const label of ["actenon-jcs-sha256-v1", "JCS", ""]) {
+    const sdk = new VerifierSDK(buildLocalProofVerifier());
+    assert.throws(
+      () =>
+        sdk.verify({
+          intent: structuredClone(intent),
+          pccb: relabelAndResign(basePccb, label),
+          context: structuredClone(manifest.base.context),
+        }),
+      (error: unknown) => error instanceof VerificationError,
+    );
   }
 });

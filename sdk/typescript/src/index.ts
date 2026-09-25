@@ -29,6 +29,7 @@ export {
 } from "./trust-artifacts.js";
 export { buildLocalProofVerifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
 export { DEFAULT_CLOCK_SKEW_TOLERANCE_MS, VerifierSDK } from "./verifier.js";
+export { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
 export type { SignatureVerifier } from "./signers.js";
 export type { VerifierSDKOptions } from "./verifier.js";
 export type {
@@ -53,6 +54,7 @@ export type {
 export type {
   ActionHashSpec,
   ActionIntent,
+  CanonicalizationProfile,
   ActionSpec,
   AudienceRef,
   JsonScalar,
