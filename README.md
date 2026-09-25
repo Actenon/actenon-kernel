@@ -251,17 +251,22 @@ verifier.verify(intent, pccb, context)
 
 ```python
 from actenon.boundary import BoundaryVerifier, BoundaryVerificationRequest
+from actenon.proof import PCCBVerifier
 
-verifier = BoundaryVerifier()
+# The trust root is mandatory: without a PCCBVerifier every proof is
+# refused (ISSUER_UNTRUSTED). Pass a durable replay_store= when more than
+# one worker serves the same boundary.
+verifier = BoundaryVerifier(pccb_verifier=PCCBVerifier(signer=issuer_verifier))
 result = verifier.verify_boundary(BoundaryVerificationRequest(
-    proof_token="v1.eyJ...",
-    action_type="payment.refund",
-    action_hash="abc123...",
-    audience="service:payments",
+    proof_token=proof_header,         # PCCB JSON, or "v1." + base64url(PCCB JSON)
+    intent=action_intent,             # the exact Action Intent this request performs
+    action_type="payment.refund",     # must equal the intent's action name
+    action_hash="",                   # optional; when set, must equal the proof's action hash
+    audience="service:payments",      # this boundary's identity (required)
 ))
-# result.valid         → True / False
-# result.refusal_code  → "PROOF_INVALID" | "REPLAY_DETECTED" | ""
-# result.proof_id      → "proof_..."  (for receipt correlation)
+# result.valid         → True only after signature + exact-action verification
+# result.refusal_code  → "PROOF_INVALID" | "AUDIENCE_MISMATCH" | "REPLAY_DETECTED" | ...
+# result.proof_id      → the PCCB's pccb_id (for receipt correlation)
 ```
 
 ## Use as a minter + executor (brokered mode, full local proof)
