@@ -40,6 +40,7 @@ from actenon.preflight import (
     Requirement,
 )
 from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, VerifierDisclosureMode, build_local_proof_signer
+from actenon.proof.service import default_disclosure_mode
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
 
@@ -192,6 +193,7 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        disclosure_mode: VerifierDisclosureMode | None = None,
     ) -> None:
         if verifier is None:
             raise ValueError(
@@ -214,7 +216,10 @@ class ActenonGate:
         self._intake = ActionIntentIntakeService()
         self._minter = PCCBMinter(signer=signer, issuer=self.issuer) if signer is not None else None
         self._executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
+            # Granular codes for local development; in a production-like
+            # environment (where LOCAL_DEBUG is refused) pre-authentication
+            # failures collapse to PROOF_INVALID.
+            proof_verifier=PCCBVerifier(verifier, disclosure_mode=disclosure_mode or default_disclosure_mode()),
             credential_broker=credential_broker or InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             replay_protection=replay_protection,
@@ -336,6 +341,7 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        disclosure_mode: VerifierDisclosureMode | None = None,
     ) -> "ActenonGate":
         """Build a local-only HMAC gate for demos and development.
 
@@ -361,6 +367,7 @@ class ActenonGate:
             clock=clock,
             request_id_factory=request_id_factory,
             escrow_id_factory=escrow_id_factory,
+            disclosure_mode=disclosure_mode,
         )
 
     def mint_proof(

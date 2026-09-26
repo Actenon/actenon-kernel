@@ -104,7 +104,7 @@ func (v *Verifier) Verify(intent ActionIntent, pccb PCCB, context VerificationCo
         if !normalizedEqual(normalizedPCCB.Target, normalizedIntent.Target) {
                 return VerifiedProtectedRequest{}, newVerificationError(ErrTargetMismatch, "The proof target does not exactly match the action intent.", nil)
         }
-        if normalizedPCCB.ActionHash.Algorithm != "sha-256" || normalizedPCCB.ActionHash.Canonicalization != "RFC8785-JCS" {
+        if normalizedPCCB.ActionHash.Algorithm != "sha-256" || !IsAcceptedCanonicalizationProfile(normalizedPCCB.ActionHash.Canonicalization) {
                 return VerifiedProtectedRequest{}, newVerificationError(ErrActionHashAlgorithmInvalid, "The proof action hash metadata is invalid.", nil)
         }
 

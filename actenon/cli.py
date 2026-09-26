@@ -123,7 +123,57 @@ def _resolve_verification_time(raw: str, pccb: PCCB) -> datetime:
     return parse_timestamp(raw, "verification_time")
 
 
-def _resolve_signature_verifier(pccb: PCCB, verifier_name: str) -> SignatureVerifier:
+class _PublicJwkVerifier:
+    """Verify a PCCB signature against one explicitly supplied public JWK.
+
+    Uses the same hardened path as well-known key discovery (kid and alg
+    binding, raw 32-byte Ed25519 keys, RS256 >= 2048 bits) without any
+    network access.
+    """
+
+    def __init__(self, jwk: dict[str, Any]) -> None:
+        from actenon.proof.signers.well_known import (
+            DiscoveredVerificationKey,
+            ResolvedVerificationKey,
+        )
+
+        if not isinstance(jwk.get("kid"), str) or not jwk["kid"]:
+            raise ValueError("the public JWK must carry a 'kid' naming the proof's signing key")
+        algorithm = jwk.get("alg") or ("EdDSA" if jwk.get("kty") == "OKP" else "RS256")
+        self.key_id = jwk["kid"]
+        self.algorithm = algorithm
+        self._resolved = ResolvedVerificationKey(
+            issuer=PartyRef(type="service", id="cli-supplied-public-key"),
+            origin="cli:--public-key-jwk",
+            published_at=datetime.now(timezone.utc),
+            key=DiscoveredVerificationKey(
+                key_id=self.key_id,
+                algorithm=algorithm,
+                use=("proof_issuance",),
+                status="active",
+                public_key_jwk=dict(jwk),
+            ),
+        )
+
+    def verify(self, payload: bytes, signature) -> bool:
+        from actenon.proof.signers.well_known import (
+            WellKnownKeyResolverError,
+            _verify_signature_with_resolved_key,
+        )
+
+        if signature.key_id != self.key_id or signature.algorithm != self.algorithm:
+            return False
+        try:
+            return _verify_signature_with_resolved_key(
+                payload=payload, signature=signature, resolved_key=self._resolved
+            )
+        except WellKnownKeyResolverError:
+            return False
+
+
+def _resolve_signature_verifier(pccb: PCCB, verifier_name: str, public_key_jwk: str | None = None) -> SignatureVerifier:
+    if public_key_jwk is not None:
+        return _PublicJwkVerifier(_load_public_jwk(path=public_key_jwk, raw_json=None))
     if verifier_name == "local":
         signature_verifier = build_local_proof_signer()
         if pccb.signature.key_id != signature_verifier.key_id:
@@ -1051,7 +1101,7 @@ def _cmd_verify_proof(args: argparse.Namespace) -> int:
     try:
         intent = _load_intent(args.intent)
         pccb = _load_pccb(args.pccb)
-        signature_verifier = _resolve_signature_verifier(pccb, args.signer)
+        signature_verifier = _resolve_signature_verifier(pccb, args.signer, getattr(args, "public_key_jwk", None))
         sdk = VerifierSDK(signature_verifier)
         verification_time = _resolve_verification_time(args.verification_time, pccb)
         context = sdk.build_context(
@@ -1090,18 +1140,64 @@ def _cmd_verify_proof(args: argparse.Namespace) -> int:
     return 0
 
 
+_UNSIGNED_OUTCOME_NOTE = (
+    "Not verified: the {kind} itself carries no signature (v1), so its origin and "
+    "integrity are established only through the linked artifacts above. For signed "
+    "provenance use attest-{kind} / verify-{kind}-attestation."
+)
+
+
+def _verify_linked_pccb_signature(pccb: PCCB, args: argparse.Namespace) -> str:
+    """Verify a linked PCCB's signature when a verifier is available; say so either way."""
+
+    try:
+        verifier = _resolve_signature_verifier(pccb, "auto", getattr(args, "public_key_jwk", None))
+    except ValueError as exc:
+        return f"PCCB signature: NOT verified ({exc})"
+    from actenon.proof.canonical import canonicalize_bytes
+
+    if not verifier.verify(canonicalize_bytes(pccb.unsigned_payload()), pccb.signature):
+        raise ValueError("linked PCCB signature does not verify; refusing to vouch for the outcome")
+    return f"PCCB signature: verified (key_id {pccb.signature.key_id})"
+
+
+def _refuse_structure_only(kind: str, args: argparse.Namespace) -> int | None:
+    if args.structure_only:
+        print(f"{kind.capitalize()} structure valid (structure only).")
+        print(
+            f"NOT verified: no linked artifact was supplied, so nothing about this {kind}'s "
+            "origin, integrity, or bindings was checked."
+        )
+        return 0
+    print(
+        f"{kind.capitalize()} NOT verified: only its structure was checked. Supply --intent, "
+        "--pccb, and/or a linked outcome to cross-check it, or pass --structure-only to "
+        "request a structure check explicitly.",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def _cmd_verify_receipt(args: argparse.Namespace) -> int:
     receipt = _load_receipt(args.receipt)
     intent = _load_intent(args.intent) if args.intent else None
     pccb = _load_pccb(args.pccb) if args.pccb else None
     refusal = _load_refusal(args.refusal) if args.refusal else None
+    if intent is None and pccb is None and refusal is None:
+        return _refuse_structure_only("receipt", args)
     _verify_receipt_links(receipt, intent=intent, pccb=pccb, refusal=refusal)
-    print("Receipt verified.")
+    signature_line = _verify_linked_pccb_signature(pccb, args) if pccb is not None else None
+    print("Receipt links verified.")
     print(f"Receipt: {receipt.receipt_id}")
     print(f"Outcome: {receipt.outcome}")
     print(f"Intent: {receipt.intent_id}")
     if receipt.phase is not None:
         print(f"Phase: {receipt.phase}")
+    checked = [name for name, value in (("action intent", intent), ("PCCB", pccb), ("refusal", refusal)) if value is not None]
+    print(f"Checked against: {', '.join(checked)}")
+    if signature_line is not None:
+        print(signature_line)
+    print(_UNSIGNED_OUTCOME_NOTE.format(kind="receipt"))
     return 0
 
 
@@ -1110,11 +1206,19 @@ def _cmd_verify_refusal(args: argparse.Namespace) -> int:
     intent = _load_intent(args.intent) if args.intent else None
     pccb = _load_pccb(args.pccb) if args.pccb else None
     receipt = _load_receipt(args.receipt) if args.receipt else None
+    if intent is None and pccb is None and receipt is None:
+        return _refuse_structure_only("refusal", args)
     _verify_refusal_links(refusal, intent=intent, pccb=pccb, receipt=receipt)
-    print("Refusal verified.")
+    signature_line = _verify_linked_pccb_signature(pccb, args) if pccb is not None else None
+    print("Refusal links verified.")
     print(f"Refusal: {refusal.refusal_id}")
     print(f"Category: {refusal.category}")
     print(f"Code: {refusal.reason_code}")
+    checked = [name for name, value in (("action intent", intent), ("PCCB", pccb), ("receipt", receipt)) if value is not None]
+    print(f"Checked against: {', '.join(checked)}")
+    if signature_line is not None:
+        print(signature_line)
+    print(_UNSIGNED_OUTCOME_NOTE.format(kind="refusal"))
     return 0
 
 
@@ -1598,6 +1702,11 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("auto", "local"),
         help="Signature verifier to use. 'auto' currently supports the open-source local trust root only.",
     )
+    verify_proof.add_argument(
+        "--public-key-jwk",
+        help="Path to the issuer's public JWK (Ed25519 OKP or RSA, with 'kid' equal to the proof's "
+        "signature.key_id). Verifies asymmetric proofs offline; overrides --signer.",
+    )
     verify_proof.set_defaults(func=_cmd_verify_proof)
 
     verify_receipt = subparsers.add_parser("verify-receipt", help="Validate a receipt artifact and optional linked artifacts.")
@@ -1605,6 +1714,12 @@ def build_parser() -> argparse.ArgumentParser:
     verify_receipt.add_argument("--intent", help="Optional Action Intent JSON to cross-check against the receipt.")
     verify_receipt.add_argument("--pccb", help="Optional PCCB JSON to cross-check against the receipt.")
     verify_receipt.add_argument("--refusal", help="Optional refusal JSON to cross-check against the receipt.")
+    verify_receipt.add_argument("--public-key-jwk", help="Issuer public JWK used to verify a linked --pccb signature.")
+    verify_receipt.add_argument(
+        "--structure-only",
+        action="store_true",
+        help="Explicitly request a structure-only check when no linked artifact is supplied (nothing is verified).",
+    )
     verify_receipt.set_defaults(func=_cmd_verify_receipt)
 
     verify_refusal = subparsers.add_parser("verify-refusal", help="Validate a refusal artifact and optional linked artifacts.")
@@ -1612,6 +1727,12 @@ def build_parser() -> argparse.ArgumentParser:
     verify_refusal.add_argument("--intent", help="Optional Action Intent JSON to cross-check against the refusal.")
     verify_refusal.add_argument("--pccb", help="Optional PCCB JSON to cross-check against the refusal.")
     verify_refusal.add_argument("--receipt", help="Optional receipt JSON to cross-check against the refusal.")
+    verify_refusal.add_argument("--public-key-jwk", help="Issuer public JWK used to verify a linked --pccb signature.")
+    verify_refusal.add_argument(
+        "--structure-only",
+        action="store_true",
+        help="Explicitly request a structure-only check when no linked artifact is supplied (nothing is verified).",
+    )
     verify_refusal.set_defaults(func=_cmd_verify_refusal)
 
     attest_receipt = subparsers.add_parser("attest-receipt", help="Create an opt-in signed attestation envelope for a receipt.")

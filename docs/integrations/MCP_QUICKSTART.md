@@ -23,6 +23,26 @@ other MCP client):
 }
 ```
 
+In Claude Code, one command registers the same server:
+
+```bash
+claude mcp add actenon -- uvx --from 'actenon-kernel[mcp]' actenon-mcp --demo
+```
+
+`claude mcp list` then health-checks it and should report `actenon` as
+connected. Add `--scope user` before the name to make it available in every
+project rather than only the current one. If you write this command by hand,
+two details matter:
+
+- **`--from` goes before `actenon-mcp`.** `uvx` treats the first word that is
+  not one of its own options as the command to run, and passes everything
+  after it to that command. `uvx actenon-kernel --from ...` therefore runs
+  the kernel CLI rather than the MCP server, and the client reports the
+  connection as closed.
+- **Quote `'actenon-kernel[mcp]'`.** zsh (the macOS default shell) treats the
+  brackets as a glob and aborts with `no matches found` before the command
+  runs.
+
 `uvx` fetches and runs the package on demand, so there is nothing to install
 first. Verified from a clean machine — this is the real client handshake, not
 a mock-up:
@@ -92,7 +112,13 @@ for an offline demo server with an ephemeral key.
 ```
 
 Demo mode is itself refused if the process looks production-like
-(`ACTENON_ENV=production` or an Actenon production flag).
+(`ACTENON_ENV` set to anything other than `local`, `dev`, `test`, or `demo`,
+or an Actenon production flag such as `ACTENON_PRODUCTION=1`).
+
+An unparseable or schema-invalid `intent` or `proof` is answered with a typed
+refusal (`INTENT_MALFORMED` / `PROOF_MALFORMED`) rather than a tool error, and
+does not consume the proof. Arguments that fail the tool's own JSON-schema
+validation are rejected by the MCP SDK before the tool runs.
 
 ## A real conversation
 
@@ -113,10 +139,10 @@ scope, succeeds, replays the proof, is refused, and fetches the receipt.
    pccb_id     : pccb_2ae82ea48d144adc8215df41de2233fe
    scoped to   : {'amount_cents': 2500, 'currency': 'USD'}
 
-3. The agent widens the amount to $5,000.00 and presents the SAME proof.
+3. The agent widens the amount to $5,000.00 and presents the SAME proof and granted intent.
    outcome     : REFUSED
    reason_code : ACTION_MISMATCH
-   reason      : The proof action does not exactly match the action intent.
+   reason      : The tool's parameters do not exactly match the supplied intent (canonical comparison; floats are never accepted).
    refusal_id  : rfsl_8d475ed4b4f044b3b4dd0e3351bc538c
 
 4. The agent retries the refund it was actually approved for.
@@ -169,6 +195,13 @@ window. When you retry, pass back the `intent` the proof was issued for:
 
 Rebuilding a lookalike intent produces a new `intent_id` and is refused as
 `INTENT_MISMATCH`. That is not a rough edge — it is the binding working.
+
+The `intent` only identifies which authorisation the proof was issued for; it
+never replaces the tool arguments. `action_name`, `capability`, `parameters`
+(compared canonically: `2500` is not `2500.0`), `target_type`, and `target_id`
+must equal the intent exactly, or the call is refused as `ACTION_MISMATCH` /
+`TARGET_MISMATCH` before any replay state is consumed. Widening the amount while
+passing back the granted intent is exactly the case step 3 shows.
 
 ## The Execution Gap
 
