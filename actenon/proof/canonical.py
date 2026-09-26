@@ -4,6 +4,8 @@ import json
 from hashlib import sha256
 from typing import Any
 
+from actenon_protocol.canonicalisation import CanonicalisationError
+
 from actenon.core.json import DEFAULT_MAX_JSON_DEPTH, JSONInputTooLargeError, validate_json_depth
 
 
@@ -23,7 +25,6 @@ DEFAULT_MAX_CANONICAL_OUTPUT_BYTES = 1_048_576
 # github.com/Actenon/actenon-protocol and
 # canonicalisation/ACTENON-JCS-STRICT-1.md for the authoritative
 # specification.
-from actenon_protocol.canonicalisation import CanonicalisationError
 from actenon_protocol import (
     CANONICALISATION_PROFILE as _PROTOCOL_CANONICALISATION_PROFILE,
     LEGACY_CANONICALISATION_PROFILE as _PROTOCOL_LEGACY_CANONICALISATION_PROFILE,
