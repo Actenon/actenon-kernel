@@ -23,6 +23,7 @@ DEFAULT_MAX_CANONICAL_OUTPUT_BYTES = 1_048_576
 # github.com/Actenon/actenon-protocol and
 # canonicalisation/ACTENON-JCS-STRICT-1.md for the authoritative
 # specification.
+from actenon_protocol.canonicalisation import CanonicalisationError
 from actenon_protocol import (
     CANONICALISATION_PROFILE as _PROTOCOL_CANONICALISATION_PROFILE,
     LEGACY_CANONICALISATION_PROFILE as _PROTOCOL_LEGACY_CANONICALISATION_PROFILE,
@@ -49,6 +50,14 @@ ACCEPTED_CANONICALIZATION_PROFILES = _PROTOCOL_ACCEPTED_CANONICALISATION_PROFILE
 
 
 def _canonicalize_string(value: str) -> str:
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        # A lone surrogate is not a Unicode scalar value and has no UTF-8
+        # form; refuse it as a canonicalisation failure, not a codec crash.
+        raise CanonicalisationError(
+            "strings must contain only Unicode scalar values (lone surrogate found)"
+        ) from exc
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
@@ -60,7 +69,9 @@ def _canonicalize_json(value: Any) -> str:
     if value is False:
         return "false"
     if isinstance(value, int):
-        return str(value)
+        # int.__repr__, not str(): on Python 3.10 str() of an IntEnum is
+        # "HTTPStatus.OK", not "200".
+        return int.__repr__(value)
     if isinstance(value, float):
         raise TypeError("floating-point values are not supported in canonical action hashing")
     if isinstance(value, str):

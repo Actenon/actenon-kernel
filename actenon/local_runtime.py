@@ -46,7 +46,7 @@ from actenon.policy import (
     build_invoice_payment_policy_engine,
 )
 from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_action_hash_input, build_local_proof_signer
-from actenon.proof.canonical import sha256_hex
+from actenon.proof.canonical import CANONICALIZATION_PROFILE, sha256_hex
 from actenon.preflight import PreflightDecision, PreflightEngine
 from actenon.receipts import (
     JsonArtifactOutcomeWriter,
@@ -1422,7 +1422,7 @@ def _minimal_simulation_pccb_payload(intent: Any, context: DynamicContextInput) 
         "nonce": f"nonce-broker-demo-{intent.intent_id}",
         "action_hash": {
             "algorithm": "sha-256",
-            "canonicalization": "actenon-jcs-sha256-v1",
+            "canonicalization": CANONICALIZATION_PROFILE,
             "value": action_hash_value,
         },
         "signature": {
