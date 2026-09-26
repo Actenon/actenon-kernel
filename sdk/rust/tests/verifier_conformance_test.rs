@@ -256,3 +256,54 @@ fn verifier_refuses_unknown_canonicalization_profile_labels() {
         assert!(verify_relabelled(label).is_err(), "{label} must be refused");
     }
 }
+
+// Fractional-second timestamps under ACTENON-JCS-STRICT-1: timestamps must be
+// re-serialised exactly as the Python reference does (six-digit microseconds)
+// and time windows compared at microsecond precision.
+#[test]
+fn shared_fractional_second_timestamp_vectors() {
+    let manifest = load_value("timestamp_cases.json");
+    let skew = Duration::milliseconds(
+        manifest["clock_skew_tolerance_ms"]
+            .as_i64()
+            .expect("skew must be an integer"),
+    );
+    for vector in manifest["cases"]
+        .as_array()
+        .expect("cases must be an array")
+    {
+        let id = vector["id"].as_str().expect("id must be a string");
+        let intent_document = load_value(vector["intent"].as_str().expect("intent path"));
+        let pccb_document = load_value(vector["pccb"].as_str().expect("pccb path"));
+        let verifier = Verifier::new(build_local_proof_verifier())
+            .with_clock_skew_tolerance(skew)
+            .expect("skew must be valid");
+        let intent = parse_action_intent_json(
+            &serde_json::to_vec(&intent_document).expect("intent must encode"),
+        )
+        .unwrap_or_else(|error| panic!("{id}: intent must parse: {error}"));
+        let pccb = parse_pccb_json(&serde_json::to_vec(&pccb_document).expect("pccb must encode"))
+            .unwrap_or_else(|error| panic!("{id}: pccb must parse: {error}"));
+        let context = verifier
+            .build_context(context_from_value(&vector["context"]))
+            .expect("context must parse");
+        let result = verifier.verify(intent, pccb, context);
+        let expected = &vector["expected"];
+        if expected["outcome"] == "verified" {
+            let verified =
+                result.unwrap_or_else(|error| panic!("{id} expected verification, got {error}"));
+            assert_eq!(
+                verified.pccb.action_hash.canonicalization,
+                "ACTENON-JCS-STRICT-1"
+            );
+            continue;
+        }
+        let error = result.expect_err("refusal vector must fail");
+        assert_eq!(
+            error.code().as_str(),
+            expected["reason_code"],
+            "{id} reason code"
+        );
+        assert_eq!(error.message(), expected["message"], "{id} public message");
+    }
+}

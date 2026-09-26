@@ -54,23 +54,72 @@ function requireRecordArray(value: unknown, fieldName: string, code: "INVALID_PC
   return value.map((item, index) => requireRecord(item, `${fieldName}[${index}]`) as Record<string, JsonValue>);
 }
 
-function parseTimestamp(raw: unknown, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB" | "INVALID_CONTEXT"): Date {
+const RFC3339_TIMESTAMP =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Parse an RFC 3339 timestamp to microseconds since the Unix epoch.
+ *
+ * Microseconds, not milliseconds: the Python reference keeps six fractional
+ * digits, so both the re-serialised (signed) form and the time-window
+ * comparison must too. Digits beyond six are truncated, as Python does.
+ */
+function parseTimestampMicros(
+  raw: unknown,
+  fieldName: string,
+  code: "INVALID_INTENT" | "INVALID_PCCB" | "INVALID_CONTEXT",
+): number {
   if (typeof raw !== "string") {
     throw new VerificationError(code, `${fieldName} must be an RFC3339 timestamp string.`);
   }
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) {
-    throw new VerificationError("INVALID_TIMESTAMP", `${fieldName} must be an RFC3339 timestamp string.`);
+  const match = RFC3339_TIMESTAMP.exec(raw);
+  const invalid = () =>
+    new VerificationError("INVALID_TIMESTAMP", `${fieldName} must be an RFC3339 timestamp string.`);
+  if (match === null) {
+    throw invalid();
   }
-  return parsed;
+  const field = (index: number): number => Number(match[index] ?? "");
+  const [year, month, day, hour, minute, second] = [field(1), field(2), field(3), field(4), field(5), field(6)];
+  const wholeMs = Date.UTC(year, month - 1, day, hour, minute, second);
+  const check = new Date(wholeMs);
+  if (
+    year < 1 ||
+    check.getUTCFullYear() !== year ||
+    check.getUTCMonth() !== month - 1 ||
+    check.getUTCDate() !== day ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59
+  ) {
+    throw invalid();
+  }
+  let offsetMinutes = 0;
+  const zone = match[8] ?? "Z";
+  if (zone !== "Z") {
+    const hours = Number(zone.slice(1, 3));
+    const minutes = Number(zone.slice(4, 6));
+    if (hours > 23 || minutes > 59) {
+      throw invalid();
+    }
+    offsetMinutes = (zone[0] === "-" ? -1 : 1) * (hours * 60 + minutes);
+  }
+  const micros = Number((match[7] ?? "").padEnd(6, "0").slice(0, 6));
+  return (wholeMs / 1000 - offsetMinutes * 60) * 1_000_000 + micros;
 }
 
-function formatTimestamp(date: Date): string {
-  return date.toISOString().replace(".000Z", "Z");
+function formatTimestampMicros(epochMicros: number): string {
+  const micros = ((epochMicros % 1_000_000) + 1_000_000) % 1_000_000;
+  const seconds = (epochMicros - micros) / 1_000_000;
+  const whole = new Date(seconds * 1000).toISOString().slice(0, 19);
+  return micros === 0 ? `${whole}Z` : `${whole}.${String(micros).padStart(6, "0")}Z`;
+}
+
+function contextNowMicros(now: Date | string): number {
+  return parseTimestampMicros(typeof now === "string" ? now : now.toISOString(), "context.now", "INVALID_CONTEXT");
 }
 
 function normalizeTimestamp(raw: string, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB"): string {
-  return formatTimestamp(parseTimestamp(raw, fieldName, code));
+  return formatTimestampMicros(parseTimestampMicros(raw, fieldName, code));
 }
 
 function parseTenantRef(raw: unknown, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB"): TenantRef {
@@ -287,8 +336,8 @@ export class VerifierSDK {
       throw new VerificationError("INVALID_INTENT", "contract must declare action_intent v1.");
     }
     requireString(data.intent_id, "action_intent.intent_id", "INVALID_INTENT");
-    parseTimestamp(data.issued_at, "action_intent.issued_at", "INVALID_INTENT");
-    parseTimestamp(data.expires_at, "action_intent.expires_at", "INVALID_INTENT");
+    parseTimestampMicros(data.issued_at, "action_intent.issued_at", "INVALID_INTENT");
+    parseTimestampMicros(data.expires_at, "action_intent.expires_at", "INVALID_INTENT");
     parseTenantRef(data.tenant, "action_intent.tenant", "INVALID_INTENT");
     parsePartyRef(data.requester, "action_intent.requester", "INVALID_INTENT");
     parseActionSpec(data.action, "action_intent.action", "INVALID_INTENT");
@@ -336,9 +385,9 @@ export class VerifierSDK {
       throw new VerificationError("INVALID_PCCB", "contract must declare pccb v1.");
     }
     requireString(data.pccb_id, "pccb.pccb_id", "INVALID_PCCB");
-    parseTimestamp(data.issued_at, "pccb.issued_at", "INVALID_PCCB");
-    parseTimestamp(data.not_before, "pccb.not_before", "INVALID_PCCB");
-    parseTimestamp(data.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    parseTimestampMicros(data.issued_at, "pccb.issued_at", "INVALID_PCCB");
+    parseTimestampMicros(data.not_before, "pccb.not_before", "INVALID_PCCB");
+    parseTimestampMicros(data.expires_at, "pccb.expires_at", "INVALID_PCCB");
     parsePartyRef(data.issuer, "pccb.issuer", "INVALID_PCCB");
     parsePartyRef(data.subject, "pccb.subject", "INVALID_PCCB");
     parseTenantRef(data.tenant, "pccb.tenant", "INVALID_PCCB");
@@ -390,7 +439,7 @@ export class VerifierSDK {
   buildContext(input: BuildContextInput): VerificationContext {
     requireString(input.request_id, "context.request_id", "INVALID_CONTEXT");
     const audience = parseAudienceRef(input.audience, "context.audience", "INVALID_CONTEXT");
-    parseTimestamp(typeof input.now === "string" ? input.now : input.now.toISOString(), "context.now", "INVALID_CONTEXT");
+    contextNowMicros(input.now);
     const scope_capabilities = requireStringArray(
       input.scope_capabilities,
       "context.scope_capabilities",
@@ -433,14 +482,15 @@ export class VerifierSDK {
       contextInput.resource_selectors = input.context.resource_selectors;
     }
     const context = this.buildContext(contextInput);
-    const now = parseTimestamp(typeof context.now === "string" ? context.now : context.now.toISOString(), "context.now", "INVALID_CONTEXT");
-    const notBefore = parseTimestamp(pccb.not_before, "pccb.not_before", "INVALID_PCCB");
-    const expiresAt = parseTimestamp(pccb.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    const now = contextNowMicros(context.now);
+    const notBefore = parseTimestampMicros(pccb.not_before, "pccb.not_before", "INVALID_PCCB");
+    const expiresAt = parseTimestampMicros(pccb.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    const skewMicros = this.clockSkewToleranceMs * 1000;
 
-    if (now.getTime() + this.clockSkewToleranceMs < notBefore.getTime()) {
+    if (now + skewMicros < notBefore) {
       throw new VerificationError("PROOF_NOT_YET_VALID", "The proof is not yet valid.");
     }
-    if (now.getTime() - this.clockSkewToleranceMs > expiresAt.getTime()) {
+    if (now - skewMicros > expiresAt) {
       throw new VerificationError("PROOF_EXPIRED", "The proof has expired.");
     }
 

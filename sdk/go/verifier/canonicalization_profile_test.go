@@ -106,3 +106,52 @@ func TestVerifierRefusesUnknownCanonicalizationProfileLabels(t *testing.T) {
 		})
 	}
 }
+
+// Fractional-second timestamps under ACTENON-JCS-STRICT-1: timestamps must be
+// re-serialised exactly as the Python reference does (six-digit microseconds)
+// and time windows compared at microsecond precision.
+func TestSharedFractionalSecondTimestampVectors(t *testing.T) {
+	manifest := loadProfileVector(t, "timestamp_cases.json")
+	skew := time.Duration(manifest["clock_skew_tolerance_ms"].(float64)) * time.Millisecond
+	for _, raw := range manifest["cases"].([]any) {
+		vector := raw.(map[string]any)
+		t.Run(vector["id"].(string), func(t *testing.T) {
+			intentRaw, _ := json.Marshal(loadProfileVector(t, vector["intent"].(string)))
+			pccbRaw, _ := json.Marshal(loadProfileVector(t, vector["pccb"].(string)))
+			contextRaw := vector["context"].(map[string]any)
+			now, err := time.Parse(time.RFC3339Nano, contextRaw["now"].(string))
+			if err != nil {
+				t.Fatalf("invalid context time: %v", err)
+			}
+			audience := contextRaw["audience"].(map[string]any)
+			var capabilities []string
+			for _, value := range contextRaw["scope_capabilities"].([]any) {
+				capabilities = append(capabilities, value.(string))
+			}
+			context := VerificationContext{
+				RequestID:         contextRaw["request_id"].(string),
+				Audience:          AudienceRef{Type: audience["type"].(string), ID: audience["id"].(string)},
+				Now:               now,
+				ScopeCapabilities: capabilities,
+			}
+			expected := vector["expected"].(map[string]any)
+			verified, err := NewVerifier(BuildLocalProofVerifier(), WithClockSkewTolerance(skew)).VerifyJSON(intentRaw, pccbRaw, context)
+			if expected["outcome"] == "verified" {
+				if err != nil {
+					t.Fatalf("expected verification, got %v", err)
+				}
+				if verified.PCCB.ActionHash.Canonicalization != "ACTENON-JCS-STRICT-1" {
+					t.Fatalf("unexpected label %s", verified.PCCB.ActionHash.Canonicalization)
+				}
+				return
+			}
+			var verificationErr *VerificationError
+			if !errors.As(err, &verificationErr) {
+				t.Fatalf("expected refusal, got %v", err)
+			}
+			if string(verificationErr.Code) != expected["reason_code"] || verificationErr.Message != expected["message"] {
+				t.Fatalf("expected %v %q, got %s %q", expected["reason_code"], expected["message"], verificationErr.Code, verificationErr.Message)
+			}
+		})
+	}
+}

@@ -151,3 +151,43 @@ test("verifier refuses an unknown canonicalization profile label", async () => {
     );
   }
 });
+
+interface TimestampCase {
+  id: string;
+  intent: string;
+  pccb: string;
+  context: VerificationContext;
+  expected: VectorCase["expected"];
+}
+
+// Fractional-second timestamps under ACTENON-JCS-STRICT-1: timestamps must be
+// re-serialised exactly as the Python reference does (six-digit microseconds)
+// and time windows compared at microsecond precision.
+test("shared fractional-second timestamp vectors", async (t) => {
+  const manifest = await loadJson<{ clock_skew_tolerance_ms: number; cases: TimestampCase[] }>(
+    "timestamp_cases.json",
+  );
+  for (const vector of manifest.cases) {
+    await t.test(vector.id, async () => {
+      const intent = await loadJson<ActionIntent>(vector.intent);
+      const pccb = await loadJson<PCCB>(vector.pccb);
+      const sdk = new VerifierSDK(buildLocalProofVerifier(), {
+        clockSkewToleranceMs: manifest.clock_skew_tolerance_ms,
+      });
+      if (vector.expected.outcome === "verified") {
+        const verified = sdk.verify({ intent, pccb, context: vector.context });
+        assert.equal(verified.pccb.action_hash.canonicalization, "ACTENON-JCS-STRICT-1");
+        return;
+      }
+      assert.throws(
+        () => sdk.verify({ intent, pccb, context: vector.context }),
+        (error: unknown) => {
+          assert.ok(error instanceof VerificationError);
+          assert.equal(error.code, vector.expected.reason_code);
+          assert.equal(error.message, vector.expected.message);
+          return true;
+        },
+      );
+    });
+  }
+});

@@ -58,7 +58,20 @@ func parseTimestamp(raw string, fieldName string, code VerificationErrorCode) (t
 	if err != nil {
 		return time.Time{}, newVerificationError(ErrInvalidTimestamp, fieldName+" must be an RFC3339 timestamp string.", nil)
 	}
-	return parsed.UTC(), nil
+	// The Python reference keeps microseconds: truncate anything finer so the
+	// re-serialised (signed) form and the time-window checks both match it.
+	return parsed.UTC().Truncate(time.Microsecond), nil
+}
+
+// formatTimestamp re-serialises a timestamp exactly as the Python reference
+// does: UTC, "Z", and six fractional digits only when the microsecond is
+// non-zero.
+func formatTimestamp(value time.Time) string {
+	value = value.UTC().Truncate(time.Microsecond)
+	if value.Nanosecond() == 0 {
+		return value.Format("2006-01-02T15:04:05Z")
+	}
+	return value.Format("2006-01-02T15:04:05.000000Z")
 }
 
 func normalizeTimestamp(raw string, fieldName string, code VerificationErrorCode) (string, error) {
@@ -66,7 +79,7 @@ func normalizeTimestamp(raw string, fieldName string, code VerificationErrorCode
 	if err != nil {
 		return "", err
 	}
-	return parsed.Format(time.RFC3339), nil
+	return formatTimestamp(parsed), nil
 }
 
 func normalizeActionIntent(intent ActionIntent) (ActionIntent, error) {
@@ -219,7 +232,7 @@ func normalizeVerificationContext(context VerificationContext) (VerificationCont
 	return VerificationContext{
 		RequestID:            context.RequestID,
 		Audience:             audience,
-		Now:                  context.Now.UTC(),
+		Now:                  context.Now.UTC().Truncate(time.Microsecond),
 		ScopeCapabilities:    capabilities,
 		ParameterConstraints: cloneJSONObject(context.ParameterConstraints),
 		ResourceSelectors:    cloneJSONObjects(context.ResourceSelectors),
