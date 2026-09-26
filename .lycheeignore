@@ -1,8 +1,0 @@
-# actenon-cloud is a private repository (source-available to Actenon org
-# members only), so its URL returns 404 to anonymous link checkers. The link
-# lives in the README ecosystem table, which is rendered verbatim from
-# actenon-protocol's ecosystem.yaml and gated by
-# `python -m actenon_protocol.ecosystem --check README.md --repo actenon-kernel`,
-# so it cannot be edited here. Drop this entry once the protocol stops linking
-# a private repository from public READMEs (or the repository becomes public).
-^https://github\.com/Actenon/actenon-cloud/?$
