@@ -116,3 +116,24 @@ def test_malformed_authority_reference_refuses(tmp_path, authority):
     out = gate.protect(action, gate.mint_proof(action, authority=authority), lambda: calls.append(1))
     assert not out.ok
     assert calls == []
+
+
+def test_gate_declared_capabilities_refuse_a_proof_for_another_capability(tmp_path):
+    # protocol/13 E1 at the gate: a gate that declares what its side effect
+    # performs must not run it for a valid proof of a different capability.
+    signer = _Ed25519Signer()
+    issuer_gate = ActenonGate(verifier=signer, signer=signer, audience="service:payments", issuer="service:permit",
+                              replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "i.sqlite3")))
+    action = _action(issuer_gate)  # capability payment.refund
+    proof = issuer_gate.mint_proof(action)
+    read_only_edge = ActenonGate(verifier=signer, audience="service:payments", issuer="service:permit",
+                                 capabilities=("payment.read",),
+                                 replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "e.sqlite3")))
+    calls: list[int] = []
+    assert read_only_edge.protect(action, proof, lambda: calls.append(1)).reason_code == "SCOPE_CAPABILITY_MISMATCH"
+    refund_edge = ActenonGate(verifier=signer, audience="service:payments", issuer="service:permit",
+                              capabilities=("payment.refund",),
+                              parameter_constraints={"amount_minor": 999},
+                              replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "f.sqlite3")))
+    assert refund_edge.protect(action, proof, lambda: calls.append(1)).reason_code == "PARAMETER_MISMATCH"
+    assert calls == []

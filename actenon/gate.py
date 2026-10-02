@@ -203,6 +203,9 @@ class ActenonGate:
         escrow_id_factory: Callable[[], str] | None = None,
         disclosure_mode: VerifierDisclosureMode | None = None,
         revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
+        parameter_constraints: Mapping[str, Any] | None = None,
+        resource_selectors: tuple[Mapping[str, Any], ...] | list[Mapping[str, Any]] | None = None,
     ) -> None:
         if verifier is None:
             raise ValueError(
@@ -215,6 +218,15 @@ class ActenonGate:
         self.issuer = _coerce_party(issuer)
         self.signer = signer
         self._verifier = verifier
+        # What this edge declares about itself (protocol/13-edge-binding.md):
+        # the capabilities its side effect performs, the parameter constraints
+        # it relies on, and the resources it acts on. ``capabilities=None``
+        # keeps the 1.x behaviour of trusting the presented intent's
+        # capability; declare it so a proof for another capability cannot run
+        # this side effect.
+        self.declared_capabilities = tuple(capabilities) if capabilities is not None else None
+        self.declared_parameter_constraints = dict(parameter_constraints or {})
+        self.declared_resource_selectors = tuple(dict(selector) for selector in (resource_selectors or ()))
         self.policy_pack = policy_pack
         self.escrow = escrow
         self.clock = clock
@@ -461,7 +473,7 @@ class ActenonGate:
         if decision != "allow":
             raise ValueError("PCCB minting requires decision='allow'")
         intent = self._coerce_action(action)
-        context = self._build_context(intent, audience=self.audience)
+        context = self._build_context(intent, audience=self.audience, for_minting=True)
         policy_decision = PolicyDecision(
             outcome="allow",
             summary="The configured issuer allowed proof minting for this exact action.",
@@ -640,17 +652,33 @@ class ActenonGate:
         *,
         audience: AudienceRef,
         evidence: Mapping[str, Any] | None = None,
+        for_minting: bool = False,
     ) -> DynamicContextInput:
-        selectors = intent.target.selectors or {"resource_id": intent.target.resource_id}
-        parameter_constraints = intent.action.constraints or intent.action.parameters
+        if for_minting:
+            # The issuer signs the scope it is granting for this exact intent.
+            selectors = intent.target.selectors or {"resource_id": intent.target.resource_id}
+            return DynamicContextInput(
+                request_id=self.request_id_factory(),
+                audience=audience,
+                scope_capabilities=(intent.action.capability,),
+                now=self.clock(),
+                facts=dict(evidence or {}),
+                parameter_constraints=dict(intent.action.constraints or intent.action.parameters),
+                resource_selectors=(dict(selectors),),
+            )
+        # Verification: the edge's own declarations, never values derived from
+        # the presented request (which would make E1-E3 vacuous).
+        capabilities = (
+            self.declared_capabilities if self.declared_capabilities is not None else (intent.action.capability,)
+        )
         return DynamicContextInput(
             request_id=self.request_id_factory(),
             audience=audience,
-            scope_capabilities=(intent.action.capability,),
+            scope_capabilities=capabilities,
             now=self.clock(),
             facts=dict(evidence or {}),
-            parameter_constraints=dict(parameter_constraints),
-            resource_selectors=(dict(selectors),),
+            parameter_constraints=dict(self.declared_parameter_constraints),
+            resource_selectors=self.declared_resource_selectors,
         )
 
     def _refuse(
