@@ -1,0 +1,10 @@
+129 |     throw new TokenError("signature verification failed — token is forged or was signed with a different key");
+TokenError: signature verification failed — token is forged or was signed with a different key
+(fail) grant token interop vectors > verifies v1_non_ascii [1.84ms]
+(fail) grant token interop vectors > verifies v2_ascii [0.12ms]
+(fail) grant token interop vectors > verifies v2_non_ascii [0.03ms]
+(fail) grant token interop vectors > verifies v2_astral [0.03ms]
+(fail) grant token interop vectors > verifies v2_decimal_trailing_zero [0.03ms]
+(fail) grant token interop vectors > re-encoding a verified v2 grant yields the same v2 token [0.37ms]
+ 5 pass
+ 6 fail
