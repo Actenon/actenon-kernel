@@ -85,3 +85,40 @@ class CanonicalizationAttackTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CanonicalizerEdgeTypeTests(unittest.TestCase):
+    """Protocol-alignment edge cases (actenon-protocol canonicalisation.py)."""
+
+    def test_lone_surrogate_raises_a_typed_canonicalisation_error(self) -> None:
+        from actenon_protocol.canonicalisation import CanonicalisationError
+
+        for value in ("\ud800", {"k": "a\udfffb"}, {"\ud83d": 1}):
+            with self.subTest(value=repr(value)):
+                with self.assertRaises(CanonicalisationError):
+                    canonicalize_bytes(value)
+
+    def test_int_subclasses_serialise_as_plain_integers(self) -> None:
+        import enum
+        from http import HTTPStatus
+
+        class Amount(enum.IntEnum):
+            CENTS = 2500
+
+        self.assertEqual(b'{"a":200,"b":2500}', canonicalize_bytes({"a": HTTPStatus.OK, "b": Amount.CENTS}))
+        self.assertEqual(canonicalize_bytes({"a": 200}), canonicalize_bytes({"a": HTTPStatus.OK}))
+
+    def test_valid_input_matches_the_protocol_reference_byte_for_byte(self) -> None:
+        from actenon_protocol.canonicalisation import canonicalize_bytes as protocol_canonicalize_bytes
+
+        samples = [
+            {"z": 1, "a": [True, False, None, -7, 0, 123456789012345678901234567890]},
+            {"unicode": "é é   \U0001f600 \x00\x1f\"\\"},
+            {"￿": 1, "\U0001f600": 2, "a": {"b": {"c": []}}},
+            [],
+            {},
+            "plain",
+        ]
+        for sample in samples:
+            with self.subTest(sample=repr(sample)[:40]):
+                self.assertEqual(protocol_canonicalize_bytes(sample), canonicalize_bytes(sample))

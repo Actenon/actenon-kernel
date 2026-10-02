@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use actenon_verifier_sdk::{
     build_local_proof_verifier, parse_action_intent_json, parse_pccb_json, AudienceRef,
-    VerificationContextInput, Verifier,
+    VerificationContextInput, Verifier, LOCAL_PROOF_SECRET,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -188,5 +188,122 @@ fn shared_verifier_sdk_conformance_vectors() {
             "{} public message",
             vector.id,
         );
+    }
+}
+
+// The kernel mints every new PCCB with the ACTENON-JCS-STRICT-1 action-hash
+// label (actenon-protocol >= 1.1); RFC8785-JCS is the accepted legacy alias.
+// The shared vectors only carry the legacy label, so re-label the base proof,
+// re-sign it with the public local development key, and require the verdicts
+// the Python reference gives. serde_json's default (sorted, compact) output is
+// the canonical form for this all-ASCII, float-free vector.
+fn verify_relabelled(label: &str) -> Result<String, String> {
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    use base64::Engine;
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
+
+    let manifest: Manifest = serde_json::from_slice(
+        &fs::read(vector_root().join("cases.json")).expect("failed to read manifest"),
+    )
+    .expect("failed to decode manifest");
+    let intent_document = load_value(&manifest.base.intent);
+    let mut pccb_document = load_value(&manifest.base.pccb);
+    let object = pccb_document
+        .as_object_mut()
+        .expect("pccb must be an object");
+    object["action_hash"]["canonicalization"] = Value::String(label.to_string());
+    let mut signature = object.remove("signature").expect("pccb must be signed");
+    let unsigned = serde_json::to_vec(&pccb_document).expect("pccb must encode");
+    let mut mac = Hmac::<Sha256>::new_from_slice(LOCAL_PROOF_SECRET.as_bytes())
+        .expect("hmac accepts any key");
+    mac.update(&unsigned);
+    signature["value"] = Value::String(URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes()));
+    pccb_document
+        .as_object_mut()
+        .expect("pccb must be an object")
+        .insert("signature".to_string(), signature);
+
+    let verifier = Verifier::new(build_local_proof_verifier());
+    let intent = parse_action_intent_json(
+        &serde_json::to_vec(&intent_document).expect("intent must encode"),
+    )
+    .map_err(|error| error.to_string())?;
+    let pccb = parse_pccb_json(&serde_json::to_vec(&pccb_document).expect("pccb must encode"))
+        .map_err(|error| error.to_string())?;
+    let context = verifier
+        .build_context(context_from_value(&manifest.base.context))
+        .expect("context must parse");
+    verifier
+        .verify(intent, pccb, context)
+        .map(|verified| verified.pccb.action_hash.canonicalization)
+        .map_err(|error| error.to_string())
+}
+
+#[test]
+fn verifier_accepts_both_canonicalization_profile_labels() {
+    for label in ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"] {
+        assert_eq!(
+            verify_relabelled(label).unwrap_or_else(|error| panic!("{label}: {error}")),
+            label
+        );
+    }
+}
+
+#[test]
+fn verifier_refuses_unknown_canonicalization_profile_labels() {
+    for label in ["actenon-jcs-sha256-v1", "JCS"] {
+        assert!(verify_relabelled(label).is_err(), "{label} must be refused");
+    }
+}
+
+// Fractional-second timestamps under ACTENON-JCS-STRICT-1: timestamps must be
+// re-serialised exactly as the Python reference does (six-digit microseconds)
+// and time windows compared at microsecond precision.
+#[test]
+fn shared_fractional_second_timestamp_vectors() {
+    let manifest = load_value("timestamp_cases.json");
+    let skew = Duration::milliseconds(
+        manifest["clock_skew_tolerance_ms"]
+            .as_i64()
+            .expect("skew must be an integer"),
+    );
+    for vector in manifest["cases"]
+        .as_array()
+        .expect("cases must be an array")
+    {
+        let id = vector["id"].as_str().expect("id must be a string");
+        let intent_document = load_value(vector["intent"].as_str().expect("intent path"));
+        let pccb_document = load_value(vector["pccb"].as_str().expect("pccb path"));
+        let verifier = Verifier::new(build_local_proof_verifier())
+            .with_clock_skew_tolerance(skew)
+            .expect("skew must be valid");
+        let intent = parse_action_intent_json(
+            &serde_json::to_vec(&intent_document).expect("intent must encode"),
+        )
+        .unwrap_or_else(|error| panic!("{id}: intent must parse: {error}"));
+        let pccb = parse_pccb_json(&serde_json::to_vec(&pccb_document).expect("pccb must encode"))
+            .unwrap_or_else(|error| panic!("{id}: pccb must parse: {error}"));
+        let context = verifier
+            .build_context(context_from_value(&vector["context"]))
+            .expect("context must parse");
+        let result = verifier.verify(intent, pccb, context);
+        let expected = &vector["expected"];
+        if expected["outcome"] == "verified" {
+            let verified =
+                result.unwrap_or_else(|error| panic!("{id} expected verification, got {error}"));
+            assert_eq!(
+                verified.pccb.action_hash.canonicalization,
+                "ACTENON-JCS-STRICT-1"
+            );
+            continue;
+        }
+        let error = result.expect_err("refusal vector must fail");
+        assert_eq!(
+            error.code().as_str(),
+            expected["reason_code"],
+            "{id} reason code"
+        );
+        assert_eq!(error.message(), expected["message"], "{id} public message");
     }
 }

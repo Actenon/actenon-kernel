@@ -1,0 +1,172 @@
+{
+  "description": "Fractional-second timestamps signed under ACTENON-JCS-STRICT-1. Verifiers must re-serialise every timestamp exactly as the Python reference does before hashing and signature verification: UTC, 'Z', and a fractional part of exactly six digits when the microsecond is non-zero (omitted otherwise; digits beyond six truncated). Time-window checks use microsecond precision.",
+  "clock_skew_tolerance_ms": 0,
+  "cases": [
+    {
+      "id": "fractional_500000_short_and_offset_forms_verify",
+      "intent": "fractional_500000_action_intent.json",
+      "pccb": "fractional_500000_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:01:00Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "fractional_123456_verifies",
+      "intent": "fractional_123456_action_intent.json",
+      "pccb": "fractional_123456_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:01:00Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "fractional_123456_not_before_boundary",
+      "intent": "fractional_123456_action_intent.json",
+      "pccb": "fractional_123456_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:00:00.123456Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "fractional_123456_one_microsecond_before_not_before",
+      "intent": "fractional_123456_action_intent.json",
+      "pccb": "fractional_123456_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:00:00.123455Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_NOT_YET_VALID",
+        "message": "The proof is not yet valid."
+      }
+    },
+    {
+      "id": "fractional_123456_expiry_boundary",
+      "intent": "fractional_123456_action_intent.json",
+      "pccb": "fractional_123456_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:05:00.123456Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "fractional_123456_one_microsecond_after_expiry",
+      "intent": "fractional_123456_action_intent.json",
+      "pccb": "fractional_123456_pccb.json",
+      "context": {
+        "request_id": "req_shared_sdk_conformance_001",
+        "audience": {
+          "type": "service",
+          "id": "portable-hello-world-endpoint"
+        },
+        "now": "2026-01-01T12:05:00.123457Z",
+        "scope_capabilities": [
+          "protected_resource.read"
+        ],
+        "parameter_constraints": {
+          "exact_message": "portable hello world"
+        },
+        "resource_selectors": [
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PROOF_EXPIRED",
+        "message": "The proof has expired."
+      }
+    }
+  ]
+}

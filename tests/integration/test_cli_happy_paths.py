@@ -133,7 +133,7 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(0, code, stderr)
-            self.assertIn("Receipt verified.", stdout)
+            self.assertIn("Receipt links verified.", stdout)
 
     def test_verify_refusal_command_accepts_local_refusal_and_links(self) -> None:
         with TemporaryDirectory() as tempdir:
@@ -152,7 +152,7 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(0, code, stderr)
-            self.assertIn("Refusal verified.", stdout)
+            self.assertIn("Refusal links verified.", stdout)
 
     def test_outcome_attestation_commands_attest_and_verify_receipt_and_refusal(self) -> None:
         with TemporaryDirectory() as tempdir:

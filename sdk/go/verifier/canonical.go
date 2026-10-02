@@ -11,6 +11,23 @@ import (
 	"strings"
 )
 
+// AcceptedCanonicalizationProfiles lists the canonicalization profile labels
+// a verifier accepts for a PCCB action hash. New proofs carry
+// ACTENON-JCS-STRICT-1; RFC8785-JCS is the legacy alias for the same
+// serialisation (actenon-protocol ACCEPTED_CANONICALISATION_PROFILES).
+var AcceptedCanonicalizationProfiles = []string{"ACTENON-JCS-STRICT-1", "RFC8785-JCS"}
+
+// IsAcceptedCanonicalizationProfile reports whether label is an accepted
+// canonicalization profile label.
+func IsAcceptedCanonicalizationProfile(label string) bool {
+	for _, accepted := range AcceptedCanonicalizationProfiles {
+		if label == accepted {
+			return true
+		}
+	}
+	return false
+}
+
 func canonicalizeJSON(value any) (string, error) {
 	var builder strings.Builder
 	if err := writeCanonicalJSON(&builder, value); err != nil {

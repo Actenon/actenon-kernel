@@ -186,6 +186,43 @@ class VerifierSdkConformanceTests(unittest.TestCase):
                 )
                 self.assertEqual(expected["message"], raised.exception.message)
 
+        # Fractional-second timestamps under the ACTENON-JCS-STRICT-1 label:
+        # every SDK must re-serialise timestamps exactly as this reference
+        # does and compare time windows at microsecond precision.
+        timestamp_manifest = _load_vector("timestamp_cases.json")
+        for case in timestamp_manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(
+                        milliseconds=timestamp_manifest["clock_skew_tolerance_ms"]
+                    ),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context_payload = case["context"]
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(case["intent"])
+                pccb = _load_vector(case["pccb"])
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verified = sdk.verify(intent=intent, pccb=pccb, context=context)
+                    self.assertEqual(
+                        "ACTENON-JCS-STRICT-1",
+                        verified.pccb.action_hash.canonicalization,
+                    )
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
+                self.assertEqual(expected["message"], raised.exception.message)
+
 
 if __name__ == "__main__":
     unittest.main()

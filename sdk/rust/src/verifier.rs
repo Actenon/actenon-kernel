@@ -13,6 +13,12 @@ use crate::types::{
 
 pub const DEFAULT_CLOCK_SKEW_TOLERANCE: Duration = Duration::ZERO;
 
+/// Canonicalization profile labels a verifier accepts for a PCCB action hash.
+/// New proofs carry `ACTENON-JCS-STRICT-1`; `RFC8785-JCS` is the legacy alias
+/// for the same serialisation (actenon-protocol
+/// `ACCEPTED_CANONICALISATION_PROFILES`).
+pub const ACCEPTED_CANONICALIZATION_PROFILES: [&str; 2] = ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"];
+
 pub fn parse_action_intent_json(raw: &[u8]) -> Result<ActionIntent, VerificationError> {
     let intent: ActionIntent =
         decode_json(raw, VerificationErrorCode::InvalidIntent, "action intent")?;
@@ -187,7 +193,8 @@ impl<V: SignatureVerifier> Verifier<V> {
             ));
         }
         if normalized_pccb.action_hash.algorithm != "sha-256"
-            || normalized_pccb.action_hash.canonicalization != "RFC8785-JCS"
+            || !ACCEPTED_CANONICALIZATION_PROFILES
+                .contains(&normalized_pccb.action_hash.canonicalization.as_str())
         {
             return Err(VerificationError::new(
                 VerificationErrorCode::ActionHashAlgorithmInvalid,
@@ -275,7 +282,7 @@ fn parse_timestamp(
         ));
     }
     OffsetDateTime::parse(raw, &Rfc3339)
-        .map(|value| value.to_offset(UtcOffset::UTC))
+        .map(|value| truncate_to_microseconds(value.to_offset(UtcOffset::UTC)))
         .map_err(|_error| {
             VerificationError::new(
                 VerificationErrorCode::InvalidTimestamp,
@@ -284,18 +291,40 @@ fn parse_timestamp(
         })
 }
 
+/// The Python reference keeps microseconds: drop anything finer so the
+/// re-serialised (signed) form and the time-window checks both match it.
+fn truncate_to_microseconds(value: OffsetDateTime) -> OffsetDateTime {
+    let nanos = value.nanosecond();
+    value
+        .replace_nanosecond(nanos - nanos % 1_000)
+        .expect("truncating nanoseconds stays in range")
+}
+
+/// Re-serialise a timestamp exactly as the Python reference does: UTC, `Z`,
+/// and six fractional digits only when the microsecond is non-zero.
+fn format_timestamp(value: OffsetDateTime) -> String {
+    let value = truncate_to_microseconds(value.to_offset(UtcOffset::UTC));
+    let whole = format!(
+        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}",
+        value.year(),
+        u8::from(value.month()),
+        value.day(),
+        value.hour(),
+        value.minute(),
+        value.second()
+    );
+    match value.microsecond() {
+        0 => format!("{whole}Z"),
+        micros => format!("{whole}.{micros:06}Z"),
+    }
+}
+
 fn normalize_timestamp(
     raw: &str,
     field_name: &str,
     code: VerificationErrorCode,
 ) -> Result<String, VerificationError> {
-    let parsed = parse_timestamp(raw, field_name, code)?;
-    parsed.format(&Rfc3339).map_err(|_error| {
-        VerificationError::new(
-            code,
-            format!("{field_name} must be an RFC3339 timestamp string."),
-        )
-    })
+    parse_timestamp(raw, field_name, code).map(format_timestamp)
 }
 
 fn normalize_action_intent(intent: ActionIntent) -> Result<ActionIntent, VerificationError> {
@@ -463,7 +492,7 @@ fn normalize_context(
             "context.audience",
             VerificationErrorCode::InvalidContext,
         )?,
-        now: input.now.to_offset(UtcOffset::UTC),
+        now: truncate_to_microseconds(input.now.to_offset(UtcOffset::UTC)),
         scope_capabilities: capabilities,
         parameter_constraints: input.parameter_constraints,
         resource_selectors: input.resource_selectors,
