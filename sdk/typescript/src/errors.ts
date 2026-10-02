@@ -16,7 +16,8 @@ export type VerificationErrorCode =
   | "TARGET_MISMATCH"
   | "ACTION_HASH_ALGORITHM_INVALID"
   | "ACTION_HASH_MISMATCH"
-  | "SIGNATURE_INVALID";
+  | "SIGNATURE_INVALID"
+  | "AUTHORITY_REVOKED";
 
 export class VerificationError extends Error {
   readonly code: VerificationErrorCode;

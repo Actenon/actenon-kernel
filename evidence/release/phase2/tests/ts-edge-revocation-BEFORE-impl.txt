@@ -1,0 +1,8 @@
+    not ok 2 - e5_revocable_revoked
+    not ok 3 - e5_revocable_source_unavailable
+    not ok 4 - e5_revocable_no_source
+    not ok 6 - e5_non_revocable_revoked_source
+    not ok 8 - e5_malformed_authority
+not ok 5 - edge-revocation vectors (E5)
+# pass 28
+# fail 6

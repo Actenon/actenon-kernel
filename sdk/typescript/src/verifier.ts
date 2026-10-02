@@ -320,6 +320,14 @@ interface BuildContextInput {
 
 export interface VerifierSDKOptions {
   clockSkewToleranceMs?: number;
+  /**
+   * Revocation source for the proof's signed authority
+   * (protocol/13-edge-binding.md E5). Return true only when the authority is
+   * NOT revoked. Throwing, returning anything but true, or omitting the
+   * checker for a proof whose authority declares `revocable: true` refuses
+   * with AUTHORITY_REVOKED.
+   */
+  revocationChecker?: (pccb: PCCB, context: VerificationContext) => boolean;
 }
 
 export const DEFAULT_CLOCK_SKEW_TOLERANCE_MS = 0;
@@ -327,6 +335,7 @@ export const DEFAULT_CLOCK_SKEW_TOLERANCE_MS = 0;
 export class VerifierSDK {
   private readonly signatureVerifier: SignatureVerifier;
   private readonly clockSkewToleranceMs: number;
+  private readonly revocationChecker: VerifierSDKOptions["revocationChecker"];
 
   constructor(signatureVerifier: SignatureVerifier, options: VerifierSDKOptions = {}) {
     const clockSkewToleranceMs =
@@ -336,6 +345,7 @@ export class VerifierSDK {
     }
     this.signatureVerifier = signatureVerifier;
     this.clockSkewToleranceMs = clockSkewToleranceMs;
+    this.revocationChecker = options.revocationChecker;
   }
 
   parseIntent(payload: unknown): ActionIntent {
@@ -597,6 +607,29 @@ export class VerifierSDK {
     const selectors = context.resource_selectors ?? [];
     if (selectors.length > 0 && !selectors.some((selector) => targetSatisfies(pccb.target, selector))) {
       throw new VerificationError("TARGET_MISMATCH", "The proof target does not satisfy this endpoint's resource selectors.");
+    }
+    // E5: revocation of the underlying authority, after every other check.
+    const unknown = () =>
+      new VerificationError("AUTHORITY_REVOKED", "The proof authority's revocation status could not be established.");
+    const extensions = (pccb.extensions ?? {}) as Record<string, JsonValue>;
+    let revocable = false;
+    if (Object.prototype.hasOwnProperty.call(extensions, "authority")) {
+      const authority = extensions.authority;
+      if (authority === null || typeof authority !== "object" || Array.isArray(authority)) throw unknown();
+      const flag = (authority as Record<string, JsonValue>).revocable;
+      if (flag !== undefined && typeof flag !== "boolean") throw unknown();
+      revocable = flag === true;
+    }
+    if (this.revocationChecker === undefined) {
+      if (revocable) throw unknown();
+    } else {
+      let notRevoked: boolean;
+      try {
+        notRevoked = this.revocationChecker(pccb, context) === true;
+      } catch {
+        throw unknown();
+      }
+      if (!notRevoked) throw new VerificationError("AUTHORITY_REVOKED", "The proof authority has been revoked.");
     }
     return { intent, pccb, context };
   }

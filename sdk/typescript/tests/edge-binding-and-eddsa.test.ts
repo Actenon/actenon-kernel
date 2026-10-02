@@ -112,3 +112,37 @@ test("Ed25519 verifier refuses unusable keys", () => {
   assert.throws(() => new Ed25519Verifier([{ ...privateKey.export({ format: "jwk" }), kid: "k" }]), /private/);
   assert.ok(typeof (sdkModule as Record<string, unknown>).Ed25519Verifier === "function");
 });
+
+// protocol/13-edge-binding.md E5: revocation of the underlying authority.
+test("edge-revocation vectors (E5)", async (t) => {
+  const manifest = JSON.parse((await raw("edge_revocation_cases.json")).toString("utf8"));
+  const intent = await raw(manifest.base.intent);
+  const sources: Record<string, ((pccb: unknown, context: unknown) => boolean) | undefined> = {
+    none: undefined,
+    not_revoked: () => true,
+    revoked: () => false,
+    unavailable: () => {
+      throw new Error("revocation source unavailable");
+    },
+  };
+  for (const vector of manifest.cases) {
+    await t.test(vector.id, async () => {
+      const pccb = await raw(vector.pccb);
+      const sdk = new VerifierSDK(buildLocalProofVerifier(), {
+        clockSkewToleranceMs: vector.clock_skew_tolerance_ms,
+        revocationChecker: sources[vector.revocation_source],
+      });
+      const run = () => sdk.verifyJSON({ intent, pccb, context: manifest.base.context as VerificationContext });
+      if (vector.expected.outcome === "verified") {
+        run();
+        return;
+      }
+      assert.throws(run, (error: unknown) => {
+        assert.ok(error instanceof VerificationError);
+        assert.equal(error.code, vector.expected.reason_code);
+        assert.equal(error.message, vector.expected.message);
+        return true;
+      });
+    });
+  }
+});
