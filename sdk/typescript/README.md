@@ -47,6 +47,35 @@ npm install /absolute/path/to/repo/sdk/typescript
 
 ## Verify A Proof
 
+Pass untrusted proof material to `verifyJSON` **as received** (the raw
+request bytes or text). Do not `JSON.parse` it first: `JSON.parse` keeps the
+last of duplicate members and turns `2500.0` or `2.5e3` into `2500`, so a
+proof the Python reference refuses would verify. `verifyJSON` parses strictly
+(duplicate members, fractional/exponent numbers, unsafe integers, lone
+surrogates, a BOM, trailing content and oversize or over-deep input are
+refused) and signature values must be canonical unpadded base64url.
+
+```ts
+import { VerifierSDK, HmacSha256Verifier } from "@actenon/verifier-sdk";
+
+const verifier = new VerifierSDK(new HmacSha256Verifier({ secret, keyId }));
+
+const verified = verifier.verifyJSON({
+  intent: rawIntentBody,   // string | Uint8Array, exactly as received
+  pccb: rawPccbBody,       // string | Uint8Array, exactly as received
+  context: {
+    request_id: "req_ts_001",
+    audience: { type: "service", id: "portable-hello-world-endpoint" },
+    now: new Date().toISOString(),
+    scope_capabilities: ["protected_resource.read"],
+  },
+});
+```
+
+`verifyPayloads` / `verify` take already-parsed objects and cannot detect
+what `JSON.parse` discarded; use them only for objects you constructed
+yourself, as in the local example below.
+
 ```ts
 import { buildLocalProofVerifier, VerifierSDK } from "@actenon/verifier-sdk";
 

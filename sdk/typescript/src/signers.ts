@@ -9,10 +9,15 @@ export interface SignatureVerifier {
 export const LOCAL_PROOF_KEY_ID = "local-proof-v1";
 export const LOCAL_PROOF_SECRET = "actenon-local-proof-secret-v1";
 
-function base64UrlDecode(value: string): Buffer {
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-  const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
-  return Buffer.from(normalized + padding, "base64");
+// Canonical unpadded base64url only. Buffer.from(..., "base64") skips
+// whitespace and unknown characters and ignores non-zero trailing bits, so a
+// lenient decode would accept many spellings of one signature.
+function base64UrlDecode(value: string): Buffer | null {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]*$/.test(value) || value.length % 4 === 1) {
+    return null;
+  }
+  const decoded = Buffer.from(value, "base64url");
+  return decoded.toString("base64url") === value ? decoded : null;
 }
 
 export class HmacSha256Verifier implements SignatureVerifier {
@@ -36,7 +41,7 @@ export class HmacSha256Verifier implements SignatureVerifier {
     }
     const expected = createHmac("sha256", this.secret).update(payload).digest();
     const provided = base64UrlDecode(signature.value);
-    if (expected.length !== provided.length) {
+    if (provided === null || expected.length !== provided.length) {
       return false;
     }
     return timingSafeEqual(expected, provided);

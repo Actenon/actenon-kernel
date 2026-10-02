@@ -74,7 +74,9 @@ jobs:
         run: npm ci
 
       - name: Typecheck
-        run: npm run typecheck --if-present
+        # The package's typecheck script is `check`; `typecheck --if-present`
+        # matched no script and silently ran nothing.
+        run: npm run check
 
       - name: Test
         # The test files use node:test (not bun:test), so we must use

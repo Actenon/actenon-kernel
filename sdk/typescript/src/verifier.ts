@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { canonicalizeBytes, sha256Hex } from "./canonical.js";
 import { VerificationError } from "./errors.js";
+import { parseStrictJson, StrictJsonError } from "./strict-json.js";
 import { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
 import type {
   ActionIntent,
@@ -291,6 +292,14 @@ export interface VerifyInput {
   context: VerificationContext;
 }
 
+export interface VerifyJSONInput {
+  /** The Action Intent exactly as received (bytes or text), not JSON.parse output. */
+  intent: string | Uint8Array;
+  /** The PCCB exactly as received (bytes or text), not JSON.parse output. */
+  pccb: string | Uint8Array;
+  context: VerificationContext;
+}
+
 export interface VerifyPayloadsInput {
   request_id: string;
   audience: AudienceRef;
@@ -464,6 +473,30 @@ export class VerifierSDK {
       context.resource_selectors = input.resource_selectors;
     }
     return context;
+  }
+
+  /**
+   * Verify proof material received as raw bytes or text. Use this for any
+   * untrusted request body: it refuses duplicate members, fractional or
+   * exponent number lexemes and other input JSON.parse would silently
+   * normalise into something the Python reference refuses.
+   */
+  verifyJSON(input: VerifyJSONInput): VerifiedProtectedRequest {
+    const parse = (raw: string | Uint8Array, code: "INVALID_INTENT" | "INVALID_PCCB", what: string): unknown => {
+      try {
+        return parseStrictJson(raw);
+      } catch (error) {
+        if (error instanceof StrictJsonError) {
+          throw new VerificationError(code, `The ${what} is not acceptable JSON.`);
+        }
+        throw error;
+      }
+    };
+    return this.verify({
+      intent: parse(input.intent, "INVALID_INTENT", "action intent"),
+      pccb: parse(input.pccb, "INVALID_PCCB", "proof"),
+      context: input.context,
+    });
   }
 
   verify(input: VerifyInput): VerifiedProtectedRequest {
