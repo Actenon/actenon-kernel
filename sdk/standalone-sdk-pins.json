@@ -2,10 +2,10 @@
   "comment": "Go and Rust verifier SDKs live in their own repositories. The kernel's CI checks out each one at the pinned commit, requires its vendored kernel vectors to be byte-identical to this tree (scripts/check_standalone_sdk_fixtures.py), and runs its full test suite against this tree's conformance/vector-lock.json. Move a pin only to a commit whose vendored vectors match this kernel.",
   "sdk-go": {
     "repository": "Actenon/sdk-go",
-    "sha": "37700d01d6cb753d9e9129020e3a1b93b9e1af0c"
+    "sha": "52e4df57af581ae13cbe9af3e624fb0332932064"
   },
   "sdk-rust": {
     "repository": "Actenon/sdk-rust",
-    "sha": "261ffbfee09d2af8b0ac509b37104ec511c7b56a"
+    "sha": "7178814775ccb5211ccc7b467b77571685304591"
   }
 }
