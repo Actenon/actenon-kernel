@@ -31,9 +31,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Rust SDK
-sdk/rust/target/
-sdk/rust/Cargo.lock
+# Pinned standalone SDK checkouts (scripts/verify_sdk_conformance.sh)
+.sdk-cache/
 
 # OS / editor
 .DS_Store

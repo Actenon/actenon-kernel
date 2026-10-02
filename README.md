@@ -290,8 +290,8 @@ python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runt
 |---|---|---|
 | **Python** (reference) | Full kernel: minter, verifier, executor, CLI, conformance, local proof mode | this repo |
 | **TypeScript** | Verifier-edge proof checking in Node / Express / TS services | [`sdk/typescript/`](sdk/typescript/README.md) |
-| **Go** | Verifier-edge proof checking in Go HTTP services | [`sdk/go/`](sdk/go/README.md) |
-| **Rust** | Verifier-edge proof checking in systems components | [`sdk/rust/`](sdk/rust/README.md) |
+| **Go** | Verifier-edge proof checking in Go HTTP services | [`Actenon/sdk-go`](https://github.com/Actenon/sdk-go) (standalone; kernel CI tests the pinned commit) |
+| **Rust** | Verifier-edge proof checking in systems components | [`Actenon/sdk-rust`](https://github.com/Actenon/sdk-rust) (standalone; kernel CI tests the pinned commit) |
 
 Every SDK runs against the same 51 conformance vectors. See [`SDK_SELECTION_GUIDE.md`](docs/SDK_SELECTION_GUIDE.md).
 
@@ -461,7 +461,7 @@ See the signing backends table above for the exact wiring paths. The full produc
 | `actenon/conformance/` | 51 conformance vectors + suite |
 | `actenon/cli.py` | Unified CLI (`actenon-kernel verify-proof`, `actenon-kernel up`, `actenon-kernel simulate`, `actenon-kernel conformance run`) |
 | `actenon/local_runtime.py` | Local trust runtime (no external accounts) |
-| `sdk/typescript/` `sdk/go/` `sdk/rust/` | Verifier-only SDKs |
+| `sdk/typescript/` | TypeScript verifier-only SDK (Go and Rust SDKs are standalone repos pinned in `sdk/standalone-sdk-pins.json`) |
 | `examples/` | 20+ framework & platform adapters (see above) |
 | `spec/` | Active v1 specs (11 surfaces) |
 | `docs/incidents/` | Pattern-based incident library |
