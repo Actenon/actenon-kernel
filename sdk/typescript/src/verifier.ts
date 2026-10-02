@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 
-import { canonicalizeBytes, sha256Hex } from "./canonical.js";
+import { canonicalizeBytes, canonicalizeJson, sha256Hex, type CanonicalValue } from "./canonical.js";
 import { VerificationError } from "./errors.js";
 import { parseStrictJson, StrictJsonError } from "./strict-json.js";
 import { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
@@ -492,14 +492,16 @@ export class VerifierSDK {
         throw error;
       }
     };
-    return this.verify({
+    return this.#verifyParsed({
       intent: parse(input.intent, "INVALID_INTENT", "action intent"),
       pccb: parse(input.pccb, "INVALID_PCCB", "proof"),
       context: input.context,
     });
   }
 
-  verify(input: VerifyInput): VerifiedProtectedRequest {
+  // Not public: parsed objects cannot show what JSON.parse discarded, so
+  // untrusted input must arrive through verifyJSON.
+  #verifyParsed(input: VerifyInput): VerifiedProtectedRequest {
     const intent = this.parseIntent(input.intent);
     const pccb = this.parsePccb(input.pccb);
     const contextInput: BuildContextInput = {
@@ -542,11 +544,16 @@ export class VerifierSDK {
     if (!isDeepStrictEqual(pccb.audience, context.audience)) {
       throw new VerificationError("AUDIENCE_MISMATCH", "The proof audience does not match this endpoint.");
     }
-    if (pccb.scope.mode !== "exact") {
+    // Protocol v1 proofs are exact and single-use only (protocol/13 E4).
+    if (pccb.scope.mode !== "exact" || pccb.scope.single_use !== true) {
       throw new VerificationError("SCOPE_MODE_INVALID", "The proof scope mode is not supported.");
     }
     if (!pccb.scope.capabilities.includes(intent.action.capability)) {
       throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The proof scope does not allow this capability.");
+    }
+    // E1: the capability must be one this endpoint declares it performs.
+    if (!context.scope_capabilities.includes(intent.action.capability)) {
+      throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The action capability is not one this endpoint performs.");
     }
     if (pccb.intent_id !== undefined && pccb.intent_id !== intent.intent_id) {
       throw new VerificationError("INTENT_MISMATCH", "The proof does not match the supplied action intent.");
@@ -576,15 +583,44 @@ export class VerifierSDK {
     if (pccb.action_hash.value !== expectedHash) {
       throw new VerificationError("ACTION_HASH_MISMATCH", "The proof action hash does not match the action intent.");
     }
+    // E2: every constraint the endpoint relies on was signed into the proof.
+    const signedConstraints = (pccb.scope.parameter_constraints ?? {}) as Record<string, JsonValue>;
+    for (const [key, value] of Object.entries(context.parameter_constraints ?? {})) {
+      if (!Object.prototype.hasOwnProperty.call(signedConstraints, key) || !canonicalEqual(signedConstraints[key], value)) {
+        throw new VerificationError(
+          "PARAMETER_MISMATCH",
+          "The proof parameter constraints do not cover this endpoint's constraints.",
+        );
+      }
+    }
+    // E3: the bound target satisfies at least one declared resource selector.
+    const selectors = context.resource_selectors ?? [];
+    if (selectors.length > 0 && !selectors.some((selector) => targetSatisfies(pccb.target, selector))) {
+      throw new VerificationError("TARGET_MISMATCH", "The proof target does not satisfy this endpoint's resource selectors.");
+    }
     return { intent, pccb, context };
   }
+}
 
-  verifyPayloads(input: VerifyPayloadsInput & { intent_payload: unknown; pccb_payload: unknown }): VerifiedProtectedRequest {
-    const context = this.buildContext(input);
-    return this.verify({
-      intent: input.intent_payload,
-      pccb: input.pccb_payload,
-      context,
-    });
+function canonicalEqual(a: unknown, b: unknown): boolean {
+  try {
+    return canonicalizeJson(a as CanonicalValue) === canonicalizeJson(b as CanonicalValue);
+  } catch {
+    return false;
   }
+}
+
+// protocol/13-edge-binding.md E3.
+function targetSatisfies(target: PCCB["target"], selector: Record<string, JsonValue>): boolean {
+  const entries = Object.entries(selector ?? {});
+  if (entries.length === 0) return false;
+  const extra = (target.selectors ?? {}) as Record<string, JsonValue>;
+  return entries.every(([key, value]) => {
+    let actual: unknown;
+    if (key === "resource_id") actual = target.resource_id;
+    else if (key === "resource_type") actual = target.resource_type;
+    else if (Object.prototype.hasOwnProperty.call(extra, key)) actual = extra[key];
+    else return false;
+    return canonicalEqual(actual, value);
+  });
 }

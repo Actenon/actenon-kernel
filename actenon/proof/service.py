@@ -26,7 +26,7 @@ from .canonical import (
     canonicalize_bytes,
     sha256_hex,
 )
-from .refusal_messages import public_proof_refusal_message
+from .refusal_messages import EDGE_BINDING_REFUSAL_MESSAGES, public_proof_refusal_message
 from .signing import SignatureVerifier, Signer
 
 
@@ -113,6 +113,30 @@ def _canonical_equal(a: Any, b: Any) -> bool:
         return canonicalize_bytes(_coerce(a)) == canonicalize_bytes(_coerce(b))
     except (TypeError, ValueError):
         return False
+
+
+_MISSING = object()
+
+
+def _target_satisfies(target: Any, selector: Any) -> bool:
+    """protocol/13-edge-binding.md E3: does the bound target satisfy one selector?
+
+    ``resource_id`` / ``resource_type`` compare with the target's fields, any
+    other key with ``target.selectors``. A key the target does not carry is
+    not satisfied; an empty or non-object selector is not satisfied.
+    """
+    if not isinstance(selector, dict) or not selector:
+        return False
+    for key, value in selector.items():
+        if key == "resource_id":
+            actual = target.resource_id
+        elif key == "resource_type":
+            actual = target.resource_type
+        else:
+            actual = (target.selectors or {}).get(key, _MISSING)
+        if actual is _MISSING or not _canonical_equal(actual, value):
+            return False
+    return True
 
 
 @dataclass
@@ -422,7 +446,9 @@ class PCCBVerifier:
 
         # ── Step 10: Action binding (canonical comparison) ───────────
         # Scope mode + capability check (part of action binding)
-        if pccb.scope.mode != "exact":
+        # Protocol v1 proofs are exact and single-use only
+        # (protocol/13-edge-binding.md E4).
+        if pccb.scope.mode != "exact" or pccb.scope.single_use is not True:
             self._raise_post_auth_failure(
                 "SCOPE_MODE_INVALID",
                 pccb=pccb,
@@ -433,6 +459,15 @@ class PCCBVerifier:
                 "SCOPE_CAPABILITY_MISMATCH",
                 pccb=pccb,
                 context=context,
+            )
+        # E1: the capability must be one this edge declares it performs
+        # (exact strings; an empty declaration performs nothing).
+        if intent.action.capability not in tuple(context.scope_capabilities or ()):
+            self._raise_post_auth_failure(
+                "SCOPE_CAPABILITY_MISMATCH",
+                pccb=pccb,
+                context=context,
+                edge_binding=True,
             )
 
         # Intent ID (the signed intent_id differs from the supplied intent_id)
@@ -490,6 +525,27 @@ class PCCBVerifier:
                 "ACTION_HASH_MISMATCH",
                 pccb=pccb,
                 context=context,
+            )
+
+        # ── Step 11b: Edge declarations (protocol/13-edge-binding.md) ──
+        # E2: every constraint the edge relies on was signed into the proof.
+        signed_constraints = pccb.scope.parameter_constraints or {}
+        for key, value in (context.parameter_constraints or {}).items():
+            if key not in signed_constraints or not _canonical_equal(signed_constraints[key], value):
+                self._raise_post_auth_failure(
+                    "PARAMETER_MISMATCH",
+                    pccb=pccb,
+                    context=context,
+                    edge_binding=True,
+                )
+        # E3: the bound target satisfies at least one declared selector.
+        selectors = tuple(context.resource_selectors or ())
+        if selectors and not any(_target_satisfies(pccb.target, selector) for selector in selectors):
+            self._raise_post_auth_failure(
+                "TARGET_MISMATCH",
+                pccb=pccb,
+                context=context,
+                edge_binding=True,
             )
 
         # ── Step 12: Authority reference binding ─────────────────────
@@ -588,6 +644,7 @@ class PCCBVerifier:
         pccb: PCCB,
         context: DynamicContextInput,
         internal_detail: str | None = None,
+        edge_binding: bool = False,
     ) -> None:
         """Raise a ProofVerificationError for a post-authentication failure.
 
@@ -622,5 +679,5 @@ class PCCBVerifier:
         # trusted_detailed + local_debug: disclose the detailed code
         raise ProofVerificationError(
             detailed_code,
-            public_proof_refusal_message(detailed_code),
+            EDGE_BINDING_REFUSAL_MESSAGES[detailed_code] if edge_binding else public_proof_refusal_message(detailed_code),
         )

@@ -224,5 +224,42 @@ class VerifierSdkConformanceTests(unittest.TestCase):
                 self.assertEqual(expected["message"], raised.exception.message)
 
 
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
+                self.assertEqual(expected["message"], raised.exception.message)
+
+
 if __name__ == "__main__":
     unittest.main()

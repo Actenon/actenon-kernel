@@ -1,0 +1,4 @@
+# SyntaxError: The requested module '../src/index.js' does not provide an export named 'Ed25519Verifier'
+not ok 1 - tests/edge-binding-and-eddsa.test.ts
+# pass 0
+# fail 1

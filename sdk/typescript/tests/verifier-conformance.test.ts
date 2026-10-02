@@ -17,6 +17,16 @@ import {
 } from "../src/index.js";
 import type { CanonicalValue } from "../src/canonical.js";
 
+// The SDK only verifies raw bytes (verifyJSON). These tests build their
+// inputs as objects, so serialise them first.
+function verifyObjects(
+  sdk: VerifierSDK,
+  input: { intent: unknown; pccb: unknown; context: Parameters<VerifierSDK["verifyJSON"]>[0]["context"] },
+) {
+  return sdk.verifyJSON({ intent: JSON.stringify(input.intent), pccb: JSON.stringify(input.pccb), context: input.context });
+}
+
+
 interface Mutation {
   document: "intent" | "pccb" | "context";
   path: string[];
@@ -86,13 +96,13 @@ test("shared verifier SDK conformance vectors", async (t) => {
       });
 
       if (vector.expected.outcome === "verified") {
-        const verified = sdk.verify({ intent, pccb, context });
+        const verified = verifyObjects(sdk, { intent, pccb, context });
         assert.equal(verified.pccb.pccb_id, "pccb_portable_hello_world_001");
         return;
       }
 
       assert.throws(
-        () => sdk.verify({ intent, pccb, context }),
+        () => verifyObjects(sdk, { intent, pccb, context }),
         (error: unknown) => {
           assert.ok(error instanceof VerificationError);
           assert.equal(error.code, vector.expected.reason_code);
@@ -125,7 +135,7 @@ test("verifier accepts both accepted canonicalization profile labels", async () 
   const basePccb = await loadJson<PCCB>(manifest.base.pccb);
   for (const label of ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"]) {
     const sdk = new VerifierSDK(buildLocalProofVerifier());
-    const verified = sdk.verify({
+    const verified = verifyObjects(sdk, {
       intent: structuredClone(intent),
       pccb: relabelAndResign(basePccb, label),
       context: structuredClone(manifest.base.context),
@@ -142,7 +152,7 @@ test("verifier refuses an unknown canonicalization profile label", async () => {
     const sdk = new VerifierSDK(buildLocalProofVerifier());
     assert.throws(
       () =>
-        sdk.verify({
+        verifyObjects(sdk, {
           intent: structuredClone(intent),
           pccb: relabelAndResign(basePccb, label),
           context: structuredClone(manifest.base.context),
@@ -175,12 +185,12 @@ test("shared fractional-second timestamp vectors", async (t) => {
         clockSkewToleranceMs: manifest.clock_skew_tolerance_ms,
       });
       if (vector.expected.outcome === "verified") {
-        const verified = sdk.verify({ intent, pccb, context: vector.context });
+        const verified = verifyObjects(sdk, { intent, pccb, context: vector.context });
         assert.equal(verified.pccb.action_hash.canonicalization, "ACTENON-JCS-STRICT-1");
         return;
       }
       assert.throws(
-        () => sdk.verify({ intent, pccb, context: vector.context }),
+        () => verifyObjects(sdk, { intent, pccb, context: vector.context }),
         (error: unknown) => {
           assert.ok(error instanceof VerificationError);
           assert.equal(error.code, vector.expected.reason_code);

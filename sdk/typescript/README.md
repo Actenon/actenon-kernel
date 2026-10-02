@@ -72,31 +72,30 @@ const verified = verifier.verifyJSON({
 });
 ```
 
-`verifyPayloads` / `verify` take already-parsed objects and cannot detect
-what `JSON.parse` discarded; use them only for objects you constructed
-yourself, as in the local example below.
+`verifyJSON` is the only verification entry point: the SDK does not accept
+already-parsed objects, because it could not tell what `JSON.parse` discarded.
+For an envelope that carries both documents, parse it with the exported
+`parseStrictJson` and pass `JSON.stringify(member)` for each.
+
+Production issuers (actenon-permit) sign with Ed25519. Pin the issuer's public
+JWK:
 
 ```ts
-import { buildLocalProofVerifier, VerifierSDK } from "@actenon/verifier-sdk";
+import { Ed25519Verifier, VerifierSDK } from "@actenon/verifier-sdk";
 
-const verifier = new VerifierSDK(buildLocalProofVerifier());
-
-const verified = verifier.verifyPayloads({
-  intent_payload,
-  pccb_payload,
-  request_id: "req_ts_001",
-  audience: { type: "service", id: "portable-hello-world-endpoint" },
-  now: "2026-01-01T12:00:00Z",
-  scope_capabilities: ["protected_resource.read"],
-  parameter_constraints: { exact_message: "portable hello world" },
-  resource_selectors: [{ resource_id: "hello_resource_demo_001" }],
-});
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]));
 ```
+
+The endpoint's own declarations in `context` are enforced (protocol
+`13-edge-binding.md`): the intent's capability must be one of
+`scope_capabilities`, every `parameter_constraints` member must have been
+signed into the proof, the proof's target must satisfy one of
+`resource_selectors`, and only single-use proofs verify.
 
 Clock skew tolerance is strict by default. If a deployment needs to absorb small NTP drift, configure it explicitly:
 
 ```ts
-const verifier = new VerifierSDK(buildLocalProofVerifier(), {
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]), {
   clockSkewToleranceMs: 10_000,
 });
 ```
