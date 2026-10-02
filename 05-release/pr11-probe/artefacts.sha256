@@ -1,0 +1,4 @@
+f45ad19749b5d4363a2d1b87bc1846e195cc013482584c2928719d2bf16cb55a  /tmp/claude-0/-home-user-actenon-kernel/ec64850c-97f9-5405-ab44-362762ebbae6/scratchpad/me/pr11/dist/actenon_permit-2.0.0-py3-none-any.whl
+49b68d98dd5fc07838cf3ebdec9ce1ce066f45785cfccd6c3aea19027706fb89  node_modules/@actenon/sdk/package.json
+dist.integrity = 'sha512-bnz7UHshMrKtzyTLTKyKJxZ5CglUN7NgEL03/poQDAJiaoApxJycLtzgTkdBaaalJPsjqcQCPopN/lprbpXrIw=='
+dist.shasum = 'f9000df6821c072ec60c410f0368685a1575567c'

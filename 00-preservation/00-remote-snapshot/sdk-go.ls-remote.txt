@@ -1,0 +1,6 @@
+bbd1c0d5381e6fba9504207b778955a051bbf2d3	HEAD
+37700d01d6cb753d9e9129020e3a1b93b9e1af0c	refs/heads/claude/actenon-kernel-mcp-setup-qolk0h
+ba0f2ca79d91d5aaeb71c6c36b88029ebfe6108b	refs/heads/fix/ecosystem-markers
+bbd1c0d5381e6fba9504207b778955a051bbf2d3	refs/heads/main
+ba0f2ca79d91d5aaeb71c6c36b88029ebfe6108b	refs/pull/1/head
+89a23b45172512ab7e62782f65cccd66b3aa82aa	refs/tags/v1.0.0

@@ -1,0 +1,14 @@
+## node ESM import of @actenon/sdk@1.4.0
+node FAIL ERR_MODULE_NOT_FOUND
+exit=0
+## bun: verifyGrantToken on PR#11 (ef20ad7) v2 tokens
+ascii REJECTED: unsupported token version (expected 'v1.')
+unicode REJECTED: unsupported token version (expected 'v1.')
+exit=0
+## PR#11 canonical_json float
+canonical_json float: RAISES CanonicalisationError
+Grant fields: ['id', 'agent_id', 'issued_at', 'expires_at', 'scopes', 'budget', 'rate', 'approval_rules', 'status', 'signature', 'parent_grant_id', 'delegation_depth']
+## CONTROL: PyPI actenon-permit==1.4.0 v1 tokens -> @actenon/sdk@1.4.0 verifyGrantToken (bun)
+ascii VERIFIED grant_1ff8d443718442d9
+unicode REJECTED: signature verification failed — token is forged or was signed with a different key
+NOTE (coordinator, 2026-10-02T09:36:28Z): the first CONTROL attempt failed with a harness error (driver read ../tokens.json, ENOENT). The output was removed from RESULTS.txt and the driver path fixed (t-control.mjs). No verifier result was produced by that attempt.

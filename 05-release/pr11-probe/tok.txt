@@ -1,0 +1,2 @@
+canonical_json float: RAISES CanonicalisationError
+Grant fields: ['id', 'agent_id', 'issued_at', 'expires_at', 'scopes', 'budget', 'rate', 'approval_rules', 'status', 'signature', 'parent_grant_id', 'delegation_depth']

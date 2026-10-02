@@ -1,0 +1,173 @@
+{
+  "total_count": 14,
+  "workflows": [
+    {
+      "id": 321021039,
+      "node_id": "W_kwDOSxt6584TImRv",
+      "name": "actenon-scan",
+      "path": ".github/workflows/actenon-scan.yml",
+      "state": "active",
+      "created_at": "2026-07-27T00:37:52.000+01:00",
+      "updated_at": "2026-07-27T00:37:52.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/321021039",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/actenon-scan.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/actenon-scan/badge.svg"
+    },
+    {
+      "id": 320421973,
+      "node_id": "W_kwDOSxt6584TGUBV",
+      "name": "Bandit static analysis",
+      "path": ".github/workflows/bandit.yml",
+      "state": "active",
+      "created_at": "2026-07-25T20:13:58.000+01:00",
+      "updated_at": "2026-07-25T20:16:56.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/320421973",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/bandit.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Bandit%20static%20analysis/badge.svg"
+    },
+    {
+      "id": 289815968,
+      "node_id": "W_kwDOSxt6584RRj2g",
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "state": "active",
+      "created_at": "2026-06-05T13:17:31.000+01:00",
+      "updated_at": "2026-06-05T13:17:31.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/289815968",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/ci.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/CI/badge.svg"
+    },
+    {
+      "id": 290420144,
+      "node_id": "W_kwDOSxt6584RT3Ww",
+      "name": "Conformance release",
+      "path": ".github/workflows/conformance-release.yml",
+      "state": "active",
+      "created_at": "2026-06-06T16:20:43.000+01:00",
+      "updated_at": "2026-06-06T16:20:43.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/290420144",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/conformance-release.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Conformance%20release/badge.svg"
+    },
+    {
+      "id": 319860472,
+      "node_id": "W_kwDOSxt6584TEK74",
+      "name": "Invariants",
+      "path": ".github/workflows/invariants.yml",
+      "state": "active",
+      "created_at": "2026-07-24T21:10:15.000+01:00",
+      "updated_at": "2026-07-24T21:17:19.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/319860472",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/invariants.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Invariants/badge.svg"
+    },
+    {
+      "id": 318915354,
+      "node_id": "W_kwDOSxt6584TAkMa",
+      "name": "Link check",
+      "path": ".github/workflows/link-check.yml",
+      "state": "active",
+      "created_at": "2026-07-23T14:16:02.000+01:00",
+      "updated_at": "2026-07-23T14:16:02.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/318915354",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/link-check.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Link%20check/badge.svg"
+    },
+    {
+      "id": 317783338,
+      "node_id": "W_kwDOSxt6584S8P0q",
+      "name": "Protocol drift gate",
+      "path": ".github/workflows/protocol-drift.yml",
+      "state": "active",
+      "created_at": "2026-07-22T00:10:04.000+01:00",
+      "updated_at": "2026-07-22T00:47:49.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/317783338",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/protocol-drift.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Protocol%20drift%20gate/badge.svg"
+    },
+    {
+      "id": 319952898,
+      "node_id": "W_kwDOSxt6584TEhgC",
+      "name": "Publish to MCP Registry",
+      "path": ".github/workflows/publish-mcp-registry.yml",
+      "state": "active",
+      "created_at": "2026-07-25T00:09:17.000+01:00",
+      "updated_at": "2026-07-25T00:09:17.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/319952898",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/publish-mcp-registry.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Publish%20to%20MCP%20Registry/badge.svg"
+    },
+    {
+      "id": 318389350,
+      "node_id": "W_kwDOSxt6584S-jxm",
+      "name": "Publish to PyPI",
+      "path": ".github/workflows/publish.yml",
+      "state": "active",
+      "created_at": "2026-07-22T19:48:56.000+01:00",
+      "updated_at": "2026-07-22T19:48:56.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/318389350",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/publish.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Publish%20to%20PyPI/badge.svg"
+    },
+    {
+      "id": 319717627,
+      "node_id": "W_kwDOSxt6584TDoD7",
+      "name": "Supply chain",
+      "path": ".github/workflows/supply-chain.yml",
+      "state": "active",
+      "created_at": "2026-07-24T16:51:26.000+01:00",
+      "updated_at": "2026-07-24T19:56:17.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/319717627",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/supply-chain.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Supply%20chain/badge.svg"
+    },
+    {
+      "id": 319932191,
+      "node_id": "W_kwDOSxt6584TEccf",
+      "name": "Verify claims",
+      "path": ".github/workflows/verify-claims.yml",
+      "state": "active",
+      "created_at": "2026-07-24T23:23:34.000+01:00",
+      "updated_at": "2026-07-24T23:31:15.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/319932191",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/verify-claims.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Verify%20claims/badge.svg"
+    },
+    {
+      "id": 319906840,
+      "node_id": "W_kwDOSxt6584TEWQY",
+      "name": "Version coherence",
+      "path": ".github/workflows/version-coherence.yml",
+      "state": "active",
+      "created_at": "2026-07-24T22:35:14.000+01:00",
+      "updated_at": "2026-07-24T22:58:12.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/319906840",
+      "html_url": "https://github.com/Actenon/actenon-kernel/blob/main/.github/workflows/version-coherence.yml",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/workflows/Version%20coherence/badge.svg"
+    },
+    {
+      "id": 367159154,
+      "node_id": "W_kwDOSxt6584V4mdy",
+      "name": "Dependabot Updates",
+      "path": "dynamic/dependabot/dependabot-updates",
+      "state": "active",
+      "created_at": "2026-09-25T18:10:51.000+01:00",
+      "updated_at": "2026-09-25T18:10:51.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/367159154",
+      "html_url": "https://github.com/Actenon/actenon-kernel/actions/workflows/dependabot/dependabot-updates",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/actions/workflows/dependabot/dependabot-updates/badge.svg"
+    },
+    {
+      "id": 290062617,
+      "node_id": "W_kwDOSxt6584RSgEZ",
+      "name": "Dependency Graph",
+      "path": "dynamic/dependabot/update-graph",
+      "state": "active",
+      "created_at": "2026-06-05T21:43:01.000+01:00",
+      "updated_at": "2026-06-05T21:43:01.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/actions/workflows/290062617",
+      "html_url": "https://github.com/Actenon/actenon-kernel/actions/workflows/dependabot/update-graph",
+      "badge_url": "https://github.com/Actenon/actenon-kernel/actions/workflows/dependabot/update-graph/badge.svg"
+    }
+  ]
+}

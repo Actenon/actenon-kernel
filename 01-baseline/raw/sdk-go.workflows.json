@@ -1,0 +1,29 @@
+{
+  "total_count": 2,
+  "workflows": [
+    {
+      "id": 321021064,
+      "node_id": "W_kwDOTjdAp84TImSI",
+      "name": "actenon-scan",
+      "path": ".github/workflows/actenon-scan.yml",
+      "state": "disabled_inactivity",
+      "created_at": "2026-07-27T00:37:57.000+01:00",
+      "updated_at": "2026-09-25T12:30:46.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/sdk-go/actions/workflows/321021064",
+      "html_url": "https://github.com/Actenon/sdk-go/blob/main/.github/workflows/actenon-scan.yml",
+      "badge_url": "https://github.com/Actenon/sdk-go/workflows/actenon-scan/badge.svg"
+    },
+    {
+      "id": 320695613,
+      "node_id": "W_kwDOTjdAp84THW09",
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "state": "active",
+      "created_at": "2026-07-26T11:25:03.000+01:00",
+      "updated_at": "2026-07-26T11:25:03.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/sdk-go/actions/workflows/320695613",
+      "html_url": "https://github.com/Actenon/sdk-go/blob/main/.github/workflows/ci.yml",
+      "badge_url": "https://github.com/Actenon/sdk-go/workflows/CI/badge.svg"
+    }
+  ]
+}
