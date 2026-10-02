@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+
 import warnings
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -543,7 +545,8 @@ class PCCB:
         if self.escrow_id is not None:
             payload["escrow_reference"] = {"escrow_id": self.escrow_id, "single_use": self.scope.single_use}
         if self.extensions:
-            payload["extensions"] = self.extensions
+            # Copy: callers mutating the returned dict must not alter the proof.
+            payload["extensions"] = copy.deepcopy(self.extensions)
         return payload
 
     def to_dict(self) -> dict[str, Any]:

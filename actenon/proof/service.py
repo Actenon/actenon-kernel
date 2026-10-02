@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import copy
+
 import logging
 import os
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import Enum
 from secrets import token_urlsafe
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 from uuid import uuid4
 
 from actenon.core.errors import ProofVerificationError
@@ -147,7 +149,15 @@ class PCCBMinter:
     nonce_factory: Callable[[], str] = field(default=lambda: token_urlsafe(24))
     audit_sink: AuditLogSink | None = None
 
-    def mint(self, intent: ActionIntent, decision: PolicyDecision, context: DynamicContextInput, *, escrow_id: str | None = None) -> PCCB:
+    def mint(
+        self,
+        intent: ActionIntent,
+        decision: PolicyDecision,
+        context: DynamicContextInput,
+        *,
+        escrow_id: str | None = None,
+        extensions: Mapping[str, Any] | None = None,
+    ) -> PCCB:
         if not decision.allowed:
             raise ValueError("PCCB minting requires an allow decision")
 
@@ -181,6 +191,8 @@ class PCCBMinter:
             action_hash=action_hash,
             escrow_id=escrow_id,
             signature=SignatureSpec(algorithm=self.signer.algorithm, key_id=self.signer.key_id, encoding="base64url", value="pending"),
+            # Deep copy: the signed extensions must not alias caller state.
+            extensions=copy.deepcopy(dict(extensions or {})),
         )
         signature = self.signer.sign(canonicalize_bytes(unsigned.unsigned_payload()))
         pccb = PCCB(
@@ -206,6 +218,8 @@ class PCCBMinter:
             self.audit_sink.record_pccb_mint(PCCBMintAuditRecord(pccb))
         return pccb
 
+
+AUTHORITY_STATUS_UNKNOWN_MESSAGE = "The proof authority's revocation status could not be established."
 
 # Type alias for the optional revocation checker callable.
 # Returns True if the proof/issuer is NOT revoked, False if revoked.
@@ -560,17 +574,37 @@ class PCCBVerifier:
         # If a revocation_checker is configured, call it AFTER all other
         # checks pass. This is the last non-mutating check before the
         # executor takes over (steps 14–15: replay + execution eligibility).
-        if self.revocation_checker is not None:
+        # protocol/13-edge-binding.md E5: a proof whose signed authority
+        # reference declares it revocable needs a revocation source that
+        # answers "not revoked". No source, a malformed reference or a source
+        # that cannot be consulted all fail closed.
+        authority_revocable = False
+        if "authority" in (pccb.extensions or {}):
+            authority = pccb.extensions["authority"]
+            if not isinstance(authority, dict) or not isinstance(authority.get("revocable", False), bool):
+                self._raise_post_auth_failure(
+                    "AUTHORITY_REVOKED", pccb=pccb, context=context, message=AUTHORITY_STATUS_UNKNOWN_MESSAGE
+                )
+            authority_revocable = authority.get("revocable", False) is True
+        if self.revocation_checker is None:
+            if authority_revocable:
+                self._raise_post_auth_failure(
+                    "AUTHORITY_REVOKED", pccb=pccb, context=context, message=AUTHORITY_STATUS_UNKNOWN_MESSAGE
+                )
+        else:
             try:
-                is_not_revoked = self.revocation_checker(pccb, context)
+                is_not_revoked = self.revocation_checker(pccb, context) is True
+                status_message = None
             except Exception:
-                # Fail-closed: if the revocation checker errors, refuse.
+                # Fail-closed: if the revocation source errors, refuse.
                 is_not_revoked = False
+                status_message = AUTHORITY_STATUS_UNKNOWN_MESSAGE
             if not is_not_revoked:
                 self._raise_post_auth_failure(
                     "AUTHORITY_REVOKED",
                     pccb=pccb,
                     context=context,
+                    message=status_message,
                 )
 
         # ── Steps 14–15: Replay state + execution eligibility ────────
@@ -645,6 +679,7 @@ class PCCBVerifier:
         context: DynamicContextInput,
         internal_detail: str | None = None,
         edge_binding: bool = False,
+        message: str | None = None,
     ) -> None:
         """Raise a ProofVerificationError for a post-authentication failure.
 
@@ -679,5 +714,6 @@ class PCCBVerifier:
         # trusted_detailed + local_debug: disclose the detailed code
         raise ProofVerificationError(
             detailed_code,
-            EDGE_BINDING_REFUSAL_MESSAGES[detailed_code] if edge_binding else public_proof_refusal_message(detailed_code),
+            message
+            or (EDGE_BINDING_REFUSAL_MESSAGES[detailed_code] if edge_binding else public_proof_refusal_message(detailed_code)),
         )

@@ -202,6 +202,7 @@ class ActenonGate:
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
         disclosure_mode: VerifierDisclosureMode | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
     ) -> None:
         if verifier is None:
             raise ValueError(
@@ -228,7 +229,11 @@ class ActenonGate:
             # Granular codes for local development; in a production-like
             # environment (where LOCAL_DEBUG is refused) pre-authentication
             # failures collapse to PROOF_INVALID.
-            proof_verifier=PCCBVerifier(verifier, disclosure_mode=disclosure_mode or default_disclosure_mode()),
+            proof_verifier=PCCBVerifier(
+                verifier,
+                disclosure_mode=disclosure_mode or default_disclosure_mode(),
+                revocation_checker=revocation_checker,
+            ),
             credential_broker=credential_broker or InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             replay_protection=replay_protection,
@@ -442,8 +447,14 @@ class ActenonGate:
         action: dict[str, Any] | ActionIntent,
         *,
         decision: str = "allow",
+        authority: Mapping[str, Any] | Any | None = None,
     ) -> PCCB:
-        """Mint a single-use proof for an exact Action Intent."""
+        """Mint a single-use proof for an exact Action Intent.
+
+        ``authority`` is signed into ``extensions.authority``. When it declares
+        ``"revocable": true`` every edge must consult the authority's
+        revocation source before executing (protocol/13-edge-binding.md E5).
+        """
 
         if self._minter is None:
             raise RuntimeError("this gate is verifier-only; configure a signer to mint proofs")
@@ -458,7 +469,13 @@ class ActenonGate:
             reason_codes=("GATE_PROOF_MINTED",),
         )
         escrow_id = self.escrow_id_factory() if self.escrow is not None else None
-        pccb = self._minter.mint(intent, policy_decision, context, escrow_id=escrow_id)
+        pccb = self._minter.mint(
+            intent,
+            policy_decision,
+            context,
+            escrow_id=escrow_id,
+            extensions={"authority": authority} if authority is not None else None,
+        )
         if self.escrow is not None and escrow_id is not None:
             self.escrow.issue(
                 escrow_id=escrow_id,
