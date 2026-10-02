@@ -131,6 +131,24 @@ def explicit_development_intent(source: str) -> Iterator[None]:
         _DECLARED_INTENT.reset(token)
 
 
+def declare_process_development_intent(source: str) -> None:
+    """Declare development intent for a whole development-only process.
+
+    For command-line entry points whose only purpose is a local demo,
+    simulation or self-test. Refused (:class:`DevelopmentIntentConflictError`)
+    when ACTENON_ENV declares a non-development environment or a production
+    flag is set. With ACTENON_ENV unset the process is marked
+    ``ACTENON_ENV=development`` so that worker threads and child processes see
+    the same intent. Library code must use :func:`explicit_development_intent`
+    instead, which does not outlive its block.
+    """
+
+    with explicit_development_intent(source):
+        pass
+    if not os.environ.get(ACTENON_ENV_ENV, "").strip():
+        os.environ[ACTENON_ENV_ENV] = "development"
+
+
 def require_development_intent(what: str, *, fix: str) -> None:
     """Refuse ``what`` unless the current context has development intent."""
 
@@ -179,6 +197,7 @@ __all__ = [
     "UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY_ENV",
     "UNSAFE_ALLOW_REPLAY_DISABLED_ENV",
     "UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV",
+    "declare_process_development_intent",
     "declared_development_source",
     "development_environment",
     "development_intent",

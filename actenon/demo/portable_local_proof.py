@@ -118,6 +118,11 @@ def run_portable_local_proof_demo(artifact_root: Path) -> dict[str, Any]:
 
 
 def main() -> int:
+    from actenon.security_posture import declare_process_development_intent
+
+    # A local demo signed with the public development secret: running it is
+    # explicit development intent (refused in a declared non-development env).
+    declare_process_development_intent("python -m actenon.demo.portable_local_proof")
     parser = argparse.ArgumentParser(description="Run the portable hello-world local proof demo.")
     parser.add_argument(
         "--artifacts-dir",
