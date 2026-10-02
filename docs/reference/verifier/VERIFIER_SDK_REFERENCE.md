@@ -14,8 +14,8 @@ It is implemented in:
 | --- | --- | --- |
 | [Python verifier and kernel path](../../../docs/guides/INTEGRATION_QUICKSTART.md) | the full OSS reference path, local proof mode, CLI verification, and protected-endpoint examples | kernel plus verifier-first adoption |
 | [TypeScript verifier SDK](../../../sdk/typescript/README.md) | verifier-edge proof checking in Node or TypeScript services | verifier-only |
-| [Go verifier SDK](../../../sdk/go/README.md) | verifier-edge proof checking in Go services | verifier-only |
-| [Rust verifier SDK](../../../sdk/rust/README.md) | verifier-edge proof checking in Rust services or systems components | verifier-only |
+| [Go verifier SDK](https://github.com/Actenon/sdk-go) | verifier-edge proof checking in Go services | verifier-only |
+| [Rust verifier SDK](https://github.com/Actenon/sdk-rust) | verifier-edge proof checking in Rust services or systems components | verifier-only |
 
 For a fast language chooser, use [../../../SDK_SELECTION_GUIDE.md](../../../SDK_SELECTION_GUIDE.md).
 
@@ -101,8 +101,8 @@ The repository now exposes explicit verifier-side contracts in:
 - `actenon.proof.SignatureVerifier`
 - `actenon.verifier.VerifierSDK`
 - `sdk/typescript/src/signers.ts`
-- `sdk/go/verifier/signers.go`
-- `sdk/rust/src/signers.rs`
+- [`verifier/signers.go`](https://github.com/Actenon/sdk-go/blob/main/verifier/signers.go) in Actenon/sdk-go
+- [`src/signers.rs`](https://github.com/Actenon/sdk-rust/blob/main/src/signers.rs) in Actenon/sdk-rust
 
 Local demos use `build_local_proof_signer()` because the repo ships a deterministic local trust root for testing and examples. That local `HS256` HMAC path is dev/demo-only: the default secret is public repository material, so anyone can forge local-mode proofs. The signer emits a runtime warning in development and refuses creation whenever an Actenon production flag is set. Production flags have no local-HMAC override.
 

@@ -68,6 +68,20 @@ def _is_production_like_env() -> bool:
     return env not in _LOCAL_DEBUG_ALLOWED_ENVS
 
 
+def default_disclosure_mode() -> "VerifierDisclosureMode":
+    """The disclosure profile for kernel-built execution paths.
+
+    ``LOCAL_DEBUG`` (granular pre-authentication codes) where the
+    environment permits it, and ``TRUSTED_DETAILED`` (pre-authentication
+    failures collapse to ``PROOF_INVALID``) in a production-like
+    environment, where ``LOCAL_DEBUG`` is refused at construction.
+    """
+
+    if _is_production_like_env():
+        return VerifierDisclosureMode.TRUSTED_DETAILED
+    return VerifierDisclosureMode.LOCAL_DEBUG
+
+
 def build_action_hash_input(intent: ActionIntent) -> dict[str, Any]:
     return {
         "intent_id": intent.intent_id,

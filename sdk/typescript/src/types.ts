@@ -47,9 +47,21 @@ export interface ScopeSpec {
   parameter_constraints?: Record<string, JsonValue>;
 }
 
+/**
+ * Canonicalization profile labels a verifier accepts for a PCCB action hash.
+ * New proofs carry ACTENON-JCS-STRICT-1; RFC8785-JCS is the legacy alias for
+ * the same serialisation (actenon-protocol ACCEPTED_CANONICALISATION_PROFILES).
+ */
+export const ACCEPTED_CANONICALIZATION_PROFILES = ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"] as const;
+export type CanonicalizationProfile = (typeof ACCEPTED_CANONICALIZATION_PROFILES)[number];
+
+export function isAcceptedCanonicalizationProfile(value: string): value is CanonicalizationProfile {
+  return (ACCEPTED_CANONICALIZATION_PROFILES as readonly string[]).includes(value);
+}
+
 export interface ActionHashSpec {
   algorithm: "sha-256";
-  canonicalization: "RFC8785-JCS";
+  canonicalization: CanonicalizationProfile;
   value: string;
 }
 

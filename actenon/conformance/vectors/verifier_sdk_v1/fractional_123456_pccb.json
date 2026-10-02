@@ -15,8 +15,8 @@
   },
   "action_hash": {
     "algorithm": "sha-256",
-    "canonicalization": "RFC8785-JCS",
-    "value": "0c86e20c2de67ffdd210064fc258f59e525642c4d73c1bc06a60badcb610009b"
+    "canonicalization": "ACTENON-JCS-STRICT-1",
+    "value": "606cd92adf32a29e057d76b3cde7744a26c5ab443c801c1c91b59d0e83bc2d3b"
   },
   "audience": {
     "id": "portable-hello-world-endpoint",
@@ -26,17 +26,17 @@
     "name": "pccb",
     "version": "v1"
   },
-  "expires_at": "2026-01-01T12:05:00Z",
-  "intent_id": "intent_portable_hello_world_001",
-  "issued_at": "2026-01-01T12:00:00Z",
+  "expires_at": "2026-01-01T12:05:00.123456Z",
+  "intent_id": "intent_portable_hello_world_123456",
+  "issued_at": "2026-01-01T12:00:00.123456Z",
   "issuer": {
-    "display_name": "Portable Local Issuer",
-    "id": "portable_local_issuer",
+    "display_name": "Portable Demo Actor",
+    "id": "portable_demo_actor",
     "type": "service"
   },
-  "nonce": "nonce-portable-hello-world-00000001",
-  "not_before": "2026-01-01T12:00:00Z",
-  "pccb_id": "pccb_portable_hello_world_001",
+  "nonce": "nonce-portable-123456",
+  "not_before": "2026-01-01T12:00:00.123456Z",
+  "pccb_id": "pccb_portable_hello_world_123456",
   "scope": {
     "capabilities": [
       "protected_resource.read"
@@ -56,7 +56,7 @@
     "algorithm": "HS256",
     "encoding": "base64url",
     "key_id": "local-proof-v1",
-    "value": "4GPCzShn0SL-qGd_K-65WW0T88b_VfKUBpLIz7Wd-8g"
+    "value": "Xvv0x2idCF25FbGNgyshgUmcivf4X06rLH23nwxfZA8"
   },
   "subject": {
     "display_name": "Portable Demo Actor",

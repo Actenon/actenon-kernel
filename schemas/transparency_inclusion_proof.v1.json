@@ -34,7 +34,7 @@
       "required": ["algorithm", "canonicalization", "value"],
       "properties": {
         "algorithm": {"const": "sha-256"},
-        "canonicalization": {"const": "RFC8785-JCS"},
+        "canonicalization": {"enum": ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"]},
         "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
       }
     }

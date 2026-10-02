@@ -98,11 +98,11 @@
     },
     {
       "id": "go",
-      "command": "cd sdk/go && go test ./..."
+      "command": "bash scripts/verify_sdk_conformance.sh  # github.com/Actenon/sdk-go at the commit pinned in sdk/standalone-sdk-pins.json"
     },
     {
       "id": "rust",
-      "command": "cd sdk/rust && cargo test"
+      "command": "bash scripts/verify_sdk_conformance.sh  # github.com/Actenon/sdk-rust at the commit pinned in sdk/standalone-sdk-pins.json"
     }
   ]
 }

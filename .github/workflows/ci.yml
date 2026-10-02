@@ -83,54 +83,79 @@ jobs:
         run: npm test
 
   go-verifier:
-    name: Go verifier SDK
+    # The Go verifier SDK lives in github.com/Actenon/sdk-go. This job runs it
+    # at the commit pinned in sdk/standalone-sdk-pins.json against THIS
+    # kernel's vectors, so a vector change here fails until the SDK follows.
+    name: Go verifier SDK (standalone, pinned)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdk/go
-
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read the sdk-go pin
+        id: pin
+        run: |
+          python3 -c "import json; p=json.load(open('sdk/standalone-sdk-pins.json'))['sdk-go']; print('repository=' + p['repository']); print('sha=' + p['sha'])" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _sdk/sdk-go
+
+      - name: Check the checkout is the pinned commit
+        run: test "$(git -C _sdk/sdk-go rev-parse HEAD)" = "${{ steps.pin.outputs.sha }}"
+
+      - name: Vendored kernel vectors match this kernel
+        run: python3 scripts/check_standalone_sdk_fixtures.py _sdk/sdk-go
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-          cache: true
-          cache-dependency-path: sdk/go/go.sum
+          go-version-file: _sdk/sdk-go/go.mod
+          cache: false
 
-      - name: Vet
-        run: go vet ./...
-
-      - name: Test
-        run: go test ./... -v
+      - name: Test sdk-go and its vendored vectors against this kernel
+        working-directory: _sdk/sdk-go
+        env:
+          ACTENON_KERNEL_VECTOR_LOCK: ${{ github.workspace }}/conformance/vector-lock.json
+        run: |
+          go vet ./...
+          go test -race -count=1 ./...
 
   rust-verifier:
-    name: Rust verifier SDK
+    # The Rust verifier SDK lives in github.com/Actenon/sdk-rust; see go-verifier.
+    # Lints (fmt, clippy) are the SDK repository's own gate, so a new stable
+    # clippy lint cannot turn this job red without a behaviour change.
+    name: Rust verifier SDK (standalone, pinned)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdk/rust
-
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read the sdk-rust pin
+        id: pin
+        run: |
+          python3 -c "import json; p=json.load(open('sdk/standalone-sdk-pins.json'))['sdk-rust']; print('repository=' + p['repository']); print('sha=' + p['sha'])" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _sdk/sdk-rust
+
+      - name: Check the checkout is the pinned commit
+        run: test "$(git -C _sdk/sdk-rust rev-parse HEAD)" = "${{ steps.pin.outputs.sha }}"
+
+      - name: Vendored kernel vectors match this kernel
+        run: python3 scripts/check_standalone_sdk_fixtures.py _sdk/sdk-rust
+
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: 'stable'
-          components: rustfmt, clippy
 
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: sdk/rust
-
-      - name: Format check
-        run: cargo fmt -- --check
-
-      - name: Clippy
-        run: cargo clippy -- -D warnings
-
-      - name: Test
-        run: cargo test --verbose
+      - name: Test sdk-rust and its vendored vectors against this kernel
+        working-directory: _sdk/sdk-rust
+        env:
+          ACTENON_KERNEL_VECTOR_LOCK: ${{ github.workspace }}/conformance/vector-lock.json
+        run: |
+          cargo test --all-targets --locked
+          cargo test --doc --locked
 
   # The verify-claims job moved to verify-claims.yml so the README
   # badge can link to a dedicated gate.

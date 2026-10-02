@@ -1,36 +1,65 @@
 """Boundary Verifier — high-level Kernel verification for resource boundaries.
 
 Wraps PCCBVerifier with the boundary-protection workflow:
-  1. Extract the proof from the request (header or body).
-  2. Build the canonical action from the boundary manifest mapping.
-  3. Verify the proof using PCCBVerifier (signature, action_hash, audience, expiry).
-  4. Check replay protection (single-use proofs).
+  1. Decode the proof token into a PCCB (strict JSON: no duplicate keys,
+     size and depth limits).
+  2. Bind it to the exact Action Intent the request is performing, the
+     route's declared action and target, and the boundary's audience.
+  3. Verify the proof with the configured PCCBVerifier (signature,
+     time window, audience, tenant, subject, target, action, action hash).
+  4. Enforce single use (in-process by default, or a durable ReplayStore).
   5. Return a structured verification result.
   6. Construct a Kernel receipt on success.
 
 This is the Kernel's contribution to the Actenon Boundary Kit. The
 boundary middleware (in actenon-permit) calls this verifier; it does
 NOT implement proof verification itself.
+
+The verifier fails closed: without a configured ``PCCBVerifier`` (the
+trust root) or without the Action Intent the proof was issued for, no
+token is ever reported valid.
 """
 
 from __future__ import annotations
 
-import hashlib
+import base64
+import binascii
 import logging
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Mapping
 from uuid import uuid4
 
-from actenon.core.errors import ProofVerificationError
+from actenon.api import ActionIntentIntakeService
+from actenon.core.errors import ProofVerificationError, RefusalException
+from actenon.core.json import loads_no_duplicate_keys
+from actenon.models import PCCB, ActionIntent, AudienceRef, DynamicContextInput
+from actenon.proof.canonical import sha256_hex
 from actenon.proof.service import PCCBVerifier
+from actenon.replay.base import ReplayStore
+from actenon.replay.service import build_action_consumption_claim
 
 logger = logging.getLogger(__name__)
+
+PROOF_TOKEN_PREFIX = "v1."
 
 
 @dataclass(frozen=True)
 class BoundaryVerificationRequest:
-    """Input to BoundaryVerifier.verify_boundary()."""
+    """Input to BoundaryVerifier.verify_boundary().
+
+    ``proof_token`` is the PCCB as JSON, as unpadded base64url of that
+    JSON, or as ``"v1." + base64url(JSON)``. ``intent`` is the exact
+    Action Intent (object or dict) the request is performing; a proof can
+    only be verified against the action it authorises, so a request
+    without one is refused. ``action_type`` and ``target`` are the
+    route's declared action name and resource id, and must match the
+    intent. ``action_hash``, when non-empty, must equal the proof's
+    action hash. ``audience`` (``"type:id"``) identifies this boundary
+    and is required. ``now`` overrides the verification time (default:
+    the current UTC time).
+    """
 
     proof_token: str
     action_type: str
@@ -38,6 +67,8 @@ class BoundaryVerificationRequest:
     audience: str = ""
     boundary_id: str = ""
     target: str = ""
+    intent: ActionIntent | Mapping[str, Any] | None = None
+    now: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +108,34 @@ class BoundaryVerificationResult:
         )
 
 
+def _decode_proof_token(token: str) -> PCCB:
+    """Decode a proof token into a PCCB. Raises ValueError on any problem."""
+
+    text = token.strip()
+    if not text.startswith("{"):
+        text = text.removeprefix(PROOF_TOKEN_PREFIX)
+        padding = "=" * (-len(text) % 4)
+        try:
+            text = base64.b64decode(
+                (text + padding).encode("ascii"), altchars=b"-_", validate=True
+            ).decode("utf-8")
+        except (binascii.Error, UnicodeError) as exc:
+            raise ValueError("proof token is neither PCCB JSON nor base64url-encoded PCCB JSON") from exc
+    payload = loads_no_duplicate_keys(text)
+    if not isinstance(payload, Mapping):
+        raise ValueError("proof token must decode to a JSON object")
+    return PCCB.from_dict(payload)
+
+
+def _parse_audience(raw: str) -> AudienceRef:
+    audience_type, separator, audience_id = raw.partition(":")
+    if not separator:
+        return AudienceRef(type="service", id=raw)
+    if not audience_type or not audience_id:
+        raise ValueError("audience must be 'type:id' or a bare service id")
+    return AudienceRef(type=audience_type, id=audience_id)
+
+
 class BoundaryVerifier:
     """High-level Kernel verifier for resource boundaries.
 
@@ -84,12 +143,11 @@ class BoundaryVerifier:
     The boundary middleware calls this verifier; it does NOT implement
     proof verification itself.
 
-    The verifier is stateless except for the replay store. The replay
-    store prevents the same proof from being used twice.
-
     The verifier DOES:
-      - Verify the proof's signature, action_hash, audience, expiry
-      - Check replay (single-use)
+      - Verify the proof's signature, time window, audience, tenant,
+        subject, target, action, and action hash against the exact intent
+      - Check replay (single-use), keyed on proof identity rather than on
+        the token's encoding
       - Return a structured result
       - Construct a receipt on success
 
@@ -97,20 +155,24 @@ class BoundaryVerifier:
       - Execute the action (handler's job)
       - Resolve credentials (broker's job)
       - Issue proofs (authority's job)
+
+    Without a ``pccb_verifier`` (the trust root) every token is refused
+    with ``ISSUER_UNTRUSTED``. Replay state is process-local unless a
+    durable ``replay_store`` is supplied; multi-worker deployments must
+    supply one shared by every worker.
     """
 
     def __init__(
         self,
         *,
         pccb_verifier: PCCBVerifier | None = None,
-        replay_store: Any | None = None,
+        replay_store: ReplayStore | None = None,
     ) -> None:
         self._pccb_verifier = pccb_verifier
-        # We use an in-memory set for replay detection in the boundary
-        # verifier. The full ReplayStore (SQLite/Postgres) is used by
-        # the ProtectedExecutor; the boundary verifier's replay needs
-        # are simpler (just dedup by proof_id within the process).
+        self._replay_store = replay_store
+        self._replay_lock = threading.Lock()
         self._replay_keys: set[str] = set()
+        self._intake = ActionIntentIntakeService()
 
     def verify_boundary(
         self, request: BoundaryVerificationRequest
@@ -120,59 +182,91 @@ class BoundaryVerifier:
         Returns a BoundaryVerificationResult. Never raises — all
         failures are captured in the result.
         """
-        # Step 1: Check proof token is present.
+        try:
+            return self._verify(request)
+        except Exception:  # pragma: no cover - defensive: never fail open
+            logger.exception("boundary.verification_error")
+            return BoundaryVerificationResult.failure(
+                "boundary verification failed unexpectedly", "OUTCOME_UNKNOWN"
+            )
+
+    def _verify(self, request: BoundaryVerificationRequest) -> BoundaryVerificationResult:
+        # Step 1: Proof presence.
         if not request.proof_token:
             return BoundaryVerificationResult.failure(
                 "no proof token provided", "PROOF_MISSING"
             )
 
-        # Step 2: Structural check (minimum length).
-        if len(request.proof_token) < 16:
+        # Step 2: A trust root is mandatory. Structure alone is never proof.
+        if self._pccb_verifier is None:
             return BoundaryVerificationResult.failure(
-                "proof token too short (malformed)", "PROOF_INVALID"
+                "no PCCBVerifier trust root is configured; the boundary refuses every proof",
+                "ISSUER_UNTRUSTED",
             )
 
-        # Step 3: Derive proof ID for replay detection.
-        proof_id = (
-            f"proof_{hashlib.sha256(request.proof_token.encode()).hexdigest()[:16]}"
+        # Step 3: Decode the token into a PCCB.
+        try:
+            pccb = _decode_proof_token(request.proof_token)
+        except (ValueError, TypeError, RecursionError):
+            return BoundaryVerificationResult.failure(
+                "proof token is not a well-formed PCCB", "PROOF_INVALID"
+            )
+
+        # Step 4: The exact Action Intent this request performs.
+        if request.intent is None:
+            return BoundaryVerificationResult.failure(
+                "no Action Intent supplied; a proof can only be verified against "
+                "the exact action it authorises",
+                "MALFORMED_REQUEST",
+            )
+        try:
+            intent = (
+                request.intent
+                if isinstance(request.intent, ActionIntent)
+                else self._intake.parse(request.intent)
+            )
+            audience = _parse_audience(request.audience)
+        except (RefusalException, ValueError, TypeError):
+            return BoundaryVerificationResult.failure(
+                "the Action Intent or boundary audience is malformed", "MALFORMED_REQUEST"
+            )
+
+        # Step 5: The route's declared action and target bind the intent.
+        if intent.action.name != request.action_type:
+            return BoundaryVerificationResult.failure(
+                "the intent's action does not match this boundary's action", "ACTION_MISMATCH"
+            )
+        if request.target and intent.target.resource_id != request.target:
+            return BoundaryVerificationResult.failure(
+                "the intent's target does not match this request's target", "TARGET_MISMATCH"
+            )
+
+        # Step 6: Full PCCB verification against the intent and this audience.
+        context = DynamicContextInput(
+            request_id=f"req_boundary_{uuid4().hex}",
+            audience=audience,
+            scope_capabilities=(intent.action.capability,),
+            now=request.now or datetime.now(timezone.utc),
         )
-
-        # Step 4: Check replay.
-        if proof_id in self._replay_keys:
+        try:
+            self._pccb_verifier.verify(intent, pccb, context)
+        except ProofVerificationError as e:
             return BoundaryVerificationResult.failure(
-                "replay detected: proof has already been used",
-                "REPLAY_DETECTED",
+                f"proof verification failed: {e.refusal_code}",
+                e.refusal_code,
+            )
+        if request.action_hash and request.action_hash != pccb.action_hash.value:
+            return BoundaryVerificationResult.failure(
+                "the declared action hash does not match the proof", "ACTION_HASH_MISMATCH"
             )
 
-        # Step 5: Verify using the Kernel's PCCBVerifier if configured.
-        #
-        # In a full deployment, this would:
-        #   a. Decode the proof token (base64url -> JSON -> PCCB dataclass)
-        #   b. Build an ActionIntent from the request
-        #   c. Call self._pccb_verifier.verify(intent, pccb, context)
-        #   d. Catch ProofVerificationError and map to a result
-        #
-        # The key architectural point: the boundary middleware calls
-        # THIS method, not a bespoke verification. When full PCCB
-        # decoding is wired, the middleware doesn't change — only
-        # this method's internals change.
-        if self._pccb_verifier is not None:
-            try:
-                # Full PCCB verification would go here.
-                # For now, the verifier is configured but the token
-                # format is not yet PCCB (it's a raw token). The
-                # structural check above is the gate.
-                pass
-            except ProofVerificationError as e:
-                return BoundaryVerificationResult.failure(
-                    f"proof verification failed: {e.refusal_code}",
-                    e.refusal_code,
-                )
+        # Step 7: Single use. Keyed on proof identity, not on the token's
+        # encoding, so re-serialising the same proof is still a replay.
+        replay_refusal = self._claim_single_use(intent, pccb, context)
+        if replay_refusal is not None:
+            return replay_refusal
 
-        # Step 6: Record proof ID for replay detection.
-        self._replay_keys.add(proof_id)
-
-        # Step 7: Construct receipt ID.
+        # Step 8: Construct receipt ID.
         receipt_id = f"rcpt_{uuid4().hex[:16]}"
 
         logger.info(
@@ -180,16 +274,50 @@ class BoundaryVerifier:
             extra={
                 "boundary_id": request.boundary_id,
                 "action_type": request.action_type,
-                "proof_id": proof_id,
+                "proof_id": pccb.pccb_id,
                 "receipt_id": receipt_id,
                 "audience": request.audience,
             },
         )
 
         return BoundaryVerificationResult.success(
-            proof_id=proof_id,
+            proof_id=pccb.pccb_id,
             receipt_id=receipt_id,
         )
+
+    def _claim_single_use(
+        self, intent: ActionIntent, pccb: PCCB, context: DynamicContextInput
+    ) -> BoundaryVerificationResult | None:
+        if self._replay_store is not None:
+            claim = build_action_consumption_claim(intent, pccb, context)
+            try:
+                self._replay_store.claim_once(claim, now=context.now)
+                self._replay_store.mark_consumed(claim.replay_key, now=context.now)
+            except RefusalException:
+                return BoundaryVerificationResult.failure(
+                    "replay detected: proof has already been used", "REPLAY_DETECTED"
+                )
+            except Exception:
+                return BoundaryVerificationResult.failure(
+                    "replay state could not be established; refusing", "REPLAY_STORE_UNAVAILABLE"
+                )
+            return None
+
+        replay_key = sha256_hex(
+            {
+                "pccb_id": pccb.pccb_id,
+                "nonce": pccb.nonce,
+                "action_hash": pccb.action_hash.to_dict(),
+                "audience": pccb.audience.to_dict(),
+            }
+        )
+        with self._replay_lock:
+            if replay_key in self._replay_keys:
+                return BoundaryVerificationResult.failure(
+                    "replay detected: proof has already been used", "REPLAY_DETECTED"
+                )
+            self._replay_keys.add(replay_key)
+        return None
 
     def construct_receipt(
         self,
@@ -198,6 +326,8 @@ class BoundaryVerifier:
         outcome: str = "succeeded",
     ) -> dict[str, Any]:
         """Construct a receipt for a verified boundary execution."""
+        if not result.valid:
+            raise ValueError("a boundary receipt can only be constructed for a verified result")
         return {
             "receipt_id": result.receipt_id,
             "boundary_id": request.boundary_id,
@@ -213,9 +343,9 @@ class BoundaryVerifier:
     def health(self) -> dict[str, Any]:
         """Health check."""
         return {
-            "ok": True,
+            "ok": self._pccb_verifier is not None,
             "pccb_verifier_configured": self._pccb_verifier is not None,
-            "replay_store": "in_memory_set",
+            "replay_store": "durable" if self._replay_store is not None else "in_memory_set",
             "replay_keys_tracked": len(self._replay_keys),
         }
 
