@@ -231,7 +231,7 @@ ACTENON_ENV=development python3 -m actenon.cli verify-proof \
 Verify a receipt from the refund local proof run:
 
 ```bash
-python3 -m actenon.cli verify-receipt \
+ACTENON_ENV=development python3 -m actenon.cli verify-receipt \
   --receipt artifacts/local_proof/scenarios/allow/execution_receipt.json \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json

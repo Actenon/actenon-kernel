@@ -1,0 +1,12 @@
+[
+  {
+    "name": "v0.1.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/sdk-rust/zipball/refs/tags/v0.1.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/sdk-rust/tarball/refs/tags/v0.1.0",
+    "commit": {
+      "sha": "8b3d0241bdd990953d33cdb0e7ea38292ea2f49c",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/8b3d0241bdd990953d33cdb0e7ea38292ea2f49c"
+    },
+    "node_id": "REF_kwDOTjdDe7ByZWZzL3RhZ3MvdjAuMS4w"
+  }
+]

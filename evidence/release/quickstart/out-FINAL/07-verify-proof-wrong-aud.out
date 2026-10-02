@@ -1,0 +1,54 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/cli.py:187: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  return build_local_proof_signer()
+{
+  "ok": false,
+  "refusal": {
+    "action": {
+      "capability": "refund.execute",
+      "constraints": {
+        "exact_amount_minor": 1500,
+        "exact_currency": "USD"
+      },
+      "name": "refund.create",
+      "parameters": {
+        "amount_minor": 1500,
+        "currency": "USD"
+      },
+      "scope": {
+        "single_use": true,
+        "target_resource_type": "payment"
+      }
+    },
+    "audience": {
+      "id": "wrong-endpoint",
+      "type": "service"
+    },
+    "category": "proof",
+    "contract": {
+      "name": "refusal",
+      "version": "v1"
+    },
+    "correlation": {
+      "pccb_id": "pccb_0001",
+      "request_id": "cli_verify_proof"
+    },
+    "intent_id": "intent_allow",
+    "message": "The proof audience does not match this endpoint.",
+    "reason_code": "AUDIENCE_MISMATCH",
+    "refusal_id": "rfsl_cli_verify_proof",
+    "refused_at": "2026-01-01T12:00:00Z",
+    "retryable": false,
+    "subject": {
+      "display_name": "Local Proof Demo",
+      "id": "demo_actor",
+      "type": "service"
+    },
+    "target": {
+      "resource_id": "payment_demo_001",
+      "resource_type": "payment"
+    },
+    "tenant": {
+      "tenant_id": "tenant_demo"
+    }
+  }
+}

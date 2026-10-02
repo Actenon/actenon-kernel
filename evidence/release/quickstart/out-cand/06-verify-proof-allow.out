@@ -1,0 +1,5 @@
+Proof verification failed.
+Category: schema
+Code: SCHEMA_INVALID
+Message: [Errno 2] No such file or directory: 'artifacts/local_proof/scenarios/allow/action_intent.json'
+Refused at: 2026-10-02T18:41:57.347820Z

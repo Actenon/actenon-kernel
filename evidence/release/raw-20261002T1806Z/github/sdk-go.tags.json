@@ -1,0 +1,12 @@
+[
+  {
+    "name": "v1.0.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/sdk-go/zipball/refs/tags/v1.0.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/sdk-go/tarball/refs/tags/v1.0.0",
+    "commit": {
+      "sha": "89a23b45172512ab7e62782f65cccd66b3aa82aa",
+      "url": "https://api.github.com/repos/Actenon/sdk-go/commits/89a23b45172512ab7e62782f65cccd66b3aa82aa"
+    },
+    "node_id": "REF_kwDOTjdAp7ByZWZzL3RhZ3MvdjEuMC4w"
+  }
+]

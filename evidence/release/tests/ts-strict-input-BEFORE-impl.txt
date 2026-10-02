@@ -1,0 +1,7 @@
+not ok 1 - verifyJSON accepts the raw shared vector
+not ok 2 - verifyJSON refuses duplicate object members in the intent and the proof
+not ok 3 - verifyJSON refuses non-integer number lexemes that JSON.parse would collapse
+not ok 4 - verifyJSON refuses malformed and non-JSON-text input
+not ok 5 - signature values must be canonical unpadded base64url
+# pass 0
+# fail 5

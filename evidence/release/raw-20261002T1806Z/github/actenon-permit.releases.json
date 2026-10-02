@@ -1,0 +1,46 @@
+[
+  {
+    "url": "https://api.github.com/repos/Actenon/actenon-permit/releases/357705701",
+    "assets_url": "https://api.github.com/repos/Actenon/actenon-permit/releases/357705701/assets",
+    "upload_url": "https://uploads.github.com/repos/Actenon/actenon-permit/releases/357705701/assets{?name,label}",
+    "html_url": "https://github.com/Actenon/actenon-permit/releases/tag/v1.0.0-integration",
+    "id": 357705701,
+    "author": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "node_id": "RE_kwDOTSIuvM4VUifl",
+    "tag_name": "v1.0.0-integration",
+    "target_commitish": "8157c8bd588fdb316fe7d42a55ef35b83468f217",
+    "name": "v1.0.0-integration — actenon-protocol v1.0.0 integrated",
+    "draft": false,
+    "immutable": false,
+    "prerelease": true,
+    "created_at": "2026-07-22T00:03:39Z",
+    "updated_at": "2026-07-22T00:04:09Z",
+    "published_at": "2026-07-22T00:04:09Z",
+    "assets": [
+
+    ],
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-permit/tarball/v1.0.0-integration",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-permit/zipball/v1.0.0-integration",
+    "body": "Protocol-integrated baseline.\n\nThis release marks the point where all four Actenon repos have integrated the pinned actenon-protocol v1.0.0 contract and have CI drift gates in place.\n\nSee the PR that created this tag for full details."
+  }
+]

@@ -1,0 +1,14 @@
+df10b55fd8e18becd8678dcdf577fa54605e6e50	HEAD
+d7f60a656dba4bb63a6ca604db2dc1ee681aa18b	refs/heads/claude/actenon-kernel-mcp-setup-qolk0h
+f7161d87368342eae5673fe3b0938f2be77b8704	refs/heads/codex/auditable-milestone
+df10b55fd8e18becd8678dcdf577fa54605e6e50	refs/heads/main
+f7161d87368342eae5673fe3b0938f2be77b8704	refs/pull/1/head
+04059add0ff465cfe898b473f3d56b1edf2b2b1e	refs/pull/2/head
+65da00eb88eec1e51fea20e69e95e984da6f379b	refs/tags/v0.1.0
+7879e9c62fa1871a8527a5e8dea2b6f6b682afcb	refs/tags/v0.1.0^{}
+3871c82338a351708021fc39304d0387ef7f032c	refs/tags/v0.2.0
+cd8451e7ad0dd0c02c29e1d9b92698b436863f0e	refs/tags/v0.2.0^{}
+53c3f1e20c6ea1a99d5ac0d1cdf6e48ecf7f7e2d	refs/tags/v0.3.0
+6dc6955a7c295ae64249860f8a113093ebf0401e	refs/tags/v0.3.0^{}
+3af3b411237cc43ae9a8f7c36efa7588727c2278	refs/tags/v0.4.0
+08396afaa5966326d4f727304ee55b4c82205f17	refs/tags/v0.4.0^{}

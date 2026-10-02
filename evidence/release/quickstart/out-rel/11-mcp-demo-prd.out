@@ -1,0 +1,19 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/mcp_server.py:443: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer(token_bytes(32))
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/bin/actenon-mcp", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/mcp_server.py", line 518, in main
+    gate, signer = build_demo_gate(args.audience)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/mcp_server.py", line 444, in build_demo_gate
+    gate = ActenonGate(
+           ^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/gate.py", line 217, in __init__
+    proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 9, in __init__
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/proof/service.py", line 271, in __post_init__
+    raise ValueError(
+ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='prd'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.

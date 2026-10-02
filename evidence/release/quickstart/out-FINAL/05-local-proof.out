@@ -1,0 +1,19 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/demo/local_proof.py:93: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer()
+Local proof mode completed.
+Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_proof
+Refund wedge:
+refund.allow: executed
+refund.deny: deny
+refund.approval_required: approval-required
+refund.needs_evidence: needs-evidence
+Invoice payment wedge:
+invoice_payment.allow: executed
+invoice_payment.duplicate_invoice_payment: deny
+invoice_payment.wrong_entity: deny
+invoice_payment.bank_mismatch: deny
+invoice_payment.approval_missing: approval-required
+invoice_payment.evidence_missing: needs-evidence
+invoice_payment.batch_hash_mismatch: deny
+Refund protected endpoint state: /tmp/tmp.54bxeMsjY5/artifacts/local_proof/state/protected_endpoint_state.json
+Invoice payment protected endpoint state: /tmp/tmp.54bxeMsjY5/artifacts/local_proof/invoice_payment/state/protected_endpoint_state.json

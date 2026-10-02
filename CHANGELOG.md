@@ -54,6 +54,27 @@ explicit store). Local development: set `ACTENON_ENV=development` or use
 fix that changes behaviour within 1.x and requires a published security
 advisory naming the affected versions (<= 1.2.1).
 
+### Security — TypeScript verifier SDK (`@actenon/verifier-sdk`, unpublished)
+
+- `VerifierSDK.verifyJSON` verifies proof material exactly as received and
+  parses it strictly. The object API cannot see what `JSON.parse` discarded:
+  on the `kernel_diff_v1` corpus the TS verifier fed `JSON.parse` output
+  accepted 8 proofs (plus 3 in the precision addendum) that the Python
+  reference refuses (duplicate members, `2500.0` / `2.5e3` / `1e0` number
+  forms, whitespace inside a signature). Through `verifyJSON`: 0.
+- HMAC signature values must be canonical unpadded base64url.
+
+### Fixed (from the programme branch, PR #37; unreleased until this version)
+
+- `BoundaryVerifier` verified nothing: 1.2.1 returns `valid=True` for any
+  16+ character token (reproduced: `"AAAAAAAAAAAAAAAA"` -> VALID). It now
+  requires a trust root and verifies the proof.
+- `ActenonGate` could not be constructed with `ACTENON_ENV=production`
+  (it hard-coded `LOCAL_DEBUG` disclosure). Further fixes: idempotent retries
+  verify the proof first; artifact store paths are confined; the MCP server
+  checks a supplied intent against the tool arguments; CLI verify commands
+  stop reporting unchecked artifacts as verified. See PR #37.
+
 ## [1.2.1] — 2026-07-25
 
 ### Fixed

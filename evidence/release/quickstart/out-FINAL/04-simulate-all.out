@@ -1,0 +1,144 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/local_runtime.py:2403: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer=build_local_proof_signer(),
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/local_runtime.py:2449: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/local_runtime.py:2593: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer()
+Local incident simulation.
+Runtime root: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime
+Mode: technical
+Scenario: all
+Succeeded: yes
+Takeaways:
+- Without execution-edge verification, an upstream allow can still reach the wrong endpoint or wrong parameters.
+- The protected endpoint is where proof becomes consequential: the side effect happens only after the edge verifies the exact action.
+- Proof binding catches wrong audience, mutated action, and expired proof before side effects.
+- Proof alone does not stop replay. Replay protection is a protected-endpoint runtime property backed by state.
+- Preflight and credential brokering make the side door explicit: agents should not hold standing production credentials for consequential actions.
+- The Action Intent plus Receipt or Refusal turns each incident into an inspectable record instead of an anecdote.
+Results:
+- valid-proof: VERIFIED
+  Portable proof verified and the protected resource executed locally.
+  Lesson: The happy path stays inspectable: proof-bound execution gives you both execution and evidence, not just a side effect.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/valid-proof
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/valid-proof/INCIDENT_SUMMARY.md
+  Perspectives:
+  - without_execution_edge [counterfactual]: WOULD_EXECUTE
+    Counterfactual: if the endpoint trusted upstream allow state instead of verifying at execution time, the request would reach the side effect path unchecked.
+  - proof_verifier_only [observed]: WOULD_VERIFY
+    Observed: the proof pair verified successfully for the intended audience, time window, and action hash.
+  - protected_endpoint_runtime [observed]: EXECUTED
+    Observed: the protected resource executed only after the verifier accepted the bound proof.
+  - action_intent_record [observed]: RECORDED_EXECUTION
+    Observed: the Action Intent, PCCB, and successful execution result are persisted as inspectable artifacts for later evidence lookup.
+- audience-mismatch: REFUSED
+  Portable proof verification failed with AUDIENCE_MISMATCH.
+  Lesson: Audience binding turned a wrong-endpoint execution attempt into a deterministic refusal before side effects.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/audience-mismatch
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/audience-mismatch/INCIDENT_SUMMARY.md
+  Perspectives:
+  - without_execution_edge [counterfactual]: WOULD_EXECUTE
+    Counterfactual: if the endpoint trusted upstream allow state instead of verifying at execution time, the request would reach the side effect path unchecked.
+  - proof_verifier_only [observed]: WOULD_REFUSE
+    Observed: proof verification rejected the request with AUDIENCE_MISMATCH.
+  - protected_endpoint_runtime [observed]: REFUSED
+    Observed: the protected endpoint refused the request before any side effect with AUDIENCE_MISMATCH.
+  - action_intent_record [observed]: RECORDED_REFUSAL
+    Observed: the Action Intent and Refusal artifacts preserve the blocked attempt for incident review and evidence lookup.
+- action-hash-mismatch: REFUSED
+  Portable proof verification failed with SIGNATURE_INVALID.
+  Lesson: Action-hash binding turned a mutated request into a deterministic refusal before side effects.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/action-hash-mismatch
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/action-hash-mismatch/INCIDENT_SUMMARY.md
+  Perspectives:
+  - without_execution_edge [counterfactual]: WOULD_EXECUTE
+    Counterfactual: if the endpoint trusted upstream allow state instead of verifying at execution time, the request would reach the side effect path unchecked.
+  - proof_verifier_only [observed]: WOULD_REFUSE
+    Observed: proof verification rejected the request with SIGNATURE_INVALID.
+  - protected_endpoint_runtime [observed]: REFUSED
+    Observed: the protected endpoint refused the request before any side effect with SIGNATURE_INVALID.
+  - action_intent_record [observed]: RECORDED_REFUSAL
+    Observed: the Action Intent and Refusal artifacts preserve the blocked attempt for incident review and evidence lookup.
+- expired-proof: REFUSED
+  Portable proof verification failed with PROOF_EXPIRED.
+  Lesson: Expiry enforcement turned a stale proof into a deterministic refusal before side effects.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/expired-proof
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/expired-proof/INCIDENT_SUMMARY.md
+  Perspectives:
+  - without_execution_edge [counterfactual]: WOULD_EXECUTE
+    Counterfactual: if the endpoint trusted upstream allow state instead of verifying at execution time, the request would reach the side effect path unchecked.
+  - proof_verifier_only [observed]: WOULD_REFUSE
+    Observed: proof verification rejected the request with PROOF_EXPIRED.
+  - protected_endpoint_runtime [observed]: REFUSED
+    Observed: the protected endpoint refused the request before any side effect with PROOF_EXPIRED.
+  - action_intent_record [observed]: RECORDED_REFUSAL
+    Observed: the Action Intent and Refusal artifacts preserve the blocked attempt for incident review and evidence lookup.
+- replay-refused: REFUSED
+  Duplicate execution was refused by the replay layer.
+  Lesson: Replay protection is a runtime property. Proof alone verifies intent, but only the protected endpoint with replay state prevents duplicate execution.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/replay-refused
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/replay-refused/INCIDENT_SUMMARY.md
+  Receipt: rcpt_sim_replay_0003
+  Perspectives:
+  - without_execution_edge [counterfactual]: WOULD_EXECUTE_TWICE
+    Counterfactual: without execution-edge replay enforcement, the same proof-bearing request could drive two side effects.
+  - proof_verifier_only [observed]: WOULD_VERIFY_TWICE
+    Observed: proof verification alone accepted the same PCCB twice. Replay defense is not a signature property.
+  - protected_endpoint_runtime [observed]: FIRST_EXECUTION_THEN_REFUSED
+    Observed: the protected endpoint executed once and refused the duplicate with DUPLICATE_REPLAY.
+  - action_intent_record [observed]: RECORDED_REFUSAL
+    Observed: the Action Intent, first execution Receipt, and replay Refusal show exactly which attempt succeeded and which duplicate was blocked.
+- MCP Tool Proof-Laundering Pattern: APPROVAL-REQUIRED
+  MCP Tool Proof-Laundering Pattern: Production destructive action requires explicit approval before execution.
+  Lesson: Frameworks plan. Tool handlers verify. No receipt, no tool side effect.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/mcp-tool-proof-laundering
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/mcp-tool-proof-laundering/INCIDENT_SUMMARY.md
+  Receipt: rcpt_sim_mcp_tool_proof_laundering_decision
+  Perspectives:
+  - without_actenon [counterfactual]: WOULD_EXECUTE
+    Without Actenon: a proof or approval story minted for one tool could be carried to a different side-effecting tool.
+  - with_preflight [observed]: APPROVAL-REQUIRED
+    Observed: Preflight returned approval-required with PREFLIGHT_PRODUCTION_DESTRUCTIVE_APPROVAL_REQUIRED.
+  - with_credential_broker [observed]: SIDE_DOOR_REMOVED
+    With a credential-broker boundary, the MCP handler owns the production authority and will not broker it to a mismatched or unapproved tool invocation.
+  - receipt_or_refusal [observed]: RECORDED
+    Observed: the decision and non-execution outcome were written as inspectable Receipt/Refusal artifacts before any side effect.
+  - non_claims [scope]: BOUNDED
+    The simulation proves the boundary shape and local decision artifacts. It does not prove business-policy correctness, downstream provider finality, adapter honesty, or replay protection unless deployed at a protected endpoint.
+  Trace viewer: Start `actenon-kernel up` if you want a local trace viewer after the simulation finishes.
+- IAM Privilege-Escalation Pattern: APPROVAL-REQUIRED
+  IAM Privilege-Escalation Pattern: Admin or wildcard permission grant requires approval before execution.
+  Lesson: No receipt, no privilege.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/iam-escalation
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/iam-escalation/INCIDENT_SUMMARY.md
+  Receipt: rcpt_sim_iam_escalation_decision
+  Perspectives:
+  - without_actenon [counterfactual]: WOULD_EXECUTE
+    Without Actenon: an agent with standing IAM authority could attach an admin role directly to its runtime principal.
+  - with_preflight [observed]: APPROVAL-REQUIRED
+    Observed: Preflight returned approval-required with PREFLIGHT_ADMIN_PERMISSION_APPROVAL_REQUIRED.
+  - with_credential_broker [observed]: SIDE_DOOR_REMOVED
+    With a credential-broker boundary, the agent does not hold IAM admin credentials; the protected endpoint refuses to broker privilege without required approval.
+  - receipt_or_refusal [observed]: RECORDED
+    Observed: the decision and non-execution outcome were written as inspectable Receipt/Refusal artifacts before any side effect.
+  - non_claims [scope]: BOUNDED
+    The simulation proves the boundary shape and local decision artifacts. It does not prove business-policy correctness, downstream provider finality, adapter honesty, or replay protection unless deployed at a protected endpoint.
+  Trace viewer: Start `actenon-kernel up` if you want a local trace viewer after the simulation finishes.
+- Sensitive Data Export Pattern: APPROVAL-REQUIRED
+  Sensitive Data Export Pattern: Broad or sensitive data export requires approval before execution.
+  Lesson: No receipt, no export.
+  Artifacts: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/data-export
+  Incident summary: /tmp/tmp.54bxeMsjY5/artifacts/local_runtime/simulations/data-export/INCIDENT_SUMMARY.md
+  Receipt: rcpt_sim_data_export_decision
+  Perspectives:
+  - without_actenon [counterfactual]: WOULD_EXECUTE
+    Without Actenon: an agent with standing warehouse export permission could copy a broad sensitive dataset to an external destination.
+  - with_preflight [observed]: APPROVAL-REQUIRED
+    Observed: Preflight returned approval-required with PREFLIGHT_BROAD_DATA_EXPORT_APPROVAL_REQUIRED.
+  - with_credential_broker [observed]: SIDE_DOOR_REMOVED
+    With a credential-broker boundary, the agent has no direct warehouse export credential; the protected endpoint requires approval before brokering export authority.
+  - receipt_or_refusal [observed]: RECORDED
+    Observed: the decision and non-execution outcome were written as inspectable Receipt/Refusal artifacts before any side effect.
+  - non_claims [scope]: BOUNDED
+    The simulation proves the boundary shape and local decision artifacts. It does not prove business-policy correctness, downstream provider finality, adapter honesty, or replay protection unless deployed at a protected endpoint.
+  Trace viewer: Start `actenon-kernel up` if you want a local trace viewer after the simulation finishes.

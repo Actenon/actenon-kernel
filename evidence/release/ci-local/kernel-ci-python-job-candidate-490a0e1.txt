@@ -1,0 +1,5 @@
+compileall ok
+make demo exit=0
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+798 passed, 3 skipped, 1 warning, 171 subtests passed in 60.39s (0:01:00)
+33 passed, 28 subtests passed in 0.26s

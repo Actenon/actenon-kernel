@@ -1,0 +1,4 @@
+actenon-mcp: no signing material configured.
+Non-demo mode fails closed: pass --key-file PATH, or run
+  actenon-mcp --demo
+for an offline demo server with an ephemeral key.

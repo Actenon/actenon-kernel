@@ -1,0 +1,47 @@
+## ACTENON_ENV=<unset>  versions: {'actenon-kernel': '1.2.1', 'actenon-protocol': '1.3.0'}
+### scenario A: default replay store (nothing configured)
+minted pccb_c08f002564b84ff095752cb2e94845e7
+[workerA] pid=1475 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerA] attempt 1: outcome=executed reason=None
+[workerA] attempt 2: outcome=refused reason=DUPLICATE_REPLAY
+[workerB] pid=1476 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerB] attempt 1: outcome=executed reason=None
+[workerA-restarted] pid=1477 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerA-restarted] attempt 1: outcome=executed reason=None
+RESULT A: side effects executed for ONE single-use proof = 3
+### scenario B (control): ACTENON_REPLAY_DB = one shared durable file
+minted pccb_0b943af777c54b068ea8fdcc3b4c56bd
+[workerA] pid=1481 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerA] attempt 1: outcome=executed reason=None
+[workerA] attempt 2: outcome=refused reason=DUPLICATE_REPLAY
+[workerB] pid=1482 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerB] attempt 1: outcome=refused reason=DUPLICATE_REPLAY
+[workerA-restarted] pid=1483 ACTENON_ENV=None replay_store=SqliteReplayStore path=None
+[workerA-restarted] attempt 1: outcome=refused reason=DUPLICATE_REPLAY
+RESULT B: side effects executed for ONE single-use proof = 1
+## ACTENON_ENV=prd  versions: {'actenon-kernel': '1.2.1', 'actenon-protocol': '1.3.0'}
+### scenario A: default replay store (nothing configured)
+   (exit 1) ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='prd'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-A.json'
+RESULT A: side effects executed for ONE single-use proof = 0
+### scenario B (control): ACTENON_REPLAY_DB = one shared durable file
+   (exit 1) ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='prd'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-prd/proof-B.json'
+RESULT B: side effects executed for ONE single-use proof = 0
+## ACTENON_ENV=production  versions: {'actenon-kernel': '1.2.1', 'actenon-protocol': '1.3.0'}
+### scenario A: default replay store (nothing configured)
+   (exit 1) ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-A.json'
+RESULT A: side effects executed for ONE single-use proof = 0
+### scenario B (control): ACTENON_REPLAY_DB = one shared durable file
+   (exit 1) ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/h1h2/out-rel-1.2.1-production/proof-B.json'
+RESULT B: side effects executed for ONE single-use proof = 0

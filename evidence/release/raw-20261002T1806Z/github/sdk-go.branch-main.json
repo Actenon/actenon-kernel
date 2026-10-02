@@ -1,0 +1,103 @@
+{
+  "name": "main",
+  "commit": {
+    "sha": "bbd1c0d5381e6fba9504207b778955a051bbf2d3",
+    "node_id": "C_kwDOTjdAp9oAKGJiZDFjMGQ1MzgxZTZmYmE5NTA0MjA3Yjc3ODk1NWEwNTFiYmYyZDM",
+    "commit": {
+      "author": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-07-26T23:37:56Z"
+      },
+      "committer": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-07-26T23:37:56Z"
+      },
+      "message": "ci: add actenon-scan workflow",
+      "tree": {
+        "sha": "da05d1caf0bcef95ac564eaddd1a2d3cee734849",
+        "url": "https://api.github.com/repos/Actenon/sdk-go/git/trees/da05d1caf0bcef95ac564eaddd1a2d3cee734849"
+      },
+      "url": "https://api.github.com/repos/Actenon/sdk-go/git/commits/bbd1c0d5381e6fba9504207b778955a051bbf2d3",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/Actenon/sdk-go/commits/bbd1c0d5381e6fba9504207b778955a051bbf2d3",
+    "html_url": "https://github.com/Actenon/sdk-go/commit/bbd1c0d5381e6fba9504207b778955a051bbf2d3",
+    "comments_url": "https://api.github.com/repos/Actenon/sdk-go/commits/bbd1c0d5381e6fba9504207b778955a051bbf2d3/comments",
+    "author": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "0402df3f406c26a4c6108c7ec42033f4f0bee678",
+        "url": "https://api.github.com/repos/Actenon/sdk-go/commits/0402df3f406c26a4c6108c7ec42033f4f0bee678",
+        "html_url": "https://github.com/Actenon/sdk-go/commit/0402df3f406c26a4c6108c7ec42033f4f0bee678"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/Actenon/sdk-go/branches/main",
+    "html": "https://github.com/Actenon/sdk-go/tree/main"
+  },
+  "protected": false,
+  "protection": {
+    "enabled": false,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [
+
+      ],
+      "checks": [
+
+      ]
+    }
+  },
+  "protection_url": "https://api.github.com/repos/Actenon/sdk-go/branches/main/protection"
+}

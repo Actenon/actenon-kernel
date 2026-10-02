@@ -1,0 +1,104 @@
+{
+ "corpus": "kernel_diff_v1",
+ "base_now": "2026-01-01T12:01:00Z",
+ "cases": [
+  {
+   "id": "prec_signed_2p53_presented_2p53p1",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "doubles round 2^53+1 to 2^53"
+  },
+  {
+   "id": "prec_signed_2p53_presented_2p53p1_ctx_signed",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "same; context constraint = signed value"
+  },
+  {
+   "id": "prec_signed_2p53p1_presented_2p53",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_2p53_presented_float_text",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_2p53_presented_exp",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_2p63m1_presented_2p63",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "int64 overflow"
+  },
+  {
+   "id": "prec_signed_2p64_presented_2p64p1",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "u64 overflow, f64 rounding"
+  },
+  {
+   "id": "prec_signed_1e21_int_presented_exp",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_big_presented_big_plus1",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "both beyond f64 integer precision"
+  },
+  {
+   "id": "prec_signed_0_presented_neg0_float",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_1_presented_1_0",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_1_presented_1e0",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_signed_1_presented_10e-1",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "prec_dup_member_first_differs_by_one_ulp",
+   "category": "numeric_precision",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "first-wins parsers see 2^53+1"
+  }
+ ]
+}

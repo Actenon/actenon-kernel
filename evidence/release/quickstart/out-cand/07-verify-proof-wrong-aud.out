@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "refusal": {
+    "category": "schema",
+    "contract": {
+      "name": "refusal",
+      "version": "v1"
+    },
+    "message": "[Errno 2] No such file or directory: 'artifacts/local_proof/scenarios/allow/action_intent.json'",
+    "reason_code": "SCHEMA_INVALID",
+    "refusal_id": "rfsl_cli_verify_proof",
+    "refused_at": "2026-10-02T18:41:57.691467Z",
+    "retryable": false
+  }
+}

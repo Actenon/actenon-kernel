@@ -1,0 +1,19 @@
+## go fixtures
+ok   fixtures/verifier_sdk_v1/README.md == actenon/conformance/vectors/verifier_sdk_v1/README.md
+sdk-go: 5 vendored kernel files match this kernel
+## go vet/test
+?   	github.com/Actenon/sdk-go/examples/http-protected-endpoint	[no test files]
+ok  	github.com/Actenon/sdk-go/verifier	2.327s
+## rust fixtures
+ok   fixtures/verifier_sdk_v1/README.md == actenon/conformance/vectors/verifier_sdk_v1/README.md
+sdk-rust: 5 vendored kernel files match this kernel
+## cargo test
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+clippy exit=0

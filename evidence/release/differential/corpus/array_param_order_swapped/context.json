@@ -1,0 +1,1 @@
+{"request_id":"req_diff_001","audience":{"type":"service","id":"payments-edge"},"now":"2026-01-01T12:01:00Z","scope_capabilities":["payments.refund"],"parameter_constraints":{"amount_minor":2500,"currency":"EUR","memo":"Rückerstattung für Bestellung #42 ✓","lines":[1,2,3]},"resource_selectors":[{"resource_id":"ch_3Nq"}],"clock_skew_ms":0}

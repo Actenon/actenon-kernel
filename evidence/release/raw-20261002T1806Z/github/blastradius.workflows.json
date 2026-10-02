@@ -1,0 +1,29 @@
+{
+  "total_count": 2,
+  "workflows": [
+    {
+      "id": 367575951,
+      "node_id": "W_kwDOUKEEAs4V6MOP",
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "state": "active",
+      "created_at": "2026-09-26T09:23:44.000+01:00",
+      "updated_at": "2026-09-26T09:32:59.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/blastradius/actions/workflows/367575951",
+      "html_url": "https://github.com/Actenon/blastradius/blob/main/.github/workflows/ci.yml",
+      "badge_url": "https://github.com/Actenon/blastradius/workflows/CI/badge.svg"
+    },
+    {
+      "id": 346859412,
+      "node_id": "W_kwDOUKEEAs4UrKeU",
+      "name": "Publish to PyPI",
+      "path": ".github/workflows/publish.yml",
+      "state": "active",
+      "created_at": "2026-08-31T19:23:31.000+01:00",
+      "updated_at": "2026-08-31T19:23:31.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/blastradius/actions/workflows/346859412",
+      "html_url": "https://github.com/Actenon/blastradius/blob/main/.github/workflows/publish.yml",
+      "badge_url": "https://github.com/Actenon/blastradius/workflows/Publish%20to%20PyPI/badge.svg"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+Generator-author hints that the reference oracle contradicts (hint is NOT the oracle):
+unicode_bom_prefix                            hint=REFUSE reference=ACCEPT None  [unicode] UTF-8 BOM before JSON text
+time_now_equals_expires_at                    hint=REFUSE reference=ACCEPT None  [expiry] boundary: reference decides inclusive/exclusive
+time_pccb_space_separator                     hint=REFUSE reference=ACCEPT None  [timestamps] expires_at text changed, signature over the original text
+empty_scope_capabilities_ctx                  hint=REFUSE reference=ACCEPT None  [empty_strings] 
+extra_intent_toplevel                         hint=REFUSE reference=ACCEPT None  [additional_fields] unknown top-level intent member
+extra_pccb_toplevel_unsigned                  hint=REFUSE reference=ACCEPT None  [additional_fields] unknown PCCB member not covered by the signature
+num_2p53_plus1                                hint=REFUSE reference=ACCEPT None  [numeric_boundaries] 
+num_2p63                                      hint=REFUSE reference=ACCEPT None  [numeric_boundaries] 
+num_2p64_plus1                                hint=REFUSE reference=ACCEPT None  [numeric_boundaries] 
+nest_32_resigned                              hint=REFUSE reference=ACCEPT None  [deep_nesting] 
+nest_33_resigned                              hint=REFUSE reference=ACCEPT None  [deep_nesting] 
+nest_64_resigned                              hint=REFUSE reference=ACCEPT None  [deep_nesting] 
+escrow_single_use_false                       hint=REFUSE reference=ACCEPT None  [escrow] 
+single_use_false_resigned                     hint=REFUSE reference=ACCEPT None  [single_use] a validly signed non-single-use proof
+sig_padded_base64url                          hint=REFUSE reference=ACCEPT None  [signature_malleability] 
+sig_std_base64_alphabet                       hint=REFUSE reference=ACCEPT None  [signature_malleability] 
+sig_noncanonical_trailing_bits                hint=REFUSE reference=ACCEPT None  [signature_malleability] same decoded bytes under a lenient decoder
+target_ctx_selector_mismatch                  hint=REFUSE reference=ACCEPT None  [target] 
+action_ctx_constraint_mismatch                hint=REFUSE reference=ACCEPT None  [action] 
+action_ctx_scope_capability_missing           hint=REFUSE reference=ACCEPT None  [action] 
