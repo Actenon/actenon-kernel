@@ -210,12 +210,16 @@ class FailClosedTests(unittest.TestCase):
     def test_demo_is_refused_in_a_production_like_environment(self) -> None:
         import os
 
+        previous = os.environ.get("ACTENON_ENV")
         os.environ["ACTENON_ENV"] = "production"
         try:
             with self.assertRaises(SystemExit) as raised:
                 main(["--demo"])
         finally:
-            del os.environ["ACTENON_ENV"]
+            if previous is None:
+                del os.environ["ACTENON_ENV"]
+            else:
+                os.environ["ACTENON_ENV"] = previous
         self.assertIn("production", str(raised.exception).lower())
 
 
@@ -495,12 +499,16 @@ class DemoRefusedOutsideDevelopmentTests(unittest.TestCase):
 
         for value in ("prd", "live", "uat", "preprod"):
             with self.subTest(ACTENON_ENV=value):
+                previous = os.environ.get("ACTENON_ENV")
                 os.environ["ACTENON_ENV"] = value
                 try:
                     with self.assertRaises(SystemExit) as raised:
                         main(["--demo"])
                 finally:
-                    del os.environ["ACTENON_ENV"]
+                    if previous is None:
+                        del os.environ["ACTENON_ENV"]
+                    else:
+                        os.environ["ACTENON_ENV"] = previous
                 self.assertIn("--demo refused", str(raised.exception))
 
 

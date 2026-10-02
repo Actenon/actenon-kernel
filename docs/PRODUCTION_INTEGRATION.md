@@ -109,6 +109,28 @@ is the rotation invariant — historical receipts remain auditable.
 
 ## 3. Replay store operations
 
+### 3.0 Single use needs shared, durable replay state (enforced)
+
+A single-use proof is only single-use if every worker and every restart of
+the protected edge consults the same replay state. Without development
+intent (`ACTENON_ENV` in `development`, `dev`, `local`, `test`) the kernel
+refuses to construct a gate, executor, middleware or `BoundaryVerifier`
+whose replay state would be per-process. Configure one of:
+
+- `ACTENON_REPLAY_DB=/shared/path/replay.sqlite3` (every worker on one host
+  pointing at the same file), or
+- an explicit `replay_protector=ReplayProtector(PostgresReplayStore(dsn))`
+  (`replay_store=` for `BoundaryVerifier`) shared by all instances.
+
+`ACTENON_ENV` is an allowlist: unset, empty, `production`, `prd` or any
+other value is treated as production-capable. The public development HMAC
+secret is refused there with no override. `replay_protection="disabled"`,
+`replay_store_failure="fail_open"` and per-process replay state each have a
+named unsafe override (`ACTENON_UNSAFE_ALLOW_REPLAY_DISABLED`,
+`ACTENON_UNSAFE_ALLOW_REPLAY_FAIL_OPEN`,
+`ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY`); each logs a warning and is
+listed in `security_downgrades`, which should be empty in production.
+
 ### 3.1 SQLite (local/dev/single-node)
 
 ```python
@@ -248,9 +270,12 @@ See [`docs/FAILURE_MODES.md`](FAILURE_MODES.md) for the full table.
 
 ## 9. Reference deployment
 
-See [`examples/production-reference/`](../examples/production-reference/)
-for a docker-compose setup with the kernel and a Postgres replay store,
-plus a worked example protecting one endpoint end to end.
+[`examples/production-reference/`](../examples/production-reference/)
+is a docker-compose layout only. It is **not** a production reference: its
+verifier signs with the public development secret, exposes an unauthenticated
+`/mint-proof` endpoint, and sets `ACTENON_REPLAY_DB_URL`, which the kernel
+does not read (it uses no replay store). With `ACTENON_ENV=production-reference`
+the kernel now refuses to start it. Use §1 and §3.0 instead.
 
 ## 10. actenon-cloud references
 

@@ -16,7 +16,16 @@ from actenon.idempotency import IdempotencyStore, OutcomeState
 from actenon.models.runtime import ExecutionResult, PolicyDecision, ProtectedExecutionRequest
 from actenon.proof import PCCBVerifier
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
-from actenon.replay import ReplayProtector, build_default_replay_store
+from actenon.replay import ReplayProtector
+from actenon.replay.service import default_replay_db_path, default_replay_store_downgrades
+from actenon.replay.sqlite import SqliteReplayStore
+from actenon.security_posture import (
+    DOWNGRADE_REPLAY_PROTECTION_DISABLED,
+    DOWNGRADE_REPLAY_STORE_FAIL_OPEN,
+    UNSAFE_ALLOW_REPLAY_DISABLED_ENV,
+    UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV,
+    permit_downgrade,
+)
 
 
 BrokeredHandler = Callable[[ProtectedExecutionRequest, BrokeredCredential], dict[str, Any]]
@@ -93,6 +102,9 @@ class ProtectedExecutor:
     replay_protection: Literal["default", "disabled"] = "default"
     replay_store_failure: Literal["fail_closed", "fail_open"] = "fail_closed"
     idempotency_store: IdempotencyStore | None = None
+    # Weakened guarantees this executor was built with (empty in a correctly
+    # configured production deployment). See actenon.security_posture.
+    security_downgrades: tuple[str, ...] = field(default=(), init=False)
 
     def __post_init__(self) -> None:
         if self.replay_protection not in {"default", "disabled"}:
@@ -104,12 +116,30 @@ class ProtectedExecutor:
                 raise ValueError("replay_protector cannot be supplied when replay_protection is 'disabled'")
             if self.replay_store_failure != "fail_closed":
                 raise ValueError("replay_store_failure cannot be 'fail_open' when replay_protection is 'disabled'")
+            downgrade = permit_downgrade(
+                DOWNGRADE_REPLAY_PROTECTION_DISABLED,
+                override_env=UNSAFE_ALLOW_REPLAY_DISABLED_ENV,
+                what='replay_protection="disabled" (the same proof can execute more than once)',
+                fix="Keep replay protection on and configure a durable replay store.",
+            )
             logging.warning(REPLAY_PROTECTION_DISABLED_WARNING)
+            self.security_downgrades = (downgrade,)
             return
+        downgrades: list[str] = []
         if self.replay_store_failure == "fail_open":
+            downgrades.append(
+                permit_downgrade(
+                    DOWNGRADE_REPLAY_STORE_FAIL_OPEN,
+                    override_env=UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV,
+                    what='replay_store_failure="fail_open" (an action may execute when single use cannot be enforced)',
+                    fix='Use replay_store_failure="fail_closed" (the default).',
+                )
+            )
             logging.warning(REPLAY_STORE_FAIL_OPEN_WARNING)
         if self.replay_protector is None:
-            self.replay_protector = ReplayProtector(build_default_replay_store())
+            downgrades.extend(default_replay_store_downgrades())
+            self.replay_protector = ReplayProtector(SqliteReplayStore(default_replay_db_path()))
+        self.security_downgrades = tuple(downgrades)
 
     def _claim_replay(self, request: ProtectedExecutionRequest):
         if self.replay_protector is None:

@@ -43,6 +43,7 @@ from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, V
 from actenon.proof.service import default_disclosure_mode
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
+from actenon.security_posture import DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET, explicit_development_intent
 
 
 SideEffect = Callable[..., Any]
@@ -86,6 +87,13 @@ class GateOutcome:
         if self.refusal is not None:
             payload["refusal"] = self.refusal.to_dict()
         return payload
+
+
+def _uses_public_development_secret(material: Any) -> bool:
+    from actenon.proof.signers.local import LOCAL_PROOF_SECRET
+
+    secret = getattr(material, "secret", None)
+    return isinstance(secret, bytes) and secret == LOCAL_PROOF_SECRET
 
 
 def _coerce_audience(value: AudienceRef | str) -> AudienceRef:
@@ -205,6 +213,7 @@ class ActenonGate:
         self.audience = _coerce_audience(audience)
         self.issuer = _coerce_party(issuer)
         self.signer = signer
+        self._verifier = verifier
         self.policy_pack = policy_pack
         self.escrow = escrow
         self.clock = clock
@@ -230,6 +239,22 @@ class ActenonGate:
             outcome_writer=self.outcome_writer,
         )
 
+
+    @property
+    def security_downgrades(self) -> tuple[str, ...]:
+        """Weakened guarantees this gate runs with; empty when correctly configured.
+
+        ``public_development_secret``: proofs are signed/verified with the
+        public development HMAC secret. ``process_local_replay``,
+        ``replay_protection_disabled``, ``replay_store_fail_open``: single use
+        is not enforced across workers/restarts, or not at all.
+        """
+
+        downgrades = list(self._executor.security_downgrades)
+        for material in (self.signer, self._verifier):
+            if _uses_public_development_secret(material) and DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET not in downgrades:
+                downgrades.insert(0, DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET)
+        return tuple(downgrades)
 
     def build_action(
         self,
@@ -346,9 +371,51 @@ class ActenonGate:
         """Build a local-only HMAC gate for demos and development.
 
         The local signer uses public development material and is not a
-        production trust root.
+        production trust root. Calling this is explicit development intent:
+        the gate may use the public secret and per-process replay state, both
+        listed in :attr:`security_downgrades`. It is refused when
+        ``ACTENON_ENV`` declares a non-development environment.
         """
 
+        with explicit_development_intent("ActenonGate.local_dev"):
+            return cls._local_dev_in_scope(
+                audience=audience,
+                issuer=issuer,
+                policy_pack=policy_pack,
+                replay_protector=replay_protector,
+                replay_protection=replay_protection,
+                replay_store_failure=replay_store_failure,
+                escrow=escrow,
+                credential_broker=credential_broker,
+                receipt_factory=receipt_factory,
+                refusal_factory=refusal_factory,
+                outcome_writer=outcome_writer,
+                clock=clock,
+                request_id_factory=request_id_factory,
+                escrow_id_factory=escrow_id_factory,
+                disclosure_mode=disclosure_mode,
+            )
+
+    @classmethod
+    def _local_dev_in_scope(
+        cls,
+        *,
+        audience,
+        issuer,
+        policy_pack,
+        replay_protector,
+        replay_protection,
+        replay_store_failure,
+        escrow,
+        credential_broker,
+        receipt_factory,
+        refusal_factory,
+        outcome_writer,
+        clock,
+        request_id_factory,
+        escrow_id_factory,
+        disclosure_mode,
+    ) -> "ActenonGate":
         signer = build_local_proof_signer()
         return cls(
             verifier=signer,

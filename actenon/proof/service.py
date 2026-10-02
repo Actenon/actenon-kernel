@@ -59,7 +59,7 @@ class VerifierDisclosureMode(str, Enum):
 
 # Environments where local_debug mode is permitted. Anything else
 # (production, staging, etc.) refuses local_debug at construction time.
-_LOCAL_DEBUG_ALLOWED_ENVS = frozenset({"local", "dev", "test", "demo", ""})
+_LOCAL_DEBUG_ALLOWED_ENVS = frozenset({"development", "local", "dev", "test", "demo", ""})
 
 
 def _is_production_like_env() -> bool:

@@ -4,6 +4,56 @@ See [VERSIONING.md](VERSIONING.md) for the compatibility promise that governs
 this changelog. Within 1.x, a proof that verifies under one version verifies
 under any later version.
 
+## [Unreleased] — candidate 1.3.0rc1 (not released)
+
+### Security — insecure development behaviour requires explicit development intent
+
+Two defects, reproduced against the released 1.2.1 wheel
+(`evidence/release/h1h2/`):
+
+- **H1 — single-use proofs replayed across workers and restarts.** With no
+  replay configuration, `ActenonGate`, `ProtectedExecutor`,
+  `ProtectedEndpointMiddleware` and `BoundaryVerifier` kept replay state in a
+  per-process temp directory (or an in-memory set). One single-use proof
+  executed once per worker process and again after every restart.
+- **H2 — unset or unconventional `ACTENON_ENV` silently enabled development
+  signing.** The public development HMAC secret was refused only for a
+  denylist of production names (`prod`, `production`, `staging`, ...). With
+  `ACTENON_ENV` unset, empty, `prd`, `live`, `prod-eu`, `uat`, ... a verifier
+  rooted in `build_local_proof_signer()` accepted proofs anyone can forge,
+  and `actenon-permit`'s signer resolution fell back to that secret.
+
+The boundary is now an allowlist (`actenon.security_posture`). Explicit
+development intent is `ACTENON_ENV` in {`development`, `dev`, `local`,
+`test`} or a development entry point (`ActenonGate.local_dev(...)`,
+`actenon-mcp --demo`, `actenon-kernel up|doctor|simulate|conformance run|coverage run`).
+A code-level entry point is refused when `ACTENON_ENV` declares any other
+value. Without development intent the kernel refuses, at construction:
+
+- the public development HMAC secret (`LOCAL_PROOF_SECRET`), with no override;
+- per-process replay state: set `ACTENON_REPLAY_DB` to a durable path shared
+  by every worker, or pass a `ReplayProtector`/`replay_store`; unsafe
+  override `ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY=1`;
+- `replay_protection="disabled"`; unsafe override
+  `ACTENON_UNSAFE_ALLOW_REPLAY_DISABLED=1`;
+- `replay_store_failure="fail_open"`; unsafe override
+  `ACTENON_UNSAFE_ALLOW_REPLAY_FAIL_OPEN=1`.
+
+An override is loud (`RuntimeWarning` plus a log record) and recorded in
+`ActenonGate.security_downgrades` / `ProtectedExecutor.security_downgrades` /
+`BoundaryVerifier.health()["security_downgrades"]`, which are empty in a
+correctly configured deployment. `BoundaryVerifier` now honours
+`ACTENON_REPLAY_DB`. `actenon-kernel verify-proof|attest-*` with the local
+signer refuse without development intent.
+
+**Migration (deployment-breaking for unconfigured deployments).** A service
+that relied on the defaults now fails to start with a message naming the fix.
+Production: configure asymmetric signing and `ACTENON_REPLAY_DB` (or an
+explicit store). Local development: set `ACTENON_ENV=development` or use
+`ActenonGate.local_dev(...)`. Under VERSIONING.md §1.4 this is a security
+fix that changes behaviour within 1.x and requires a published security
+advisory naming the affected versions (<= 1.2.1).
+
 ## [1.2.1] — 2026-07-25
 
 ### Fixed

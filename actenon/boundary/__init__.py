@@ -25,6 +25,7 @@ from __future__ import annotations
 import base64
 import binascii
 import logging
+import os
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -38,7 +39,7 @@ from actenon.models import PCCB, ActionIntent, AudienceRef, DynamicContextInput
 from actenon.proof.canonical import sha256_hex
 from actenon.proof.service import PCCBVerifier
 from actenon.replay.base import ReplayStore
-from actenon.replay.service import build_action_consumption_claim
+from actenon.replay.service import build_action_consumption_claim, permit_process_local_replay
 
 logger = logging.getLogger(__name__)
 
@@ -157,9 +158,12 @@ class BoundaryVerifier:
       - Issue proofs (authority's job)
 
     Without a ``pccb_verifier`` (the trust root) every token is refused
-    with ``ISSUER_UNTRUSTED``. Replay state is process-local unless a
-    durable ``replay_store`` is supplied; multi-worker deployments must
-    supply one shared by every worker.
+    with ``ISSUER_UNTRUSTED``. Single use is enforced against a durable
+    ``replay_store`` shared by every worker: pass one, or set
+    ``ACTENON_REPLAY_DB`` to a shared SQLite path. A process-local in-memory
+    set (accepts a proof once per worker and again after a restart) requires
+    explicit development intent or ``ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY=1``
+    and is listed in ``health()["security_downgrades"]``.
     """
 
     def __init__(
@@ -169,6 +173,17 @@ class BoundaryVerifier:
         replay_store: ReplayStore | None = None,
     ) -> None:
         self._pccb_verifier = pccb_verifier
+        self._security_downgrades: tuple[str, ...] = ()
+        if replay_store is None and pccb_verifier is not None:
+            # No trust root means every proof is refused, so there is no
+            # single-use guarantee to protect; otherwise insist on shared state.
+            configured = os.environ.get("ACTENON_REPLAY_DB")
+            if configured:
+                from actenon.replay.sqlite import SqliteReplayStore
+
+                replay_store = SqliteReplayStore(configured)
+            else:
+                self._security_downgrades = (permit_process_local_replay("BoundaryVerifier"),)
         self._replay_store = replay_store
         self._replay_lock = threading.Lock()
         self._replay_keys: set[str] = set()
@@ -347,6 +362,7 @@ class BoundaryVerifier:
             "pccb_verifier_configured": self._pccb_verifier is not None,
             "replay_store": "durable" if self._replay_store is not None else "in_memory_set",
             "replay_keys_tracked": len(self._replay_keys),
+            "security_downgrades": list(self._security_downgrades),
         }
 
 

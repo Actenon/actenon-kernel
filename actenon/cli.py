@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import unittest
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ from typing import Any, Sequence
 from actenon.api.intake import ActionIntentIntakeService
 from actenon.core import ContractValidationError, RefusalException
 from actenon.core.json import loads_no_duplicate_keys
+from actenon.security_posture import explicit_development_intent
 from actenon.coverage_matrix import DEFAULT_EVIDENCE_PATH, render_coverage_matrix_text, run_consequential_action_matrix
 from actenon.evidence import (
     EvidenceQuery,
@@ -2132,10 +2134,43 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Commands that only exist to run the local demo runtime, simulations and
+# self-tests. Running one is explicit development intent for this process
+# (see actenon.security_posture); every other command, including
+# verify-proof and attest-*, gets no such intent and refuses the public
+# development secret unless ACTENON_ENV declares development.
+_DEVELOPMENT_COMMANDS = {
+    "_cmd_up": "actenon-kernel up",
+    "_cmd_doctor": "actenon-kernel doctor",
+    "_cmd_simulate": "actenon-kernel simulate",
+    "_cmd_conformance_run": "actenon-kernel conformance run",
+    "_cmd_coverage_run": "actenon-kernel coverage run",
+}
+
+
+def _declare_cli_development_intent(source: str) -> None:
+    """Make a development command's intent explicit for its own process.
+
+    Refused (DevelopmentIntentConflictError) when ACTENON_ENV declares a
+    non-development environment or a production flag is set. With
+    ACTENON_ENV unset the process is marked ACTENON_ENV=development so that
+    worker threads and child processes of the demo runtime see the same
+    intent.
+    """
+
+    with explicit_development_intent(source):
+        pass
+    if not os.environ.get("ACTENON_ENV", "").strip():
+        os.environ["ACTENON_ENV"] = "development"
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
     try:
+        source = _DEVELOPMENT_COMMANDS.get(getattr(args.func, "__name__", ""))
+        if source is not None:
+            _declare_cli_development_intent(source)
         return args.func(args)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

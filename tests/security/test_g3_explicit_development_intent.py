@@ -250,10 +250,13 @@ def test_local_dev_constructor_is_explicit_development_intent(monkeypatch):
     gate = ActenonGate.local_dev(audience="service:payments")
     assert gate.signer.secret == LOCAL_PROOF_SECRET
     assert "process_local_replay" in gate.security_downgrades
-    proof = gate.mint_proof(_action(gate))
+    # One action, minted once and presented twice (each _action() call stamps
+    # fresh issued_at/expires_at, i.e. a different action hash).
+    action = _action(gate)
+    proof = gate.mint_proof(action)
     calls: list[int] = []
-    assert gate.protect(_action(gate), proof, lambda: calls.append(1)).ok
-    assert gate.protect(_action(gate), proof, lambda: calls.append(1)).reason_code == "DUPLICATE_REPLAY"
+    assert gate.protect(action, proof, lambda: calls.append(1)).ok
+    assert gate.protect(action, proof, lambda: calls.append(1)).reason_code == "DUPLICATE_REPLAY"
     assert calls == [1]
 
 

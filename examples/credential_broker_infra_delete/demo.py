@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+import os
+
+# Local demo: declare development intent explicitly. The demo signs with the
+# public development secret and keeps replay state per process, which the
+# kernel refuses without it. A non-development ACTENON_ENV still refuses.
+os.environ.setdefault("ACTENON_ENV", "development")
+
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any

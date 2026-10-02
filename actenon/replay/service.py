@@ -9,6 +9,35 @@ from actenon.models.runtime import DynamicContextInput, ProtectedExecutionReques
 from actenon.proof.canonical import sha256_hex
 from .base import ActionConsumptionClaim, ActionConsumptionState, ReplayStore
 from .sqlite import SqliteReplayStore
+from actenon.security_posture import (
+    DOWNGRADE_PROCESS_LOCAL_REPLAY,
+    UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY_ENV,
+    permit_downgrade,
+)
+
+PROCESS_LOCAL_REPLAY_FIX = (
+    "Single-use needs replay state shared by every worker and surviving restarts: set "
+    "ACTENON_REPLAY_DB to a durable path shared by all workers, or pass replay_protector="
+    "ReplayProtector(SqliteReplayStore(path) | PostgresReplayStore(dsn))."
+)
+
+
+def replay_db_configured() -> bool:
+    return bool(os.environ.get("ACTENON_REPLAY_DB"))
+
+
+def permit_process_local_replay(component: str) -> str:
+    """Refuse per-process replay state unless development intent or the override allows it.
+
+    Returns the downgrade name to record in ``security_downgrades``.
+    """
+
+    return permit_downgrade(
+        DOWNGRADE_PROCESS_LOCAL_REPLAY,
+        override_env=UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY_ENV,
+        what=f"{component} with per-process replay state (a single-use proof would be accepted once per worker and again after a restart)",
+        fix=PROCESS_LOCAL_REPLAY_FIX,
+    )
 
 
 def default_replay_db_path(base_dir: str | Path | None = None) -> Path:
@@ -27,7 +56,29 @@ def default_replay_db_path(base_dir: str | Path | None = None) -> Path:
     return Path(tmpdir) / "replay.sqlite3"
 
 
+def default_replay_store_downgrades(base_dir: str | Path | None = None) -> tuple[str, ...]:
+    """Downgrades implied by :func:`build_default_replay_store` for these arguments.
+
+    Raises when the implied store is per-process and neither development
+    intent nor the named unsafe override allows it.
+    """
+
+    if replay_db_configured() or base_dir is not None:
+        return ()
+    return (permit_process_local_replay("the default replay store"),)
+
+
 def build_default_replay_store(base_dir: str | Path | None = None) -> ReplayStore:
+    """Return the replay store used when none is supplied.
+
+    ``ACTENON_REPLAY_DB`` (or an explicit ``base_dir``) selects a durable
+    SQLite file. Without either the store would live in a per-process temp
+    directory deleted at exit, which cannot enforce single use across workers
+    or restarts; that requires explicit development intent or
+    ``ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY=1``.
+    """
+
+    default_replay_store_downgrades(base_dir)
     return SqliteReplayStore(default_replay_db_path(base_dir))
 
 

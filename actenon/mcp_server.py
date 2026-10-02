@@ -44,13 +44,13 @@ from actenon.gate import ActenonGate
 from actenon.models import PCCB, ActionIntent, DynamicContextInput
 from actenon.proof import PCCBVerifier, VerifierDisclosureMode
 from actenon.proof.canonical import CANONICALIZATION_PROFILE, canonicalize_bytes, sha256_hex
-from actenon.proof.service import default_disclosure_mode
 from actenon.proof.signers.external_managed import (
     ProductionSigningGuardError,
     is_production_like_environment,
     validate_signing_backend_for_environment,
 )
 from actenon.proof.signers.local import build_local_proof_signer
+from actenon.security_posture import InsecureDefaultRefusedError, explicit_development_intent
 
 DEMO_BANNER = "DEMO MODE — ephemeral key, not for production."
 DEFAULT_AUDIENCE = "mcp:actenon-demo"
@@ -612,23 +612,22 @@ def main(argv: list[str] | None = None) -> int:
 
     # stdout is the MCP transport. Everything human-facing goes to stderr.
     if args.demo:
-        # Refuse on either definition of "production-like": the signing
-        # guard's (ACTENON_ENV=prod/production/staging/..., production
-        # flags) or the verifier's, which only permits local/dev/test/demo.
-        if (
-            is_production_like_environment()
-            or default_disclosure_mode() is not VerifierDisclosureMode.LOCAL_DEBUG
-        ):
+        # --demo is explicit development intent. It is honoured only while
+        # ACTENON_ENV is unset or a development value (development, dev,
+        # local, test) and no Actenon production flag is set; any other
+        # environment declared itself non-development and the demo is
+        # refused (see actenon.security_posture).
+        if is_production_like_environment():
             raise SystemExit(
                 "actenon-mcp: --demo refused in a production-like environment "
-                "(ACTENON_ENV is not local/dev/test/demo, or an Actenon production "
-                "flag is set). The demo signs with an ephemeral development key "
-                "and must never run in production."
+                "(ACTENON_ENV/ACTENON_PRODUCTION is set). The demo signs with an "
+                "ephemeral development key and must never run in production."
             )
         try:
-            gate, signer = build_demo_gate(args.audience)
-        except ProductionSigningGuardError as exc:
-            raise SystemExit(f"actenon-mcp: {exc}") from exc
+            with explicit_development_intent("actenon-mcp --demo"):
+                gate, signer = build_demo_gate(args.audience)
+        except (ProductionSigningGuardError, InsecureDefaultRefusedError) as exc:
+            raise SystemExit(f"actenon-mcp: --demo refused: {exc}") from exc
         print(f"actenon-mcp: {DEMO_BANNER}", file=sys.stderr)
         print(
             "actenon-mcp: ephemeral in-process key, in-memory replay store, "
@@ -652,7 +651,7 @@ def main(argv: list[str] | None = None) -> int:
             gate, signer = build_configured_gate(
                 key_file=args.key_file, audience=args.audience
             )
-        except ProductionSigningGuardError as exc:
+        except (ProductionSigningGuardError, InsecureDefaultRefusedError) as exc:
             raise SystemExit(f"actenon-mcp: {exc}") from exc
         print(
             f"actenon-mcp: verifying for audience {args.audience}.",
