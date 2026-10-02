@@ -1,0 +1,4 @@
+v1_ascii documented re-mint (grant_to_token only): v2 token VERIFIES
+v1_ascii re-mint after grant.sign(): v2 token verifies
+v1_non_ascii documented re-mint (grant_to_token only): v2 token REFUSED: signature verification failed — token is forged or was signed with a different key
+v1_non_ascii re-mint after grant.sign(): v2 token verifies
