@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "conformance_version": "1.0.0",
-  "release_tag": "conformance-v1.0.0",
+  "conformance_version": "1.1.0",
+  "release_tag": "conformance-v1.1.0",
   "canonicalization_profile": "actenon-jcs-sha256-v1",
   "compatibility_surface": "Actenon Kernel active v1 public compatibility surface",
   "verified_mark": {
     "name": "Actenon Verified",
-    "claim": "Actenon Verified (Conformance 1.0.0)",
+    "claim": "Actenon Verified (Conformance 1.1.0)",
     "self_certification_command": "python -m actenon.cli conformance run --require-complete",
     "requirements": [
       "Run the unmodified hash-locked vectors for this version.",

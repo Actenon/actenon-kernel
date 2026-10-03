@@ -1,6 +1,6 @@
 # Conformance
 
-Current suite version: **1.0.0**
+Current suite version: **1.1.0**
 
 ## Purpose
 
@@ -155,7 +155,7 @@ A passing result supports a scoped compatibility claim against the repository's 
 
 The versioned self-certification wording for the current suite is:
 
-> Actenon Verified (Conformance 1.0.0)
+> Actenon Verified (Conformance 1.1.0)
 
 That wording is gated on the unmodified hash-locked vectors passing with no
 skipped checks. The claim must also state the implementation and tested
@@ -174,7 +174,7 @@ If you want to describe a passing result publicly, keep the claim scoped to the 
 
 Example:
 
-> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, supports the opt-in Outcome Attestation v2alpha1 envelope where used, and is Actenon Verified (Conformance 1.0.0) at the stated implementation revision.
+> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, supports the opt-in Outcome Attestation v2alpha1 envelope where used, and is Actenon Verified (Conformance 1.1.0) at the stated implementation revision.
 
 Stronger but still safe:
 

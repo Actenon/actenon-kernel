@@ -76,7 +76,7 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             self.assertIn("Conformance tests passed.", conformance_result.stdout)
             self.assertIn("Skipped: 0.", conformance_result.stdout)
             self.assertIn(
-                "Actenon Verified (Conformance 1.0.0)",
+                "Actenon Verified (Conformance 1.1.0)",
                 conformance_result.stdout,
             )
 

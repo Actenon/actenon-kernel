@@ -9,7 +9,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 <!-- PYTHON-BADGE:END -->
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
-[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0--53%20vectors-success.svg)](docs/CONFORMANCE.md)
+[![Conformance 1.1.0](https://img.shields.io/badge/Conformance-1.1.0--53%20vectors-success.svg)](docs/CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
 [![Versioning: SemVer 1.x](https://img.shields.io/badge/Versioning-SemVer%201.x-blue.svg)](VERSIONING.md)
 [![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](docs/SDK_SELECTION_GUIDE.md)
@@ -401,7 +401,7 @@ Full mapping in [`COMPLIANCE_MAPPING.md`](docs/COMPLIANCE_MAPPING.md).
 
 ```bash
 actenon-kernel conformance run --require-complete
-# → 53 tests pass. Mark: Actenon Verified (Conformance 1.0.0)
+# → 53 tests pass. Mark: Actenon Verified (Conformance 1.1.0)
 ```
 
 The active v1 compatibility surface is: Action Intent, PCCB, Receipt, Refusal, Protected Endpoint, Replay. Reserved surfaces (Reconciliation, Policy Bundle) are **not** active v1 conformance targets. Third-party verifier implementers should target these surfaces and run the same suite. See [`CONFORMANCE.md`](docs/CONFORMANCE.md).

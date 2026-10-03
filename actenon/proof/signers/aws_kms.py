@@ -271,20 +271,13 @@ class AwsKmsSigningBackend:
             ) from e
 
         signature = response["Signature"]
-        # KMS returns the AWS-generated request ID; we use it as the
-        # provider operation ID for audit correlation.
-        operation_id = response.get("SigningAlgorithm")  # not ideal; see TODO
-
-        # TODO: AWS KMS does not return a per-operation ID in the Sign
-        # response. For audit correlation, operators should use
-        # CloudTrail's `eventID` matched on `requestParameters.keyId`
-        # and approximate timestamp. A future version of this backend
-        # may inject the CloudTrail event ID via a post-hoc lookup.
-        # For now, we synthesize a stable operation ID from the
-        # signature digest (deterministic, no secret leakage).
-        if operation_id is None or operation_id == key.algorithm:
-            digest = hashlib.sha256(signature).hexdigest()[:16]
-            operation_id = f"aws-kms-sign-{digest}"
+        # The Sign response carries no per-operation ID (its SigningAlgorithm
+        # field only echoes the requested algorithm). The provider operation ID
+        # is therefore derived from the signature digest: stable, and it
+        # reveals nothing secret. For audit correlation, match CloudTrail's
+        # `eventID` on `requestParameters.keyId` and the signing time.
+        digest = hashlib.sha256(signature).hexdigest()[:16]
+        operation_id = f"aws-kms-sign-{digest}"
 
         return ManagedSigningResult(
             algorithm=key.algorithm,

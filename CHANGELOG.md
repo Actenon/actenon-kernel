@@ -134,6 +134,15 @@ now shipped. `tests/unit/test_package_data_declared.py` fails for any
 undeclared data file under `actenon/`, and the clean-install job runs `scan`
 from the wheel.
 
+### Conformance suite 1.1.0
+
+The kernel conformance suite is versioned on its own (`conformance/CHANGELOG.md`).
+1.3.0 ships Conformance **1.1.0**: the edge-binding and revocation vectors
+(protocol 13) and the fractional-timestamp vectors, all additive. They had been
+added under the 1.0.0 label, so the same "Actenon Verified (Conformance 1.0.0)"
+claim would have meant different suites. `actenon-kernel conformance run` now
+reports 1.1.0, and the signed tag `conformance-v1.1.0` publishes it.
+
 ### Fixed — timestamps parse identically on every supported Python
 
 `parse_timestamp` delegated to `datetime.fromisoformat`, whose grammar changed

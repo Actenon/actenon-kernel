@@ -239,10 +239,10 @@ class CliHappyPathIntegrationTests(unittest.TestCase):
             ["conformance", "run", "--require-complete"]
         )
         self.assertEqual(0, code, stderr)
-        self.assertIn("Conformance version: 1.0.0", stdout)
+        self.assertIn("Conformance version: 1.1.0", stdout)
         self.assertIn("Conformance tests passed.", stdout)
         self.assertIn(
-            "Mark eligibility: Actenon Verified (Conformance 1.0.0)",
+            "Mark eligibility: Actenon Verified (Conformance 1.1.0)",
             stdout,
         )
 

@@ -142,7 +142,6 @@ _REFUSAL_CODE_MAP: Mapping[str, FailureCode] = {
     "AUTHORITY_REVOKED": FailureCode.REVOKED,
     "POLICY_REFUSAL": FailureCode.NOT_ACTIVE,
     "OUTCOME_UNKNOWN": FailureCode.ENGINE_ERROR,
-    "PROOF_NOT_YET_VALID": FailureCode.PCCB_EXPIRED,  # already above; kept for clarity
     "ISSUER_UNTRUSTED": FailureCode.SIGNATURE_INVALID,
     "PARAMETER_MISMATCH": FailureCode.ACTION_MISMATCH,
     "MALFORMED_REQUEST": FailureCode.SIGNATURE_INVALID,

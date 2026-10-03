@@ -3,10 +3,23 @@
 The conformance suite follows semantic versioning independently from package
 releases. Existing vector meaning never changes silently.
 
-## Unreleased
+## 1.1.0
 
-Additive vectors only; no existing vector changed meaning or bytes.
+Released with actenon-kernel 1.3.0. Additive vectors only: no vector file of
+1.0.0 changed bytes (`git diff v1.2.1 -- actenon/conformance/vectors
+conformance/vectors` adds 12 files and modifies none). MINOR, as
+actenon-protocol 1.4.0 is for the same contract: an implementation that
+passed 1.0.0 but ignores the protected edge's declarations does NOT pass
+1.1.0. Claim the mark with its version.
 
+- `verifier_sdk_v1/edge_binding_cases.json` (21 cases) and
+  `verifier_sdk_v1/edge_revocation_cases.json` (8 cases), with the PCCB
+  fixtures `edge_non_revocable_pccb.json`, `edge_revocable_pccb.json`,
+  `edge_revocable_malformed_pccb.json` and `edge_single_use_false_pccb.json`:
+  actenon-protocol `protocol/13-edge-binding.md` rules E1-E5 (declared
+  capability, parameter constraints, resource selectors, single use, and
+  revocation of revocable authority, failing closed when the revocation
+  source is unknown or unreachable).
 - `verifier_sdk_v1/timestamp_cases.json` with two newly minted proofs
   (`fractional_500000_*`, `fractional_123456_*`): the `ACTENON-JCS-STRICT-1`
   action-hash label and fractional-second timestamps, including non-canonical

@@ -2,13 +2,13 @@
 # Build every RELEASE-VERSIONED artefact from exact commits (git archive exports;
 # fresh venvs; frozen JS lockfiles). usage: build_release_artefacts.sh OUT WORK
 # The only non-committed input is the Permit 2.0.0 release-preparation patch
-# (permit-release-prep-v2.patch; v1 preserved: it missed three stale README/CHANGELOG lines), which cannot be committed before actenon-kernel
+# (permit-release-prep-v3.patch; v1 missed three stale README/CHANGELOG lines, v2 predates the kernel pin move to 8c5c25e), which cannot be committed before actenon-kernel
 # 1.3.0 exists on PyPI (its uv.lock must be regenerated against PyPI then).
 set -euo pipefail
 OUT=${1:?out}; WORK=${2:?work}; HERE=$(cd "$(dirname "$0")" && pwd)
 # Rehearsal 1 used PROTOCOL=ed8904d KERNEL=088f9e3 SDKGO=2139da9 SDKRS=384cc00 PERMIT=e348c18 + permit-release-prep-v1.patch.
-PROTOCOL=${PROTOCOL:-626afa2}; KERNEL=${KERNEL:-088f9e3}; SDKGO=${SDKGO:-2139da9}; SDKRS=${SDKRS:-384cc00}; PERMIT=${PERMIT:-f8ebc70}
-PERMIT_PATCH=${PERMIT_PATCH:-permit-release-prep-v2.patch}
+PROTOCOL=${PROTOCOL:-626afa2}; KERNEL=${KERNEL:-8c5c25e}; SDKGO=${SDKGO:-8a87d6f}; SDKRS=${SDKRS:-384cc00}; PERMIT=${PERMIT:-8e36c25}
+PERMIT_PATCH=${PERMIT_PATCH:-permit-release-prep-v3.patch}
 GOMODZIP=${GOMODZIP:?path to gomodzip binary}
 rm -rf "${WORK:?}"; mkdir -p "$WORK" "$OUT/pypi" "$OUT/npm" "$OUT/goproxy" "$OUT/crates"
 x() { mkdir -p "$WORK/$2"; git -C "/home/user/$1" archive --format=tar "$3" | tar -x -C "$WORK/$2"; echo "$1 $(git -C "/home/user/$1" rev-parse "$3")" >> "$OUT/SOURCE_COMMITS"; }

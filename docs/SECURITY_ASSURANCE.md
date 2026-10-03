@@ -18,7 +18,7 @@ The current suite version is declared in:
 
 The versioned public claim is:
 
-> Actenon Verified (Conformance 1.0.0)
+> Actenon Verified (Conformance 1.1.0)
 
 An implementation may use that claim only when it:
 
