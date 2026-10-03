@@ -1,0 +1,7 @@
+test_adversarial.py                           27 passed in 0.05s
+test_bypass_shell_semantics.py                ABORTED (no pytest summary: process replaced or killed) last: FF.FFFFFFFFFFFFFFFFFFFFFFFFFFFF..............F..............
+test_bypass_wrappers.py                       9 failed, 3 passed in 0.05s
+test_performance.py                           5 passed in 0.08s
+test_resolve.py                               19 passed in 0.02s
+test_rules.py                                 36 passed in 0.03s
+test_tokenise_commands.py                     51 passed in 0.03s

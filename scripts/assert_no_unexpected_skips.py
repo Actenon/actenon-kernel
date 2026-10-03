@@ -25,6 +25,8 @@ ALLOWED_SKIPS = {
         "needs a PostgreSQL server; executed (no skips allowed) by the postgres-replay CI job",
     ("tests.integration.test_postgres_real_server", "test_unreachable_server_never_executes"):
         "needs a PostgreSQL server; executed (no skips allowed) by the postgres-replay CI job",
+    ("tests.integration.test_postgres_real_server", "test_concurrent_cold_start_creates_the_schema_once"):
+        "needs a PostgreSQL server; executed (no skips allowed) by the postgres-replay CI job",
 }
 
 

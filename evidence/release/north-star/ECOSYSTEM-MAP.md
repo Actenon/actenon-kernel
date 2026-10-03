@@ -1,5 +1,11 @@
 # Actenon ecosystem map
 
+> **Snapshot at programme start (NS1), kept unchanged.** Since then the candidates moved: final commits and
+> artefact hashes are in CANDIDATE-HASHES.txt. The release order is RELEASE-GRAPH.md: protocol is now strictly
+> first, because the kernel's and Permit's README checks render with protocol 1.4.0. Permit's floor is
+> `>=1.3.0,<2` after release preparation.
+
+
 Generated from `ECOSYSTEM-MAP.json` by `render_ecosystem_map.py` (collected live by `collect_ecosystem_map.py`).
 
 | Repo | Remote | Branch / HEAD | Candidate | Dirty | Published now | Intended | Actenon deps | Release role | Gate-critical |
