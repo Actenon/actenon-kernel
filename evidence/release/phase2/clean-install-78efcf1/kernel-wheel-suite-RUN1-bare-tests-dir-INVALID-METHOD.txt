@@ -1,0 +1,8 @@
+# kernel test suite against installed wheel actenon_kernel-1.3.0rc1 (78efcf1); cwd has no actenon/ source
+actenon from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/__init__.py
+ERROR tests/unit/test_scope_claims.py - FileNotFoundError: [Errno 2] No such ...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 warning, 1 error in 1.24s
+16 failed, 37 passed, 5 warnings, 6 subtests passed in 0.31s
+2 warnings, 1 error in 0.64s
+executed test cases: 1; unexpected skips: 0

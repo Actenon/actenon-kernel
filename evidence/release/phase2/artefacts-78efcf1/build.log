@@ -1,0 +1,135 @@
+== actenon-kernel wheel + sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77
+  - wheel
+* Getting build dependencies for sdist...
+* Installed build dependency versions:
+  - setuptools==84.0.0
+  - wheel==0.48.0
+* Building sdist...
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77
+  - wheel
+* Getting build dependencies for wheel...
+* Installed build dependency versions:
+  - setuptools==84.0.0
+  - wheel==0.48.0
+* Building wheel...
+== @actenon/verifier-sdk tarball
+npm notice
+npm notice package: @actenon/verifier-sdk@0.2.0
+npm notice Tarball Contents
+npm notice 7.6kB README.md
+npm notice 340B dist/canonical.d.ts
+npm notice 1.2kB dist/canonical.js
+npm notice 1.1kB dist/countersignature.d.ts
+npm notice 10.8kB dist/countersignature.js
+npm notice 713B dist/errors.d.ts
+npm notice 243B dist/errors.js
+npm notice 2.1kB dist/index.d.ts
+npm notice 1.2kB dist/index.js
+npm notice 1.3kB dist/signers.d.ts
+npm notice 3.8kB dist/signers.js
+npm notice 257B dist/strict-json.d.ts
+npm notice 7.6kB dist/strict-json.js
+npm notice 2.7kB dist/transparency.d.ts
+npm notice 20.5kB dist/transparency.js
+npm notice 1.9kB dist/trust-artifacts.d.ts
+npm notice 13.2kB dist/trust-artifacts.js
+npm notice 3.3kB dist/types.d.ts
+npm notice 460B dist/types.js
+npm notice 2.5kB dist/verifier.d.ts
+npm notice 27.0kB dist/verifier.js
+npm notice 930B package.json
+npm notice Tarball Details
+npm notice name: @actenon/verifier-sdk
+npm notice version: 0.2.0
+npm notice filename: actenon-verifier-sdk-0.2.0.tgz
+npm notice package size: 23.7 kB
+npm notice unpacked size: 110.6 kB
+npm notice shasum: 817906c6fc0344046ddc0ae1f7d92d8aba9b26dc
+npm notice integrity: sha512-uQI/2ikNLiXip[...]YGDywBw85S0yg==
+npm notice total files: 22
+npm notice
+== actenon-permit wheel + sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - hatchling
+* Getting build dependencies for sdist...
+* Installed build dependency versions:
+  - hatchling==1.32.4
+* Building sdist...
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - hatchling
+* Getting build dependencies for wheel...
+* Installed build dependency versions:
+  - hatchling==1.32.4
+* Building wheel...
+== @actenon/sdk tarball
+$ tsc
+npm notice
+npm notice package: @actenon/sdk@2.0.0-rc.1
+npm notice Tarball Contents
+npm notice 6.9kB README.md
+npm notice 1.7kB dist/canonical.d.ts
+npm notice 391B dist/canonical.d.ts.map
+npm notice 4.1kB dist/canonical.js
+npm notice 3.3kB dist/canonical.js.map
+npm notice 3.2kB dist/client.d.ts
+npm notice 1.5kB dist/client.d.ts.map
+npm notice 12.4kB dist/client.js
+npm notice 7.6kB dist/client.js.map
+npm notice 1.7kB dist/crypto.d.ts
+npm notice 465B dist/crypto.d.ts.map
+npm notice 3.9kB dist/crypto.js
+npm notice 2.0kB dist/crypto.js.map
+npm notice 1.2kB dist/gateway-client.d.ts
+npm notice 655B dist/gateway-client.d.ts.map
+npm notice 3.3kB dist/gateway-client.js
+npm notice 2.7kB dist/gateway-client.js.map
+npm notice 1.4kB dist/index.d.ts
+npm notice 552B dist/index.d.ts.map
+npm notice 1.5kB dist/index.js
+npm notice 512B dist/index.js.map
+npm notice 1.8kB dist/legacy-client.d.ts
+npm notice 1.5kB dist/legacy-client.d.ts.map
+npm notice 4.4kB dist/legacy-client.js
+npm notice 4.5kB dist/legacy-client.js.map
+npm notice 4.7kB dist/protocol.d.ts
+npm notice 3.7kB dist/protocol.d.ts.map
+npm notice 2.1kB dist/protocol.js
+npm notice 1.6kB dist/protocol.js.map
+npm notice 1.3kB dist/token.d.ts
+npm notice 470B dist/token.d.ts.map
+npm notice 5.7kB dist/token.js
+npm notice 5.1kB dist/token.js.map
+npm notice 3.1kB dist/types.d.ts
+npm notice 3.2kB dist/types.d.ts.map
+npm notice 1.1kB dist/types.js
+npm notice 814B dist/types.js.map
+npm notice 1.4kB package.json
+npm notice Tarball Details
+npm notice name: @actenon/sdk
+npm notice version: 2.0.0-rc.1
+npm notice filename: actenon-sdk-2.0.0-rc.1.tgz
+npm notice package size: 27.1 kB
+npm notice unpacked size: 107.6 kB
+npm notice shasum: 2b72cdbd6577fb7a6c2923a424948a7d62ce6d57
+npm notice integrity: sha512-nKLtynWo5tWDy[...]agFbgzvL7qomQ==
+npm notice total files: 38
+npm notice
+== sdk-go module zip (go mod download of the exact commit)
+== sdk-rust crate (cargo package at the exact commit)
+93cd41d21091d4bb37168428cf064b3d87e1ece36c14dd2a8194fc520fdf87ec  actenon_kernel-1.3.0rc1-py3-none-any.whl
+e106a60705c1251ac9687e601501827f484420ff91906133cb007f8538f65b3f  actenon_permit-2.0.0rc1-py3-none-any.whl
+e90f3965236b57072f0cea669505aea55cf98eda4f77de8a4bb8f2ddbc1c0b69  actenon_kernel-1.3.0rc1.tar.gz
+238668bba55de83f41a77068aa2129bf77b9315cf75cc7908fd3f95ac536af7e  actenon_permit-2.0.0rc1.tar.gz
+06e41f13cbcdea38e806e14e1c104b8daa8d0d656e9a463ad10059a8f27e7f3d  actenon-sdk-2.0.0-rc.1.tgz
+8eed4ad04603cdc815b12c5acbd227ffaeba683713baf29b1af3dcf5218a1207  actenon-verifier-sdk-0.2.0.tgz
+cd0ca45e74ef36cb57eaac59a02ad94ab21fdcd17f4d5ba1f649a2ba3d544ecc  sdk-go-v1.0.1-0.20261002194149-67615bece436.zip
+257e6e52be4fdf585b3a0c307e4ca56f36a27cd51921105de07e2dc6f00552bc  actenon-verifier-sdk-0.2.0-7f10d50.crate
