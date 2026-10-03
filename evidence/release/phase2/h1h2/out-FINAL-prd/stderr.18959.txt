@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/h1h2/h1_worker.py", line 13, in <module>
+    gate = ActenonGate(verifier=Ed25519Verifier(d["jwk"]["x"], d["jwk"]["kid"]), audience="service:payments", issuer="service:issuer",
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/gate.py", line 259, in __init__
+    self._executor = ProtectedExecutor(
+                     ^^^^^^^^^^^^^^^^^^
+  File "<string>", line 13, in __init__
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/execution/protected_executor.py", line 140, in __post_init__
+    downgrades.extend(default_replay_store_downgrades())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/replay/service.py", line 68, in default_replay_store_downgrades
+    return (permit_process_local_replay("the default replay store"),)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/replay/service.py", line 35, in permit_process_local_replay
+    return permit_downgrade(
+           ^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/security_posture.py", line 184, in permit_downgrade
+    raise InsecureDefaultRefusedError(
+actenon.security_posture.InsecureDefaultRefusedError: the default replay store with per-process replay state (a single-use proof would be accepted once per worker and again after a restart) requires explicit development intent and ACTENON_ENV='prd' declares none. Single-use needs replay state shared by every worker and surviving restarts: set ACTENON_REPLAY_DB to a durable path shared by all workers, or pass replay_protector=ReplayProtector(SqliteReplayStore(path) | PostgresReplayStore(dsn)). For local development, demos or tests set ACTENON_ENV=development (or dev, local, test). To accept the weaker guarantee outside development anyway, set ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY=1 (unsafe; recorded as 'process_local_replay').

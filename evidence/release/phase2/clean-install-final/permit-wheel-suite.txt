@@ -1,0 +1,3 @@
+# actenon-permit a5467ab suite against artefacts-final permit + kernel wheels; src/ removed
+================= 556 passed, 3 skipped, 64 warnings in 16.19s =================
+executed test cases: 556; unexpected skips: 0
