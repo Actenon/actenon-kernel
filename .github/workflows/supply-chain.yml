@@ -110,10 +110,18 @@ jobs:
             )
 
       - name: Audit (sarif output for Security tab)
+        # Reporting only; the gate is the step above. pip-audit exits 1 when it
+        # finds vulnerabilities (already failing the job above); any other
+        # status, or no SARIF file, means the audit itself broke, and fails.
         if: always()
+        shell: bash
         run: |
-          pip-audit --vulnerability-service osv --format sarif -o pip-audit.sarif || true
-        continue-on-error: true
+          set +e
+          pip-audit --vulnerability-service osv --format sarif -o pip-audit.sarif
+          status=$?
+          set -e
+          test "$status" -le 1
+          test -s pip-audit.sarif
 
       - name: Upload SARIF to GitHub Security tab
         if: always()
@@ -121,7 +129,6 @@ jobs:
         with:
           sarif_file: pip-audit.sarif
           category: pip-audit
-        continue-on-error: true
 
   sigstore-release:
     # Sigstore-sign the wheel on release tags. This is what lets a

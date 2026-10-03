@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, master]
 
+# bash with -o pipefail: a failing command piped into tee/tail fails the step.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     name: Python tests (${{ matrix.python-version }})
@@ -30,8 +35,10 @@ jobs:
           # Install the protocol package first so the kernel's pyproject
           # constraint `actenon-protocol>=1.1.0,<2` resolves cleanly.
           python -m pip install "actenon-protocol>=1.1.0,<2"
-          python -m pip install -e ".[asymmetric,mcp,dev]"
-          python -m pip install fastapi httpx
+          # Every optional integration the suite exercises is installed, so
+          # its tests execute instead of skipping (see the skip gate below).
+          python -m pip install -e ".[asymmetric,mcp,dev,langchain,fastapi]"
+          python -m pip install httpx
 
       - name: Compile package and examples
         run: |
@@ -41,10 +48,18 @@ jobs:
         run: make demo
 
       - name: Run full test suite
-        # The full test suite (561+ tests) runs on every supported Python
-        # version, not just one. Previously only a narrow subset ran in CI;
-        # Fable 5's Part 3A flagged this as a drift between docs and reality.
-        run: python -m pytest tests/ -q
+        # The configured testpaths (actenon/ and tests/) on every supported
+        # Python version. `pytest tests/` alone missed actenon/conformance,
+        # the shared verifier-vector runner (edge binding, revocation).
+        run: python -m pytest -q -rs --junitxml=junit-suite.xml
+
+      - name: Run example tests
+        # The examples are documentation that executes; they must pass.
+        run: python -m pytest examples -q -rs --junitxml=junit-examples.xml
+
+      - name: No unexpected skips
+        # A skipped test is work CI claims but did not do.
+        run: python scripts/assert_no_unexpected_skips.py junit-suite.xml junit-examples.xml
 
       - name: Run conformance suite
         # The conformance suite MUST run on every push and PR, not just on
@@ -59,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: sdk/typescript
 
     steps:
@@ -83,6 +99,22 @@ jobs:
         # `npm test` (which runs `node --import tsx --test`) rather than
         # `bun test` (which doesn't support nested node:test calls).
         run: npm test
+
+      - name: Packed tarball imports in plain Node
+        # What npm consumers get: the packed tarball, installed into an empty
+        # project, imported as ESM with no TypeScript tooling.
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install "$RUNNER_TEMP"/actenon-verifier-sdk-*.tgz
+          node --input-type=module -e '
+            import { VerifierSDK, Ed25519Verifier, buildLocalProofVerifier } from "@actenon/verifier-sdk";
+            const sdk = new VerifierSDK(buildLocalProofVerifier());
+            if (typeof sdk.verifyJSON !== "function" || typeof sdk.verify !== "undefined") process.exit(1);
+            if (typeof Ed25519Verifier !== "function") process.exit(1);
+            console.log("packed @actenon/verifier-sdk imports OK");
+          '
 
   go-verifier:
     # The Go verifier SDK lives in github.com/Actenon/sdk-go. This job runs it

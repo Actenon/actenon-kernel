@@ -9,6 +9,12 @@ on:
     branches: [main, master]
   pull_request:
 
+# bash with -o pipefail: `pytest ... | tee` fails the step when pytest fails.
+# (The default `bash -e` does not, which let failing conformance runs pass.)
+defaults:
+  run:
+    shell: bash
+
 jobs:
   invariant-tests:
     name: Invariant tests
@@ -79,12 +85,18 @@ jobs:
           fi
           echo "OK: clean install has exactly 2 actenon packages"
 
-      - name: Run conformance suite on base install
+      - name: Run conformance suite against the installed wheel
         # The base install has NO extras. This proves the README claim:
         # "pip install actenon-kernel # full verifier: HMAC and Ed25519"
+        # Run from outside the checkout with --import-mode=importlib so
+        # `import actenon` resolves to the wheel, not ./actenon (running from
+        # the repository root tested the source tree).
         run: |
           /tmp/clean/bin/pip install pytest
-          /tmp/clean/bin/python -m pytest tests/conformance/ -v --tb=short 2>&1 | tail -30
+          cd "$RUNNER_TEMP"
+          /tmp/clean/bin/python -c 'import actenon, sys; print(actenon.__file__); sys.exit("site-packages" not in actenon.__file__)'
+          /tmp/clean/bin/python -m pytest -p no:cacheprovider --import-mode=importlib --rootdir "$GITHUB_WORKSPACE" \
+            "$GITHUB_WORKSPACE/tests/conformance" --pyargs actenon.conformance -q -rs
 
   base-install-conformance:
     name: Base-install conformance (no extras)

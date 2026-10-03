@@ -64,6 +64,83 @@ advisory naming the affected versions (<= 1.2.1).
   forms, whitespace inside a signature). Through `verifyJSON`: 0.
 - HMAC signature values must be canonical unpadded base64url.
 
+### Security — the protected edge enforces its own declarations (protocol 13)
+
+actenon-protocol `protocol/13-edge-binding.md` (normative from protocol
+1.4.0) defines the rules. 1.2.1 accepted `scope_capabilities`,
+`parameter_constraints` and `resource_selectors` as verifier context and then
+ignored them. On the differential corpus, an edge declaring
+`["payments.read"]` executed a valid `payments.refund` proof.
+`PCCBVerifier` (and every SDK) now refuses with the following codes. The
+shared vectors are `edge_binding_cases.json` and `edge_revocation_cases.json`.
+
+- **E1** — the intent's capability is not in the edge's declared
+  `scope_capabilities`, compared exactly with no pattern expansion; an empty
+  declaration also refuses. Code `SCOPE_CAPABILITY_MISMATCH`.
+- **E2** — an edge `parameter_constraints` member is missing from the signed
+  `scope.parameter_constraints`, or differs canonically. Code
+  `PARAMETER_MISMATCH`.
+- **E3** — the signed target satisfies none of the edge's
+  `resource_selectors`. Code `TARGET_MISMATCH`.
+- **E4** — `scope.single_use` is not `true`. Code `SCOPE_MODE_INVALID`.
+- **E5** — the proof carries a signed `extensions.authority` with
+  `revocable: true` and the edge's `revocation_checker` says the authority is
+  revoked, cannot be consulted, or is not configured. Code
+  `AUTHORITY_REVOKED`. Every check passes before this one, and no replay
+  claim or side effect happens until it does. `ActenonGate(...,
+  revocation_checker=...)` and `mint_proof(..., authority=...)` support it.
+- `ActenonGate` verifies against its own `capabilities`,
+  `parameter_constraints` and `resource_selectors`, never against values
+  derived from the request. **A gate without `capabilities` is refused at
+  construction outside explicit development intent.** It would otherwise take
+  the capability from the presented intent, so E1 would compare the request
+  with itself. The unsafe override is
+  `ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES=1`, recorded as
+  `undeclared_capabilities` in `security_downgrades`. `actenon-mcp` gains
+  `--capability NAME` (repeatable), which non-demo mode requires.
+- Fixed: `PCCB.to_dict()` / `unsigned_payload()` aliased the minted proof's
+  `extensions`, so mutating a serialised copy changed the proof.
+
+Migration: an edge whose declarations already agree with the proofs it
+receives sees no change. An edge whose declarations contradicted its proofs
+was executing actions it said it does not perform; it now refuses them.
+Issuers of revocable authority (actenon-permit >= 2.0.0) require edges to
+configure a revocation source.
+
+### Security — outbound HTTP clients accept only http(s) URLs
+
+`HttpProofSealClient`, `HttpExecutionGraphClient` and the local runtime's
+status probe passed configured URLs straight to `urlopen`, which also opens
+`file://` and custom schemes (bandit B310). They now refuse every scheme
+except http and https at construction. `docs/CRYPTO_REVIEW.md` had assessed
+this as validated; the addendum there corrects it.
+
+### TypeScript verifier SDK 0.2.0 (`@actenon/verifier-sdk`, unpublished)
+
+- Breaking: `verify` and `verifyPayloads` (parsed objects) are no longer
+  public. `verifyJSON` (raw bytes, strict parse) is the only entry point.
+- `Ed25519Verifier(jwks)` verifies EdDSA proofs, the algorithm
+  actenon-permit mints in production. It refuses private JWKs, duplicate or
+  missing `kid`s, non-canonical `S`, and signatures that are not 64 bytes.
+- Edge binding E1–E5, with `revocationChecker` in `VerifierSDKOptions`.
+
+### CI
+
+- The suite runs the configured testpaths (`actenon/` and `tests/`, which
+  includes the shared verifier-vector runner) and `examples/`, with the
+  LangChain and FastAPI extras installed. Any skip not on the allowlist
+  (`scripts/assert_no_unexpected_skips.py`) fails the run.
+- Workflows run bash with `pipefail`. `pytest ... | tee` and
+  `pytest ... | tail` previously passed when pytest failed, as did the base
+  and clean-install conformance jobs.
+- Clean-install conformance runs against the installed wheel, from outside
+  the checkout. It previously imported `./actenon`.
+- bandit scans all of `actenon/` and gates on medium severity and above.
+  It previously ran `|| true`. The pip-audit SARIF step no longer swallows
+  failures.
+- The packed TypeScript tarball is installed into an empty project and
+  imported in plain Node.
+
 ### Fixed (from the programme branch, PR #37; unreleased until this version)
 
 - `BoundaryVerifier` verified nothing: 1.2.1 returns `valid=True` for any
