@@ -92,6 +92,20 @@ The endpoint's own declarations in `context` are enforced (protocol
 signed into the proof, the proof's target must satisfy one of
 `resource_selectors`, and only single-use proofs verify.
 
+Proofs minted by actenon-permit 2.0 carry a signed, revocable authority
+reference (`extensions.authority`). They are refused with `AUTHORITY_REVOKED`
+unless the verifier has a revocation source:
+
+```ts
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]), {
+  // true only when the authority is known and not revoked; false or a throw refuses
+  revocationChecker: (pccb, context) => grantIsActive(pccb.extensions.authority),
+});
+```
+
+The SDK verifies; it does not enforce single use. Claim the proof's nonce in a
+store shared by every worker before performing the side effect.
+
 Clock skew tolerance is strict by default. If a deployment needs to absorb small NTP drift, configure it explicitly:
 
 ```ts
