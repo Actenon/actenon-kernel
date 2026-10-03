@@ -1,0 +1,30 @@
+{
+  "schema": "airlock/authority-diff/v1",
+  "expands_authority": true,
+  "summary": {
+    "new_powers": 1,
+    "removed_powers": 0,
+    "new_unresolved": 0,
+    "resolved_unresolved": 0,
+    "unchanged": 6
+  },
+  "added": [
+    {
+      "change": "NEW POWER",
+      "action": "github.repo.delete",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "runtime": "BLOCKED until approved",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 819,
+          "function": "GithubProvider.publish_comment",
+          "via": "PyGithub Repository.delete"
+        }
+      ]
+    }
+  ],
+  "removed": [],
+  "unresolved_added": [],
+  "unresolved_removed": []
+}

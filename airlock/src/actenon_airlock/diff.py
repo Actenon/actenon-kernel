@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .discovery import Discovery
-from .manifest import AuthorityEntry, Manifest, UnresolvedItem
+from .manifest import AuthorityEntry, Evidence, Manifest, UnresolvedItem
 
 SCHEMA = "airlock/authority-diff/v1"
 
@@ -70,7 +70,21 @@ def compute_diff(manifest: Manifest, discovery: Discovery) -> AuthorityDiff:
             out.removed.append(a)
     known_ids = {u.id for u in manifest.unresolved}
     now_ids = {u.id for u in discovery.unresolved}
-    out.unresolved_added = [u for u in discovery.unresolved if u.id not in known_ids]
+    from .manifest import group_key, item_resource
+
+    for u in discovery.unresolved:
+        if u.id in known_ids:
+            continue
+        chosen = manifest.resolutions.get(group_key(u))
+        if chosen is not None:
+            chosen = item_resource(u, group_key(u), chosen)
+            # The person already said which target this group acts on: a new capability in the group is a
+            # NEW POWER on exactly that target (still blocked until approved).
+            if manifest.find(u.action, chosen) is None and all(e.key != (u.action, chosen) for e in out.added):
+                out.added.append(AuthorityEntry(u.action, chosen, origin="user", note=f"{group_key(u)} chosen by user",
+                                                evidence=[Evidence(u.file, u.line, u.function, u.via)]))
+            continue
+        out.unresolved_added.append(u)
     out.unresolved_removed = [u for u in manifest.unresolved if u.id not in now_ids]
     return out
 

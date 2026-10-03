@@ -119,8 +119,15 @@ def _program(executable, args) -> str:
     return os.path.basename(prog)
 
 
+# Read-only platform probes that libraries run at import time (platform.uname(), distro detection). They
+# change nothing and read nothing of the user's; running them is not a consequential action.
+_PLATFORM_PROBES = {"uname", "sw_vers", "lsb_release", "getconf", "nproc"}
+
+
 def _check_exec(executable, args) -> None:
     prog = _program(executable, args)
+    if prog in _PLATFORM_PROBES:
+        return
     argv = [os.fsdecode(a) if isinstance(a, bytes) else str(a) for a in (args if isinstance(args, (list, tuple)) else [args])]
     verdict = _decide({"kind": "process", "action": "process.exec", "resource": prog or None,
                        "params": {"program": prog, "argv": argv}, "display": {"argv": argv}})

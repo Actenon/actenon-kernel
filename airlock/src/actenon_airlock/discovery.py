@@ -16,6 +16,7 @@ import ast
 import hashlib
 import os
 import tomllib
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -93,7 +94,9 @@ def _env_names_in_code(root: Path, files: list[str]) -> set[str]:
     names: set[str] = set()
     for rel in files:
         try:
-            tree = ast.parse((root / rel).read_text(encoding="utf-8"))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                tree = ast.parse((root / rel).read_text(encoding="utf-8"))
         except (SyntaxError, UnicodeDecodeError, OSError, ValueError):
             continue
         for node in ast.walk(tree):
@@ -187,7 +190,7 @@ def discover(root: Path, *, env: dict[str, str] | None = None) -> Discovery:
         if ev.resource_state is ResourceState.UNRESOLVED:
             d.unresolved.append(UnresolvedItem(
                 id=unresolved_id(ev), action=ev.action, missing=list(ev.unresolved_parts) or ["target"], file=ev.file,
-                line=ev.line, function=ev.function, via=ev.via, reason=ev.reason))
+                line=ev.line, function=ev.function, via=ev.via, reason=ev.reason, template=ev.url))
             continue
         assert ev.resource is not None
         if ev.action.startswith("http.") and ev.method in ("get", "head", "options"):

@@ -1,0 +1,16 @@
+run 20261003T202747Z-a91673
+
+BLOCKED  github.repo.delete  github.com/Actenon/actenon-kernel
+  when:      2026-10-03T20:28:00Z
+  request:   DELETE https://api.github.com/repos/Actenon/actenon-kernel
+  reason:    authority not present in approved manifest
+  credential released: NO   execution occurred: NO
+  id:        rcpt_ea837493e85cdf54
+
+BLOCKED  github.repo.delete  github.com/Actenon/actenon-kernel
+  when:      2026-10-03T20:28:00Z
+  request:   DELETE https://api.github.com/repos/Actenon/actenon-kernel
+  reason:    authority not present in approved manifest
+  credential released: NO   execution occurred: NO
+  id:        rcpt_fff76bbb539c43a7
+

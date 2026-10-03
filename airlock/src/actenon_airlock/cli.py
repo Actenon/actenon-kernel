@@ -228,7 +228,13 @@ def cmd_approve(args: argparse.Namespace) -> int:
     manifest.authority = [e for e in manifest.authority if e.key not in removed_keys]
     known = {u.id for u in manifest.unresolved}
     manifest.unresolved = [u for u in manifest.unresolved if u.id not in {x.id for x in diff.unresolved_removed}]
-    manifest.unresolved += [u for u in d.unresolved if u.id not in known]
+    from .manifest import group_key
+
+    for u in d.unresolved:
+        if u.id not in known:
+            if manifest.resolutions.get(group_key(u)):
+                u.decision = "resolved-by-user"
+            manifest.unresolved.append(u)
     for name, hosts in d.credentials.items():
         manifest.credentials.setdefault(name, hosts)
     manifest.save(root)

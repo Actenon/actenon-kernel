@@ -1,0 +1,11 @@
+AUTHORITY DIFF
+
+NEW POWER DETECTED
+
++ github.repo.delete
+  github.com/Actenon/actenon-kernel
+  pr_agent/git_providers/github_provider.py:819 in GithubProvider.publish_comment  (PyGithub Repository.delete)
+
+This authority was not previously approved.
+Runtime: BLOCKED until approved (airlock approve)
+

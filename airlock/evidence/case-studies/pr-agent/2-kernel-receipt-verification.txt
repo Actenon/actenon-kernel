@@ -1,0 +1,8 @@
+Receipt links verified.
+Receipt: rcpt_2563cb12521242cba46ea9ab43ad5a5b
+Outcome: executed
+Intent: act_32689c8181914219
+Phase: execution
+Checked against: action intent, PCCB
+PCCB signature: verified (key_id ed25519-adc563ace734)
+Not verified: the receipt itself carries no signature (v1), so its origin and integrity are established only through the linked artifacts above. For signed provenance use attest-receipt / verify-receipt-attestation.

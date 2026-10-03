@@ -90,6 +90,7 @@ class UnresolvedItem:
     via: str
     reason: str
     decision: str = "blocked"  # blocked | dynamic (acknowledged as intentionally dynamic; still blocked)
+    template: str = ""  # the target as far as known, "{}" for unknown parts (e.g. "{}/pr-agent-settings")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -97,7 +98,7 @@ class UnresolvedItem:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "UnresolvedItem":
         return cls(**{k: d[k] for k in ("id", "action", "missing", "file", "line", "function", "via", "reason")},
-                   decision=d.get("decision", "blocked"))
+                   decision=d.get("decision", "blocked"), template=d.get("template", ""))
 
 
 @dataclass
@@ -109,6 +110,7 @@ class Manifest:
     unresolved: list[UnresolvedItem] = field(default_factory=list)
     credentials: dict[str, list[str]] = field(default_factory=dict)  # name -> hosts
     generated_by: str = ""
+    resolutions: dict[str, str] = field(default_factory=dict)  # group -> exact target a person chose
 
     # --- queries ------------------------------------------------------------------------------------
     def approved(self) -> list[AuthorityEntry]:
@@ -136,6 +138,7 @@ class Manifest:
             "authority": [e.to_dict() for e in sorted(self.authority, key=lambda e: (e.status != "approved", e.action, e.resource))],
             "unresolved": [u.to_dict() for u in sorted(self.unresolved, key=lambda u: (u.file, u.line, u.action))],
             "credentials": {k: sorted(v) for k, v in sorted(self.credentials.items())},
+            "resolutions": dict(sorted(self.resolutions.items())),
             "generated_by": self.generated_by,
         }
 
@@ -151,6 +154,7 @@ class Manifest:
             unresolved=[UnresolvedItem.from_dict(u) for u in d.get("unresolved", [])],
             credentials={k: list(v) for k, v in d.get("credentials", {}).items()},
             generated_by=d.get("generated_by", ""),
+            resolutions=dict(d.get("resolutions", {})),
         )
 
     def save(self, root: Path) -> Path:
@@ -251,17 +255,34 @@ def group_unresolved(items: list[UnresolvedItem]) -> dict[str, list[UnresolvedIt
     return out
 
 
+def group_resource(part: str, value: str) -> str:
+    if part == "repository":
+        repo = value.removeprefix("https://").removeprefix("github.com/").strip("/")
+        return f"github.com/{repo}"
+    if part == "path":
+        return value if value.startswith(("./", "/", "~/")) else "./" + value
+    return value.removeprefix("https://").removeprefix("http://")
+
+
+def item_resource(u: UnresolvedItem, part: str, chosen: str) -> str:
+    """The exact resource a group answer gives one item. A repository whose name the code fixes but whose owner
+    it takes at runtime ("{}/pr-agent-settings") gets the chosen owner and its own name, not the chosen repo."""
+    if part == "repository" and u.template.startswith("{}/") and u.template.count("/") == 1:
+        name = u.template[3:]
+        if name and "{}" not in name:
+            owner = chosen.split("/")[1] if chosen.count("/") >= 2 else ""
+            if owner:
+                return f"github.com/{owner}/{name}"
+    return chosen
+
+
 def resolve_group(manifest: Manifest, part: str, value: str, at: str) -> list[AuthorityEntry]:
     """Turn one person-supplied exact target into authority for every unresolved item of that group."""
     added: list[AuthorityEntry] = []
+    chosen = group_resource(part, value)
+    manifest.resolutions[part] = chosen
     for u in group_unresolved(manifest.unresolved).get(part, []):
-        if part == "repository":
-            repo = value.removeprefix("https://").removeprefix("github.com/").strip("/")
-            resource = f"github.com/{repo}"
-        elif part == "path":
-            resource = value if value.startswith(("./", "/", "~/")) else "./" + value
-        else:
-            resource = value.removeprefix("https://").removeprefix("http://")
+        resource = item_resource(u, part, chosen)
         if manifest.find(u.action, resource) is None and all(e.key != (u.action, resource) for e in added):
             e = AuthorityEntry(u.action, resource, origin="user", approved_at=at, note=f"{GROUP_LABELS.get(part, part)} chosen by user",
                                evidence=[Evidence(u.file, u.line, u.function, u.via)])
