@@ -17,7 +17,9 @@ Usage:
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+UTC = timezone.utc  # datetime.UTC is Python >= 3.11; the kernel supports 3.10
 from pathlib import Path
 
 # Add the repo root to the path

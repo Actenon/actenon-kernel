@@ -7,15 +7,11 @@ name: Bandit static analysis
 # it is fixed or reviewed and justified.
 
 on:
+  # No path filter: this is a required check, and a path-filtered required
+  # check never reports on PRs that do not touch the filter, blocking merge.
   push:
     branches: [main]
-    paths:
-      - 'actenon/**'
-      - '.github/workflows/bandit.yml'
   pull_request:
-    paths:
-      - 'actenon/**'
-      - '.github/workflows/bandit.yml'
   schedule:
     - cron: '0 6 * * *'
 

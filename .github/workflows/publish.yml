@@ -6,8 +6,33 @@ on:
       - "v*"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
 jobs:
+  release-gate:
+    # Publish only a v<version> tag whose commit is on main and whose required
+    # checks (.github/required-checks.json "release") succeeded on that commit.
+    name: Release gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag commit is on main and its required checks passed
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/release_gate.py gate --version "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+
   build:
+    needs: release-gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,8 +40,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install build
-      - run: python -m build --sdist --wheel --outdir dist/
+      - name: "Build (reproducible: SOURCE_DATE_EPOCH = commit time)"
+        run: |
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          python -m build --sdist --wheel --outdir dist/
       - run: pip install twine && twine check dist/*
+      - name: The built wheel passes this commit's conformance vectors from a clean venv
+        run: bash scripts/verify_published.sh python "$(ls dist/actenon_kernel-*.whl)"
       - uses: actions/upload-artifact@v4
         with:
           name: dist
@@ -47,3 +78,22 @@ jobs:
           print-hash: true
     env:
       PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+  verify-registry:
+    # Post-publish: install the version from PyPI (not the local build) into a
+    # clean venv and run this commit's conformance vectors and the scan smoke.
+    name: Install from PyPI and run conformance
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          version="$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+          for _ in $(seq 1 30); do
+            curl -sf "https://pypi.org/pypi/actenon-kernel/${version}/json" >/dev/null && break
+            sleep 20
+          done
+          bash scripts/verify_published.sh python "actenon-kernel==${version}"

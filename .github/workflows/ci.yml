@@ -69,6 +69,19 @@ jobs:
       # Claim-verification steps moved to verify-claims.yml (one copy of
       # each check; the README badge links there).
 
+  required-checks:
+    # Branch protection and the publish workflows' release gate read
+    # .github/required-checks.json. Every name in it must be produced by a job.
+    name: Required-check names exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pyyaml
+      - run: python scripts/release_gate.py validate
+
   postgres-replay:
     # PostgresReplayStore against a real PostgreSQL 16 server: one execution
     # across independent store connections, and fail-closed when the server is

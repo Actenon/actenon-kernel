@@ -86,7 +86,14 @@ include = ["actenon*", "conformance*", "examples*", "schemas*"]
 "schemas" = ["*.json"]
 
 [tool.pytest.ini_options]
+# The only pytest configuration. A root pytest.ini used to take precedence and
+# silently disabled testpaths/norecursedirs here, so pytest recursed from the
+# repository root and imported scripts/ (CI failed on Python 3.10 because of it).
 testpaths = ["actenon", "tests"]
+filterwarnings = [
+  "ignore:urllib3 v2 only supports OpenSSL.*:Warning",
+  "ignore:ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY.*:RuntimeWarning",
+]
 norecursedirs = [
   ".git",
   ".pytest_cache",

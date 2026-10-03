@@ -82,6 +82,11 @@ jobs:
               failures.append(f'prose claims {prose.group(1)}, runner ran {actual}')
           if not badge or not prose:
               failures.append('conformance-count claim not found in README')
+          # Every other count claim in the README must agree too (they drifted
+          # to 51 while the runner executed 53 because only two were checked).
+          for claimed in re.findall(r'(\d+) (?:conformance vectors\b|tests pass\b)', readme):
+              if int(claimed) != actual:
+                  failures.append(f'README claims {claimed} conformance vectors/tests, runner ran {actual}')
           if failures:
               for f in failures:
                   print(f'FAIL: {f}', file=sys.stderr)
