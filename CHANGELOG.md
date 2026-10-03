@@ -124,6 +124,16 @@ this as validated; the addendum there corrects it.
   missing `kid`s, non-canonical `S`, and signatures that are not 64 bytes.
 - Edge binding E1–E5, with `revocationChecker` in `VerifierSDKOptions`.
 
+### Fixed — `actenon-kernel scan` from an installed wheel
+
+The scanner's capability registry (`actenon/scanner_capability_registry.v1.json`)
+was never declared as package data. `actenon-kernel scan` and
+`actenon-kernel doctor --deep` failed with `FileNotFoundError` from every
+installed wheel, released 1.2.1 included, while passing from a checkout. It is
+now shipped. `tests/unit/test_package_data_declared.py` fails for any
+undeclared data file under `actenon/`, and the clean-install job runs `scan`
+from the wheel.
+
 ### CI
 
 - The suite runs the configured testpaths (`actenon/` and `tests/`, which

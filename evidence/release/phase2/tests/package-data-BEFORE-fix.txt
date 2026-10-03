@@ -1,0 +1,3 @@
+=========================== short test summary info ============================
+FAILED tests/unit/test_package_data_declared.py::test_every_data_file_under_actenon_is_declared_package_data
+1 failed in 0.03s
