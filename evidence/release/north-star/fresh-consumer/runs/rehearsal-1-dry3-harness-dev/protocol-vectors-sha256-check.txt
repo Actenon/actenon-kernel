@@ -1,0 +1,259 @@
+sha256sum: canonicalisation/invalid/deeply_nested_exceeds_limit.json: No such file or directory
+canonicalisation/invalid/deeply_nested_exceeds_limit.json: FAILED open or read
+sha256sum: canonicalisation/invalid/duplicate_keys.json: No such file or directory
+canonicalisation/invalid/duplicate_keys.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_deep_nested.json: No such file or directory
+canonicalisation/invalid/float_deep_nested.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_exponent.json: No such file or directory
+canonicalisation/invalid/float_exponent.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_in_array.json: No such file or directory
+canonicalisation/invalid/float_in_array.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_in_object.json: No such file or directory
+canonicalisation/invalid/float_in_object.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_infinity.json: No such file or directory
+canonicalisation/invalid/float_infinity.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_nan.json: No such file or directory
+canonicalisation/invalid/float_nan.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_neg_infinity.json: No such file or directory
+canonicalisation/invalid/float_neg_infinity.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_top_level.json: No such file or directory
+canonicalisation/invalid/float_top_level.json: FAILED open or read
+sha256sum: canonicalisation/invalid/float_zero.json: No such file or directory
+canonicalisation/invalid/float_zero.json: FAILED open or read
+sha256sum: canonicalisation/invalid/non_string_key.json: No such file or directory
+canonicalisation/invalid/non_string_key.json: FAILED open or read
+sha256sum: canonicalisation/invalid/oversized_structure.json: No such file or directory
+canonicalisation/invalid/oversized_structure.json: FAILED open or read
+sha256sum: canonicalisation/invalid/unsupported_type_bytes.json: No such file or directory
+canonicalisation/invalid/unsupported_type_bytes.json: FAILED open or read
+sha256sum: canonicalisation/invalid/unsupported_type_set.json: No such file or directory
+canonicalisation/invalid/unsupported_type_set.json: FAILED open or read
+sha256sum: canonicalisation/valid/absent_field.json: No such file or directory
+canonicalisation/valid/absent_field.json: FAILED open or read
+sha256sum: canonicalisation/valid/absent_vs_null.json: No such file or directory
+canonicalisation/valid/absent_vs_null.json: FAILED open or read
+sha256sum: canonicalisation/valid/action_parameters_payment_refund.json: No such file or directory
+canonicalisation/valid/action_parameters_payment_refund.json: FAILED open or read
+sha256sum: canonicalisation/valid/array_preserves_order.json: No such file or directory
+canonicalisation/valid/array_preserves_order.json: FAILED open or read
+sha256sum: canonicalisation/valid/array_reordering_differs.json: No such file or directory
+canonicalisation/valid/array_reordering_differs.json: FAILED open or read
+sha256sum: canonicalisation/valid/boolean_values.json: No such file or directory
+canonicalisation/valid/boolean_values.json: FAILED open or read
+sha256sum: canonicalisation/valid/control_chars_escaped.json: No such file or directory
+canonicalisation/valid/control_chars_escaped.json: FAILED open or read
+sha256sum: canonicalisation/valid/deeply_nested_valid.json: No such file or directory
+canonicalisation/valid/deeply_nested_valid.json: FAILED open or read
+sha256sum: canonicalisation/valid/empty_collections.json: No such file or directory
+canonicalisation/valid/empty_collections.json: FAILED open or read
+sha256sum: canonicalisation/valid/escaped_vs_unescaped_equivalent.json: No such file or directory
+canonicalisation/valid/escaped_vs_unescaped_equivalent.json: FAILED open or read
+sha256sum: canonicalisation/valid/integer_boundary.json: No such file or directory
+canonicalisation/valid/integer_boundary.json: FAILED open or read
+sha256sum: canonicalisation/valid/integer_values.json: No such file or directory
+canonicalisation/valid/integer_values.json: FAILED open or read
+sha256sum: canonicalisation/valid/key_order_byte_vs_codepoint.json: No such file or directory
+canonicalisation/valid/key_order_byte_vs_codepoint.json: FAILED open or read
+sha256sum: canonicalisation/valid/negative_zero_not_applicable.json: No such file or directory
+canonicalisation/valid/negative_zero_not_applicable.json: FAILED open or read
+sha256sum: canonicalisation/valid/nested_object.json: No such file or directory
+canonicalisation/valid/nested_object.json: FAILED open or read
+sha256sum: canonicalisation/valid/null_value.json: No such file or directory
+canonicalisation/valid/null_value.json: FAILED open or read
+sha256sum: canonicalisation/valid/reordered_keys_same_bytes.json: No such file or directory
+canonicalisation/valid/reordered_keys_same_bytes.json: FAILED open or read
+sha256sum: canonicalisation/valid/simple_object.json: No such file or directory
+canonicalisation/valid/simple_object.json: FAILED open or read
+sha256sum: canonicalisation/valid/string_with_quotes_and_backslashes.json: No such file or directory
+canonicalisation/valid/string_with_quotes_and_backslashes.json: FAILED open or read
+sha256sum: canonicalisation/valid/unicode_normalization_none.json: No such file or directory
+canonicalisation/valid/unicode_normalization_none.json: FAILED open or read
+sha256sum: canonicalisation/valid/unicode_strings.json: No such file or directory
+canonicalisation/valid/unicode_strings.json: FAILED open or read
+sha256sum: canonicalisation/valid/visually_similar_strings.json: No such file or directory
+canonicalisation/valid/visually_similar_strings.json: FAILED open or read
+sha256sum: execution-mode/valid/brokered_mode_explicit.v1.json: No such file or directory
+execution-mode/valid/brokered_mode_explicit.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/brokered_result_has_brokered_fields.v1.json: No such file or directory
+execution-mode/valid/brokered_result_has_brokered_fields.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/brokered_result_missing_provider_response.v1.json: No such file or directory
+execution-mode/valid/brokered_result_missing_provider_response.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/mode_must_be_explicit.v1.json: No such file or directory
+execution-mode/valid/mode_must_be_explicit.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/mode_must_be_string.v1.json: No such file or directory
+execution-mode/valid/mode_must_be_string.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/resource_owned_mode_explicit.v1.json: No such file or directory
+execution-mode/valid/resource_owned_mode_explicit.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/resource_owned_result_has_resource_fields.v1.json: No such file or directory
+execution-mode/valid/resource_owned_result_has_resource_fields.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/resource_owned_result_missing_resource_signature.v1.json: No such file or directory
+execution-mode/valid/resource_owned_result_missing_resource_signature.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/submitted_is_non_final.v1.json: No such file or directory
+execution-mode/valid/submitted_is_non_final.v1.json: FAILED open or read
+sha256sum: execution-mode/valid/succeeded_is_final.v1.json: No such file or directory
+execution-mode/valid/succeeded_is_final.v1.json: FAILED open or read
+sha256sum: execution-result/invalid/brokered_succeeded_without_observation.v1.json: No such file or directory
+execution-result/invalid/brokered_succeeded_without_observation.v1.json: FAILED open or read
+sha256sum: execution-result/invalid/mixed_mode_fields.v1.json: No such file or directory
+execution-result/invalid/mixed_mode_fields.v1.json: FAILED open or read
+sha256sum: execution-result/invalid/resource_owned_submitted_marked_final.v1.json: No such file or directory
+execution-result/invalid/resource_owned_submitted_marked_final.v1.json: FAILED open or read
+sha256sum: execution-result/invalid/resource_owned_succeeded_with_forged_receipt.v1.json: No such file or directory
+execution-result/invalid/resource_owned_succeeded_with_forged_receipt.v1.json: FAILED open or read
+sha256sum: execution-result/valid/brokered_outcome_unknown.v1.json: No such file or directory
+execution-result/valid/brokered_outcome_unknown.v1.json: FAILED open or read
+sha256sum: execution-result/valid/brokered_succeeded.v1.json: No such file or directory
+execution-result/valid/brokered_succeeded.v1.json: FAILED open or read
+sha256sum: execution-result/valid/resource_owned_submitted.v1.json: No such file or directory
+execution-result/valid/resource_owned_submitted.v1.json: FAILED open or read
+sha256sum: execution-result/valid/resource_owned_succeeded.v1.json: No such file or directory
+execution-result/valid/resource_owned_succeeded.v1.json: FAILED open or read
+sha256sum: proof/invalid/approval_prefix_proof_id.v1.json: No such file or directory
+proof/invalid/approval_prefix_proof_id.v1.json: FAILED open or read
+sha256sum: proof/invalid/invalid_execution_mode.v1.json: No such file or directory
+proof/invalid/invalid_execution_mode.v1.json: FAILED open or read
+sha256sum: proof/invalid/invalid_proof_id_prefix.v1.json: No such file or directory
+proof/invalid/invalid_proof_id_prefix.v1.json: FAILED open or read
+sha256sum: proof/invalid/issuer_no_key_discovery.v1.json: No such file or directory
+proof/invalid/issuer_no_key_discovery.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_action_hash.v1.json: No such file or directory
+proof/invalid/missing_action_hash.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_action_type.v1.json: No such file or directory
+proof/invalid/missing_action_type.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_execution_mode.v1.json: No such file or directory
+proof/invalid/missing_execution_mode.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_issuer.v1.json: No such file or directory
+proof/invalid/missing_issuer.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_proof_id.v1.json: No such file or directory
+proof/invalid/missing_proof_id.v1.json: FAILED open or read
+sha256sum: proof/invalid/missing_signature.v1.json: No such file or directory
+proof/invalid/missing_signature.v1.json: FAILED open or read
+sha256sum: proof/invalid/policy_prefix_proof_id.v1.json: No such file or directory
+proof/invalid/policy_prefix_proof_id.v1.json: FAILED open or read
+sha256sum: proof/invalid/unsupported_canonicalisation.v1.json: No such file or directory
+proof/invalid/unsupported_canonicalisation.v1.json: FAILED open or read
+sha256sum: proof/invalid/unsupported_protocol_version.v1.json: No such file or directory
+proof/invalid/unsupported_protocol_version.v1.json: FAILED open or read
+sha256sum: proof/invalid/user_prefix_proof_id.v1.json: No such file or directory
+proof/invalid/user_prefix_proof_id.v1.json: FAILED open or read
+sha256sum: proof/valid/action_access_control.v1.json: No such file or directory
+proof/valid/action_access_control.v1.json: FAILED open or read
+sha256sum: proof/valid/action_communication.v1.json: No such file or directory
+proof/valid/action_communication.v1.json: FAILED open or read
+sha256sum: proof/valid/action_data_destruction.v1.json: No such file or directory
+proof/valid/action_data_destruction.v1.json: FAILED open or read
+sha256sum: proof/valid/action_data_export.v1.json: No such file or directory
+proof/valid/action_data_export.v1.json: FAILED open or read
+sha256sum: proof/valid/action_deployment.v1.json: No such file or directory
+proof/valid/action_deployment.v1.json: FAILED open or read
+sha256sum: proof/valid/empty_parameters.v1.json: No such file or directory
+proof/valid/empty_parameters.v1.json: FAILED open or read
+sha256sum: proof/valid/long_expiry_window.v1.json: No such file or directory
+proof/valid/long_expiry_window.v1.json: FAILED open or read
+sha256sum: proof/valid/minimal_brokered.v1.json: No such file or directory
+proof/valid/minimal_brokered.v1.json: FAILED open or read
+sha256sum: proof/valid/minimal_resource_owned.v1.json: No such file or directory
+proof/valid/minimal_resource_owned.v1.json: FAILED open or read
+sha256sum: proof/valid/nested_parameters.v1.json: No such file or directory
+proof/valid/nested_parameters.v1.json: FAILED open or read
+sha256sum: proof/valid/short_expiry_window.v1.json: No such file or directory
+proof/valid/short_expiry_window.v1.json: FAILED open or read
+sha256sum: proof/valid/unicode_parameters.v1.json: No such file or directory
+proof/valid/unicode_parameters.v1.json: FAILED open or read
+sha256sum: proof/valid/with_approval_artefact.v1.json: No such file or directory
+proof/valid/with_approval_artefact.v1.json: FAILED open or read
+sha256sum: proof/valid/with_evidence_links.v1.json: No such file or directory
+proof/valid/with_evidence_links.v1.json: FAILED open or read
+sha256sum: proof/valid/with_well_known_key_discovery.v1.json: No such file or directory
+proof/valid/with_well_known_key_discovery.v1.json: FAILED open or read
+sha256sum: receipt/invalid/invalid_outcome.v1.json: No such file or directory
+receipt/invalid/invalid_outcome.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_action.v1.json: No such file or directory
+receipt/invalid/missing_action.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_executed_at.v1.json: No such file or directory
+receipt/invalid/missing_executed_at.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_execution_mode.v1.json: No such file or directory
+receipt/invalid/missing_execution_mode.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_outcome.v1.json: No such file or directory
+receipt/invalid/missing_outcome.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_proof_id.v1.json: No such file or directory
+receipt/invalid/missing_proof_id.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_receipt_id.v1.json: No such file or directory
+receipt/invalid/missing_receipt_id.v1.json: FAILED open or read
+sha256sum: receipt/invalid/missing_target.v1.json: No such file or directory
+receipt/invalid/missing_target.v1.json: FAILED open or read
+sha256sum: receipt/valid/executed_brokered.v1.json: No such file or directory
+receipt/valid/executed_brokered.v1.json: FAILED open or read
+sha256sum: receipt/valid/executed_resource_owned.v1.json: No such file or directory
+receipt/valid/executed_resource_owned.v1.json: FAILED open or read
+sha256sum: receipt/valid/executed_with_long_action_parameters.v1.json: No such file or directory
+receipt/valid/executed_with_long_action_parameters.v1.json: FAILED open or read
+sha256sum: receipt/valid/failed_brokered.v1.json: No such file or directory
+receipt/valid/failed_brokered.v1.json: FAILED open or read
+sha256sum: receipt/valid/minimal_fields.v1.json: No such file or directory
+receipt/valid/minimal_fields.v1.json: FAILED open or read
+sha256sum: receipt/valid/outcome_unknown_brokered.v1.json: No such file or directory
+receipt/valid/outcome_unknown_brokered.v1.json: FAILED open or read
+sha256sum: receipt/valid/partial_brokered.v1.json: No such file or directory
+receipt/valid/partial_brokered.v1.json: FAILED open or read
+sha256sum: receipt/valid/refused_receipt_brokered.v1.json: No such file or directory
+receipt/valid/refused_receipt_brokered.v1.json: FAILED open or read
+sha256sum: receipt/valid/refused_resource_owned.v1.json: No such file or directory
+receipt/valid/refused_resource_owned.v1.json: FAILED open or read
+sha256sum: receipt/valid/unicode_action_parameters.v1.json: No such file or directory
+receipt/valid/unicode_action_parameters.v1.json: FAILED open or read
+sha256sum: receipt/valid/with_additional_evidence.v1.json: No such file or directory
+receipt/valid/with_additional_evidence.v1.json: FAILED open or read
+sha256sum: receipt/valid/with_evidence_links.v1.json: No such file or directory
+receipt/valid/with_evidence_links.v1.json: FAILED open or read
+sha256sum: refusal/invalid/internal_without_disclosed_match.v1.json: No such file or directory
+refusal/invalid/internal_without_disclosed_match.v1.json: FAILED open or read
+sha256sum: refusal/invalid/missing_disclosed_code.v1.json: No such file or directory
+refusal/invalid/missing_disclosed_code.v1.json: FAILED open or read
+sha256sum: refusal/invalid/missing_refusal_id.v1.json: No such file or directory
+refusal/invalid/missing_refusal_id.v1.json: FAILED open or read
+sha256sum: refusal/invalid/retryable_mismatch.v1.json: No such file or directory
+refusal/invalid/retryable_mismatch.v1.json: FAILED open or read
+sha256sum: refusal/invalid/unknown_disclosed_code.v1.json: No such file or directory
+refusal/invalid/unknown_disclosed_code.v1.json: FAILED open or read
+sha256sum: refusal/valid/action_mismatch.v1.json: No such file or directory
+refusal/valid/action_mismatch.v1.json: FAILED open or read
+sha256sum: refusal/valid/audience_mismatch.v1.json: No such file or directory
+refusal/valid/audience_mismatch.v1.json: FAILED open or read
+sha256sum: refusal/valid/authority_revoked.v1.json: No such file or directory
+refusal/valid/authority_revoked.v1.json: FAILED open or read
+sha256sum: refusal/valid/canonicalisation_failure.v1.json: No such file or directory
+refusal/valid/canonicalisation_failure.v1.json: FAILED open or read
+sha256sum: refusal/valid/credential_unavailable.v1.json: No such file or directory
+refusal/valid/credential_unavailable.v1.json: FAILED open or read
+sha256sum: refusal/valid/issuer_untrusted.v1.json: No such file or directory
+refusal/valid/issuer_untrusted.v1.json: FAILED open or read
+sha256sum: refusal/valid/malformed_request.v1.json: No such file or directory
+refusal/valid/malformed_request.v1.json: FAILED open or read
+sha256sum: refusal/valid/outcome_unknown.v1.json: No such file or directory
+refusal/valid/outcome_unknown.v1.json: FAILED open or read
+sha256sum: refusal/valid/parameter_mismatch.v1.json: No such file or directory
+refusal/valid/parameter_mismatch.v1.json: FAILED open or read
+sha256sum: refusal/valid/policy_refusal.v1.json: No such file or directory
+refusal/valid/policy_refusal.v1.json: FAILED open or read
+sha256sum: refusal/valid/proof_expired.v1.json: No such file or directory
+refusal/valid/proof_expired.v1.json: FAILED open or read
+sha256sum: refusal/valid/proof_invalid_umbrella.v1.json: No such file or directory
+refusal/valid/proof_invalid_umbrella.v1.json: FAILED open or read
+sha256sum: refusal/valid/proof_missing.v1.json: No such file or directory
+refusal/valid/proof_missing.v1.json: FAILED open or read
+sha256sum: refusal/valid/proof_not_yet_valid.v1.json: No such file or directory
+refusal/valid/proof_not_yet_valid.v1.json: FAILED open or read
+sha256sum: refusal/valid/provider_failure.v1.json: No such file or directory
+refusal/valid/provider_failure.v1.json: FAILED open or read
+sha256sum: refusal/valid/provider_refusal.v1.json: No such file or directory
+refusal/valid/provider_refusal.v1.json: FAILED open or read
+sha256sum: refusal/valid/replay_detected.v1.json: No such file or directory
+refusal/valid/replay_detected.v1.json: FAILED open or read
+sha256sum: refusal/valid/signature_invalid.v1.json: No such file or directory
+refusal/valid/signature_invalid.v1.json: FAILED open or read
+sha256sum: refusal/valid/target_mismatch.v1.json: No such file or directory
+refusal/valid/target_mismatch.v1.json: FAILED open or read
+sha256sum: refusal/valid/unsupported_protocol_version.v1.json: No such file or directory
+refusal/valid/unsupported_protocol_version.v1.json: FAILED open or read
+sha256sum: WARNING: 129 listed files could not be read
