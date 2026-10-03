@@ -1,0 +1,12 @@
+[package]
+name = "rust-edge"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# The verifier is the published crate, exactly as its README documents.
+[dependencies]
+actenon-verifier-sdk = "0.2"
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde_json = "1"
+time = { version = "0.3", features = ["formatting", "parsing"] }

@@ -1,0 +1,91 @@
+[13:18:54] consumers from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/rel3 (actenon-protocol e988c4d43f8b59d459628a306cd0117109e59d70 actenon-kernel 185e0fd834bda7318893f7cda51100c5708091bc sdk-go 0198ef597e67a31de778c38628d10d99a5c60d8e sdk-rust c149ab681be437b68f699b4f734a1a18ed7ad0e7 actenon-permit a0d2b8dae74972a06f5774e4667774df26fbad97 )
+{'actenon-kernel': '1.3.0', 'actenon-permit': '2.0.0', 'actenon-protocol': '1.4.0', 'psycopg': '3.3.6'}
+
+added 1 package in 259ms
+go: creating new go.mod: module example.com/goedge
+go: to add module requirements and sums:
+	go mod tidy
+go: downloading github.com/Actenon/sdk-go v1.1.0
+go: downloading modernc.org/sqlite v1.38.2
+go: downloading golang.org/x/sys v0.34.0
+go: downloading modernc.org/libc v1.66.3
+go: downloading github.com/dustin/go-humanize v1.0.1
+go: downloading github.com/ncruces/go-strftime v0.1.9
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+go: downloading modernc.org/mathutil v1.7.1
+go: downloading modernc.org/memory v1.11.0
+go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+go: added github.com/Actenon/sdk-go v1.1.0
+go: added github.com/dustin/go-humanize v1.0.1
+go: added github.com/google/uuid v1.6.0
+go: added github.com/mattn/go-isatty v0.0.20
+go: added github.com/ncruces/go-strftime v0.1.9
+go: added github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+go: added golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+go: added golang.org/x/sys v0.34.0
+go: added modernc.org/libc v1.66.3
+go: added modernc.org/mathutil v1.7.1
+go: added modernc.org/memory v1.11.0
+go: added modernc.org/sqlite v1.38.2
+github.com/Actenon/sdk-go v1.1.0
+name = "actenon-verifier-sdk"
+version = "0.2.0"
+source = "sparse+http://127.0.0.1:18766/cargo/index/"
+[13:20:21] PostgreSQL 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1) at /tmp/actenon-e2e-pg.Ni3RBV:5545
+[13:20:21] == run_full_e2e.sh, replay store: sqlite
+RESULT E0: PASS
+RESULT E1: PASS
+RESULT E2: PASS
+RESULT E3: PASS
+RESULT E4: PASS
+RESULT E5: PASS (codes: py="reasons": ["ACTION_MISMATCH"] ts="reason_code":"ACTION_MISMATCH"
+RESULT E5b: PASS
+RESULT E5c: PASS
+RESULT E5d: PASS
+RESULT E6: PASS
+RESULT E6b: PASS
+RESULT E7: PASS
+RESULT E8a: PASS (Permit refuses to mint)
+RESULT E8b: PASS (edges refuse a proof whose grant was revoked after minting)
+RESULT E8c: PASS
+RESULT E8d: PASS (fail closed)
+RESULT E8e: PASS (fail closed)
+RESULT E9: PASS
+RESULT E9b: PASS
+RESULT E9c: PASS
+RESULT E10a: PASS (no proof minted)
+RESULT E10b: PASS
+RESULT E10e: PASS (no proof minted; the grant key is not used as a proof key)
+RESULT E10c: PASS
+RESULT E10d: PASS
+## TOTAL FAILS: 0
+[13:20:38] == run_full_e2e.sh, replay store: postgres
+RESULT E0: PASS
+RESULT E1: PASS
+RESULT E2: PASS
+RESULT E3: PASS
+RESULT E4: PASS
+RESULT E5: PASS (codes: py="reasons": ["ACTION_MISMATCH"] ts="reason_code":"ACTION_MISMATCH"
+RESULT E5b: PASS
+RESULT E5c: PASS
+RESULT E5d: PASS
+RESULT E6: PASS
+RESULT E6b: PASS
+RESULT E7: PASS
+RESULT E8a: PASS (Permit refuses to mint)
+RESULT E8b: PASS (edges refuse a proof whose grant was revoked after minting)
+RESULT E8c: PASS
+RESULT E8d: PASS (fail closed)
+RESULT E8e: PASS (fail closed)
+RESULT E9: PASS
+RESULT E9b: PASS
+RESULT E9c: PASS
+RESULT E10a: PASS (no proof minted)
+RESULT E10b: PASS
+RESULT E10e: PASS (no proof minted; the grant key is not used as a proof key)
+RESULT E10c: PASS
+RESULT E10d: PASS
+## TOTAL FAILS: 0
+postgres action_consumption: consumed|4

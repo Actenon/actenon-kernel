@@ -1,0 +1,4 @@
+    Updating crates.io index
+error: no matching package named `actenon-verifier-sdk` found
+location searched: crates.io index
+required by package `control v0.0.0 (/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/rs)`

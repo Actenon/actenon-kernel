@@ -7,7 +7,7 @@
 set -euo pipefail
 OUT=${1:?out}; WORK=${2:?work}; HERE=$(cd "$(dirname "$0")" && pwd)
 # Rehearsal 1 used PROTOCOL=ed8904d KERNEL=088f9e3 SDKGO=2139da9 SDKRS=384cc00 PERMIT=e348c18 + permit-release-prep-v1.patch.
-PROTOCOL=${PROTOCOL:-e988c4d}; KERNEL=${KERNEL:-3be5d68}; SDKGO=${SDKGO:-0198ef5}; SDKRS=${SDKRS:-c149ab6}; PERMIT=${PERMIT:-a0d2b8d}
+PROTOCOL=${PROTOCOL:-e988c4d}; KERNEL=${KERNEL:-185e0fd}; SDKGO=${SDKGO:-0198ef5}; SDKRS=${SDKRS:-c149ab6}; PERMIT=${PERMIT:-a0d2b8d}
 PERMIT_PATCH=${PERMIT_PATCH:-permit-release-prep-v4.patch}
 GOMODZIP=${GOMODZIP:?path to gomodzip binary}
 rm -rf "${WORK:?}"; mkdir -p "$WORK" "$OUT/pypi" "$OUT/npm" "$OUT/goproxy" "$OUT/crates"

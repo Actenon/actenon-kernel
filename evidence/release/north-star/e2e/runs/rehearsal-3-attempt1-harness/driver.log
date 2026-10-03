@@ -1,0 +1,10 @@
+[13:15:57] consumers from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/rel3 (actenon-protocol e988c4d43f8b59d459628a306cd0117109e59d70 actenon-kernel 185e0fd834bda7318893f7cda51100c5708091bc sdk-go 0198ef597e67a31de778c38628d10d99a5c60d8e sdk-rust c149ab681be437b68f699b4f734a1a18ed7ad0e7 actenon-permit a0d2b8dae74972a06f5774e4667774df26fbad97 )
+{'actenon-kernel': '1.3.0', 'actenon-permit': '2.0.0', 'actenon-protocol': '1.4.0', 'psycopg': '3.3.6'}
+
+added 1 package in 213ms
+go: creating new go.mod: module example.com/goedge
+go: to add module requirements and sums:
+	go mod tidy
+go: downloading github.com/Actenon/sdk-go v1.1.0
+go: downloading modernc.org/sqlite v1.60.1
+go: modernc.org/sqlite@v1.60.1 requires go >= 1.26.0 (running go 1.24.7; GOTOOLCHAIN=local)

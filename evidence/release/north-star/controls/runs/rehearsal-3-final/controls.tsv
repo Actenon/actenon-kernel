@@ -1,0 +1,9 @@
+family	artefact	observed	detail
+python	actenon-kernel 1.2.1 (PyPI)	FAIL	current verifier vectors: 14 failed, 8 passed, 9 warnings, 37 subtests passed in 0.21s
+ts	@actenon/verifier-sdk (npm)	FAIL	not installable: E404
+ts	@actenon/protocol-types 1.3.0 (npm)	FAIL	plain-node import:     throw new ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING(filename);
+ts	@actenon/sdk 1.4.0 (npm)	FAIL	plain-node import:     throw new ERR_MODULE_NOT_FOUND(
+go	sdk-go v1.0.0 (proxy.golang.org)	FAIL	current vectors via public API: ./edge_revocation_conformance_test.go:45:33: undefined: verifier.RevocationChecker
+rust	actenon-verifier-sdk (crates.io)	FAIL	not resolvable: error: no matching package named `actenon-verifier-sdk` found
+python	actenon-protocol 1.3.0 (PyPI)	PASS	release-tag conformance runner
+python	actenon-protocol 1.3.0 (PyPI) [control v2]	FAIL	standalone runner, installed schemas only: KeyError: 'urn:actenon:protocol:execution-result:v1'
