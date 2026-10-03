@@ -1,0 +1,124 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 45fdc27..5cbbe93 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -5,7 +5,7 @@ All notable changes to actenon-permit are documented in this file.
+ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+ 
+-## [2.0.0] — Unreleased (candidate 2.0.0rc1)
++## [2.0.0]
+ 
+ ### BREAKING CHANGES
+ 
+@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+ 
+ ### Security
+ 
+-- **Requires the secure kernel.** `actenon-kernel[asymmetric]>=1.3.0rc1,<2`.
++- **Requires the secure kernel.** `actenon-kernel[asymmetric]>=1.3.0,<2`.
+   Kernel 1.3.0 refuses implicit development signing and process-local replay
+   outside explicit development intent, and enforces the protected edge's own
+   declarations (actenon-protocol `protocol/13-edge-binding.md`).
+@@ -86,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+   bundled `permit demo`, `actenon demo` and `actenon protect test` declare
+   development intent themselves.
+ 
+-### TypeScript SDK (`@actenon/sdk` 2.0.0-rc.1)
++### TypeScript SDK (`@actenon/sdk` 2.0.0)
+ 
+ - `encodeGrantToken` mints `v2.` tokens (ACTENON-JCS-STRICT-1 body).
+   `verifyGrantToken` accepts `v2.` and `v1.`, each with its own canonicaliser.
+diff --git a/README.md b/README.md
+index a9c04e3..d3f2774 100755
+--- a/README.md
++++ b/README.md
+@@ -127,7 +127,7 @@ Python 3.10+ for the Kernel alone. The full stack including Permit requires 3.11
+ 
+ ```bash
+ pip install actenon-permit              # Python SDK + unified CLI + Boundary Kit (see note below)
+-npm install @actenon/sdk                # TypeScript SDK v1.4.0 — discriminated result types, receipt verification, protocol parity with Python
++npm install @actenon/sdk                # TypeScript SDK v2.0.0 — discriminated result types, receipt verification, protocol parity with Python
+ ```
+ 
+ > **Release note:** this README tracks `main`. The Boundary Kit proof binding, the kernel execution Receipts returned by brokered calls, and other fixes on `main` are newer than the latest PyPI/npm release; install from a checkout (`pip install .`) to get them until the next release.
+@@ -160,7 +160,7 @@ import { Actenon } from "@actenon/sdk";
+ 
+ const client = Actenon.cloud({
+   baseUrl: "http://localhost:7780",
+-  grantToken: "v1.YOUR_GRANT_TOKEN",
++  grantToken: "v2.YOUR_GRANT_TOKEN",
+ });
+ 
+ const intent = await client.authorisedExecutionIntents.create({
+@@ -398,7 +398,7 @@ The Kernel's [Insurer Clarity document](docs/INSURER_CLARITY.md) separates three
+ 
+ ```bash
+ pip install actenon-permit              # Python SDK + CLI + Boundary Kit
+-npm install @actenon/sdk                # TypeScript SDK v1.4.0
++npm install @actenon/sdk                # TypeScript SDK v2.0.0
+ ```
+ 
+ ## Independence
+diff --git a/pyproject.toml b/pyproject.toml
+index 5953da1..6cb2e1f 100755
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
+ 
+ [project]
+ name = "actenon-permit"
+-version = "2.0.0rc1"
++version = "2.0.0"
+ description = "Actenon-Permit: an open-source authority broker for AI agents. Bounded, revocable capability grants with hard runtime limits."
+ readme = "README.md"
+ requires-python = ">=3.11"
+@@ -32,7 +32,7 @@ dependencies = [
+     # (shadowing this package's unified CLI, install-order dependent) and
+     # shipped no `actenon.boundary` module, which the Boundary Kit
+     # middleware requires.
+-    "actenon-kernel[asymmetric]>=1.3.0rc1,<2",
++    "actenon-kernel[asymmetric]>=1.3.0,<2",
+     "actenon-protocol>=1.1.0,<2",
+     # pytest-asyncio is a runtime dep, not a dev dep, because:
+     #   1. pyproject.toml sets `asyncio_mode = "auto"` under
+@@ -100,14 +100,6 @@ exclude = [
+ [tool.hatch.metadata]
+ allow-direct-references = true
+ 
+-[tool.uv.sources]
+-# PRE-RELEASE ONLY. actenon-kernel 1.3.0 (the secure kernel this release
+-# requires) is not yet on PyPI, so uv resolves the exact candidate commit.
+-# uv sources never reach the wheel's metadata, but this table MUST be removed
+-# (and uv.lock regenerated against PyPI) once actenon-kernel 1.3.0 is
+-# published and before actenon-permit 2.0.0 is released.
+-actenon-kernel = { git = "https://github.com/Actenon/actenon-kernel", rev = "b1b175d468b36521277f1ae10d57ebf152979569" }
+-
+ [tool.ruff]
+ line-length = 100
+ target-version = "py311"
+diff --git a/ts-sdk/package.json b/ts-sdk/package.json
+index c557c6d..679cf38 100755
+--- a/ts-sdk/package.json
++++ b/ts-sdk/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "@actenon/sdk",
+-  "version": "2.0.0-rc.1",
++  "version": "2.0.0",
+   "description": "Official TypeScript SDK for Actenon — protected execution for AI agents with discriminated result types, receipt verification, and protocol parity with the Python SDK.",
+   "type": "module",
+   "main": "dist/index.js",
+diff --git a/ts-sdk/src/client.ts b/ts-sdk/src/client.ts
+index e891390..7542a49 100755
+--- a/ts-sdk/src/client.ts
++++ b/ts-sdk/src/client.ts
+@@ -232,7 +232,7 @@ export class CloudActenonClient extends ActenonClient {
+     const headers: Record<string, string> = {
+       "Content-Type": "application/json",
+       Accept: "application/json",
+-      "User-Agent": "@actenon/sdk-ts/2.0.0-rc.1",
++      "User-Agent": "@actenon/sdk-ts/2.0.0",
+       ...(extraHeaders ?? {}),
+     };
+     if (this.config.grantToken && !headers["X-Actenon-Grant"]) {
