@@ -1,0 +1,702 @@
+
+## python-kernel-1.3.0rc1-REFERENCE: agree=179 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=0 U(unsupported)=0
+
+## python-kernel-1.2.1-released: agree=179 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=0 U(unsupported)=0
+
+## ts-kernel-verifier-sdk-0.1.0-candidate: agree=159 A(dangerous)=8 B(fail-closed)=7 C(code-differs)=53 U(unsupported)=5
+  A  dup_param_same_value                          [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_param_attacker_first                      [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_pccb_audience                             [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_pccb_signature_obj                        [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_intent_toplevel_intent_id                 [duplicate_members] reference refused DuplicateJSONKeyError
+  A  canon_number_1_0_vs_1                         [canonicalisation] reference refused ACTION_MISMATCH
+  A  canon_number_exponent                         [canonicalisation] reference refused ACTION_MISMATCH
+  A  sig_whitespace_inside                         [signature_malleability] reference refused SIGNATURE_INVALID
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused SyntaxError
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  num_2p53                                      [numeric_boundaries] impl refused TypeError
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused TypeError
+  B  num_2p63                                      [numeric_boundaries] impl refused TypeError
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused TypeError
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=ACTION_MISMATCH
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=TARGET_MISMATCH
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=SyntaxError
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=ACTION_MISMATCH
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=INVALID_PCCB
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=SyntaxError
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=ACTION_MISMATCH
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_hash_algorithm_sha512_resigned           ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_hash_canon_label_unknown_resigned        ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_not_json                            ref=JSONDecodeError impl=SyntaxError
+  C  malformed_truncated                           ref=JSONDecodeError impl=SyntaxError
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=SyntaxError
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=SyntaxError
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=SyntaxError
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_CONTEXT
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=SyntaxError
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=SyntaxError
+
+## ts-verifier-sdk-0.1.0-FINAL-2a7850c-OBJECT-API: agree=157 A(dangerous)=7 B(fail-closed)=10 C(code-differs)=53 U(unsupported)=5
+  A  dup_param_same_value                          [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_param_attacker_first                      [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_pccb_audience                             [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_pccb_signature_obj                        [duplicate_members] reference refused DuplicateJSONKeyError
+  A  dup_intent_toplevel_intent_id                 [duplicate_members] reference refused DuplicateJSONKeyError
+  A  canon_number_1_0_vs_1                         [canonicalisation] reference refused ACTION_MISMATCH
+  A  canon_number_exponent                         [canonicalisation] reference refused ACTION_MISMATCH
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused SyntaxError
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  num_2p53                                      [numeric_boundaries] impl refused TypeError
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused TypeError
+  B  num_2p63                                      [numeric_boundaries] impl refused TypeError
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused TypeError
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused SIGNATURE_INVALID
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=ACTION_MISMATCH
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=TARGET_MISMATCH
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=SyntaxError
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=ACTION_MISMATCH
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=INVALID_PCCB
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=SyntaxError
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=ACTION_MISMATCH
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_hash_algorithm_sha512_resigned           ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_hash_canon_label_unknown_resigned        ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_not_json                            ref=JSONDecodeError impl=SyntaxError
+  C  malformed_truncated                           ref=JSONDecodeError impl=SyntaxError
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=SyntaxError
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=SyntaxError
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=SyntaxError
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_CONTEXT
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=SyntaxError
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=SyntaxError
+
+## ts-verifier-sdk-0.1.0-FINAL-2a7850c-STRICT-verifyJSON: agree=165 A(dangerous)=0 B(fail-closed)=9 C(code-differs)=63 U(unsupported)=5
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  num_2p53                                      [numeric_boundaries] impl refused INVALID_INTENT
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused INVALID_INTENT
+  B  num_2p63                                      [numeric_boundaries] impl refused INVALID_INTENT
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused INVALID_INTENT
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused SIGNATURE_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  canon_number_1_0_vs_1                         ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  canon_number_exponent                         ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_lone_surrogate                        ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=INVALID_INTENT
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_CONTEXT
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=INVALID_PCCB
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  num_huge_literal                              ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_float_literal_1e400                       ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=INVALID_INTENT
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_hash_algorithm_sha512_resigned           ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_hash_canon_label_unknown_resigned        ref=ACTION_HASH_ALGORITHM_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_CONTEXT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_CONTEXT
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+## go-sdk-v1.0.0: agree=125 A(dangerous)=0 B(fail-closed)=49 C(code-differs)=61 U(unsupported)=5
+  B  baseline_valid_hs256                          [baseline] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_member_order_permuted                   [canonicalisation] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_pretty_printed                          [whitespace] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_ascii_escaped_unicode                   [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_number_negative_zero                    [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  unicode_astral_resigned                       [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_escaped_astral_resigned               [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_nul_in_string_resigned                [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_not_before                    [not_before] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_expires_at                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_1us_before_expiry                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_expired_within_skew                      [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0000                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0100_same_instant        [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  time_intent_offset_plus0000                   [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_intent_zero_fraction                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_fraction_resigned                        [timestamps] impl refused SIGNATURE_INVALID
+  B  time_fraction_short_form_in_intent            [timestamps] impl refused SIGNATURE_INVALID
+  B  time_fraction_7_digits_in_intent              [timestamps] impl refused SIGNATURE_INVALID
+  B  empty_param_value_resigned                    [empty_strings] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  empty_scope_capabilities_ctx                  [empty_strings] impl refused INVALID_CONTEXT
+  B  extra_intent_toplevel                         [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_toplevel_unsigned                  [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_signature_member                   [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  array_ctx_scope_order_swapped                 [array_ordering] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_zero                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_negative                                  [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p63                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_16_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_31_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_32_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_33_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_64_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  size_64k_resigned                             [document_size] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_valid                                  [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_single_use_false                       [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  single_use_false_resigned                     [single_use] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  target_ctx_selector_mismatch                  [target] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_constraint_mismatch                [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_scope_capability_missing           [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=ACTION_MISMATCH
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=TARGET_MISMATCH
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=ACTION_MISMATCH
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_fraction_500                        ref=SIGNATURE_INVALID impl=ACTION_HASH_ALGORITHM_INVALID
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  case_hash_hex_upper_resigned                  ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=SIGNATURE_INVALID
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  array_pccb_scope_order_swapped_unsigned       ref=SIGNATURE_INVALID impl=ACTION_HASH_ALGORITHM_INVALID
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=ACTION_MISMATCH
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  action_hash_value_altered_resigned            ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  action_hash_intent_expiry_changed             ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+## go-sdk-bbd1c0d: agree=125 A(dangerous)=0 B(fail-closed)=49 C(code-differs)=61 U(unsupported)=5
+  B  baseline_valid_hs256                          [baseline] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_member_order_permuted                   [canonicalisation] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_pretty_printed                          [whitespace] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_ascii_escaped_unicode                   [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_number_negative_zero                    [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  unicode_astral_resigned                       [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_escaped_astral_resigned               [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_nul_in_string_resigned                [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_not_before                    [not_before] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_expires_at                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_1us_before_expiry                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_expired_within_skew                      [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0000                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0100_same_instant        [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  time_intent_offset_plus0000                   [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_intent_zero_fraction                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_fraction_resigned                        [timestamps] impl refused SIGNATURE_INVALID
+  B  time_fraction_short_form_in_intent            [timestamps] impl refused SIGNATURE_INVALID
+  B  time_fraction_7_digits_in_intent              [timestamps] impl refused SIGNATURE_INVALID
+  B  empty_param_value_resigned                    [empty_strings] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  empty_scope_capabilities_ctx                  [empty_strings] impl refused INVALID_CONTEXT
+  B  extra_intent_toplevel                         [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_toplevel_unsigned                  [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_signature_member                   [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  array_ctx_scope_order_swapped                 [array_ordering] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_zero                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_negative                                  [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p63                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_16_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_31_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_32_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_33_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_64_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  size_64k_resigned                             [document_size] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_valid                                  [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_single_use_false                       [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  single_use_false_resigned                     [single_use] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  target_ctx_selector_mismatch                  [target] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_constraint_mismatch                [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_scope_capability_missing           [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=ACTION_MISMATCH
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=TARGET_MISMATCH
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=ACTION_MISMATCH
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_fraction_500                        ref=SIGNATURE_INVALID impl=ACTION_HASH_ALGORITHM_INVALID
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  case_hash_hex_upper_resigned                  ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=SIGNATURE_INVALID
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  array_pccb_scope_order_swapped_unsigned       ref=SIGNATURE_INVALID impl=ACTION_HASH_ALGORITHM_INVALID
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=ACTION_MISMATCH
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=ACTION_MISMATCH
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  action_hash_value_altered_resigned            ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  action_hash_intent_expiry_changed             ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+## go-sdk-37700d0: agree=173 A(dangerous)=0 B(fail-closed)=6 C(code-differs)=56 U(unsupported)=0
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  time_pccb_space_separator                     [timestamps] impl refused INVALID_TIMESTAMP
+  B  empty_scope_capabilities_ctx                  [empty_strings] impl refused INVALID_CONTEXT
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused SIGNATURE_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_lone_surrogate                        ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=INVALID_INTENT
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=SIGNATURE_INVALID
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=INVALID_INTENT
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+## rust-sdk-8b3d024: agree=125 A(dangerous)=0 B(fail-closed)=49 C(code-differs)=63 U(unsupported)=5
+  B  baseline_valid_hs256                          [baseline] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_member_order_permuted                   [canonicalisation] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_pretty_printed                          [whitespace] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_ascii_escaped_unicode                   [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_number_negative_zero                    [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  unicode_astral_resigned                       [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_escaped_astral_resigned               [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  unicode_nul_in_string_resigned                [unicode] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_not_before                    [not_before] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_equals_expires_at                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_now_1us_before_expiry                    [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_expired_within_skew                      [expiry] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0000                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_offset_plus0100_same_instant        [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_pccb_space_separator                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_intent_offset_plus0000                   [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_intent_zero_fraction                     [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_fraction_resigned                        [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_fraction_short_form_in_intent            [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  time_fraction_7_digits_in_intent              [timestamps] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  empty_param_value_resigned                    [empty_strings] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  empty_scope_capabilities_ctx                  [empty_strings] impl refused INVALID_CONTEXT
+  B  extra_intent_toplevel                         [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_toplevel_unsigned                  [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  extra_pccb_signature_member                   [additional_fields] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  array_ctx_scope_order_swapped                 [array_ordering] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_zero                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_negative                                  [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p53_plus1                                [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p63                                      [numeric_boundaries] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused INVALID_PCCB
+  B  nest_16_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_31_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_32_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_33_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  nest_64_resigned                              [deep_nesting] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  size_64k_resigned                             [document_size] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_valid                                  [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  escrow_single_use_false                       [escrow] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  single_use_false_resigned                     [single_use] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused SIGNATURE_INVALID
+  B  target_ctx_selector_mismatch                  [target] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_constraint_mismatch                [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  B  action_ctx_scope_capability_missing           [action] impl refused ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=ACTION_MISMATCH
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_lone_surrogate                        ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=INVALID_INTENT
+  C  time_pccb_lowercase_z                         ref=ValueError impl=ACTION_HASH_ALGORITHM_INVALID
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  case_hash_hex_upper_resigned                  ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=INVALID_PCCB
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  array_pccb_scope_order_swapped_unsigned       ref=SIGNATURE_INVALID impl=ACTION_HASH_ALGORITHM_INVALID
+  C  num_huge_literal                              ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_float_literal_1e400                       ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=ACTION_MISMATCH
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_scope_mode_prefix_resigned               ref=SCOPE_MODE_INVALID impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  action_hash_value_altered_resigned            ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  action_hash_intent_expiry_changed             ref=ACTION_HASH_MISMATCH impl=ACTION_HASH_ALGORITHM_INVALID
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+## rust-sdk-261ffbf: agree=172 A(dangerous)=0 B(fail-closed)=7 C(code-differs)=58 U(unsupported)=0
+  B  canon_neg_zero_literal_text                   [canonicalisation] impl refused ACTION_MISMATCH
+  B  unicode_bom_prefix                            [unicode] impl refused INVALID_INTENT
+  B  empty_scope_capabilities_ctx                  [empty_strings] impl refused INVALID_CONTEXT
+  B  num_2p64_plus1                                [numeric_boundaries] impl refused INVALID_PCCB
+  B  sig_padded_base64url                          [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_std_base64_alphabet                       [signature_malleability] impl refused SIGNATURE_INVALID
+  B  sig_noncanonical_trailing_bits                [signature_malleability] impl refused SIGNATURE_INVALID
+  C  dup_param_same_value                          ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_last                       ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_param_attacker_first                      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_target_resource_id                        ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  dup_pccb_audience                             ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_pccb_signature_obj                        ref=DuplicateJSONKeyError impl=INVALID_PCCB
+  C  dup_intent_toplevel_intent_id                 ref=DuplicateJSONKeyError impl=INVALID_INTENT
+  C  canon_leading_plus_invalid_json               ref=JSONDecodeError impl=INVALID_INTENT
+  C  unicode_lone_surrogate                        ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  unicode_invalid_utf8                          ref=UnicodeDecodeError impl=INVALID_INTENT
+  C  time_pccb_lowercase_z                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_no_timezone                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_leap_second                         ref=ValueError impl=INVALID_TIMESTAMP
+  C  time_pccb_date_only                           ref=ValueError impl=INVALID_TIMESTAMP
+  C  case_contract_name                            ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  case_pccb_contract_name                       ref=ValueError impl=INVALID_PCCB
+  C  empty_context_audience_id                     ref=ValueError impl=INVALID_CONTEXT
+  C  empty_intent_tenant_id                        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  empty_signature_value                         ref=ValueError impl=INVALID_PCCB
+  C  empty_nonce_resigned                          ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature                        ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_action_hash                      ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_expires_at                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_not_before                       ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_audience                         ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_nonce                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope                            ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_tenant                           ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_value                  ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_signature_key_id                 ref=ValueError impl=INVALID_PCCB
+  C  missing_pccb_scope_single_use                 ref=ValueError impl=INVALID_PCCB
+  C  missing_intent_tenant                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_intent_id                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_requester                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_target                         ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_action_parameters              ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_expires_at                     ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  missing_intent_contract                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  num_huge_literal                              ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_float_literal_1e400                       ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  num_nan_literal                               ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  nest_1000_raw                                 ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  nest_100000_raw                               ref=JSONNestingDepthError impl=INVALID_INTENT
+  C  size_2048k_unsigned                           ref=JSONInputTooLargeError impl=INVALID_INTENT
+  C  single_use_string_true                        ref=ValueError impl=INVALID_PCCB
+  C  mode_contract_v2_intent                       ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  mode_contract_v2_pccb                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_not_json                            ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_truncated                           ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_array_toplevel                      ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_null                                ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_trailing_garbage                    ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_trailing_second_doc                 ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_pccb_empty                          ref=JSONDecodeError impl=INVALID_PCCB
+  C  malformed_pccb_string                         ref=ValueError impl=INVALID_PCCB
+  C  malformed_param_type_object_for_string        ref=SCHEMA_INVALID impl=INVALID_INTENT
+  C  malformed_comment                             ref=JSONDecodeError impl=INVALID_INTENT
+  C  malformed_single_quotes                       ref=JSONDecodeError impl=INVALID_INTENT
+
+| implementation | cases | agree | A dangerous | B fail-closed | C code differs | unsupported |
+|---|---|---|---|---|---|---|
+| python-kernel-1.3.0rc1-REFERENCE | 179 | 179 | 0 | 0 | 0 | 0 |
+| python-kernel-1.2.1-released | 179 | 179 | 0 | 0 | 0 | 0 |
+| ts-kernel-verifier-sdk-0.1.0-candidate | 179 | 159 | 8 | 7 | 53 | 5 |
+| ts-verifier-sdk-0.1.0-FINAL-2a7850c-OBJECT-API | 179 | 157 | 7 | 10 | 53 | 5 |
+| ts-verifier-sdk-0.1.0-FINAL-2a7850c-STRICT-verifyJSON | 179 | 165 | 0 | 9 | 63 | 5 |
+| go-sdk-v1.0.0 | 179 | 125 | 0 | 49 | 61 | 5 |
+| go-sdk-bbd1c0d | 179 | 125 | 0 | 49 | 61 | 5 |
+| go-sdk-37700d0 | 179 | 173 | 0 | 6 | 56 | 0 |
+| rust-sdk-8b3d024 | 179 | 125 | 0 | 49 | 63 | 5 |
+| rust-sdk-261ffbf | 179 | 172 | 0 | 7 | 58 | 0 |

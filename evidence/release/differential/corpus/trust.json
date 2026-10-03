@@ -1,0 +1,14 @@
+{
+ "hmac": {
+  "key_id": "diff-hmac-1",
+  "algorithm": "HS256",
+  "secret_utf8": "actenon-differential-corpus-hmac-key-v1-not-a-production-key"
+ },
+ "ed25519": {
+  "kid": "diff-ed25519-1",
+  "kty": "OKP",
+  "crv": "Ed25519",
+  "alg": "EdDSA",
+  "x": "wdxP5ce2eLG29n77zQ9XCMs-RUpo7M67yG9DsfMZHG8"
+ }
+}

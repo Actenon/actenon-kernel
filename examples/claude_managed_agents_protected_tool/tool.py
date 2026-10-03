@@ -8,6 +8,13 @@ integration and not the repository's primary hero path.
 
 from __future__ import annotations
 
+import os
+
+# Local demo: declare development intent explicitly. The demo signs with the
+# public development secret and keeps replay state per process, which the
+# kernel refuses without it. A non-development ACTENON_ENV still refuses.
+os.environ.setdefault("ACTENON_ENV", "development")
+
 import argparse
 import json
 import os

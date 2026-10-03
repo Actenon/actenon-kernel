@@ -329,7 +329,7 @@
               "const": "sha-256"
             },
             "canonicalization": {
-              "const": "RFC8785-JCS"
+              "enum": ["ACTENON-JCS-STRICT-1", "RFC8785-JCS"]
             },
             "value": {
               "type": "string",

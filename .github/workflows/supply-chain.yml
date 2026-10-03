@@ -109,19 +109,29 @@ jobs:
               exit 1
             )
 
-      - name: Audit (sarif output for Security tab)
+      - name: Audit report (JSON artefact)
+        # Reporting only; the gate is the step above. pip-audit has no SARIF
+        # output format: the former SARIF step always failed, and that was
+        # hidden by '|| true' + continue-on-error until the first real PR run.
+        # Exit status 1 means "vulnerabilities found" (already gated above);
+        # any other status, or no report, means the audit itself broke.
         if: always()
+        shell: bash
         run: |
-          pip-audit --vulnerability-service osv --format sarif -o pip-audit.sarif || true
-        continue-on-error: true
+          set +e
+          pip-audit --vulnerability-service osv --format json -o pip-audit.json
+          status=$?
+          set -e
+          test "$status" -le 1
+          test -s pip-audit.json
 
-      - name: Upload SARIF to GitHub Security tab
+      - name: Upload audit report
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: pip-audit.sarif
-          category: pip-audit
-        continue-on-error: true
+          name: pip-audit
+          path: pip-audit.json
+          retention-days: 30
 
   sigstore-release:
     # Sigstore-sign the wheel on release tags. This is what lets a

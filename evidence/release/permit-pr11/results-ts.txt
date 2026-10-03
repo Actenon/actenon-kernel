@@ -1,0 +1,16 @@
+## node v22.22.0
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:310:38)
+    at ModuleJob._link (node:internal/modules/esm/module_job:182:49) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-sdk-1.4.0/node_modules/@actenon/sdk/dist/protocol'
+}
+
+Node.js v22.22.0
+## bun 1.3.14
+producer=permit-py  1.4.0 | verifier=@actenon/sdk 1.4.0 (bun) | ascii                  | ACCEPT (agent-ascii)
+producer=permit-py  1.4.0 | verifier=@actenon/sdk 1.4.0 (bun) | non_ascii              | REJECT signature verification failed — token is forged or was signed with a different key
+producer=permit-py  1.4.0 | verifier=@actenon/sdk 1.4.0 (bun) | decimal_trailing_zero  | ACCEPT (agent-dec)
+producer=permit-py  2.0.0 | verifier=@actenon/sdk 1.4.0 (bun) | ascii                  | REJECT unsupported token version (expected 'v1.')
+producer=permit-py  2.0.0 | verifier=@actenon/sdk 1.4.0 (bun) | non_ascii              | REJECT unsupported token version (expected 'v1.')
+producer=permit-py  2.0.0 | verifier=@actenon/sdk 1.4.0 (bun) | decimal_trailing_zero  | REJECT unsupported token version (expected 'v1.')

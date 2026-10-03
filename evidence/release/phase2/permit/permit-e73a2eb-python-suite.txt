@@ -1,0 +1,6 @@
+# actenon-permit e73a2ebe99d011383a5c83c975b4cbd1b75f162e with actenon-kernel 032df8e4 (uv source); 2026-10-02T23:41:09Z
+kernel /home/user/actenon-permit/.venv/lib/python3.11/site-packages/actenon/__init__.py
+    self._sync.register_credential(ref, value, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 557 passed, 1 skipped, 68 warnings in 16.00s =================

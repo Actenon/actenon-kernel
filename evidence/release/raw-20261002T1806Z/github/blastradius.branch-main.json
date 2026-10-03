@@ -1,0 +1,103 @@
+{
+  "name": "main",
+  "commit": {
+    "sha": "df10b55fd8e18becd8678dcdf577fa54605e6e50",
+    "node_id": "C_kwDOUKEEAtoAKGRmMTBiNTVmZDhlMThiZWNkODY3OGRjZGY1NzdmYTU0NjA1ZTZlNTA",
+    "commit": {
+      "author": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-09-26T08:32:58Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-09-26T08:32:58Z"
+      },
+      "message": "Claude/actenon kernel mcp setup qolk0h (#2)\n\n* fix: fail closed on shell expansions blastradius does not model\n\nresolve_target only expands plain $VAR and ${VAR}. Any other expansion\nleft in the target after that pass — ${VAR:-/}, ${VAR:=/}, ${VAR:+x},\n${#VAR}, ${VAR%pattern}, $1, $$, $@ — was passed through as a literal\nfilename and then judged in-scope, so it was ALLOWED. In a real shell\nthose forms produce a concrete path we never computed:\n\n  rm -rf ${UNSET:-/}   # deletes / in bash; blastradius allowed it\n\nThis violates principle 2 (fail closed). Now, if a `$` survives variable\nexpansion, the target cannot be resolved with certainty and is refused\nwith a new unoverridable rule `unresolvable-expansion`. Plain $VAR /\n${VAR} continue to expand normally, so in-scope deletions are unaffected.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* fix: catch destructive commands behind wrappers and git global options\n\nidentify_destructive only inspected tokens[0], so any command runner in\nfront of rm hid it entirely. Every one of these was ALLOWED to hit a\nfloor path on main:\n\n  sudo rm -rf /etc      env rm -rf /etc      xargs rm -rf /etc\n  nice / nohup / setsid / exec / command / doas / busybox / ionice /\n  stdbuf rm ...         timeout 5 rm -rf /etc     sudo rm -rf $HOME\n\nAdded _unwrap_wrappers(): it strips leading command-runner wrappers\n(and their options/arguments, env NAME=VAL assignments, and the\ntimeout DURATION positional), recursing through nested wrappers, before\nidentification. It returns the tokens unchanged when the inner command\ncannot be located, so unwrapping can only ever ADD a block, never remove\none. Applied to both identify_destructive and identify_risks.\n\nAlso fixed three narrower escapes:\n\n- git global options before the subcommand (git -C / clean -fdx,\n  git --git-dir=x --work-tree=/ reset --hard) hid the destructive\n  subcommand from the args[0] == \"clean\"/\"reset\" check. Added\n  _git_split() to parse global options and honour -C / --work-tree /\n  --git-dir as the operative target directory.\n- find -execdir rm was not detected (only -exec was).\n- truncate with a glued size flag (truncate -s0 FILE) was not detected\n  because the guard tested exact membership of \"-s\" in the flag list.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* test: adversarial bypass regression suite (wrappers, git, expansions)\n\nOne test per confirmed bypass, each of which was ALLOWED on the parent\ncommit and is now a BLOCK: wrapper prefixes (F1), git global-option\nescapes (F2), unmodelled shell expansions (F3), find -execdir (F4), and\ntruncate with a glued size flag (F5). Includes must-allow guards proving\nthe fixes do not over-block in-scope wrapped deletions or plain $VAR.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* docs: correct README test count, rule table, and coverage notes\n\n- The \"128 tests\" figure was stale (the suite is 198). Updated.\n- Added the unresolvable-expansion rule to the rule reference table.\n- Documented in the Identify/Resolve steps that command-runner wrappers\n  are unwrapped, git global options are honoured, and expansions beyond\n  $VAR/${VAR} are refused fail-closed — matching actual behaviour.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* ci: add test workflow running the suite on Python 3.10-3.12\n\nThe repo had only publish.yml (tags). Added ci.yml running the full test\nsuite on push/PR across the supported Python versions, matching the\nsibling Actenon repos' Python CI style.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* fix(eval-agent): make the isolation proof pass when run as root\n\nThe proof overlaid a tmpfs on /home to hide the host home canary, but a\nroot invocation has ~ = /root, which is not under /home, so TEST2\n(\"host home canary is readable\") failed. Overlay a tmpfs on the invoking\nuser's actual home directory as well, so the proof holds for any user.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n---------\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+      "tree": {
+        "sha": "50282a664add829207bfd8a898c6ab8221ec1430",
+        "url": "https://api.github.com/repos/Actenon/blastradius/git/trees/50282a664add829207bfd8a898c6ab8221ec1430"
+      },
+      "url": "https://api.github.com/repos/Actenon/blastradius/git/commits/df10b55fd8e18becd8678dcdf577fa54605e6e50",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqt4M6CRC1aQ7uu5UhlAAAbr0QAJLuKLuKa0w46mww3n1Iuf/q\niO9/ElQevPsl+mSA88gYEq4JCCZslaOYve33sSuPbZDHpyXeVhFg5N7WAqU6hwwZ\nV630ukl55g1aSL0SqqBeb3LYddrNgGoKBSnpiAGZsaOHV/NYmrLQfAhyvTf2ys94\nY7xXanJGPDTT7+GcKzONHheqxvnYp9V6ll1FDKrFTSGZqbIyYQd3Pz8fw3r2SrD+\nTtTnLjpQhNmXhM8L+Kxpn7PWY1ioEkkQvHtX7U8evqqAZxGwbfXlktVI578kOAkj\nkZdVgUgHNhOja6PlD52fYM1F+IHD6Ohi6qWs30cRoJAjr6pNCM2nE0sBOJw+wj0Z\n+lvqisDNiAuY/q+xXdl/ogeJHHDtHDT9qxofxK6NnaTt0km1jzUW0uV7uf7m58Dc\ntXWcXQv/iDZ1ieX7r4ca8DrZ2uVcwFel85aldvFjxid0+WsEW/DXveFYSmbIUB7Y\nD+jMgHzTqBJAEkgw9dMQjx+shydHY0CyB0tWFZmUdB4jxsjvAeyYcWkAMVCKqHeg\nUp3dC7VNjT0VBkOJwb5Ooi/GQsY6mIKPpQC21XWlZ8EbNacszaZGV8KApc9PPp6x\n6GBAFT5QL1Qe4jSlUJ8LAOs7NnQIu/4FV4A2K9jaVKMe9vL1iRQt6JkS08vzZAMY\nTFyAfdH64b+tv4BhfMTi\n=6KsS\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree 50282a664add829207bfd8a898c6ab8221ec1430\nparent fb2b6cda994f394820cddffc940e9087615e3235\nauthor Bucko <ross.buckley1990@gmail.com> 1790411578 +0100\ncommitter GitHub <noreply@github.com> 1790411578 +0100\n\nClaude/actenon kernel mcp setup qolk0h (#2)\n\n* fix: fail closed on shell expansions blastradius does not model\n\nresolve_target only expands plain $VAR and ${VAR}. Any other expansion\nleft in the target after that pass — ${VAR:-/}, ${VAR:=/}, ${VAR:+x},\n${#VAR}, ${VAR%pattern}, $1, $$, $@ — was passed through as a literal\nfilename and then judged in-scope, so it was ALLOWED. In a real shell\nthose forms produce a concrete path we never computed:\n\n  rm -rf ${UNSET:-/}   # deletes / in bash; blastradius allowed it\n\nThis violates principle 2 (fail closed). Now, if a `$` survives variable\nexpansion, the target cannot be resolved with certainty and is refused\nwith a new unoverridable rule `unresolvable-expansion`. Plain $VAR /\n${VAR} continue to expand normally, so in-scope deletions are unaffected.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* fix: catch destructive commands behind wrappers and git global options\n\nidentify_destructive only inspected tokens[0], so any command runner in\nfront of rm hid it entirely. Every one of these was ALLOWED to hit a\nfloor path on main:\n\n  sudo rm -rf /etc      env rm -rf /etc      xargs rm -rf /etc\n  nice / nohup / setsid / exec / command / doas / busybox / ionice /\n  stdbuf rm ...         timeout 5 rm -rf /etc     sudo rm -rf $HOME\n\nAdded _unwrap_wrappers(): it strips leading command-runner wrappers\n(and their options/arguments, env NAME=VAL assignments, and the\ntimeout DURATION positional), recursing through nested wrappers, before\nidentification. It returns the tokens unchanged when the inner command\ncannot be located, so unwrapping can only ever ADD a block, never remove\none. Applied to both identify_destructive and identify_risks.\n\nAlso fixed three narrower escapes:\n\n- git global options before the subcommand (git -C / clean -fdx,\n  git --git-dir=x --work-tree=/ reset --hard) hid the destructive\n  subcommand from the args[0] == \"clean\"/\"reset\" check. Added\n  _git_split() to parse global options and honour -C / --work-tree /\n  --git-dir as the operative target directory.\n- find -execdir rm was not detected (only -exec was).\n- truncate with a glued size flag (truncate -s0 FILE) was not detected\n  because the guard tested exact membership of \"-s\" in the flag list.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* test: adversarial bypass regression suite (wrappers, git, expansions)\n\nOne test per confirmed bypass, each of which was ALLOWED on the parent\ncommit and is now a BLOCK: wrapper prefixes (F1), git global-option\nescapes (F2), unmodelled shell expansions (F3), find -execdir (F4), and\ntruncate with a glued size flag (F5). Includes must-allow guards proving\nthe fixes do not over-block in-scope wrapped deletions or plain $VAR.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* docs: correct README test count, rule table, and coverage notes\n\n- The \"128 tests\" figure was stale (the suite is 198). Updated.\n- Added the unresolvable-expansion rule to the rule reference table.\n- Documented in the Identify/Resolve steps that command-runner wrappers\n  are unwrapped, git global options are honoured, and expansions beyond\n  $VAR/${VAR} are refused fail-closed — matching actual behaviour.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* ci: add test workflow running the suite on Python 3.10-3.12\n\nThe repo had only publish.yml (tags). Added ci.yml running the full test\nsuite on push/PR across the supported Python versions, matching the\nsibling Actenon repos' Python CI style.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n* fix(eval-agent): make the isolation proof pass when run as root\n\nThe proof overlaid a tmpfs on /home to hide the host home canary, but a\nroot invocation has ~ = /root, which is not under /home, so TEST2\n(\"host home canary is readable\") failed. Overlay a tmpfs on the invoking\nuser's actual home directory as well, so the proof holds for any user.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01AWNAfEkZsFvwvUGh6dF8bh\n\n---------\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+        "verified_at": "2026-09-26T08:32:58Z"
+      }
+    },
+    "url": "https://api.github.com/repos/Actenon/blastradius/commits/df10b55fd8e18becd8678dcdf577fa54605e6e50",
+    "html_url": "https://github.com/Actenon/blastradius/commit/df10b55fd8e18becd8678dcdf577fa54605e6e50",
+    "comments_url": "https://api.github.com/repos/Actenon/blastradius/commits/df10b55fd8e18becd8678dcdf577fa54605e6e50/comments",
+    "author": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "fb2b6cda994f394820cddffc940e9087615e3235",
+        "url": "https://api.github.com/repos/Actenon/blastradius/commits/fb2b6cda994f394820cddffc940e9087615e3235",
+        "html_url": "https://github.com/Actenon/blastradius/commit/fb2b6cda994f394820cddffc940e9087615e3235"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/Actenon/blastradius/branches/main",
+    "html": "https://github.com/Actenon/blastradius/tree/main"
+  },
+  "protected": false,
+  "protection": {
+    "enabled": false,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [
+
+      ],
+      "checks": [
+
+      ]
+    }
+  },
+  "protection_url": "https://api.github.com/repos/Actenon/blastradius/branches/main/protection"
+}

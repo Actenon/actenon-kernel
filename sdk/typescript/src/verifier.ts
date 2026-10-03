@@ -1,7 +1,9 @@
 import { isDeepStrictEqual } from "node:util";
 
-import { canonicalizeBytes, sha256Hex } from "./canonical.js";
+import { canonicalizeBytes, canonicalizeJson, sha256Hex, type CanonicalValue } from "./canonical.js";
 import { VerificationError } from "./errors.js";
+import { parseStrictJson, StrictJsonError } from "./strict-json.js";
+import { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
 import type {
   ActionIntent,
   ActionSpec,
@@ -53,23 +55,72 @@ function requireRecordArray(value: unknown, fieldName: string, code: "INVALID_PC
   return value.map((item, index) => requireRecord(item, `${fieldName}[${index}]`) as Record<string, JsonValue>);
 }
 
-function parseTimestamp(raw: unknown, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB" | "INVALID_CONTEXT"): Date {
+const RFC3339_TIMESTAMP =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Parse an RFC 3339 timestamp to microseconds since the Unix epoch.
+ *
+ * Microseconds, not milliseconds: the Python reference keeps six fractional
+ * digits, so both the re-serialised (signed) form and the time-window
+ * comparison must too. Digits beyond six are truncated, as Python does.
+ */
+function parseTimestampMicros(
+  raw: unknown,
+  fieldName: string,
+  code: "INVALID_INTENT" | "INVALID_PCCB" | "INVALID_CONTEXT",
+): number {
   if (typeof raw !== "string") {
     throw new VerificationError(code, `${fieldName} must be an RFC3339 timestamp string.`);
   }
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) {
-    throw new VerificationError("INVALID_TIMESTAMP", `${fieldName} must be an RFC3339 timestamp string.`);
+  const match = RFC3339_TIMESTAMP.exec(raw);
+  const invalid = () =>
+    new VerificationError("INVALID_TIMESTAMP", `${fieldName} must be an RFC3339 timestamp string.`);
+  if (match === null) {
+    throw invalid();
   }
-  return parsed;
+  const field = (index: number): number => Number(match[index] ?? "");
+  const [year, month, day, hour, minute, second] = [field(1), field(2), field(3), field(4), field(5), field(6)];
+  const wholeMs = Date.UTC(year, month - 1, day, hour, minute, second);
+  const check = new Date(wholeMs);
+  if (
+    year < 1 ||
+    check.getUTCFullYear() !== year ||
+    check.getUTCMonth() !== month - 1 ||
+    check.getUTCDate() !== day ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59
+  ) {
+    throw invalid();
+  }
+  let offsetMinutes = 0;
+  const zone = match[8] ?? "Z";
+  if (zone !== "Z") {
+    const hours = Number(zone.slice(1, 3));
+    const minutes = Number(zone.slice(4, 6));
+    if (hours > 23 || minutes > 59) {
+      throw invalid();
+    }
+    offsetMinutes = (zone[0] === "-" ? -1 : 1) * (hours * 60 + minutes);
+  }
+  const micros = Number((match[7] ?? "").padEnd(6, "0").slice(0, 6));
+  return (wholeMs / 1000 - offsetMinutes * 60) * 1_000_000 + micros;
 }
 
-function formatTimestamp(date: Date): string {
-  return date.toISOString().replace(".000Z", "Z");
+function formatTimestampMicros(epochMicros: number): string {
+  const micros = ((epochMicros % 1_000_000) + 1_000_000) % 1_000_000;
+  const seconds = (epochMicros - micros) / 1_000_000;
+  const whole = new Date(seconds * 1000).toISOString().slice(0, 19);
+  return micros === 0 ? `${whole}Z` : `${whole}.${String(micros).padStart(6, "0")}Z`;
+}
+
+function contextNowMicros(now: Date | string): number {
+  return parseTimestampMicros(typeof now === "string" ? now : now.toISOString(), "context.now", "INVALID_CONTEXT");
 }
 
 function normalizeTimestamp(raw: string, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB"): string {
-  return formatTimestamp(parseTimestamp(raw, fieldName, code));
+  return formatTimestampMicros(parseTimestampMicros(raw, fieldName, code));
 }
 
 function parseTenantRef(raw: unknown, fieldName: string, code: "INVALID_INTENT" | "INVALID_PCCB"): TenantRef {
@@ -178,8 +229,11 @@ function parseActionHashSpec(raw: unknown, fieldName: string): PCCB["action_hash
   const algorithm = requireString(data.algorithm, `${fieldName}.algorithm`, "INVALID_PCCB");
   const canonicalization = requireString(data.canonicalization, `${fieldName}.canonicalization`, "INVALID_PCCB");
   const value = requireString(data.value, `${fieldName}.value`, "INVALID_PCCB");
-  if (algorithm !== "sha-256" || canonicalization !== "RFC8785-JCS") {
-    throw new VerificationError("INVALID_PCCB", `${fieldName} must declare sha-256 and RFC8785-JCS.`);
+  if (algorithm !== "sha-256" || !isAcceptedCanonicalizationProfile(canonicalization)) {
+    throw new VerificationError(
+      "INVALID_PCCB",
+      `${fieldName} must declare sha-256 and ${ACCEPTED_CANONICALIZATION_PROFILES.join(" or ")}.`,
+    );
   }
   return {
     algorithm,
@@ -238,6 +292,14 @@ export interface VerifyInput {
   context: VerificationContext;
 }
 
+export interface VerifyJSONInput {
+  /** The Action Intent exactly as received (bytes or text), not JSON.parse output. */
+  intent: string | Uint8Array;
+  /** The PCCB exactly as received (bytes or text), not JSON.parse output. */
+  pccb: string | Uint8Array;
+  context: VerificationContext;
+}
+
 export interface VerifyPayloadsInput {
   request_id: string;
   audience: AudienceRef;
@@ -258,6 +320,14 @@ interface BuildContextInput {
 
 export interface VerifierSDKOptions {
   clockSkewToleranceMs?: number;
+  /**
+   * Revocation source for the proof's signed authority
+   * (protocol/13-edge-binding.md E5). Return true only when the authority is
+   * NOT revoked. Throwing, returning anything but true, or omitting the
+   * checker for a proof whose authority declares `revocable: true` refuses
+   * with AUTHORITY_REVOKED.
+   */
+  revocationChecker?: (pccb: PCCB, context: VerificationContext) => boolean;
 }
 
 export const DEFAULT_CLOCK_SKEW_TOLERANCE_MS = 0;
@@ -265,6 +335,7 @@ export const DEFAULT_CLOCK_SKEW_TOLERANCE_MS = 0;
 export class VerifierSDK {
   private readonly signatureVerifier: SignatureVerifier;
   private readonly clockSkewToleranceMs: number;
+  private readonly revocationChecker: VerifierSDKOptions["revocationChecker"];
 
   constructor(signatureVerifier: SignatureVerifier, options: VerifierSDKOptions = {}) {
     const clockSkewToleranceMs =
@@ -274,6 +345,7 @@ export class VerifierSDK {
     }
     this.signatureVerifier = signatureVerifier;
     this.clockSkewToleranceMs = clockSkewToleranceMs;
+    this.revocationChecker = options.revocationChecker;
   }
 
   parseIntent(payload: unknown): ActionIntent {
@@ -283,8 +355,8 @@ export class VerifierSDK {
       throw new VerificationError("INVALID_INTENT", "contract must declare action_intent v1.");
     }
     requireString(data.intent_id, "action_intent.intent_id", "INVALID_INTENT");
-    parseTimestamp(data.issued_at, "action_intent.issued_at", "INVALID_INTENT");
-    parseTimestamp(data.expires_at, "action_intent.expires_at", "INVALID_INTENT");
+    parseTimestampMicros(data.issued_at, "action_intent.issued_at", "INVALID_INTENT");
+    parseTimestampMicros(data.expires_at, "action_intent.expires_at", "INVALID_INTENT");
     parseTenantRef(data.tenant, "action_intent.tenant", "INVALID_INTENT");
     parsePartyRef(data.requester, "action_intent.requester", "INVALID_INTENT");
     parseActionSpec(data.action, "action_intent.action", "INVALID_INTENT");
@@ -332,9 +404,9 @@ export class VerifierSDK {
       throw new VerificationError("INVALID_PCCB", "contract must declare pccb v1.");
     }
     requireString(data.pccb_id, "pccb.pccb_id", "INVALID_PCCB");
-    parseTimestamp(data.issued_at, "pccb.issued_at", "INVALID_PCCB");
-    parseTimestamp(data.not_before, "pccb.not_before", "INVALID_PCCB");
-    parseTimestamp(data.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    parseTimestampMicros(data.issued_at, "pccb.issued_at", "INVALID_PCCB");
+    parseTimestampMicros(data.not_before, "pccb.not_before", "INVALID_PCCB");
+    parseTimestampMicros(data.expires_at, "pccb.expires_at", "INVALID_PCCB");
     parsePartyRef(data.issuer, "pccb.issuer", "INVALID_PCCB");
     parsePartyRef(data.subject, "pccb.subject", "INVALID_PCCB");
     parseTenantRef(data.tenant, "pccb.tenant", "INVALID_PCCB");
@@ -386,7 +458,7 @@ export class VerifierSDK {
   buildContext(input: BuildContextInput): VerificationContext {
     requireString(input.request_id, "context.request_id", "INVALID_CONTEXT");
     const audience = parseAudienceRef(input.audience, "context.audience", "INVALID_CONTEXT");
-    parseTimestamp(typeof input.now === "string" ? input.now : input.now.toISOString(), "context.now", "INVALID_CONTEXT");
+    contextNowMicros(input.now);
     const scope_capabilities = requireStringArray(
       input.scope_capabilities,
       "context.scope_capabilities",
@@ -413,7 +485,33 @@ export class VerifierSDK {
     return context;
   }
 
-  verify(input: VerifyInput): VerifiedProtectedRequest {
+  /**
+   * Verify proof material received as raw bytes or text. Use this for any
+   * untrusted request body: it refuses duplicate members, fractional or
+   * exponent number lexemes and other input JSON.parse would silently
+   * normalise into something the Python reference refuses.
+   */
+  verifyJSON(input: VerifyJSONInput): VerifiedProtectedRequest {
+    const parse = (raw: string | Uint8Array, code: "INVALID_INTENT" | "INVALID_PCCB", what: string): unknown => {
+      try {
+        return parseStrictJson(raw);
+      } catch (error) {
+        if (error instanceof StrictJsonError) {
+          throw new VerificationError(code, `The ${what} is not acceptable JSON.`);
+        }
+        throw error;
+      }
+    };
+    return this.#verifyParsed({
+      intent: parse(input.intent, "INVALID_INTENT", "action intent"),
+      pccb: parse(input.pccb, "INVALID_PCCB", "proof"),
+      context: input.context,
+    });
+  }
+
+  // Not public: parsed objects cannot show what JSON.parse discarded, so
+  // untrusted input must arrive through verifyJSON.
+  #verifyParsed(input: VerifyInput): VerifiedProtectedRequest {
     const intent = this.parseIntent(input.intent);
     const pccb = this.parsePccb(input.pccb);
     const contextInput: BuildContextInput = {
@@ -429,14 +527,15 @@ export class VerifierSDK {
       contextInput.resource_selectors = input.context.resource_selectors;
     }
     const context = this.buildContext(contextInput);
-    const now = parseTimestamp(typeof context.now === "string" ? context.now : context.now.toISOString(), "context.now", "INVALID_CONTEXT");
-    const notBefore = parseTimestamp(pccb.not_before, "pccb.not_before", "INVALID_PCCB");
-    const expiresAt = parseTimestamp(pccb.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    const now = contextNowMicros(context.now);
+    const notBefore = parseTimestampMicros(pccb.not_before, "pccb.not_before", "INVALID_PCCB");
+    const expiresAt = parseTimestampMicros(pccb.expires_at, "pccb.expires_at", "INVALID_PCCB");
+    const skewMicros = this.clockSkewToleranceMs * 1000;
 
-    if (now.getTime() + this.clockSkewToleranceMs < notBefore.getTime()) {
+    if (now + skewMicros < notBefore) {
       throw new VerificationError("PROOF_NOT_YET_VALID", "The proof is not yet valid.");
     }
-    if (now.getTime() - this.clockSkewToleranceMs > expiresAt.getTime()) {
+    if (now - skewMicros > expiresAt) {
       throw new VerificationError("PROOF_EXPIRED", "The proof has expired.");
     }
 
@@ -455,11 +554,16 @@ export class VerifierSDK {
     if (!isDeepStrictEqual(pccb.audience, context.audience)) {
       throw new VerificationError("AUDIENCE_MISMATCH", "The proof audience does not match this endpoint.");
     }
-    if (pccb.scope.mode !== "exact") {
+    // Protocol v1 proofs are exact and single-use only (protocol/13 E4).
+    if (pccb.scope.mode !== "exact" || pccb.scope.single_use !== true) {
       throw new VerificationError("SCOPE_MODE_INVALID", "The proof scope mode is not supported.");
     }
     if (!pccb.scope.capabilities.includes(intent.action.capability)) {
       throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The proof scope does not allow this capability.");
+    }
+    // E1: the capability must be one this endpoint declares it performs.
+    if (!context.scope_capabilities.includes(intent.action.capability)) {
+      throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The action capability is not one this endpoint performs.");
     }
     if (pccb.intent_id !== undefined && pccb.intent_id !== intent.intent_id) {
       throw new VerificationError("INTENT_MISMATCH", "The proof does not match the supplied action intent.");
@@ -476,7 +580,10 @@ export class VerifierSDK {
     if (!isDeepStrictEqual(pccb.target, intent.target)) {
       throw new VerificationError("TARGET_MISMATCH", "The proof target does not exactly match the action intent.");
     }
-    if (pccb.action_hash.algorithm !== "sha-256" || pccb.action_hash.canonicalization !== "RFC8785-JCS") {
+    if (
+      pccb.action_hash.algorithm !== "sha-256" ||
+      !isAcceptedCanonicalizationProfile(pccb.action_hash.canonicalization)
+    ) {
       throw new VerificationError(
         "ACTION_HASH_ALGORITHM_INVALID",
         "The proof action hash metadata is invalid.",
@@ -486,15 +593,67 @@ export class VerifierSDK {
     if (pccb.action_hash.value !== expectedHash) {
       throw new VerificationError("ACTION_HASH_MISMATCH", "The proof action hash does not match the action intent.");
     }
+    // E2: every constraint the endpoint relies on was signed into the proof.
+    const signedConstraints = (pccb.scope.parameter_constraints ?? {}) as Record<string, JsonValue>;
+    for (const [key, value] of Object.entries(context.parameter_constraints ?? {})) {
+      if (!Object.prototype.hasOwnProperty.call(signedConstraints, key) || !canonicalEqual(signedConstraints[key], value)) {
+        throw new VerificationError(
+          "PARAMETER_MISMATCH",
+          "The proof parameter constraints do not cover this endpoint's constraints.",
+        );
+      }
+    }
+    // E3: the bound target satisfies at least one declared resource selector.
+    const selectors = context.resource_selectors ?? [];
+    if (selectors.length > 0 && !selectors.some((selector) => targetSatisfies(pccb.target, selector))) {
+      throw new VerificationError("TARGET_MISMATCH", "The proof target does not satisfy this endpoint's resource selectors.");
+    }
+    // E5: revocation of the underlying authority, after every other check.
+    const unknown = () =>
+      new VerificationError("AUTHORITY_REVOKED", "The proof authority's revocation status could not be established.");
+    const extensions = (pccb.extensions ?? {}) as Record<string, JsonValue>;
+    let revocable = false;
+    if (Object.prototype.hasOwnProperty.call(extensions, "authority")) {
+      const authority = extensions.authority;
+      if (authority === null || typeof authority !== "object" || Array.isArray(authority)) throw unknown();
+      const flag = (authority as Record<string, JsonValue>).revocable;
+      if (flag !== undefined && typeof flag !== "boolean") throw unknown();
+      revocable = flag === true;
+    }
+    if (this.revocationChecker === undefined) {
+      if (revocable) throw unknown();
+    } else {
+      let notRevoked: boolean;
+      try {
+        notRevoked = this.revocationChecker(pccb, context) === true;
+      } catch {
+        throw unknown();
+      }
+      if (!notRevoked) throw new VerificationError("AUTHORITY_REVOKED", "The proof authority has been revoked.");
+    }
     return { intent, pccb, context };
   }
+}
 
-  verifyPayloads(input: VerifyPayloadsInput & { intent_payload: unknown; pccb_payload: unknown }): VerifiedProtectedRequest {
-    const context = this.buildContext(input);
-    return this.verify({
-      intent: input.intent_payload,
-      pccb: input.pccb_payload,
-      context,
-    });
+function canonicalEqual(a: unknown, b: unknown): boolean {
+  try {
+    return canonicalizeJson(a as CanonicalValue) === canonicalizeJson(b as CanonicalValue);
+  } catch {
+    return false;
   }
+}
+
+// protocol/13-edge-binding.md E3.
+function targetSatisfies(target: PCCB["target"], selector: Record<string, JsonValue>): boolean {
+  const entries = Object.entries(selector ?? {});
+  if (entries.length === 0) return false;
+  const extra = (target.selectors ?? {}) as Record<string, JsonValue>;
+  return entries.every(([key, value]) => {
+    let actual: unknown;
+    if (key === "resource_id") actual = target.resource_id;
+    else if (key === "resource_type") actual = target.resource_type;
+    else if (Object.prototype.hasOwnProperty.call(extra, key)) actual = extra[key];
+    else return false;
+    return canonicalEqual(actual, value);
+  });
 }

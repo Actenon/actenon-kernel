@@ -1,0 +1,60 @@
+>       assert rc != 0
+E       assert 0 != 0
+
+tests/security/test_g3_explicit_development_intent.py:495: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Proof verified.
+Intent: intent_g3_001
+PCCB: pccb_df4fa90b0d214d50b906fa35740e4172
+Audience: service:payments
+Verified at: 2026-10-02T18:14:59.871544Z
+=========================== short test summary info ============================
+FAILED tests/security/test_g3_explicit_development_intent.py::test_public_secret_signer_refused_without_development_intent[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_public_secret_signer_refused_without_development_intent[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_public_secret_passed_explicitly_is_still_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_public_secret_passed_explicitly_is_still_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_gate_default_process_local_replay_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_gate_default_process_local_replay_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_gate_default_process_local_replay_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_protected_executor_default_process_local_replay_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_protected_executor_default_process_local_replay_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_protected_executor_default_process_local_replay_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_build_default_replay_store_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_build_default_replay_store_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_build_default_replay_store_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_verifier_middleware_default_replay_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_verifier_middleware_default_replay_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_verifier_middleware_default_replay_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_in_memory_replay_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_in_memory_replay_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_in_memory_replay_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_mcp_server_non_demo_refuses_process_local_replay[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_mcp_server_non_demo_refuses_process_local_replay[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_protection_disabled_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_protection_disabled_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_protection_disabled_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_store_fail_open_refused[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_store_fail_open_refused[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_store_fail_open_refused[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_local_dev_constructor_is_explicit_development_intent
+FAILED tests/security/test_g3_explicit_development_intent.py::test_local_dev_scope_does_not_leak
+FAILED tests/security/test_g3_explicit_development_intent.py::test_development_env_does_not_override_production_flag
+FAILED tests/security/test_g3_explicit_development_intent.py::test_mcp_demo_is_explicit_development_intent[development]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_process_local_replay_override_is_loud_and_marked[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_process_local_replay_override_is_loud_and_marked[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_disabled_and_fail_open_overrides_are_marked[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_replay_disabled_and_fail_open_overrides_are_marked[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_override_does_not_unlock_the_public_secret
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_shared_replay_db_enforces_single_use_across_workers[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_shared_replay_db_enforces_single_use_across_workers[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_shared_replay_db_enforces_single_use_across_workers[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_explicit_shared_store_works[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_explicit_shared_store_works[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_production_config_with_explicit_shared_store_works[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_honours_actenon_replay_db_across_workers[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_honours_actenon_replay_db_across_workers[prd]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_boundary_verifier_honours_actenon_replay_db_across_workers[production]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_suite_declares_test_intent_in_its_own_config
+FAILED tests/security/test_g3_explicit_development_intent.py::test_cli_local_verifier_refused_without_development_intent[unset]
+FAILED tests/security/test_g3_explicit_development_intent.py::test_cli_local_verifier_refused_without_development_intent[prd]
+48 failed, 22 passed in 1.98s

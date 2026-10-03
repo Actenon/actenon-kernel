@@ -8,6 +8,7 @@ from typing import Callable, Mapping, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from actenon.core.http_url import require_http_url
 from actenon.models import ExecutionAnchor, build_artifact_digest, sha256_artifact_hex
 from actenon.models.contracts import JsonScalar, PCCB, Receipt, Refusal, utc_now
 
@@ -102,7 +103,8 @@ def _default_http_transport(endpoint_url: str, payload: bytes, timeout_seconds: 
         method="POST",
     )
     try:
-        with urlopen(request, timeout=timeout_seconds):
+        # HttpExecutionGraphClient admits only http(s) URLs (require_http_url).
+        with urlopen(request, timeout=timeout_seconds):  # nosec B310
             return None
     except HTTPError as exc:
         raise RuntimeError(f"execution graph publication failed with HTTP {exc.code}") from exc
@@ -116,6 +118,9 @@ class HttpExecutionGraphClient:
     timeout_seconds: float = 2.0
     transport: ExecutionGraphTransport = _default_http_transport
     logger: logging.Logger = field(default_factory=lambda: LOGGER)
+
+    def __post_init__(self) -> None:
+        require_http_url(self.endpoint_url, "execution graph endpoint_url")
 
     def publish(self, anchor: ExecutionAnchor) -> None:
         payload = json.dumps(anchor.to_dict(), separators=(",", ":"), sort_keys=True).encode("utf-8")

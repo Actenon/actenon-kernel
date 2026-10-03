@@ -142,7 +142,6 @@ _REFUSAL_CODE_MAP: Mapping[str, FailureCode] = {
     "AUTHORITY_REVOKED": FailureCode.REVOKED,
     "POLICY_REFUSAL": FailureCode.NOT_ACTIVE,
     "OUTCOME_UNKNOWN": FailureCode.ENGINE_ERROR,
-    "PROOF_NOT_YET_VALID": FailureCode.PCCB_EXPIRED,  # already above; kept for clarity
     "ISSUER_UNTRUSTED": FailureCode.SIGNATURE_INVALID,
     "PARAMETER_MISMATCH": FailureCode.ACTION_MISMATCH,
     "MALFORMED_REQUEST": FailureCode.SIGNATURE_INVALID,
@@ -202,15 +201,32 @@ def refusal_code_to_failure_code(refusal_code: str) -> FailureCode:
 # These allow the verifier to emit the protocol's two-layer disclosure
 # model (disclosed_code + internal_code) without re-implementing the
 # catalogue lookup.
+def _canonical_code(code: str | None) -> str | None:
+    """Resolve a compatibility alias (DUPLICATE_REPLAY, PCCB_REQUIRED, ...)
+    to its canonical catalogue code; other codes pass through unchanged.
+
+    The protocol's disclosure and retryability lookups only know canonical
+    codes, so an unresolved alias fell through to OUTCOME_UNKNOWN /
+    retryable=True — the opposite of what a replay or expiry refusal means.
+    """
+    if code is None:
+        return None
+    try:
+        return _protocol_resolve_alias(code)
+    except KeyError:
+        return code
+
+
 def to_disclosed_code(internal_code: str | None, policy: str = "public") -> str:
     """Map an internal refusal code to the disclosed code under a policy.
 
     ``policy`` is a string ("public", "trusted", "local_debug") for
     backward-compatibility with kernel callers that pass strings. It is
     converted to the protocol's DisclosurePolicy enum internally.
+    Compatibility aliases are resolved to their canonical code first.
     """
     p = _ProtocolDisclosurePolicy(policy)
-    return _protocol_refusal_to_disclosed_code(internal_code, p)
+    return _protocol_refusal_to_disclosed_code(_canonical_code(internal_code), p)
 
 
 def to_internal_code(internal_code: str | None, policy: str = "public") -> str | None:
@@ -220,8 +236,8 @@ def to_internal_code(internal_code: str | None, policy: str = "public") -> str |
 
 
 def to_retryable(internal_code: str | None) -> bool:
-    """Return the retryable flag for the given internal code."""
-    return _protocol_refusal_to_retryable(internal_code)
+    """Return the retryable flag for the given internal code (aliases resolved)."""
+    return _protocol_refusal_to_retryable(_canonical_code(internal_code))
 
 
 __all__ = [

@@ -1,0 +1,40 @@
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+  17/22 checks passed, 4 failed, 1 not applicable
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+  9/11 checks passed, 2 failed, 0 not applicable
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+E   AssertionError: First request should pass (fresh verifier) but got 403: {'outcome': 'refused', 'boundary_id': 'refund-api', 'action': 'payment.refund', 'reason': 'boundary verification failed unexpectedly', 'refusal_code': 'OUTCOME_UNKNOWN', 'action_hash': '30dbf1312f7642cc...', 'refused_at': '2026-10-02T19:35:34.382477+00:00', 'execution_mode': 'resource_owned'}
+ERROR    actenon_permit.boundary.middleware:middleware.py:178 boundary.verification_error
+FAILED tests/test_approval_wiring.py::test_wired_gateway_creates_pending_approval
+FAILED tests/test_attenuation_wire.py::test_child_token_is_usable_and_bound_by_parent_limits
+FAILED tests/test_audit_attacks.py::TestRevocationCascade::test_http_revoke_reaches_grandchildren
+FAILED tests/test_audit_attacks.py::TestRevocationCascade::test_kill_switch_by_agent_reaches_delegated_children
+FAILED tests/test_audit_attacks.py::TestBoundaryKit::test_protect_test_reports_what_actually_ran
+FAILED tests/test_audit_attacks.py::TestBoundaryKit::test_middleware_binds_the_proof_to_the_request
+FAILED tests/test_boundary_kit.py::test_middleware_valid_proof_passes - asser...
+FAILED tests/test_boundary_kit.py::test_middleware_replay_refused - assert 40...
+FAILED tests/test_boundary_kit.py::test_cli_protect_test - AssertionError: as...
+FAILED tests/test_boundary_kit.py::test_cli_protect_quickstart - AssertionErr...
+FAILED tests/test_boundary_kit.py::test_replay_refused_passes_after_valid_proof_passes
+=========== 11 failed, 503 passed, 1 skipped, 63 warnings in 17.16s ============

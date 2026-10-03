@@ -1,0 +1,12 @@
+FAILED tests/test_2_0_edge_authority.py::test_glob_scoped_grant_proof_names_the_exact_capability
+FAILED tests/test_2_0_edge_authority.py::test_minted_proof_carries_a_signed_revocable_authority
+FAILED tests/test_2_0_edge_authority.py::test_revoked_grant_cannot_execute_at_the_edge
+FAILED tests/test_2_0_edge_authority.py::test_revoked_ancestor_cascades_to_a_delegated_proof
+FAILED tests/test_2_0_edge_authority.py::test_unknown_grant_or_store_failure_refuses
+FAILED tests/test_2_0_edge_authority.py::test_edge_without_a_revocation_source_refuses_permit_proofs
+FAILED tests/test_2_0_edge_authority.py::test_permit_own_edge_refuses_a_revoked_grant
+FAILED tests/test_2_0_edge_authority.py::test_no_signing_configuration_refuses_outside_development[None]
+FAILED tests/test_2_0_edge_authority.py::test_no_signing_configuration_refuses_outside_development[prd]
+FAILED tests/test_2_0_edge_authority.py::test_no_signing_configuration_refuses_outside_development[production]
+FAILED tests/test_2_0_edge_authority.py::test_kernel_floor_is_the_secure_kernel
+=================== 11 failed, 1 passed, 1 warning in 0.71s ====================

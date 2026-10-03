@@ -1,0 +1,7 @@
+## kernel_diff_v1: reference 2a7850c (phase 1) -> 78efcf1 (phase 2): 5 changed of 179
+  empty_scope_capabilities_ctx                  ACCEPT/None -> REFUSE/SCOPE_CAPABILITY_MISMATCH
+  single_use_false_resigned                     ACCEPT/None -> REFUSE/SCOPE_MODE_INVALID
+  target_ctx_selector_mismatch                  ACCEPT/None -> REFUSE/TARGET_MISMATCH
+  action_ctx_constraint_mismatch                ACCEPT/None -> REFUSE/PARAMETER_MISMATCH
+  action_ctx_scope_capability_missing           ACCEPT/None -> REFUSE/SCOPE_CAPABILITY_MISMATCH
+## addendum-precision: reference 2a7850c (phase 1) -> 78efcf1 (phase 2): 0 changed of 14

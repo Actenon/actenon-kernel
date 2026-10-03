@@ -1,0 +1,52 @@
+## versions: {'actenon-kernel': '1.3.0rc1', 'actenon-permit': '1.4.0', 'actenon-protocol': '1.3.0'}
+### E0 Permit grant with a glob scope (payments.*) -> Kernel edge
+mint: ALLOW allowed alg= EdDSA
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["SCOPE_CAPABILITY_MISMATCH"], "downgrades": []}
+RESULT E0: FAIL (a Permit-minted proof for a glob-scoped grant is refused by the kernel edge)
+### E1 happy path: Permit decides+mints (Ed25519) -> Kernel edge verifies -> executes once -> Receipt
+mint: ALLOW allowed alg= EdDSA
+  {"label": "workerA", "started": true, "outcomes": ["executed"], "reasons": [null], "downgrades": [], "receipt_written": "/home/user/actenon-kernel/evidence/release/e2e/out-FINAL/receipt-E1.json"}
+RESULT E1: PASS
+### E2 replay across two workers and a restart (shared durable replay store)
+  {"label": "workerB", "started": true, "outcomes": ["refused"], "reasons": ["DUPLICATE_REPLAY"], "downgrades": []}
+  {"label": "workerA-restarted", "started": true, "outcomes": ["refused"], "reasons": ["DUPLICATE_REPLAY"], "downgrades": []}
+  side effects for one proof: 1
+RESULT E2: PASS
+### E3 duplicated execution: 16 concurrent presentations of a fresh proof in one worker + 1 in another
+  side effects: 1
+RESULT E3: PASS
+### E4 wrong audience
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["AUDIENCE_MISMATCH"], "downgrades": []}
+RESULT E4: PASS
+### E5 altered parameters (amount 2500 -> 999999 after minting)
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["ACTION_MISMATCH"], "downgrades": []}
+RESULT E5: PASS
+### E6 forged proof: attacker's own Ed25519 key with the issuer's kid
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["PROOF_INVALID"], "downgrades": []}
+RESULT E6: PASS
+### E6b forged proof signed with the PUBLIC development HMAC secret
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["PROOF_INVALID"], "downgrades": []}
+RESULT E6b: PASS
+### E7 expired proof (grant/proof window 3s, presented after 5s)
+  {"label": "workerA", "started": true, "outcomes": ["refused"], "reasons": ["PROOF_EXPIRED"], "downgrades": []}
+RESULT E7: PASS
+### E8 revoked authority
+revoke: ALLOW -> DENY
+  after revocation: Permit outcome {'outcome': 'DENY', 'reason': 'grant status is revoked', 'pccb_minted': False}
+RESULT E8a: PASS (Permit refuses to mint after revocation)
+  proof minted BEFORE revocation, presented AFTER: {"label": "workerA", "started": true, "outcomes": ["executed"], "reasons": [null], "downgrades": []}
+RESULT E8b: FAIL (edge executes a proof whose authority was revoked: no revocation_checker in ActenonGate)
+### E9 missing production replay configuration (no ACTENON_REPLAY_DB)
+  {"label": "workerA", "started": false, "error_type": "InsecureDefaultRefusedError", "error": "the default replay store with per-process replay state (a single-use proof would be accepted once per worker and again after a restart) requires explicit development intent and ACTENON_ENV='production' declares none. Single-use needs replay state shared by every worker and surviving restarts: set AC"}
+RESULT E9: PASS
+  ACTENON_ENV empty: {"label": "workerA", "started": false, "error_type": "InsecureDefaultRefusedError", "error": "the default replay store with per-process replay state (a single-use proof would be accepted once per worker and again after a restart) requires explicit development intent and ACTENON_ENV='' declares none. Single-use needs replay state shared by every worker and surviving restarts: set ACTENON_REPL"}
+RESULT E9b: PASS
+### E10 missing / invalid production signing configuration
+  no key, ACTENON_ENV empty: mint: DENY PCCB emission failed — failing closed alg= None
+RESULT E10a: PASS (no proof minted without signing configuration)
+  no key, ACTENON_ENV=prd: mint: DENY PCCB emission failed — failing closed alg= None
+RESULT E10b: PASS
+  invalid key file: mint: DENY PCCB emission failed — failing closed alg= None
+RESULT E10c: PASS (invalid key -> no proof)
+  edge rooted in public dev secret, ACTENON_ENV empty: REFUSED LocalHmacProductionGuardError
+RESULT E10d: PASS

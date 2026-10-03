@@ -237,14 +237,9 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         cursor.execute("BEGIN IMMEDIATE")
 
     def _select_row(self, cursor: sqlite3.Cursor, escrow_id: str) -> sqlite3.Row | None:
-        cursor.execute(
-            f"""
-            SELECT {SELECT_FIELDS}
-            FROM capability_escrow
-            WHERE escrow_id = ?
-            """,
-            (escrow_id,),
-        )
+        # SELECT_FIELDS is a module constant; escrow_id is a bound parameter.
+        query = f"SELECT {SELECT_FIELDS} FROM capability_escrow WHERE escrow_id = ?"  # nosec B608
+        cursor.execute(query, (escrow_id,))
         return cursor.fetchone()
 
     def _row_to_record(self, row: sqlite3.Row) -> EscrowRecord:

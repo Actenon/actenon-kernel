@@ -1,3 +1,10 @@
+import os
+
+# Local demo: declare development intent explicitly. The demo signs with the
+# public development secret and keeps replay state per process, which the
+# kernel refuses without it. A non-development ACTENON_ENV still refuses.
+os.environ.setdefault("ACTENON_ENV", "development")
+
 #!/usr/bin/env python3
 """
 Actenon worked example & evidence: a protected MULTI-AGENT SWARM on a shared resource boundary.

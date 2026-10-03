@@ -1,0 +1,14 @@
+80572e8467024b4272be3edd66a70707ad3827a31f906113fd06dc7bd0ede81c  crates/actenon-verifier-sdk-0.2.0.crate
+6bf25061d3caea72d34f961997d35aca8c8d960aaddac2413516882e6706c97e  goproxy/github.com/!actenon/sdk-go/@v/list
+d5850d0b19594e7ae94da10f69b950230646f51eedca09e3564f36d5cd520d66  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.info
+6638604af0ce9e11a6ae64260a8548231d93ef01915e0e093cb1608e4907304a  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.mod
+7f34778dbf6f075d3228cce2b1485b3787e9480b85bbdeb2d124727122ba2bf6  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.zip
+c01c86b684fd8edb810b340af670e5993b8794f3706d9b528a17eec70a0992a5  npm/actenon-protocol-types-1.4.0.tgz
+0322270b9790235c8a56f498e54447028ecfc792b79c3a4da4237e4dcd3a9b1f  npm/actenon-sdk-2.0.0.tgz
+adfa3bcc762b88fb96e7f1a4f741655065de8af26af8a917a27282ecfc57e8bb  npm/actenon-verifier-sdk-0.2.0.tgz
+d4d5f45f175cef69087c7334f5e476f9ed01eca49396bddf73d7295c5510fdc3  pypi/actenon_kernel-1.3.0-py3-none-any.whl
+3bb2e4da31cb592efe3b60ec57c190dd2623be61080ddd1f26cff5208b8793f4  pypi/actenon_kernel-1.3.0.tar.gz
+e1fd3c13583cf620189a7335b4f6414e180ccd343f8dbfb558ecce00addad241  pypi/actenon_permit-2.0.0-py3-none-any.whl
+528fce0718562129e4fd17290c7244e883debe969e1e7a08852011cab3b434f8  pypi/actenon_permit-2.0.0.tar.gz
+bb21f93be62b15bf6d9d414ee17edcb0f79b9dc7bf306ea7a0e9df9b76a36e2d  pypi/actenon_protocol-1.4.0-py3-none-any.whl
+ab4b596ed00bda14630e5976cfe944f1080f11403fb9f4b1d8e045aa0eacb70f  pypi/actenon_protocol-1.4.0.tar.gz

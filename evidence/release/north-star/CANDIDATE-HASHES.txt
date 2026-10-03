@@ -1,0 +1,41 @@
+# CANDIDATE-HASHES (final candidates = rehearsal 3), generated 2026-10-03T13:35:20Z
+# Baseline at the start of the north-star programme: CANDIDATE-HASHES-NS1-BASELINE.txt (unchanged).
+
+## Source commits (full SHA)
+actenon-protocol e988c4d43f8b59d459628a306cd0117109e59d70 tree=5e09b2202810d029d299ec5e3572f44512172a62
+actenon-kernel 185e0fd834bda7318893f7cda51100c5708091bc tree=b37141e1d4ed658a58c1b396ea5efdd48fd8fcfa
+sdk-go 0198ef597e67a31de778c38628d10d99a5c60d8e tree=06696562f02adb7b1e534435fe9e1af1452a5b84
+sdk-rust c149ab681be437b68f699b4f734a1a18ed7ad0e7 tree=2c7269a7468e35ae1aa3278d965a1a3789460fa9
+actenon-permit a0d2b8dae74972a06f5774e4667774df26fbad97 tree=0ae1cd3ec81b1539bc099874dbcd816b6bf854ca
+actenon-permit release preparation: rehearsal/permit-release-prep-v4.patch sha256=36d114158fa576a2c9e2ac2e527c965a069d37eb891b2d68f1c9105320a1ec2e
+
+## Release artefacts (rehearsal 3, sha256)
+80572e8467024b4272be3edd66a70707ad3827a31f906113fd06dc7bd0ede81c  crates/actenon-verifier-sdk-0.2.0.crate
+6bf25061d3caea72d34f961997d35aca8c8d960aaddac2413516882e6706c97e  goproxy/github.com/!actenon/sdk-go/@v/list
+d5850d0b19594e7ae94da10f69b950230646f51eedca09e3564f36d5cd520d66  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.info
+6638604af0ce9e11a6ae64260a8548231d93ef01915e0e093cb1608e4907304a  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.mod
+7f34778dbf6f075d3228cce2b1485b3787e9480b85bbdeb2d124727122ba2bf6  goproxy/github.com/!actenon/sdk-go/@v/v1.1.0.zip
+c01c86b684fd8edb810b340af670e5993b8794f3706d9b528a17eec70a0992a5  npm/actenon-protocol-types-1.4.0.tgz
+0322270b9790235c8a56f498e54447028ecfc792b79c3a4da4237e4dcd3a9b1f  npm/actenon-sdk-2.0.0.tgz
+adfa3bcc762b88fb96e7f1a4f741655065de8af26af8a917a27282ecfc57e8bb  npm/actenon-verifier-sdk-0.2.0.tgz
+d4d5f45f175cef69087c7334f5e476f9ed01eca49396bddf73d7295c5510fdc3  pypi/actenon_kernel-1.3.0-py3-none-any.whl
+3bb2e4da31cb592efe3b60ec57c190dd2623be61080ddd1f26cff5208b8793f4  pypi/actenon_kernel-1.3.0.tar.gz
+e1fd3c13583cf620189a7335b4f6414e180ccd343f8dbfb558ecce00addad241  pypi/actenon_permit-2.0.0-py3-none-any.whl
+528fce0718562129e4fd17290c7244e883debe969e1e7a08852011cab3b434f8  pypi/actenon_permit-2.0.0.tar.gz
+bb21f93be62b15bf6d9d414ee17edcb0f79b9dc7bf306ea7a0e9df9b76a36e2d  pypi/actenon_protocol-1.4.0-py3-none-any.whl
+ab4b596ed00bda14630e5976cfe944f1080f11403fb9f4b1d8e045aa0eacb70f  pypi/actenon_protocol-1.4.0.tar.gz
+
+## Go module content hashes (what sum.golang.org must record)
+github.com/Actenon/sdk-go v1.1.0 h1:Q368pwEy+sNg/hb5++Vr1QzE/G90QvSqyX4WS83xMew=
+github.com/Actenon/sdk-go v1.1.0/go.mod h1:yeOA1lt5N4bb9uLRW4jLbLf7f4GwM5WNdhbi3f22Rgs=
+
+## Conformance
+kernel conformance/vector-lock.json (Conformance 1.1.0) sha256=dafe9afe1ca37141cc836d13421afd394e27b5950d5c528f804ccf49a1d299d1
+protocol conformance/vectors.sha256 sha256=4e65344df114e1171cb3e3a455a8ed61f6e0d070f9e65dc1af377a19247411e0
+protocol tag archive (git archive e988c4d, prefix actenon-protocol-1.4.0/) sha256=af0a7a02b4af6c8bc60d192ed85f4b4b311ad05f092168c4c7eb34ac64e2f158
+kernel_diff_v1 corpus: 1c2bc970d3c2b93b8d63e4fd3740d7802ae49ebc972ddad8b1de772d5c31264d 539
+precision addendum: 3954555d91a49ab289d7ace45288eab2eb4aeac6c8ad416ceda9dbb76e54ea3e 44
+timestamp-grammar addendum: 05b7179e5594db42d37e13ad53b8d9ba46d5991920c0ba2c25d49eabe41cf2e5 161
+
+## Verification method after publication
+Wheels/sdists: rehearsal/compare_artefact_contents.py (content, not archive timestamps). npm tarballs and the crate: byte-identical sha256 expected. Go: h1 hashes above.

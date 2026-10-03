@@ -1,0 +1,14 @@
+producer=permit-py  1.4.0 | verifier=permit-py  1.4.0 | ascii                  | ACCEPT (agent-ascii)
+producer=permit-py  1.4.0 | verifier=permit-py  1.4.0 | non_ascii              | ACCEPT (agënt-ünïcode-日本)
+producer=permit-py  1.4.0 | verifier=permit-py  1.4.0 | decimal_trailing_zero  | ACCEPT (agent-dec)
+producer=permit-py  2.0.0 | verifier=permit-py  1.4.0 | ascii                  | REJECT TokenError: unsupported token version (expected 'v1.')
+producer=permit-py  2.0.0 | verifier=permit-py  1.4.0 | non_ascii              | REJECT TokenError: unsupported token version (expected 'v1.')
+producer=permit-py  2.0.0 | verifier=permit-py  1.4.0 | decimal_trailing_zero  | REJECT TokenError: unsupported token version (expected 'v1.')
+canonical_json(1.5) on 1.4.0: '{"a":1.5}'
+producer=permit-py  1.4.0 | verifier=permit-py  2.0.0 | ascii                  | ACCEPT (agent-ascii)
+producer=permit-py  1.4.0 | verifier=permit-py  2.0.0 | non_ascii              | ACCEPT (agënt-ünïcode-日本)
+producer=permit-py  1.4.0 | verifier=permit-py  2.0.0 | decimal_trailing_zero  | ACCEPT (agent-dec)
+producer=permit-py  2.0.0 | verifier=permit-py  2.0.0 | ascii                  | ACCEPT (agent-ascii)
+producer=permit-py  2.0.0 | verifier=permit-py  2.0.0 | non_ascii              | ACCEPT (agënt-ünïcode-日本)
+producer=permit-py  2.0.0 | verifier=permit-py  2.0.0 | decimal_trailing_zero  | ACCEPT (agent-dec)
+canonical_json(1.5) on 2.0.0: RAISES CanonicalisationError: floating-point values are not supported in ACTENON-JCS-STRICT-1; use integer cen

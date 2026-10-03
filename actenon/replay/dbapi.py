@@ -34,6 +34,9 @@ class DbApiReplayStore(ReplayStore):
     """Production-oriented abstraction for transactional relational replay stores."""
 
     parameter_placeholder = "?"
+    # Executed first, in the same transaction as the schema DDL, by backends whose
+    # CREATE ... IF NOT EXISTS is not safe against concurrent creators.
+    schema_lock_statement: str | None = None
 
     def __init__(self, connection_factory: Callable[[], Any]) -> None:
         self._connection_factory = connection_factory
@@ -47,6 +50,8 @@ class DbApiReplayStore(ReplayStore):
     def ensure_schema(self) -> None:
         with self._connect() as connection:
             cursor = connection.cursor()
+            if self.schema_lock_statement:
+                cursor.execute(self.schema_lock_statement)
             cursor.execute(
                 self._sql(
                     """
@@ -413,8 +418,9 @@ class DbApiReplayStore(ReplayStore):
         return any(cls.__name__.lower().endswith("integrityerror") for cls in type(exc).__mro__)
 
     def _select_row(self, cursor: Any, replay_key: str) -> Any:
+        # SELECT_FIELDS is a module constant; replay_key is a bound parameter.
         cursor.execute(
-            self._sql(f"SELECT {SELECT_FIELDS} FROM action_consumption WHERE replay_key = ?"),
+            self._sql(f"SELECT {SELECT_FIELDS} FROM action_consumption WHERE replay_key = ?"),  # nosec B608
             (replay_key,),
         )
         return cursor.fetchone()

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 
 from actenon.models.contracts import SignatureSpec
+from actenon.security_posture import InsecureDefaultRefusedError, development_intent
 
 from .base import b64url_decode, b64url_encode
 
@@ -28,8 +29,14 @@ _PRODUCTION_FLAG_ENVS = (
 )
 
 
-class LocalHmacProductionGuardError(RuntimeError):
-    """Raised when the local HMAC signer is created in a production-like environment."""
+class LocalHmacProductionGuardError(InsecureDefaultRefusedError):
+    """Raised when local HMAC signing is refused.
+
+    Either the environment is declared production (``ACTENON_ENV`` names a
+    production environment or an Actenon production flag is set), or the
+    public development secret was requested without explicit development
+    intent (see :mod:`actenon.security_posture`).
+    """
 
 
 def _truthy(raw: str | None) -> bool:
@@ -68,6 +75,21 @@ def _guard_local_hmac_creation() -> None:
         )
 
 
+def _guard_public_secret(secret: bytes) -> None:
+    # The secret ships in every wheel, so anyone can mint a proof that a
+    # verifier rooted in it accepts. Only explicit development intent may use
+    # it; an unset or unrecognised ACTENON_ENV is production-capable.
+    if hmac.compare_digest(secret, LOCAL_PROOF_SECRET) and not development_intent():
+        raise LocalHmacProductionGuardError(
+            "the public development HMAC secret (LOCAL_PROOF_SECRET) is refused without explicit "
+            f"development intent (ACTENON_ENV={os.environ.get(ACTENON_ENV_ENV, '<unset>')!r}). "
+            "It is published in the package, so a proof signed with it proves nothing. "
+            "For local development, demos or tests set ACTENON_ENV=development (or dev, local, test) "
+            "or use ActenonGate.local_dev(...). In production use asymmetric "
+            "well-known/KMS/HSM signing custody."
+        )
+
+
 def _warn_local_hmac_creation() -> None:
     warnings.warn(LOCAL_HMAC_WARNING_MESSAGE, RuntimeWarning, stacklevel=5)
 
@@ -87,6 +109,7 @@ class HmacSha256Signer:
 
     def __post_init__(self) -> None:
         _guard_local_hmac_creation()
+        _guard_public_secret(self.secret)
         _warn_local_hmac_creation()
 
     def sign(self, payload: bytes) -> SignatureSpec:
@@ -117,7 +140,10 @@ def build_local_proof_signer(
     """Return the canonical deterministic signer for local proof mode.
 
     Creation fails whenever ``ACTENON_ENV`` or an Actenon production flag marks
-    the process as production-like. There is no production bypass.
+    the process as production-like. There is no production bypass. Without an
+    explicit ``secret`` (or ``ACTENON_LOCAL_HMAC_SECRET``) the signer uses the
+    public development secret, which additionally requires explicit
+    development intent (see :mod:`actenon.security_posture`).
     """
 
     resolved_secret = _resolve_local_hmac_secret(secret)

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 526, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 473, in main
+    results = runner.run_all(category=args.category)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 439, in run_all
+    vr = self.run_vector(vector)
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 316, in run_vector
+    return self._run_execution_result(vector)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 354, in _run_execution_result
+    is_valid, error = self.validator.validate_execution_result(vector.data.get("artefact", {}))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.mAM1qZ/standalone/conformance/runner.py", line 223, in validate_execution_result
+    schemas["urn:actenon:protocol:execution-result:v1"], registry=registry
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'urn:actenon:protocol:execution-result:v1'

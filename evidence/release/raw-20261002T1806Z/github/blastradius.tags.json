@@ -1,0 +1,42 @@
+[
+  {
+    "name": "v0.4.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/blastradius/zipball/refs/tags/v0.4.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/blastradius/tarball/refs/tags/v0.4.0",
+    "commit": {
+      "sha": "08396afaa5966326d4f727304ee55b4c82205f17",
+      "url": "https://api.github.com/repos/Actenon/blastradius/commits/08396afaa5966326d4f727304ee55b4c82205f17"
+    },
+    "node_id": "REF_kwDOUKEEArByZWZzL3RhZ3MvdjAuNC4w"
+  },
+  {
+    "name": "v0.3.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/blastradius/zipball/refs/tags/v0.3.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/blastradius/tarball/refs/tags/v0.3.0",
+    "commit": {
+      "sha": "6dc6955a7c295ae64249860f8a113093ebf0401e",
+      "url": "https://api.github.com/repos/Actenon/blastradius/commits/6dc6955a7c295ae64249860f8a113093ebf0401e"
+    },
+    "node_id": "REF_kwDOUKEEArByZWZzL3RhZ3MvdjAuMy4w"
+  },
+  {
+    "name": "v0.2.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/blastradius/zipball/refs/tags/v0.2.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/blastradius/tarball/refs/tags/v0.2.0",
+    "commit": {
+      "sha": "cd8451e7ad0dd0c02c29e1d9b92698b436863f0e",
+      "url": "https://api.github.com/repos/Actenon/blastradius/commits/cd8451e7ad0dd0c02c29e1d9b92698b436863f0e"
+    },
+    "node_id": "REF_kwDOUKEEArByZWZzL3RhZ3MvdjAuMi4w"
+  },
+  {
+    "name": "v0.1.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/blastradius/zipball/refs/tags/v0.1.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/blastradius/tarball/refs/tags/v0.1.0",
+    "commit": {
+      "sha": "7879e9c62fa1871a8527a5e8dea2b6f6b682afcb",
+      "url": "https://api.github.com/repos/Actenon/blastradius/commits/7879e9c62fa1871a8527a5e8dea2b6f6b682afcb"
+    },
+    "node_id": "REF_kwDOUKEEArByZWZzL3RhZ3MvdjAuMS4w"
+  }
+]

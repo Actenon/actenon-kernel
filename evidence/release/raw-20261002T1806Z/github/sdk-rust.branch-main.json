@@ -1,0 +1,108 @@
+{
+  "name": "main",
+  "commit": {
+    "sha": "261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+    "node_id": "C_kwDOTjdDe9oAKDI2MWZmYmZlZTA5ZDJhZjhiMGFjNTA5YjM3MTA0ZWM1MTFjN2I1NmE",
+    "commit": {
+      "author": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-10-01T22:29:13Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-10-01T22:29:13Z"
+      },
+      "message": "Merge pull request #3 from Actenon/claude/actenon-kernel-mcp-setup-qolk0h\n\nClaude/actenon kernel mcp setup qolk0h",
+      "tree": {
+        "sha": "3bbb433655089ea857ad47a43db239b7b3c9f9a9",
+        "url": "https://api.github.com/repos/Actenon/sdk-rust/git/trees/3bbb433655089ea857ad47a43db239b7b3c9f9a9"
+      },
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/git/commits/261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqvt65CRC1aQ7uu5UhlAAAIO8QAHAAWua+Va0dJKJKCCPPUuPH\nzmVmxMsMAmyfxWprT9kG+USx/24irrErnVM/NoL1Q6NCpd3c1FXxhW10oA7hDYmQ\nqmtIFowsToJg6j+s9oMrS6n9MJUArWHByEPU5f+ZK7DZinimGKcevwayH7Uakwfa\nLj8SsbrY1G0m+FI9K4Tm9D7lAkMLN3E+U+MnMPhKFcrR398g/ROjYWD87/1F5PcX\n5g6cvy2LpnptbD2yCKOknRtR4IvPKARpGimY42QWTQRu3L7D4fhP4aZ97QObdhov\nW5StvgTAHofSKvY+DNqjqRsNSWbgSLSyirBJ9GD+FvdwrW+tOakd1VVz3eEK1M6T\no4ITmYzxBUQs6y3itt0MlGG5AQtw3zrPkJKGC0Qy6T8YWpZAA7JM2UMGXc0LeIAc\naW4Q1kNf9OSg6gbhkJh6DFHXRkOoyaNsDGsZ04h7Yhso55Z9BEHUOSg0HwE7A5r1\nGCADnvZm03YYDWh99fpB/gh/3vq7xq5ifKuMv2URBuCYLxasJzgbDwKF6Y22FQV9\nUVWBAomZlDLENB5M9WCPDWnppLgRIwZcei9uvf5O1INGO12qoF1imXE8Z2P7u+0K\nO0TpsB81uz7GOwxUS9jv39iyhxCfIKnVNtV7hYRUnY3nALSnx6tRPGp1VSPweP50\nWJIY3rrz5QNASk3SHM95\n=3hk5\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree 3bbb433655089ea857ad47a43db239b7b3c9f9a9\nparent aacd2cb32ee3ccb762438e3c87d66748dc904080\nparent 7fda4b4776a8ab17b08036281abb06f8ca8e7a91\nauthor Bucko <ross.buckley1990@gmail.com> 1790893753 +0100\ncommitter GitHub <noreply@github.com> 1790893753 +0100\n\nMerge pull request #3 from Actenon/claude/actenon-kernel-mcp-setup-qolk0h\n\nClaude/actenon kernel mcp setup qolk0h",
+        "verified_at": "2026-10-01T22:29:13Z"
+      }
+    },
+    "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+    "html_url": "https://github.com/Actenon/sdk-rust/commit/261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+    "comments_url": "https://api.github.com/repos/Actenon/sdk-rust/commits/261ffbfee09d2af8b0ac509b37104ec511c7b56a/comments",
+    "author": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "aacd2cb32ee3ccb762438e3c87d66748dc904080",
+        "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/aacd2cb32ee3ccb762438e3c87d66748dc904080",
+        "html_url": "https://github.com/Actenon/sdk-rust/commit/aacd2cb32ee3ccb762438e3c87d66748dc904080"
+      },
+      {
+        "sha": "7fda4b4776a8ab17b08036281abb06f8ca8e7a91",
+        "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/7fda4b4776a8ab17b08036281abb06f8ca8e7a91",
+        "html_url": "https://github.com/Actenon/sdk-rust/commit/7fda4b4776a8ab17b08036281abb06f8ca8e7a91"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/Actenon/sdk-rust/branches/main",
+    "html": "https://github.com/Actenon/sdk-rust/tree/main"
+  },
+  "protected": false,
+  "protection": {
+    "enabled": false,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [
+
+      ],
+      "checks": [
+
+      ]
+    }
+  },
+  "protection_url": "https://api.github.com/repos/Actenon/sdk-rust/branches/main/protection"
+}

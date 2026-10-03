@@ -47,27 +47,69 @@ npm install /absolute/path/to/repo/sdk/typescript
 
 ## Verify A Proof
 
+Pass untrusted proof material to `verifyJSON` **as received** (the raw
+request bytes or text). Do not `JSON.parse` it first: `JSON.parse` keeps the
+last of duplicate members and turns `2500.0` or `2.5e3` into `2500`, so a
+proof the Python reference refuses would verify. `verifyJSON` parses strictly
+(duplicate members, fractional/exponent numbers, unsafe integers, lone
+surrogates, a BOM, trailing content and oversize or over-deep input are
+refused) and signature values must be canonical unpadded base64url.
+
 ```ts
-import { buildLocalProofVerifier, VerifierSDK } from "@actenon/verifier-sdk";
+import { VerifierSDK, HmacSha256Verifier } from "@actenon/verifier-sdk";
 
-const verifier = new VerifierSDK(buildLocalProofVerifier());
+const verifier = new VerifierSDK(new HmacSha256Verifier({ secret, keyId }));
 
-const verified = verifier.verifyPayloads({
-  intent_payload,
-  pccb_payload,
-  request_id: "req_ts_001",
-  audience: { type: "service", id: "portable-hello-world-endpoint" },
-  now: "2026-01-01T12:00:00Z",
-  scope_capabilities: ["protected_resource.read"],
-  parameter_constraints: { exact_message: "portable hello world" },
-  resource_selectors: [{ resource_id: "hello_resource_demo_001" }],
+const verified = verifier.verifyJSON({
+  intent: rawIntentBody,   // string | Uint8Array, exactly as received
+  pccb: rawPccbBody,       // string | Uint8Array, exactly as received
+  context: {
+    request_id: "req_ts_001",
+    audience: { type: "service", id: "portable-hello-world-endpoint" },
+    now: new Date().toISOString(),
+    scope_capabilities: ["protected_resource.read"],
+  },
 });
 ```
+
+`verifyJSON` is the only verification entry point: the SDK does not accept
+already-parsed objects, because it could not tell what `JSON.parse` discarded.
+For an envelope that carries both documents, parse it with the exported
+`parseStrictJson` and pass `JSON.stringify(member)` for each.
+
+Production issuers (actenon-permit) sign with Ed25519. Pin the issuer's public
+JWK:
+
+```ts
+import { Ed25519Verifier, VerifierSDK } from "@actenon/verifier-sdk";
+
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]));
+```
+
+The endpoint's own declarations in `context` are enforced (protocol
+`13-edge-binding.md`): the intent's capability must be one of
+`scope_capabilities`, every `parameter_constraints` member must have been
+signed into the proof, the proof's target must satisfy one of
+`resource_selectors`, and only single-use proofs verify.
+
+Proofs minted by actenon-permit 2.0 carry a signed, revocable authority
+reference (`extensions.authority`). They are refused with `AUTHORITY_REVOKED`
+unless the verifier has a revocation source:
+
+```ts
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]), {
+  // true only when the authority is known and not revoked; false or a throw refuses
+  revocationChecker: (pccb, context) => grantIsActive(pccb.extensions.authority),
+});
+```
+
+The SDK verifies; it does not enforce single use. Claim the proof's nonce in a
+store shared by every worker before performing the side effect.
 
 Clock skew tolerance is strict by default. If a deployment needs to absorb small NTP drift, configure it explicitly:
 
 ```ts
-const verifier = new VerifierSDK(buildLocalProofVerifier(), {
+const verifier = new VerifierSDK(new Ed25519Verifier([issuerPublicJwk]), {
   clockSkewToleranceMs: 10_000,
 });
 ```

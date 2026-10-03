@@ -1,0 +1,38 @@
+step	result
+python-py310 kernel conformance (shipped suite)	PASS
+python-py310 actenon-kernel scan	PASS
+protocol tag vectors match vectors.sha256	FAIL
+python-py310 protocol conformance runner (Actenon-compatible v1.4.0)	PASS
+python-py310 protocol canonicalisation vectors	PASS
+python-py310 permit steps	N/A (actenon-permit Requires-Python >=3.11)
+python-py310 differential corpus run	PASS
+python-py311 kernel conformance (shipped suite)	PASS
+python-py311 actenon-kernel scan	PASS
+protocol tag vectors match vectors.sha256	FAIL
+python-py311 protocol conformance runner (Actenon-compatible v1.4.0)	PASS
+python-py311 protocol canonicalisation vectors	PASS
+python-py311 permit README quickstart	PASS
+python-py311 'actenon demo'	PASS
+python-py311 differential corpus run	PASS
+python-py312 kernel conformance (shipped suite)	PASS
+python-py312 actenon-kernel scan	PASS
+protocol tag vectors match vectors.sha256	FAIL
+python-py312 protocol conformance runner (Actenon-compatible v1.4.0)	PASS
+python-py312 protocol canonicalisation vectors	PASS
+python-py312 permit README quickstart	PASS
+python-py312 'actenon demo'	PASS
+python-py312 differential corpus run	PASS
+typescript plain-node imports of all three packages	PASS
+typescript @actenon/verifier-sdk kernel vectors (cases+timestamps+edge+revocation)	PASS
+typescript @actenon/protocol-types canonicalisation vectors	PASS
+typescript differential corpus run	PASS
+go module provenance (v1.1.0 zip digest = artefact, module cache path)	PASS
+go consumer: kernel vectors from installed wheel via public API	PASS
+go module's own test suite from the module cache (lock = installed wheel)	PASS
+go differential corpus run (strict)	PASS
+go differential corpus run (usenumber)	PASS
+rust crate provenance (Cargo.lock checksum = artefact, registry source)	PASS
+rust consumer: kernel vectors from installed wheel via public API	PASS
+rust crate's own test suite from the downloaded .crate (lock = installed wheel)	PASS
+rust differential corpus run	PASS
+no /home/user source path in any resolver state	PASS

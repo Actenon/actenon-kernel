@@ -1,0 +1,745 @@
+{
+  "criteria": {
+    "v1": "kernel_diff_v1 + precision addendum: A=0, U=0, B == phase-2 FINAL B set; rows equal phase-2 FINAL",
+    "v2": "timestamp-grammar addendum: A=0, U=0, py310 == py312, reference == RFC 3339 hint, B only on DEVIATION cases or go-sdk-strict"
+  },
+  "corpora": {
+    "kernel_diff_v1": {
+      "case_count": 179,
+      "python_reference": {
+        "py310": {
+          "rows_differing_from_phase2_final_reference": []
+        },
+        "py311": {
+          "rows_differing_from_phase2_final_reference": []
+        },
+        "py312": {
+          "rows_differing_from_phase2_final_reference": []
+        }
+      },
+      "implementations": {
+        "ts-verifier-sdk": {
+          "installed_artefact_result": {
+            "cases": 179,
+            "agree": 170,
+            "A": [],
+            "B": [
+              {
+                "id": "unicode_bom_prefix",
+                "category": "unicode",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "time_pccb_space_separator",
+                "category": "timestamps",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "num_2p53",
+                "category": "numeric_boundaries",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "num_2p53_plus1",
+                "category": "numeric_boundaries",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "num_2p63",
+                "category": "numeric_boundaries",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "num_2p64_plus1",
+                "category": "numeric_boundaries",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "sig_padded_base64url",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_std_base64_alphabet",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_noncanonical_trailing_bits",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              }
+            ],
+            "C_count": 63,
+            "U": []
+          },
+          "phase2_final_B": [
+            "num_2p53",
+            "num_2p53_plus1",
+            "num_2p63",
+            "num_2p64_plus1",
+            "sig_noncanonical_trailing_bits",
+            "sig_padded_base64url",
+            "sig_std_base64_alphabet",
+            "time_pccb_space_separator",
+            "unicode_bom_prefix"
+          ],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "go-sdk-strict": {
+          "installed_artefact_result": {
+            "cases": 179,
+            "agree": 133,
+            "A": [],
+            "B": [
+              {
+                "id": "baseline_valid_hs256",
+                "category": "baseline",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "baseline_valid_eddsa",
+                "category": "baseline",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "canon_member_order_permuted",
+                "category": "canonicalisation",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "canon_pretty_printed",
+                "category": "whitespace",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "canon_ascii_escaped_unicode",
+                "category": "unicode",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "canon_number_negative_zero",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "canon_neg_zero_literal_text",
+                "category": "canonicalisation",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "unicode_bom_prefix",
+                "category": "unicode",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "unicode_astral_resigned",
+                "category": "unicode",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "unicode_escaped_astral_resigned",
+                "category": "unicode",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "unicode_nul_in_string_resigned",
+                "category": "unicode",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_now_equals_not_before",
+                "category": "not_before",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_now_equals_expires_at",
+                "category": "expiry",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_now_1us_before_expiry",
+                "category": "expiry",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_expired_within_skew",
+                "category": "expiry",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_pccb_offset_plus0000",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_pccb_offset_plus0100_same_instant",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_pccb_space_separator",
+                "category": "timestamps",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "time_intent_offset_plus0000",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_intent_zero_fraction",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_fraction_resigned",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_fraction_short_form_in_intent",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "time_fraction_7_digits_in_intent",
+                "category": "timestamps",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "empty_param_value_resigned",
+                "category": "empty_strings",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "extra_intent_toplevel",
+                "category": "additional_fields",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "extra_pccb_toplevel_unsigned",
+                "category": "additional_fields",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "extra_pccb_signature_member",
+                "category": "additional_fields",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "array_ctx_scope_order_swapped",
+                "category": "array_ordering",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_zero",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_negative",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_2p53",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_2p53_plus1",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_2p63",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "num_2p64_plus1",
+                "category": "numeric_boundaries",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "nest_16_resigned",
+                "category": "deep_nesting",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "nest_31_resigned",
+                "category": "deep_nesting",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "nest_32_resigned",
+                "category": "deep_nesting",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "nest_33_resigned",
+                "category": "deep_nesting",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "nest_64_resigned",
+                "category": "deep_nesting",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "size_64k_resigned",
+                "category": "document_size",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "escrow_valid",
+                "category": "escrow",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "escrow_single_use_false",
+                "category": "escrow",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "mode_hash_canon_label_rfc8785_resigned",
+                "category": "unsupported_modes",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "sig_padded_base64url",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_std_base64_alphabet",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_noncanonical_trailing_bits",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              }
+            ],
+            "C_count": 57,
+            "U": []
+          },
+          "phase2_final_B": [
+            "array_ctx_scope_order_swapped",
+            "baseline_valid_eddsa",
+            "baseline_valid_hs256",
+            "canon_ascii_escaped_unicode",
+            "canon_member_order_permuted",
+            "canon_neg_zero_literal_text",
+            "canon_number_negative_zero",
+            "canon_pretty_printed",
+            "empty_param_value_resigned",
+            "escrow_single_use_false",
+            "escrow_valid",
+            "extra_intent_toplevel",
+            "extra_pccb_signature_member",
+            "extra_pccb_toplevel_unsigned",
+            "mode_hash_canon_label_rfc8785_resigned",
+            "nest_16_resigned",
+            "nest_31_resigned",
+            "nest_32_resigned",
+            "nest_33_resigned",
+            "nest_64_resigned",
+            "num_2p53",
+            "num_2p53_plus1",
+            "num_2p63",
+            "num_2p64_plus1",
+            "num_negative",
+            "num_zero",
+            "sig_noncanonical_trailing_bits",
+            "sig_padded_base64url",
+            "sig_std_base64_alphabet",
+            "size_64k_resigned",
+            "time_expired_within_skew",
+            "time_fraction_7_digits_in_intent",
+            "time_fraction_resigned",
+            "time_fraction_short_form_in_intent",
+            "time_intent_offset_plus0000",
+            "time_intent_zero_fraction",
+            "time_now_1us_before_expiry",
+            "time_now_equals_expires_at",
+            "time_now_equals_not_before",
+            "time_pccb_offset_plus0000",
+            "time_pccb_offset_plus0100_same_instant",
+            "time_pccb_space_separator",
+            "unicode_astral_resigned",
+            "unicode_bom_prefix",
+            "unicode_escaped_astral_resigned",
+            "unicode_nul_in_string_resigned"
+          ],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "go-sdk-usenumber": {
+          "installed_artefact_result": {
+            "cases": 179,
+            "agree": 174,
+            "A": [],
+            "B": [
+              {
+                "id": "unicode_bom_prefix",
+                "category": "unicode",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "time_pccb_space_separator",
+                "category": "timestamps",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "sig_padded_base64url",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_std_base64_alphabet",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_noncanonical_trailing_bits",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              }
+            ],
+            "C_count": 56,
+            "U": []
+          },
+          "phase2_final_B": [
+            "sig_noncanonical_trailing_bits",
+            "sig_padded_base64url",
+            "sig_std_base64_alphabet",
+            "time_pccb_space_separator",
+            "unicode_bom_prefix"
+          ],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "rust-sdk": {
+          "installed_artefact_result": {
+            "cases": 179,
+            "agree": 173,
+            "A": [],
+            "B": [
+              {
+                "id": "canon_neg_zero_literal_text",
+                "category": "canonicalisation",
+                "impl_code": "ACTION_MISMATCH"
+              },
+              {
+                "id": "unicode_bom_prefix",
+                "category": "unicode",
+                "impl_code": "INVALID_INTENT"
+              },
+              {
+                "id": "num_2p64_plus1",
+                "category": "numeric_boundaries",
+                "impl_code": "INVALID_PCCB"
+              },
+              {
+                "id": "sig_padded_base64url",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_std_base64_alphabet",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              },
+              {
+                "id": "sig_noncanonical_trailing_bits",
+                "category": "signature_malleability",
+                "impl_code": "SIGNATURE_INVALID"
+              }
+            ],
+            "C_count": 58,
+            "U": []
+          },
+          "phase2_final_B": [
+            "canon_neg_zero_literal_text",
+            "num_2p64_plus1",
+            "sig_noncanonical_trailing_bits",
+            "sig_padded_base64url",
+            "sig_std_base64_alphabet",
+            "unicode_bom_prefix"
+          ],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        }
+      }
+    },
+    "addendum_precision": {
+      "case_count": 14,
+      "python_reference": {
+        "py310": {
+          "rows_differing_from_phase2_final_reference": []
+        },
+        "py311": {
+          "rows_differing_from_phase2_final_reference": []
+        },
+        "py312": {
+          "rows_differing_from_phase2_final_reference": []
+        }
+      },
+      "implementations": {
+        "ts-verifier-sdk": {
+          "installed_artefact_result": {
+            "cases": 14,
+            "agree": 14,
+            "A": [],
+            "B": [],
+            "C_count": 14,
+            "U": []
+          },
+          "phase2_final_B": [],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "go-sdk-strict": {
+          "installed_artefact_result": {
+            "cases": 14,
+            "agree": 14,
+            "A": [],
+            "B": [],
+            "C_count": 1,
+            "U": []
+          },
+          "phase2_final_B": [],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "go-sdk-usenumber": {
+          "installed_artefact_result": {
+            "cases": 14,
+            "agree": 14,
+            "A": [],
+            "B": [],
+            "C_count": 1,
+            "U": []
+          },
+          "phase2_final_B": [],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        },
+        "rust-sdk": {
+          "installed_artefact_result": {
+            "cases": 14,
+            "agree": 14,
+            "A": [],
+            "B": [],
+            "C_count": 4,
+            "U": []
+          },
+          "phase2_final_B": [],
+          "B_set_equal_to_phase2_final": true,
+          "rows_differing_from_phase2_final": []
+        }
+      }
+    },
+    "timestamp_grammar": {
+      "case_count": 53,
+      "criterion": "v2",
+      "implementations": {
+        "ts-verifier-sdk": {
+          "installed_artefact_result": {
+            "cases": 53,
+            "agree": 49,
+            "A": [],
+            "B": [
+              {
+                "id": "tsg_intent_issued_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_intent_issued_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              }
+            ],
+            "C_count": 33,
+            "U": []
+          },
+          "unjustified_B": []
+        },
+        "go-sdk-strict": {
+          "installed_artefact_result": {
+            "cases": 53,
+            "agree": 33,
+            "A": [],
+            "B": [
+              {
+                "id": "tsg_intent_issued_at_frac_1_digit",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_frac_1_digit",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_frac_3_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_frac_3_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_frac_7_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_frac_7_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_frac_9_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_frac_9_digits",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_frac_6_digits_offset",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_frac_6_digits_offset",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_offset_minus0000",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_offset_minus0000",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_offset_plus0530",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_offset_plus0530",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_offset_minus0500",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_pccb_expires_at_offset_minus0500",
+                "category": "timestamp_grammar",
+                "impl_code": "PARAMETER_MISMATCH"
+              },
+              {
+                "id": "tsg_intent_issued_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_intent_issued_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              }
+            ],
+            "C_count": 33,
+            "U": []
+          },
+          "unjustified_B": []
+        },
+        "go-sdk-usenumber": {
+          "installed_artefact_result": {
+            "cases": 53,
+            "agree": 49,
+            "A": [],
+            "B": [
+              {
+                "id": "tsg_intent_issued_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_space_separator",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_intent_issued_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              },
+              {
+                "id": "tsg_pccb_expires_at_lowercase_t",
+                "category": "timestamp_grammar",
+                "impl_code": "INVALID_TIMESTAMP"
+              }
+            ],
+            "C_count": 33,
+            "U": []
+          },
+          "unjustified_B": []
+        },
+        "rust-sdk": {
+          "installed_artefact_result": {
+            "cases": 53,
+            "agree": 53,
+            "A": [],
+            "B": [],
+            "C_count": 33,
+            "U": []
+          },
+          "unjustified_B": []
+        }
+      },
+      "python_py310_rows_differing_from_py312": [],
+      "reference_vs_rfc3339_hint_mismatches": []
+    }
+  },
+  "failures": [],
+  "result": "PASS"
+}

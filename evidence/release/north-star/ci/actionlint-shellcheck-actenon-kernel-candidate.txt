@@ -1,0 +1,4 @@
+.github/workflows/version-coherence.yml:36:9: shellcheck reported issue in this script: SC2209:warning:2:3: Use var=$(command) to assign output (or quote to assign string) [shellcheck]
+   |
+36 |         run: |
+   |         ^~~~

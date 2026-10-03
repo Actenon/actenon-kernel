@@ -1,0 +1,3 @@
+# github.com/Actenon/sdk-go/verifier_test
+# [github.com/Actenon/sdk-go/verifier_test]
+vet: verifier/edge_revocation_conformance_test.go:43:33: undefined: verifier.RevocationChecker

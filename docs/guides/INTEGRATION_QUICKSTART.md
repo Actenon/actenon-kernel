@@ -125,7 +125,7 @@ Reference files:
 | a Node or TypeScript HTTP route | [../../examples/express_protected_route/README.md](../../examples/express_protected_route/README.md) |
 | an OpenAI Agents SDK tool | [../../examples/openai_agents_sdk_protected_tool/README.md](../../examples/openai_agents_sdk_protected_tool/README.md) |
 | an MCP tool | [../../examples/mcp_server_protected_tool/README.md](../../examples/mcp_server_protected_tool/README.md) |
-| a Go verifier-edge service | [../../sdk/go/README.md](../../sdk/go/README.md) |
+| a Go verifier-edge service | [Actenon/sdk-go](https://github.com/Actenon/sdk-go) |
 | the language-specific verifier SDK overview | [../../SDK_SELECTION_GUIDE.md](../../SDK_SELECTION_GUIDE.md) and [../reference/verifier/VERIFIER_SDK_REFERENCE.md](../reference/verifier/VERIFIER_SDK_REFERENCE.md) |
 
 ## Minimal VerifierSDK Example

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Any, Iterable
 
+from actenon.models.contracts import parse_calendar_date
 from actenon.proof.canonical import sha256_hex
 
 
@@ -16,8 +17,7 @@ def normalize_invoice_ids(invoice_ids: Iterable[str]) -> list[str]:
 def normalize_payment_date(value: date | str) -> str:
     if isinstance(value, date):
         return value.isoformat()
-    parsed = date.fromisoformat(value)
-    return parsed.isoformat()
+    return parse_calendar_date(value, "payment_date").isoformat()
 
 
 def compute_invoice_payment_batch_hash(

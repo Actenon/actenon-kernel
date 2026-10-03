@@ -1,0 +1,46 @@
+{
+  "required_status_checks": {
+    "strict": true,
+    "checks": [
+      {
+        "context": "Conformance suite (Python 3.10)"
+      },
+      {
+        "context": "Conformance suite (Python 3.11)"
+      },
+      {
+        "context": "Conformance suite (Python 3.12)"
+      },
+      {
+        "context": "Lint + format check"
+      },
+      {
+        "context": "TypeScript types check"
+      },
+      {
+        "context": "TypeScript runtime (@actenon/protocol)"
+      },
+      {
+        "context": "Verify README claims (machine-enforced)"
+      },
+      {
+        "context": "pyproject / tag / PyPI agree"
+      },
+      {
+        "context": "scan"
+      },
+      {
+        "context": "Required-check names exist"
+      }
+    ]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "restrictions": null,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}

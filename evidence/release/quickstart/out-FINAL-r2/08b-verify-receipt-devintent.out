@@ -1,0 +1,10 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/cli.py:187: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  return build_local_proof_signer()
+Receipt links verified.
+Receipt: rcpt_0002
+Outcome: executed
+Intent: intent_allow
+Phase: execution
+Checked against: action intent, PCCB
+PCCB signature: verified (key_id local-proof-v1)
+Not verified: the receipt itself carries no signature (v1), so its origin and integrity are established only through the linked artifacts above. For signed provenance use attest-receipt / verify-receipt-attestation.

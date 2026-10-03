@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/h1h2/h1_issuer.py", line 15, in <module>
+    gate = ActenonGate(verifier=Ed25519Verifier(signer.x, signer.key_id), signer=signer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/gate.py", line 217, in __init__
+    proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 9, in __init__
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/proof/service.py", line 271, in __post_init__
+    raise ValueError(
+ValueError: VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging.

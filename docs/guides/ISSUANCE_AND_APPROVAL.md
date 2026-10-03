@@ -64,6 +64,7 @@ issuer_gate = ActenonGate(
     verifier=trusted_public_key_verifier,
     audience="service:payments",
     issuer="service:authorization-issuer",
+    capabilities=("payment.refund",),
 )
 
 # Call only after policy and approval allow this exact Action Intent.

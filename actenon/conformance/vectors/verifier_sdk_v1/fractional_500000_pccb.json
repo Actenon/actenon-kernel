@@ -1,0 +1,73 @@
+{
+  "action": {
+    "capability": "protected_resource.read",
+    "constraints": {
+      "exact_message": "portable hello world"
+    },
+    "name": "hello_world.read",
+    "parameters": {
+      "message": "portable hello world"
+    },
+    "scope": {
+      "single_use": true,
+      "target_resource_type": "hello_resource"
+    }
+  },
+  "action_hash": {
+    "algorithm": "sha-256",
+    "canonicalization": "ACTENON-JCS-STRICT-1",
+    "value": "b8bb9ccda604875e3d47c623be92192e2013f056e8f88728ef4a826c41da56ea"
+  },
+  "audience": {
+    "id": "portable-hello-world-endpoint",
+    "type": "service"
+  },
+  "contract": {
+    "name": "pccb",
+    "version": "v1"
+  },
+  "expires_at": "2026-01-01T12:05:00.500000Z",
+  "intent_id": "intent_portable_hello_world_500000",
+  "issued_at": "2026-01-01T12:00:00.500000Z",
+  "issuer": {
+    "display_name": "Portable Demo Actor",
+    "id": "portable_demo_actor",
+    "type": "service"
+  },
+  "nonce": "nonce-portable-500000",
+  "not_before": "2026-01-01T12:00:00.500+00:00",
+  "pccb_id": "pccb_portable_hello_world_500000",
+  "scope": {
+    "capabilities": [
+      "protected_resource.read"
+    ],
+    "mode": "exact",
+    "parameter_constraints": {
+      "exact_message": "portable hello world"
+    },
+    "resource_selectors": [
+      {
+        "resource_id": "hello_resource_demo_001"
+      }
+    ],
+    "single_use": true
+  },
+  "signature": {
+    "algorithm": "HS256",
+    "encoding": "base64url",
+    "key_id": "local-proof-v1",
+    "value": "I_dyxmHCgl0-CbI0TilPD0L5epcz92fQK6UZNHusjQM"
+  },
+  "subject": {
+    "display_name": "Portable Demo Actor",
+    "id": "portable_demo_actor",
+    "type": "service"
+  },
+  "target": {
+    "resource_id": "hello_resource_demo_001",
+    "resource_type": "hello_resource"
+  },
+  "tenant": {
+    "tenant_id": "tenant_portable_demo"
+  }
+}

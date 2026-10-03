@@ -1,0 +1,52 @@
+usage: actenon-kernel [-h]
+                      {up,doctor,simulate,verify-proof,verify-receipt,verify-refusal,attest-receipt,attest-refusal,verify-receipt-attestation,verify-refusal-attestation,evidence,keys,graph,bundle,preflight,mcp,scan,conformance,coverage}
+                      ...
+
+Kernel CLI for bootstrapping the single-node trust runtime, verifying proof,
+generating local key material, creating execution anchors, publishing key-
+discovery documents, querying execution evidence, scanning execution gaps,
+running coverage matrices, validating artifacts, and running conformance. The
+unified developer CLI `actenon` is provided by the actenon-permit package.
+
+positional arguments:
+  {up,doctor,simulate,verify-proof,verify-receipt,verify-refusal,attest-receipt,attest-refusal,verify-receipt-attestation,verify-refusal-attestation,evidence,keys,graph,bundle,preflight,mcp,scan,conformance,coverage}
+    up                  Start the local single-node trust runtime server and
+                        local trace viewer.
+    doctor              Check whether the local single-node trust runtime is
+                        healthy and complete.
+    simulate            Run local incident simulations that contrast
+                        unprotected execution, proof checks, and protected-
+                        endpoint runtime behavior.
+    verify-proof        Verify an Action Intent and PCCB pair against explicit
+                        verifier context.
+    verify-receipt      Validate a receipt artifact and optional linked
+                        artifacts.
+    verify-refusal      Validate a refusal artifact and optional linked
+                        artifacts.
+    attest-receipt      Create an opt-in signed attestation envelope for a
+                        receipt.
+    attest-refusal      Create an opt-in signed attestation envelope for a
+                        refusal.
+    verify-receipt-attestation
+                        Verify a signed receipt attestation envelope.
+    verify-refusal-attestation
+                        Verify a signed refusal attestation envelope.
+    evidence            Query local execution evidence artifacts and receipt
+                        chains.
+    keys                Generate local key material or publishable key-
+                        discovery documents.
+    graph               Create local execution anchors and optionally request
+                        publication.
+    bundle              Export the local single-node runtime as a portable
+                        local bundle.
+    preflight           Ask Actenon before a consequential action executes.
+    mcp                 Inspect local MCP proof-gate wrapper patterns.
+    scan                Run the local execution-gap scanner against a repo,
+                        MCP tools, endpoints, artifacts, or the built-in local
+                        harness.
+    conformance         Run local open-source conformance checks.
+    coverage            Run local deterministic coverage matrices for proof-
+                        bound consequential actions.
+
+options:
+  -h, --help            show this help message and exit

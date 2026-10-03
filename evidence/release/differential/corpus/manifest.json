@@ -1,0 +1,1259 @@
+{
+ "corpus": "kernel_diff_v1",
+ "base_now": "2026-01-01T12:01:00Z",
+ "cases": [
+  {
+   "id": "baseline_valid_hs256",
+   "category": "baseline",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "baseline_valid_eddsa",
+   "category": "baseline",
+   "hint": "ACCEPT",
+   "alg": "EdDSA",
+   "note": ""
+  },
+  {
+   "id": "dup_param_same_value",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "dup_param_attacker_last",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "last-wins parsers see 999999; first-wins see the signed value"
+  },
+  {
+   "id": "dup_param_attacker_first",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "dup_target_resource_id",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "dup_pccb_audience",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "dup_pccb_signature_obj",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "dup_intent_toplevel_intent_id",
+   "category": "duplicate_members",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "canon_member_order_permuted",
+   "category": "canonicalisation",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "canon_pretty_printed",
+   "category": "whitespace",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "canon_ascii_escaped_unicode",
+   "category": "unicode",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "\\u00fc escapes decode to the same string"
+  },
+  {
+   "id": "canon_number_1_0_vs_1",
+   "category": "canonicalisation",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "2500.0 is a float; JCS-STRICT-1 forbids floats"
+  },
+  {
+   "id": "canon_number_exponent",
+   "category": "canonicalisation",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "canon_number_negative_zero",
+   "category": "numeric_boundaries",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "-0 as an integer literal is 0"
+  },
+  {
+   "id": "canon_neg_zero_literal_text",
+   "category": "canonicalisation",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "signed over 0, presented as the literal -0"
+  },
+  {
+   "id": "canon_leading_plus_invalid_json",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "unicode_nfd_vs_signed_nfc",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "visually identical, different code points"
+  },
+  {
+   "id": "unicode_lone_surrogate",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "unicode_invalid_utf8",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "unicode_bom_prefix",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "UTF-8 BOM before JSON text"
+  },
+  {
+   "id": "unicode_zero_width_in_target",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "unicode_homoglyph_target",
+   "category": "unicode",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "Greek capital nu"
+  },
+  {
+   "id": "unicode_astral_resigned",
+   "category": "unicode",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "unicode_escaped_astral_resigned",
+   "category": "unicode",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "surrogate-pair escapes for astral chars"
+  },
+  {
+   "id": "unicode_nul_in_string_resigned",
+   "category": "unicode",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_now_equals_not_before",
+   "category": "not_before",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "inclusive lower bound"
+  },
+  {
+   "id": "time_now_equals_expires_at",
+   "category": "expiry",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "boundary: reference decides inclusive/exclusive"
+  },
+  {
+   "id": "time_now_1us_after_expiry",
+   "category": "expiry",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_now_1us_before_not_before",
+   "category": "not_before",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_now_1us_before_expiry",
+   "category": "expiry",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_expired_within_skew",
+   "category": "expiry",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "1s past expiry, 2s tolerance"
+  },
+  {
+   "id": "time_expired_beyond_skew",
+   "category": "expiry",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_pccb_offset_plus0000",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_offset_plus0100_same_instant",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_lowercase_z",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_no_timezone",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_fraction_500",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_leap_second",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_date_only",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_pccb_space_separator",
+   "category": "timestamps",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "expires_at text changed, signature over the original text"
+  },
+  {
+   "id": "time_intent_offset_plus0000",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "action hash re-serialises timestamps"
+  },
+  {
+   "id": "time_intent_zero_fraction",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_fraction_resigned",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "time_fraction_short_form_in_intent",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ".5 == .500000"
+  },
+  {
+   "id": "time_fraction_7_digits_in_intent",
+   "category": "timestamps",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "7th digit truncated per README"
+  },
+  {
+   "id": "expiry_signed_short_window",
+   "category": "expiry",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "now=T0+60s, proof expired at T0+30s"
+  },
+  {
+   "id": "not_before_signed_future",
+   "category": "not_before",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "expiry_before_issued",
+   "category": "expiry",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_capability_upper",
+   "category": "case",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_context_audience",
+   "category": "audience",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_sig_algorithm_lower",
+   "category": "case",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_sig_key_id_upper",
+   "category": "case",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_contract_name",
+   "category": "case",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_pccb_contract_name",
+   "category": "case",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_hash_hex_upper",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "case_hash_hex_upper_resigned",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "ws_target_leading_space",
+   "category": "whitespace",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "ws_audience_trailing_space",
+   "category": "whitespace",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "ws_capability_tab",
+   "category": "whitespace",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_context_audience_id",
+   "category": "empty_strings",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_intent_tenant_id",
+   "category": "empty_strings",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_signature_value",
+   "category": "empty_strings",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_nonce_resigned",
+   "category": "empty_strings",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_param_value_resigned",
+   "category": "empty_strings",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "empty_scope_capabilities_ctx",
+   "category": "empty_strings",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_signature",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_action_hash",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_expires_at",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_not_before",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_audience",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_nonce",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_scope",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_tenant",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_signature_value",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_signature_key_id",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_pccb_scope_single_use",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_tenant",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_intent_id",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_requester",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_target",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_action_parameters",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_expires_at",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "missing_intent_contract",
+   "category": "missing_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "extra_intent_toplevel",
+   "category": "additional_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "unknown top-level intent member"
+  },
+  {
+   "id": "extra_intent_param",
+   "category": "additional_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "extra_pccb_toplevel_unsigned",
+   "category": "additional_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "unknown PCCB member not covered by the signature"
+  },
+  {
+   "id": "extra_pccb_signature_member",
+   "category": "additional_fields",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "extra_pccb_extensions_unsigned",
+   "category": "additional_fields",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "array_ctx_scope_order_swapped",
+   "category": "array_ordering",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "minted with sorted capabilities"
+  },
+  {
+   "id": "array_pccb_scope_order_swapped_unsigned",
+   "category": "array_ordering",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "array_param_order_swapped",
+   "category": "array_ordering",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_zero",
+   "category": "numeric_boundaries",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_negative",
+   "category": "numeric_boundaries",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_2p53",
+   "category": "numeric_boundaries",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_2p53_plus1",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_2p63",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_2p64_plus1",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_string_vs_int",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_bool_vs_int",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_huge_literal",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_float_literal_1e400",
+   "category": "numeric_boundaries",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "num_nan_literal",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_16_resigned",
+   "category": "deep_nesting",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_31_resigned",
+   "category": "deep_nesting",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_32_resigned",
+   "category": "deep_nesting",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_33_resigned",
+   "category": "deep_nesting",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_64_resigned",
+   "category": "deep_nesting",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_1000_raw",
+   "category": "deep_nesting",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "nest_100000_raw",
+   "category": "deep_nesting",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "size_64k_resigned",
+   "category": "document_size",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "size_900k_unsigned",
+   "category": "document_size",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "reference cannot mint: JSONInputTooLargeError"
+  },
+  {
+   "id": "size_2048k_unsigned",
+   "category": "document_size",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "reference cannot mint: JSONInputTooLargeError"
+  },
+  {
+   "id": "escrow_valid",
+   "category": "escrow",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "escrow_id_altered",
+   "category": "escrow",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "escrow_removed",
+   "category": "escrow",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "escrow_added_unsigned",
+   "category": "escrow",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "escrow_single_use_false",
+   "category": "escrow",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "single_use_false_unsigned",
+   "category": "single_use",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "single_use_false_resigned",
+   "category": "single_use",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "a validly signed non-single-use proof"
+  },
+  {
+   "id": "single_use_string_true",
+   "category": "single_use",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_scope_mode_prefix_resigned",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_sig_alg_none",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_sig_alg_rs256",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_sig_encoding_hex",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_hash_algorithm_sha512_resigned",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_hash_canon_label_unknown_resigned",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_hash_canon_label_rfc8785_resigned",
+   "category": "unsupported_modes",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "legacy label the verifiers accept"
+  },
+  {
+   "id": "mode_contract_v2_intent",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_contract_v2_pccb",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_alg_confusion_eddsa_label_on_hmac",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_kid_unknown",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "mode_kid_cross_ed_on_hmac",
+   "category": "unsupported_modes",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_padded_base64url",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_std_base64_alphabet",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_noncanonical_trailing_bits",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "same decoded bytes under a lenient decoder"
+  },
+  {
+   "id": "sig_whitespace_inside",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_truncated",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_bitflip",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_extended_bytes",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "sig_ed25519_s_plus_l",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "EdDSA",
+   "note": "non-canonical S (S+L): RFC 8032 requires S < L"
+  },
+  {
+   "id": "sig_ed25519_bitflip_R",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "EdDSA",
+   "note": ""
+  },
+  {
+   "id": "sig_ed25519_alg_relabelled_hs256",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "EdDSA",
+   "note": ""
+  },
+  {
+   "id": "sig_ed25519_tamper_amount",
+   "category": "signature_malleability",
+   "hint": "REFUSE",
+   "alg": "EdDSA",
+   "note": ""
+  },
+  {
+   "id": "aud_ctx_id_mismatch",
+   "category": "audience",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "aud_ctx_type_mismatch",
+   "category": "audience",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "aud_pccb_altered_unsigned",
+   "category": "audience",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "aud_pccb_other_audience_resigned",
+   "category": "audience",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "a valid proof for a different audience"
+  },
+  {
+   "id": "target_intent_id_mismatch",
+   "category": "target",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "target_intent_type_mismatch",
+   "category": "target",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "target_ctx_selector_mismatch",
+   "category": "target",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "target_pccb_resigned_other",
+   "category": "target",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tenant_intent_mismatch",
+   "category": "tenant",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tenant_pccb_resigned_other",
+   "category": "tenant",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "subject_intent_mismatch",
+   "category": "subject",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "subject_pccb_resigned_other",
+   "category": "subject",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "subject_type_mismatch",
+   "category": "subject",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_name_mismatch",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_capability_mismatch",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_param_amount_altered",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_param_removed",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_ctx_constraint_mismatch",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_ctx_scope_capability_missing",
+   "category": "action",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_hash_value_altered_unsigned",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_hash_value_altered_resigned",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "validly signed proof whose hash does not match the intent"
+  },
+  {
+   "id": "action_hash_intent_id_mismatch",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "action_hash_intent_expiry_changed",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "intent_pccb_intent_id_resigned_mismatch",
+   "category": "action_hash",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_not_json",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_truncated",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_array_toplevel",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_null",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_trailing_garbage",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_trailing_second_doc",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_pccb_empty",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_pccb_string",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_param_type_object_for_string",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_comment",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "malformed_single_quotes",
+   "category": "malformed",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  }
+ ]
+}

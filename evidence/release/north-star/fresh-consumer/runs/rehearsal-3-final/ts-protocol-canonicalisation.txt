@@ -1,0 +1,8 @@
+  SKIP  integer_boundary (contains integers > 2^53 — JS Number precision loss)
+  SKIP  integer_values (contains integers > 2^53 — JS Number precision loss)
+  SKIP  float_exponent (JS Number type cannot distinguish float from integer after JSON.parse)
+  SKIP  float_zero (JS Number type cannot distinguish float from integer after JSON.parse)
+
+============================================================
+Canonicalisation conformance (TypeScript): 29 passed, 0 failed, 12 skipped
+============================================================

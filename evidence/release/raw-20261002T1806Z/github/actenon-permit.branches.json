@@ -1,0 +1,130 @@
+[
+  {
+    "name": "align/authority-engine",
+    "commit": {
+      "sha": "92da0424db0bcafa385ce21777a0a6a0c328545a",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/92da0424db0bcafa385ce21777a0a6a0c328545a"
+    },
+    "protected": false
+  },
+  {
+    "name": "broker-demo/safe-branch",
+    "commit": {
+      "sha": "eaaabff0ed26e7d75707cf9d3d53395a0409ce54",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/eaaabff0ed26e7d75707cf9d3d53395a0409ce54"
+    },
+    "protected": false
+  },
+  {
+    "name": "broker-demo/safe-branch-20260722-083143",
+    "commit": {
+      "sha": "eaaabff0ed26e7d75707cf9d3d53395a0409ce54",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/eaaabff0ed26e7d75707cf9d3d53395a0409ce54"
+    },
+    "protected": false
+  },
+  {
+    "name": "claude/actenon-kernel-mcp-setup-qolk0h",
+    "commit": {
+      "sha": "08d60fe4f5e2d91782d83cc6a2ca99074818db3f",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/08d60fe4f5e2d91782d83cc6a2ca99074818db3f"
+    },
+    "protected": false
+  },
+  {
+    "name": "feat/ecosystem-renderer",
+    "commit": {
+      "sha": "708c97ae9d4da86ff1601c9bd7319814cfbd253f",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/708c97ae9d4da86ff1601c9bd7319814cfbd253f"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/canonicalisation-unification",
+    "commit": {
+      "sha": "ef20ad7e8b1b62b303c53c74848396959e6493f0",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/ef20ad7e8b1b62b303c53c74848396959e6493f0"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/five-refs",
+    "commit": {
+      "sha": "2179c00e7774229a25494a99f4482a5f66a1acbb",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/2179c00e7774229a25494a99f4482a5f66a1acbb"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/grants-and-proofs-clarity",
+    "commit": {
+      "sha": "b821498b8a81be92d9115f03432d35ccf729fd6c",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/b821498b8a81be92d9115f03432d35ccf729fd6c"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/lychee-green",
+    "commit": {
+      "sha": "e894a397052c440c4f75e9e0e8576de047a77a41",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/e894a397052c440c4f75e9e0e8576de047a77a41"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/metadata-truth",
+    "commit": {
+      "sha": "f188fe8192c18bf4204d9957a0c65ec897dfc293",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/f188fe8192c18bf4204d9957a0c65ec897dfc293"
+    },
+    "protected": false
+  },
+  {
+    "name": "integrate/actenon-protocol-v1.0.0",
+    "commit": {
+      "sha": "97b675a4bfd8b674abf55c267897d083d88c3d7d",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/97b675a4bfd8b674abf55c267897d083d88c3d7d"
+    },
+    "protected": false
+  },
+  {
+    "name": "main",
+    "commit": {
+      "sha": "c1eea9c232031c055403a96d6477d49463efa8e3",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/c1eea9c232031c055403a96d6477d49463efa8e3"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/agnostic-payments-adapter",
+    "commit": {
+      "sha": "34731d70a52d63822dfae34223325c07d6ff2c68",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/34731d70a52d63822dfae34223325c07d6ff2c68"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/test-isolation-and-drift",
+    "commit": {
+      "sha": "0af121be983bc92f9775e9a08bd147983d93467a",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/0af121be983bc92f9775e9a08bd147983d93467a"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/version-drift-gate",
+    "commit": {
+      "sha": "5f45bd770cd04b5e460e4aa69b283ec9e1e1cccd",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/5f45bd770cd04b5e460e4aa69b283ec9e1e1cccd"
+    },
+    "protected": false
+  },
+  {
+    "name": "security/cross-repo-hardening",
+    "commit": {
+      "sha": "4dca520b562e0b6915061dcdf4c63ddbe8b1c2b7",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/4dca520b562e0b6915061dcdf4c63ddbe8b1c2b7"
+    },
+    "protected": false
+  }
+]

@@ -1,0 +1,29 @@
+go: added github.com/Actenon/sdk-go v1.0.0
+github.com/Actenon/sdk-go v1.0.0
+--- FAIL: TestCountersignatureVerifiesHistoricalKeyOffline (0.00s)
+    countersignature_test.go:84: failed to read counter-signature fixture receipt.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/receipt_countersignature_v1/receipt.json: no such file or directory
+--- FAIL: TestCountersignatureAcceptsPinnedDigest (0.00s)
+    countersignature_test.go:97: failed to read counter-signature fixture countersignature.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/receipt_countersignature_v1/countersignature.json: no such file or directory
+--- FAIL: TestCountersignatureRejectsUnknownKid (0.00s)
+    countersignature_test.go:113: failed to read counter-signature fixture receipt.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/receipt_countersignature_v1/receipt.json: no such file or directory
+--- FAIL: TestCountersignatureRejectsWrongKey (0.00s)
+    countersignature_test.go:122: failed to read counter-signature fixture receipt.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/receipt_countersignature_v1/receipt.json: no such file or directory
+--- FAIL: TestCountersignatureRejectsAlteredDigest (0.00s)
+    countersignature_test.go:131: failed to read counter-signature fixture receipt.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/receipt_countersignature_v1/receipt.json: no such file or directory
+--- FAIL: TestTransparencyProofsAndHistoricalKidsVerifyOffline (0.00s)
+    transparency_test.go:89: failed to read transparency fixture trusted_keys.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/transparency_log_v1/trusted_keys.json: no such file or directory
+--- FAIL: TestMonitorRejectsSignedForkAndRewind (0.00s)
+    transparency_test.go:119: failed to read transparency fixture trusted_keys.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/transparency_log_v1/trusted_keys.json: no such file or directory
+--- FAIL: TestCheckpointRejectsUnknownKid (0.00s)
+    transparency_test.go:149: failed to read transparency fixture mutations/checkpoint_unknown_kid.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/transparency_log_v1/mutations/checkpoint_unknown_kid.json: no such file or directory
+--- FAIL: TestOrphanCountersignatureIsRejected (0.00s)
+    transparency_test.go:156: failed to read transparency fixture mutations/countersignature_orphan.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/transparency_log_v1/mutations/countersignature_orphan.json: no such file or directory
+--- FAIL: TestTransparencyFixturesAreJSON (0.00s)
+    transparency_test.go:172: failed to read transparency fixture checkpoint_new.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/transparency_log_v1/checkpoint_new.json: no such file or directory
+--- FAIL: TestTrustArtifactsVerifyAndFailClosed (0.00s)
+    trust_artifacts_test.go:48: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/conformance/vectors/trust_artifacts_v1/issuer.json: no such file or directory
+--- FAIL: TestSharedVerifierConformanceVectors (0.00s)
+    verifier_conformance_test.go:130: failed to read shared vector cases.json: open /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/gopath/pkg/mod/github.com/actenon/conformance/vectors/verifier_sdk_v1/cases.json: no such file or directory
+FAIL
+FAIL	github.com/Actenon/sdk-go/verifier	0.004s
+FAIL

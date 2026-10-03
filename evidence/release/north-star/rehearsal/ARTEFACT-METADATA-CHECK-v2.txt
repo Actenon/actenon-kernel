@@ -1,0 +1,30 @@
+PASS pypi/actenon_kernel-1.3.0-py3-none-any.whl: no direct references in Requires-Dist
+PASS pypi/actenon_kernel-1.3.0-py3-none-any.whl: no tests/ or evidence/ at wheel root
+PASS kernel 1.3.0
+PASS kernel ships scanner registry
+PASS kernel ships edge-binding vectors
+PASS kernel requires actenon-protocol>=1.1.0,<2
+PASS pypi/actenon_permit-2.0.0-py3-none-any.whl: no direct references in Requires-Dist
+PASS pypi/actenon_permit-2.0.0-py3-none-any.whl: no tests/ or evidence/ at wheel root
+PASS permit 2.0.0
+PASS permit requires actenon-kernel[asymmetric]>=1.3.0,<2
+PASS pypi/actenon_protocol-1.4.0-py3-none-any.whl: no direct references in Requires-Dist
+PASS pypi/actenon_protocol-1.4.0-py3-none-any.whl: no tests/ or evidence/ at wheel root
+PASS protocol 1.4.0
+PASS protocol ships every schema
+PASS @actenon/protocol-types 1.4.0
+PASS @actenon/protocol-types: registry-resolvable deps
+PASS @actenon/protocol-types: ships dist/
+PASS @actenon/sdk 2.0.0
+PASS @actenon/sdk: registry-resolvable deps
+PASS @actenon/sdk: ships dist/
+PASS @actenon/verifier-sdk 0.2.0
+PASS @actenon/verifier-sdk: registry-resolvable deps
+PASS @actenon/verifier-sdk: ships dist/
+PASS crate 0.2.0
+PASS crate dependency tables have no git/path sources []
+PASS crate ships kernel vector lock
+PASS go zip entries use module@version prefix (spec)
+PASS go module ships kernel vector lock
+PASS .mod equals go.mod inside zip
+ALL PASS

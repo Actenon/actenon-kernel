@@ -1,0 +1,51 @@
+.....................................................                                   [100%]
+=============================== warnings summary ===============================
+test_artifact_shape_conformance.py::ArtifactShapeConformanceTests::test_invoice_payment_execution_receipt_exposes_portable_reconciliation_fields
+test_artifact_shape_conformance.py::ArtifactShapeConformanceTests::test_policy_refusal_matches_public_shape
+test_artifact_shape_conformance.py::ArtifactShapeConformanceTests::test_refund_execution_receipt_matches_public_shape
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/demo/local_proof.py:93: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer = build_local_proof_signer()
+
+test_canonicalization_strict_conformance.py::CanonicalizationStrictConformanceTests::test_15_legacy_proof_verification
+test_canonicalization_strict_conformance.py::CanonicalizationStrictConformanceTests::test_16_new_profile_proof_minting_and_verification
+test_canonicalization_strict_conformance.py::CanonicalizationStrictConformanceTests::test_17_unsupported_profile_rejection
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/test_canonicalization_strict_conformance.py:95: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer = _security_signer()
+
+test_canonicalization_strict_conformance.py::CanonicalizationStrictConformanceTests::test_17_unsupported_profile_rejection
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/test_canonicalization_strict_conformance.py:265: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer=_security_signer(),
+
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_attested_receipt_creation
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_attested_refusal_creation
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_signature_verification_success
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_tamper_detection_failure
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_wrong_key_failure
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/test_outcome_attestation_conformance.py:16: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer=build_local_proof_signer(),
+
+test_outcome_attestation_conformance.py::OutcomeAttestationConformanceTests::test_wrong_key_failure
+  /usr/lib/python3.12/unittest/case.py:589: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    if method() is not None:
+
+test_replay_conformance.py::ReplayConformanceTests::test_duplicate_execution_is_replay_refused_with_portable_artifacts
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/test_replay_conformance.py:16: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    kernel, writer, payload, context = build_replay_kernel(tempdir)
+
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_shared_cross_sdk_conformance_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_accepts_valid_local_proof
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_action_mutation
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_audience_mismatch
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_expired_proof
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/test_verifier_sdk_conformance.py:44: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    self.signer = build_local_proof_signer()
+
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py312/venv/lib/python3.12/site-packages/actenon/demo/portable_local_proof.py:69: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer = build_local_proof_signer()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+53 passed, 23 warnings, 57 subtests passed in 0.34s

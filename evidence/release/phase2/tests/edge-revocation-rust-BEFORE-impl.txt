@@ -1,0 +1,6 @@
+error[E0599]: no method named `with_revocation_checker` found for struct `Verifier<V>` in the current scope
+   --> tests/verifier_conformance_test.rs:379:39
+    |
+379 |             "not_revoked" => verifier.with_revocation_checker(|_, _| Ok(true)),
+--
+error[E0599]: no method named `with_revocation_checker` found for struct `Verifier<V>` in the current scope

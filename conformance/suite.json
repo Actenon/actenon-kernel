@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "conformance_version": "1.0.0",
-  "release_tag": "conformance-v1.0.0",
+  "conformance_version": "1.1.0",
+  "release_tag": "conformance-v1.1.0",
   "canonicalization_profile": "actenon-jcs-sha256-v1",
   "compatibility_surface": "Actenon Kernel active v1 public compatibility surface",
   "verified_mark": {
     "name": "Actenon Verified",
-    "claim": "Actenon Verified (Conformance 1.0.0)",
+    "claim": "Actenon Verified (Conformance 1.1.0)",
     "self_certification_command": "python -m actenon.cli conformance run --require-complete",
     "requirements": [
       "Run the unmodified hash-locked vectors for this version.",
@@ -98,11 +98,11 @@
     },
     {
       "id": "go",
-      "command": "cd sdk/go && go test ./..."
+      "command": "bash scripts/verify_sdk_conformance.sh  # github.com/Actenon/sdk-go at the commit pinned in sdk/standalone-sdk-pins.json"
     },
     {
       "id": "rust",
-      "command": "cd sdk/rust && cargo test"
+      "command": "bash scripts/verify_sdk_conformance.sh  # github.com/Actenon/sdk-rust at the commit pinned in sdk/standalone-sdk-pins.json"
     }
   ]
 }

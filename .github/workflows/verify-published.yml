@@ -1,0 +1,50 @@
+name: Verify published artefacts
+
+# Machine-checks the public claim that the published verifiers (README badge
+# "SDKs: Py · TS · Go · Rust") implement THIS checkout's conformance vectors,
+# including protocol 13 (edge binding, revocation). Each job installs what a
+# user gets from the registry into a clean environment and runs
+# scripts/verify_published.sh.
+#
+# Expected RED until the release graph in
+# evidence/release/phase2/PHASE2-READINESS-*.md is executed: PyPI serves
+# kernel 1.2.1, @actenon/verifier-sdk and the Rust crate are unpublished, and
+# sdk-go's latest tag predates protocol 13.
+
+on:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Published ${{ matrix.artefact }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        artefact: [python, ts, go, rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        if: matrix.artefact == 'ts'
+        with:
+          node-version: '20'
+      - uses: actions/setup-go@v5
+        if: matrix.artefact == 'go'
+        with:
+          go-version: stable
+          cache: false
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.artefact == 'rust'
+      - run: scripts/verify_published.sh ${{ matrix.artefact }}

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "actenon-kernel"
-version = "1.2.1"
+version = "1.3.0"
 description = "Open proof-required execution kernel for consequential actions."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -41,7 +41,7 @@ dependencies = [
 # those specs. Since 1.1.0 it restates the base cryptography dependency.
 asymmetric = ["cryptography>=42"]
 aws = ["boto3>=1.34"]  # for actenon.proof.signers.aws_kms (AWS KMS signing backend)
-dev = ["build", "ruff>=0.8", "pytest>=8.0", "httpx>=0.27", "boto3>=1.34"]
+dev = ["build", "ruff>=0.8", "pytest>=8.0", "httpx>=0.27", "boto3>=1.34", "tomli>=2; python_version<'3.11'"]
 fastapi = ["fastapi>=0.115,<1"]
 langchain = ["langchain-core>=0.3,<2"]
 mcp = ["mcp>=1.9,<2; python_version>='3.10'"]
@@ -69,6 +69,7 @@ where = ["."]
 include = ["actenon*", "conformance*", "examples*", "schemas*"]
 
 [tool.setuptools.package-data]
+"actenon" = ["scanner_capability_registry.v1.json"]
 "actenon.conformance" = ["vectors/verifier_sdk_v1/*", "vectors/canonicalization_strict_v1/*"]
 "conformance" = [
   "CHANGELOG.md",
@@ -85,7 +86,14 @@ include = ["actenon*", "conformance*", "examples*", "schemas*"]
 "schemas" = ["*.json"]
 
 [tool.pytest.ini_options]
+# The only pytest configuration. A root pytest.ini used to take precedence and
+# silently disabled testpaths/norecursedirs here, so pytest recursed from the
+# repository root and imported scripts/ (CI failed on Python 3.10 because of it).
 testpaths = ["actenon", "tests"]
+filterwarnings = [
+  "ignore:urllib3 v2 only supports OpenSSL.*:Warning",
+  "ignore:ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY.*:RuntimeWarning",
+]
 norecursedirs = [
   ".git",
   ".pytest_cache",

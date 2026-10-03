@@ -203,12 +203,14 @@ Protected-endpoint reference files:
 
 `python3 -m actenon.cli verify-proof` requires explicit local audience context. It does not treat the PCCB's own audience as sufficient verifier input.
 
+The local demo artifacts are signed with the public development secret, so verifying them is development use: the commands below set `ACTENON_ENV=development`. Without explicit development intent the kernel refuses the public secret, because anyone can mint a proof that verifies against it. For real proofs pass `--public-key-jwk` with the issuer's public key.
+
 Verifier time checks are strict by default: the PCCB must be within its `not_before` / `expires_at` window at the supplied verification time. In production integrations, use short proof windows and only configure clock skew tolerance in code for small, expected distributed-clock drift.
 
 Verify a proof artifact from the local refund proof run:
 
 ```bash
-python3 -m actenon.cli verify-proof \
+ACTENON_ENV=development python3 -m actenon.cli verify-proof \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json \
   --audience service:local-refund-endpoint \
@@ -218,7 +220,7 @@ python3 -m actenon.cli verify-proof \
 Ask for structured failure details instead of human-readable output:
 
 ```bash
-python3 -m actenon.cli verify-proof \
+ACTENON_ENV=development python3 -m actenon.cli verify-proof \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json \
   --audience service:wrong-endpoint \
@@ -229,7 +231,7 @@ python3 -m actenon.cli verify-proof \
 Verify a receipt from the refund local proof run:
 
 ```bash
-python3 -m actenon.cli verify-receipt \
+ACTENON_ENV=development python3 -m actenon.cli verify-receipt \
   --receipt artifacts/local_proof/scenarios/allow/execution_receipt.json \
   --intent artifacts/local_proof/scenarios/allow/action_intent.json \
   --pccb artifacts/local_proof/scenarios/allow/pccb.json

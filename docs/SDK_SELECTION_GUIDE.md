@@ -15,8 +15,8 @@ The key question is simple:
 | --- | --- | --- |
 | [Python kernel and verifier path](docs/guides/INTEGRATION_QUICKSTART.md) | the full open-kernel reference path, local proof mode, CLI verification, protected endpoint helpers, and conformance-adjacent examples | kernel plus verifier-first adoption |
 | [TypeScript verifier SDK](sdk/typescript/README.md) | verifier-edge proof checking in Node or TypeScript services | verifier-only SDK |
-| [Go verifier SDK](sdk/go/README.md) | verifier-edge proof checking in Go services | verifier-only SDK |
-| [Rust verifier SDK](sdk/rust/README.md) | verifier-edge proof checking in Rust services or systems components | verifier-only SDK |
+| [Go verifier SDK](https://github.com/Actenon/sdk-go) | verifier-edge proof checking in Go services | verifier-only SDK |
+| [Rust verifier SDK](https://github.com/Actenon/sdk-rust) | verifier-edge proof checking in Rust services or systems components | verifier-only SDK |
 
 ## Choose Python When
 
@@ -59,7 +59,7 @@ Choose the Go SDK if your protected endpoint already lives in:
 
 Start here:
 
-- [sdk/go/README.md](sdk/go/README.md)
+- [Actenon/sdk-go](https://github.com/Actenon/sdk-go)
 
 ## Choose Rust When
 
@@ -71,7 +71,7 @@ Choose the Rust SDK if your protected endpoint already lives in:
 
 Start here:
 
-- [sdk/rust/README.md](sdk/rust/README.md)
+- [Actenon/sdk-rust](https://github.com/Actenon/sdk-rust)
 
 ## Verifier-Only Deployment Model
 

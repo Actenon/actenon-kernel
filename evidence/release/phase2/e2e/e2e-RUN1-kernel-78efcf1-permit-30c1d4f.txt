@@ -1,0 +1,92 @@
+## versions: {'actenon-kernel': '1.3.0rc1', 'actenon-permit': '2.0.0rc1', 'actenon-protocol': '1.3.0'} ts=0.2.0 node=v22.22.0
+### E0 glob-scoped grant (payments.*) -> exact-capability proof -> both edges
+  
+  
+RESULT E0: FAIL
+### E1 happy path: Permit (EdDSA) -> kernel edge executes once + Receipt; TS edge verifies the same proof (S4)
+  
+  
+RESULT E1: FAIL
+### E2 replay: second worker, then a restarted worker (shared durable replay store)
+  
+  
+  side effects for one proof: 0
+RESULT E2: FAIL
+### E3 duplicated execution: 16 concurrent presentations in one worker + 4 in another
+  side effects: 0
+RESULT E3: FAIL
+### E4 wrong audience
+  
+  
+RESULT E4: FAIL
+### E5 parameter mutation after minting (amount 2500 -> 999999)
+  
+  
+RESULT E5: FAIL
+### E5b edge declares another capability (payments.read)
+  
+  
+RESULT E5b: FAIL
+### E5c edge relies on a parameter constraint the proof was not issued under
+  
+  
+RESULT E5c: FAIL
+### E5d edge resource selectors: a non-matching selector refuses, a matching one executes
+  
+  
+  matching: 
+RESULT E5d: FAIL
+### E6 forged proof: attacker's own Ed25519 key with the issuer's kid
+  
+  
+RESULT E6: FAIL
+### E6b forged proof signed with the PUBLIC development HMAC secret
+  
+  
+RESULT E6b: FAIL
+### E7 expired proof (grant/proof window 3s, presented after 5s)
+  
+  
+RESULT E7: FAIL
+### E8 revocation (protocol 13 E5): proof minted, THEN the grant is revoked in Permit's store
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8.json'
+  Permit decides again after revocation: 
+RESULT E8a: FAIL
+  
+  
+RESULT E8b: FAIL
+### E8c delegated grant: the PARENT is revoked after the child's proof is minted
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8c.json'
+  
+  
+RESULT E8c: FAIL
+### E8d edge with NO revocation source, valid unrevoked proof
+  
+  
+RESULT E8d: FAIL
+### E8e revocation source that does not know the grant (wrong/empty store)
+  
+  
+RESULT E8e: FAIL
+### E9 missing production configuration
+  no ACTENON_REPLAY_DB: 
+RESULT E9: FAIL
+  no ACTENON_REPLAY_DB, ACTENON_ENV empty: 
+RESULT E9b: FAIL
+  no declared capabilities: 
+RESULT E9c: FAIL
+### E10 missing / invalid production signing configuration
+  no key, ACTENON_ENV empty: RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+RESULT E10a: PASS (no proof minted)
+  no key, ACTENON_ENV=prd: RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+RESULT E10b: PASS
+  invalid key file: RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+RESULT E10c: PASS
+  verifier rooted in the public dev secret, ACTENON_ENV empty: REFUSED LocalHmacProductionGuardError
+RESULT E10d: PASS
+cp: cannot stat '/tmp/tmp.0JBiN7YKVR/p1.json': No such file or directory
+## TOTAL FAILS: 20

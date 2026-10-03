@@ -1,0 +1,14 @@
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p53_presented_2p53p1","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p53_presented_2p53p1_ctx_signed","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p53p1_presented_2p53","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p53_presented_float_text","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p53_presented_exp","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p63m1_presented_2p63","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_2p64_presented_2p64p1","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_1e21_int_presented_exp","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_big_presented_big_plus1","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_0_presented_neg0_float","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_1_presented_1_0","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_1_presented_1e0","outcome":"REFUSE"}
+{"code":"ACTION_MISMATCH","id":"prec_signed_1_presented_10e-1","outcome":"REFUSE"}
+{"code":"INVALID_INTENT","id":"prec_dup_member_first_differs_by_one_ulp","outcome":"REFUSE"}

@@ -1,0 +1,35 @@
+
+## ts-verifier-sdk-0.2.0-FINAL-e775389-STRICT-verifyJSON: agree=14 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=14 U(unsupported)=0
+  C  prec_signed_2p53_presented_2p53p1             ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p53_presented_2p53p1_ctx_signed  ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p53p1_presented_2p53             ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p53_presented_float_text         ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p53_presented_exp                ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p63m1_presented_2p63             ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_2p64_presented_2p64p1             ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_1e21_int_presented_exp            ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_big_presented_big_plus1           ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_0_presented_neg0_float            ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_1_presented_1_0                   ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_1_presented_1e0                   ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_signed_1_presented_10e-1                 ref=ACTION_MISMATCH impl=INVALID_INTENT
+  C  prec_dup_member_first_differs_by_one_ulp      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+
+## go-sdk-FINAL-e3649cd: agree=14 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=1 U(unsupported)=0
+  C  prec_dup_member_first_differs_by_one_ulp      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+
+## go-sdk-FINAL-e3649cd-USENUMBER-context: agree=14 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=1 U(unsupported)=0
+  C  prec_dup_member_first_differs_by_one_ulp      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+
+## rust-sdk-0.2.0-FINAL-0a16a84-crate: agree=14 A(dangerous)=0 B(fail-closed)=0 C(code-differs)=4 U(unsupported)=0
+  C  prec_signed_2p64_presented_2p64p1             ref=ACTION_MISMATCH impl=INVALID_PCCB
+  C  prec_signed_1e21_int_presented_exp            ref=ACTION_MISMATCH impl=INVALID_PCCB
+  C  prec_signed_big_presented_big_plus1           ref=ACTION_MISMATCH impl=INVALID_PCCB
+  C  prec_dup_member_first_differs_by_one_ulp      ref=DuplicateJSONKeyError impl=INVALID_INTENT
+
+| implementation | cases | agree | A dangerous | B fail-closed | C code differs | unsupported |
+|---|---|---|---|---|---|---|
+| ts-verifier-sdk-0.2.0-FINAL-e775389-STRICT-verifyJSON | 14 | 14 | 0 | 0 | 14 | 0 |
+| go-sdk-FINAL-e3649cd | 14 | 14 | 0 | 0 | 1 | 0 |
+| go-sdk-FINAL-e3649cd-USENUMBER-context | 14 | 14 | 0 | 0 | 1 | 0 |
+| rust-sdk-0.2.0-FINAL-0a16a84-crate | 14 | 14 | 0 | 0 | 4 | 0 |

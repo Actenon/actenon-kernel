@@ -1,0 +1,31 @@
+Exception in thread Thread-1 (go):
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/api/intake.py", line 14, in parse
+    intent = ActionIntent.from_dict(payload)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/models/contracts.py", line 432, in from_dict
+    data = expect_mapping(raw, "action_intent")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/models/contracts.py", line 38, in expect_mapping
+    raise ValueError(f"{field_name} must be an object")
+ValueError: action_intent must be an object
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.11/threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 48, in go
+    out = gate.protect(intent, pccb, side_effect)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/gate.py", line 535, in protect
+    intent = self._coerce_action(action)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/gate.py", line 661, in _coerce_action
+    return self._intake.parse(action)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/api/intake.py", line 17, in parse
+    raise ContractValidationError("Action Intent contract validation failed", violations=(violation,)) from exc
+actenon.core.errors.ContractValidationError: SCHEMA_INVALID: Action Intent contract validation failed

@@ -9,6 +9,9 @@ transcript in docs/integrations/MCP_QUICKSTART.md.
 from __future__ import annotations
 
 import copy
+import json
+import re
+import shlex
 import socket
 import unittest
 from importlib.util import find_spec
@@ -38,6 +41,14 @@ REFUND = {
     "target_type": "payment",
     "target_id": "pay_9f2c",
 }
+
+ROOT = Path(__file__).resolve().parents[2]
+
+# The launch command every copy-paste form in the docs must resolve to. uvx
+# only reads its own options before the command name, so `--from` has to
+# precede `actenon-mcp`; placed after it, uvx runs the wrong command.
+LAUNCH_ARGV = ["uvx", "--from", "actenon-kernel[mcp]", "actenon-mcp", "--demo"]
+LAUNCH_DOCS = ("README.md", "docs/integrations/MCP_QUICKSTART.md")
 
 
 def _tools(demo: bool = True) -> dict:
@@ -199,12 +210,16 @@ class FailClosedTests(unittest.TestCase):
     def test_demo_is_refused_in_a_production_like_environment(self) -> None:
         import os
 
+        previous = os.environ.get("ACTENON_ENV")
         os.environ["ACTENON_ENV"] = "production"
         try:
             with self.assertRaises(SystemExit) as raised:
                 main(["--demo"])
         finally:
-            del os.environ["ACTENON_ENV"]
+            if previous is None:
+                del os.environ["ACTENON_ENV"]
+            else:
+                os.environ["ACTENON_ENV"] = previous
         self.assertIn("production", str(raised.exception).lower())
 
 
@@ -247,6 +262,254 @@ class DemoModeIsOfflineTests(unittest.TestCase):
         # A proof minted by one demo process must not verify in another.
         outcome = gate_b.protect(intent, proof=proof, side_effect=lambda **kw: {})
         self.assertEqual("refused", outcome.outcome)
+
+
+class DocumentedLaunchCommandTests(unittest.TestCase):
+    """The launch commands people copy from the docs start the server.
+
+    A misordered or unquoted command does not fail here; it fails inside the
+    user's MCP client as a closed connection, or in their shell. Pin every
+    documented form to one argv. Plain text parsing, so no `mcp` extra needed.
+    """
+
+    def _docs(self) -> dict[str, str]:
+        return {name: (ROOT / name).read_text(encoding="utf-8") for name in LAUNCH_DOCS}
+
+    def test_mcp_client_config_blocks_launch_the_server(self) -> None:
+        for name, text in self._docs().items():
+            blocks = [
+                json.loads(block)
+                for block in re.findall(r"```json\n(.*?)```", text, re.DOTALL)
+                if '"mcpServers"' in block
+            ]
+            with self.subTest(doc=name):
+                self.assertTrue(blocks, "no mcpServers config block found")
+                for block in blocks:
+                    for server in block["mcpServers"].values():
+                        self.assertEqual(
+                            LAUNCH_ARGV, [server["command"], *server["args"]]
+                        )
+
+    def test_claude_code_one_liner_launches_the_server(self) -> None:
+        for name, text in self._docs().items():
+            lines = [
+                line for line in text.splitlines() if line.startswith("claude mcp add ")
+            ]
+            with self.subTest(doc=name):
+                self.assertTrue(lines, "no `claude mcp add` one-liner found")
+                for line in lines:
+                    argv = shlex.split(line)
+                    self.assertEqual(LAUNCH_ARGV, argv[argv.index("--") + 1 :])
+                    # Unquoted, zsh treats [mcp] as a glob and aborts.
+                    self.assertIn("'actenon-kernel[mcp]'", line)
+
+
+@requires_mcp
+class MalformedModelInputTests(unittest.TestCase):
+    """A model can hand the tools anything; every bad input is a typed refusal."""
+
+    def setUp(self) -> None:
+        self.tools = _tools()
+        self.granted = self.tools["actenon_demo_grant"](**REFUND)
+
+    def _duplicate_key_proof(self) -> str:
+        raw = json.dumps(self.granted["proof"])
+        # A second `nonce` member: Python's json.loads keeps the last one,
+        # other parsers keep the first. The protocol requires rejection.
+        return raw[:-1] + ', "nonce": ' + json.dumps(self.granted["proof"]["nonce"]) + "}"
+
+    def test_duplicate_json_keys_in_a_proof_are_refused(self) -> None:
+        for tool in ("actenon_verify", "actenon_gate"):
+            with self.subTest(tool=tool):
+                response = self.tools[tool](
+                    **REFUND, proof=self._duplicate_key_proof(), intent=self.granted["intent"]
+                )
+                self.assertEqual("PROOF_MALFORMED", response["reason_code"])
+                self.assertFalse(response.get("valid", response.get("allowed")))
+
+    def test_deeply_nested_proof_is_refused(self) -> None:
+        deep = "[" * 100_000 + "]" * 100_000
+        for tool in ("actenon_verify", "actenon_gate"):
+            with self.subTest(tool=tool):
+                response = self.tools[tool](**REFUND, proof=deep, intent=self.granted["intent"])
+                self.assertEqual("PROOF_MALFORMED", response["reason_code"])
+
+    def test_malformed_intent_is_a_typed_refusal(self) -> None:
+        bad_intents = (
+            "not json",
+            "[1, 2]",
+            {"contract": "nope"},
+            '{"a": 1, "a": 2}',
+        )
+        for tool in ("actenon_verify", "actenon_gate"):
+            for intent in bad_intents:
+                with self.subTest(tool=tool, intent=intent):
+                    response = self.tools[tool](
+                        **REFUND, proof=self.granted["proof"], intent=intent
+                    )
+                    self.assertEqual("REFUSED", response["outcome"])
+                    self.assertEqual("INTENT_MALFORMED", response["reason_code"])
+                    self.assertTrue(response["reason"])
+
+    def test_a_rejected_input_does_not_consume_the_proof(self) -> None:
+        self.tools["actenon_gate"](**REFUND, proof=self.granted["proof"], intent="not json")
+        allowed = self.tools["actenon_gate"](
+            **REFUND, proof=self.granted["proof"], intent=self.granted["intent"]
+        )
+        self.assertEqual("ALLOW", allowed["outcome"])
+
+
+@requires_mcp
+class ToolArgumentsBindTheIntentTests(unittest.TestCase):
+    """A supplied intent never overrides the action the tool call describes.
+
+    The documented retry form passes the granted `intent` back with the
+    proof. The tool arguments are what the host will execute, so they must
+    equal that intent exactly; otherwise a narrow proof authorises a wider
+    action (E2E F1: amount 2500 granted, 500000 ALLOWED).
+    """
+
+    def setUp(self) -> None:
+        self.tools = _tools()
+        self.granted = self.tools["actenon_demo_grant"](**REFUND)
+
+    def _call(self, tool: str, **overrides):
+        args = {**REFUND, "proof": self.granted["proof"], "intent": self.granted["intent"]}
+        args.update(overrides)
+        return self.tools[tool](**args)
+
+    def test_widened_parameters_with_the_granted_intent_are_refused(self) -> None:
+        widened = {"amount_cents": 500000, "currency": "USD"}
+        gate = self._call("actenon_gate", parameters=widened)
+        self.assertEqual("REFUSED", gate["outcome"])
+        self.assertEqual("ACTION_MISMATCH", gate["reason_code"])
+        self.assertNotIn("receipt_id", gate)
+        verify = self._call("actenon_verify", parameters=widened)
+        self.assertEqual("ACTION_MISMATCH", verify["reason_code"])
+        self.assertFalse(verify["valid"])
+
+    def test_other_action_or_target_with_the_granted_intent_is_refused(self) -> None:
+        cases = (
+            ({"action_name": "payout.send"}, "ACTION_MISMATCH"),
+            ({"capability": "payments.payout"}, "ACTION_MISMATCH"),
+            ({"target_id": "pay_ATTACKER"}, "TARGET_MISMATCH"),
+            ({"target_type": "account"}, "TARGET_MISMATCH"),
+        )
+        for overrides, code in cases:
+            for tool in ("actenon_verify", "actenon_gate"):
+                with self.subTest(tool=tool, overrides=overrides):
+                    response = self._call(tool, **overrides)
+                    self.assertEqual(code, response["reason_code"])
+
+    def test_numeric_lookalikes_are_not_equal(self) -> None:
+        for parameters in (
+            {"amount_cents": 2500.0, "currency": "USD"},
+            {"amount_cents": "2500", "currency": "USD"},
+            {"amount_cents": 2500, "currency": "USD", "memo": ""},
+            {"amount_cents": 2500},
+        ):
+            with self.subTest(parameters=parameters):
+                response = self._call("actenon_gate", parameters=parameters)
+                self.assertEqual("ACTION_MISMATCH", response["reason_code"])
+
+    def test_mismatch_is_logged_and_does_not_consume_the_proof(self) -> None:
+        refused = self._call("actenon_gate", parameters={"amount_cents": 500000, "currency": "USD"})
+        self.assertIn("refusal_id", refused)
+        self.assertEqual("REFUSED", refused["outcome"])
+        allowed = self._call("actenon_gate")
+        self.assertEqual("ALLOW", allowed["outcome"])
+        chain = self.tools["actenon_receipt"]()
+        self.assertEqual(["refusal", "receipt"], [entry["kind"] for entry in chain["entries"]])
+
+    def test_exact_arguments_with_the_granted_intent_are_allowed(self) -> None:
+        self.assertTrue(self._call("actenon_verify")["valid"])
+        self.assertEqual("ALLOW", self._call("actenon_gate")["outcome"])
+
+
+@requires_mcp
+class StdioToolArgumentBindingTests(unittest.TestCase):
+    """The same binding, driven over the real stdio JSON-RPC transport."""
+
+    def test_widened_retry_is_refused_over_stdio(self) -> None:
+        import os
+        import subprocess
+        import sys
+
+        env = {k: v for k, v in os.environ.items() if k != "ACTENON_ENV"}
+        env["PYTHONWARNINGS"] = "ignore"
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "actenon.mcp_server", "--demo"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            env=env,
+            cwd=str(ROOT),
+        )
+        next_id = iter(range(1, 100))
+
+        def rpc(method, params=None, notify=False):
+            message = {"jsonrpc": "2.0", "method": method}
+            if params is not None:
+                message["params"] = params
+            if not notify:
+                message["id"] = next(next_id)
+            proc.stdin.write(json.dumps(message) + "\n")
+            proc.stdin.flush()
+            if notify:
+                return None
+            while True:
+                line = proc.stdout.readline()
+                self.assertTrue(line, "server closed stdout")
+                response = json.loads(line)
+                if response.get("id") == message["id"]:
+                    return response
+
+        def call(name, arguments):
+            result = rpc("tools/call", {"name": name, "arguments": arguments})["result"]
+            text = "".join(item.get("text", "") for item in result.get("content", []))
+            return json.loads(text)
+
+        try:
+            rpc(
+                "initialize",
+                {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}},
+            )
+            rpc("notifications/initialized", notify=True)
+            granted = call("actenon_demo_grant", REFUND)
+            widened = dict(
+                REFUND,
+                parameters={"amount_cents": 500000, "currency": "USD"},
+                proof=granted["proof"],
+                intent=granted["intent"],
+            )
+            refused = call("actenon_gate", widened)
+            self.assertEqual("ACTION_MISMATCH", refused["reason_code"])
+            exact = dict(REFUND, proof=granted["proof"], intent=granted["intent"])
+            self.assertEqual("ALLOW", call("actenon_gate", exact)["outcome"])
+        finally:
+            proc.stdin.close()
+            proc.terminate()
+            proc.wait(timeout=30)
+
+
+class DemoRefusedOutsideDevelopmentTests(unittest.TestCase):
+    def test_demo_is_refused_cleanly_for_any_non_development_environment(self) -> None:
+        import os
+
+        for value in ("prd", "live", "uat", "preprod"):
+            with self.subTest(ACTENON_ENV=value):
+                previous = os.environ.get("ACTENON_ENV")
+                os.environ["ACTENON_ENV"] = value
+                try:
+                    with self.assertRaises(SystemExit) as raised:
+                        main(["--demo"])
+                finally:
+                    if previous is None:
+                        del os.environ["ACTENON_ENV"]
+                    else:
+                        os.environ["ACTENON_ENV"] = previous
+                self.assertIn("--demo refused", str(raised.exception))
 
 
 if __name__ == "__main__":  # pragma: no cover

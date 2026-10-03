@@ -1,0 +1,26 @@
+[
+  {
+    "name": "claude/actenon-kernel-mcp-setup-qolk0h",
+    "commit": {
+      "sha": "7fda4b4776a8ab17b08036281abb06f8ca8e7a91",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/7fda4b4776a8ab17b08036281abb06f8ca8e7a91"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/ecosystem-markers",
+    "commit": {
+      "sha": "468db33504eef6fe7652e299bcc97b1281d1d588",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/468db33504eef6fe7652e299bcc97b1281d1d588"
+    },
+    "protected": false
+  },
+  {
+    "name": "main",
+    "commit": {
+      "sha": "261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/commits/261ffbfee09d2af8b0ac509b37104ec511c7b56a"
+    },
+    "protected": false
+  }
+]

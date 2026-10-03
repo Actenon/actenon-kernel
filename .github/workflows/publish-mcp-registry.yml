@@ -26,9 +26,18 @@ jobs:
     permissions:
       id-token: write # OIDC
       contents: read
+      checks: read # release gate
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release gate (tag commit on main; required checks passed)
+        # Applies to workflow_dispatch too: run it on the release tag, not a branch.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/release_gate.py gate --version-from pyproject.toml
 
       - name: Verify server.json version matches the tag and pyproject
         run: |

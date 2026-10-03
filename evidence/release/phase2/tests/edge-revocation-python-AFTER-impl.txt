@@ -1,0 +1,4 @@
+FAILED tests/security/test_edge_revocation.py::test_not_revoked_executes_once
+FAILED tests/security/test_edge_revocation.py::test_revoked_after_minting_does_not_execute
+2 failed, 8 passed in 0.27s
+10 passed in 0.19s

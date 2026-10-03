@@ -1,0 +1,50 @@
+Actenon Agentic Action Scan.
+Mode: repo
+Target: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.kr5JHA/py-py311/cwd/scan
+Overall status: EXECUTION_GAP_PRESENT
+Runtime-source candidate paths: 1
+Additional test/example/context findings: 0 (downgraded by context)
+Consequence class: Critical-impact candidate, if reachable and ungated
+Gating status: Not verified
+Runtime reachability: Not proven
+Vulnerability claim: no
+Manual review required: yes
+Confidence: Medium
+Categories detected: EXTERNAL_API_SIDE_EFFECT
+Actenon Scanner maps agent authority. It does not accuse your repo of being vulnerable.
+This is not a vulnerability severity rating. It is a consequence-class map of candidate action surfaces found by static analysis.
+Runtime reachability, exploitability, production exposure and business impact are not proven by this scan.
+Scanner version: 2.1.0
+Registry version: capability_registry.v1
+Summary: repo scan found 1 runtime source candidate consequential action path(s) and 0 test/example/context finding(s). Reports are static advisory; runtime reachability not proven; runtime exploitability not proven; at least one finding requires maintainer review.
+Checks:
+- Proof check before action: MISSING
+  Consequential action patterns were detected in scanned code paths. No visible Actenon proof gate was found.
+- Action intended for this system: NOT_ASSESSED
+  Static scan mode cannot prove runtime audience-enforcement behavior. Use artifact-pair or local harness mode for this check.
+- Expired proof rejected: NOT_ASSESSED
+  Static scan mode cannot prove runtime proof-expiry behavior. Use artifact-pair or local harness mode for this check.
+- Credentials brokered after approval: MISSING
+  Consequential action patterns were detected in scanned code paths. No visible credential-broker boundary was found.
+- Blocked actions produce refusals: MISSING
+  Consequential action patterns were detected in scanned code paths. No visible Receipt/Refusal emission was found.
+- Reused proof cannot be replayed: MISSING
+  Consequential action patterns were detected in scanned code paths. No visible replay or escrow protection was found.
+- High-impact actions require approval/evidence: MISSING
+  Consequential action patterns were detected in scanned code paths. No visible approval/evidence policy was found.
+- Standing credentials visible to agent runtime: PRESENT
+  No strong runtime standing credential signals were detected in scanned files.
+- Tool execution boundary protected: NOT_ASSESSED
+  No MCP destructive tool boundary issue was detected.
+Findings:
+- [Critical-impact candidate, if reachable and ungated] Candidate MONEY_AND_FINANCE path (app.py:2)
+  Actenon Scanner found a candidate consequential action path. Surface `S4` indicates money movement or financial commitment; agent-control context is `no`; this is a static advisory; runtime reachability not proven; runtime exploitability not proven; maintainer review is recommended.
+  Category: EXTERNAL_API_SIDE_EFFECT; surface: S4; path-type: runtime agent loop; primitive: consequential_surface; agent-control: no; confidence: medium; gating: Not verified; runtime reachability: Not proven; vulnerability claim: no
+  Control gaps: missing proof gate, missing credential broker, missing Preflight/policy, missing evidence requirement, missing Receipt/Refusal emission, missing replay/idempotency protection
+Remediation:
+- Add an Actenon proof gate at the protected endpoint and verify the exact ActionIntent/PCCB before side effects.
+- Remove standing agent credentials and broker short-lived execution authority inside the protected endpoint.
+- Emit structured Receipt/Refusal artifacts for allowed and blocked consequential actions.
+- Add replay protection and single-use escrow for proof-bearing execution requests.
+- Add Preflight policy requiring approvals or evidence for production destructive actions, data exports, and privileged grants.
+- Put financial action behind proof-bound execution, approval/evidence policy, brokered payment authority, idempotency, and Receipt/Refusal.

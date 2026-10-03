@@ -1,0 +1,14 @@
+# kernel e775389 suite against artefacts-final kernel wheel; export with actenon/ removed
+actenon from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final2/lib/python3.11/site-packages/actenon/__init__.py
+10 failed, 819 passed, 2 skipped, 202 subtests passed in 57.57s
+53 passed, 57 subtests passed in 0.28s
+27 passed in 2.44s
+executed test cases: 906; unexpected skips: 0
+  failed: tests.integration.test_installed_console_script.InstalledConsoleScriptIntegrationTests::test_installed_actenon_kernel_console_script_and_packaged_viewer_work
+  failed: tests.test_independence.TestKernelIndependence::test_no_cloud_permit_scan_imports
+  failed: tests.unit.test_conformance_release::test_conformance_version_manifest_and_required_vectors_are_declared
+  failed: tests.unit.test_conformance_release::test_manifest_verification_command_passes
+  failed: tests.unit.test_conformance_release::test_conformance_release_archive_is_deterministic_and_complete
+  failed: tests.unit.test_packaging_imports.PackagingImportTests::test_installed_cli_path_does_not_import_bare_ui_package
+  failed: tests.unit.test_refusal_message_hygiene::test_public_proof_messages_are_generic_and_match_shared_vectors
+  failed: tests.unit.test_refusal_message_hygiene::test_shared_refusal_vectors_do_not_embed_sensitive_fixture_values

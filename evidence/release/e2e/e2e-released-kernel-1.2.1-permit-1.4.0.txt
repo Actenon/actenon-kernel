@@ -1,0 +1,52 @@
+## versions: {'actenon-kernel': '1.2.1', 'actenon-permit': '1.4.0', 'actenon-protocol': '1.3.0'}
+### E0 Permit grant with a glob scope (payments.*) -> Kernel edge
+mint: ALLOW allowed alg= EdDSA
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E0: FAIL (a Permit-minted proof for a glob-scoped grant is refused by the kernel edge)
+### E1 happy path: Permit decides+mints (Ed25519) -> Kernel edge verifies -> executes once -> Receipt
+mint: ALLOW allowed alg= EdDSA
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E1: FAIL
+### E2 replay across two workers and a restart (shared durable replay store)
+  {"label": "workerB", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+  {"label": "workerA-restarted", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+  side effects for one proof: 0
+RESULT E2: FAIL
+### E3 duplicated execution: 16 concurrent presentations of a fresh proof in one worker + 1 in another
+  side effects: 0
+RESULT E3: FAIL
+### E4 wrong audience
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E4: FAIL
+### E5 altered parameters (amount 2500 -> 999999 after minting)
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E5: FAIL
+### E6 forged proof: attacker's own Ed25519 key with the issuer's kid
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E6: FAIL
+### E6b forged proof signed with the PUBLIC development HMAC secret
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E6b: FAIL
+### E7 expired proof (grant/proof window 3s, presented after 5s)
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E7: FAIL
+### E8 revoked authority
+revoke: ALLOW -> DENY
+  after revocation: Permit outcome {'outcome': 'DENY', 'reason': 'grant status is revoked', 'pccb_minted': False}
+RESULT E8a: PASS (Permit refuses to mint after revocation)
+  proof minted BEFORE revocation, presented AFTER: {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E8b: FAIL (edge executes a proof whose authority was revoked: no revocation_checker in ActenonGate)
+### E9 missing production replay configuration (no ACTENON_REPLAY_DB)
+  {"label": "workerA", "started": false, "error_type": "ValueError", "error": "VerifierDisclosureMode.LOCAL_DEBUG cannot be enabled in a production-like environment (ACTENON_ENV='production'). Use public_generic or trusted_detailed, or set ACTENON_ENV to 'local', 'dev', 'test', or 'demo' for local debugging."}
+RESULT E9: PASS
+  ACTENON_ENV empty: {"label": "workerA", "started": true, "outcomes": ["executed"], "reasons": [null], "downgrades": "<n/a>"}
+RESULT E9b: FAIL (edge started with per-process replay state, ACTENON_ENV empty)
+### E10 missing / invalid production signing configuration
+  no key, ACTENON_ENV empty: mint: ALLOW allowed alg= HS256
+RESULT E10a: FAIL (Permit minted an HMAC proof with no signing configuration)
+  no key, ACTENON_ENV=prd: mint: ALLOW allowed alg= HS256
+RESULT E10b: FAIL (Permit minted with the public HMAC secret under ACTENON_ENV=prd)
+  invalid key file: mint: DENY PCCB emission failed — failing closed alg= None
+RESULT E10c: PASS (invalid key -> no proof)
+  edge rooted in public dev secret, ACTENON_ENV empty: edge verifier with public secret CONSTRUCTED
+RESULT E10d: FAIL

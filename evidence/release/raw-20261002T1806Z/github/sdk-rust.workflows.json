@@ -1,0 +1,29 @@
+{
+  "total_count": 2,
+  "workflows": [
+    {
+      "id": 372616928,
+      "node_id": "W_kwDOTjdDe84WNa7g",
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "state": "active",
+      "created_at": "2026-10-01T23:29:08.000+01:00",
+      "updated_at": "2026-10-01T23:29:14.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/actions/workflows/372616928",
+      "html_url": "https://github.com/Actenon/sdk-rust/blob/main/.github/workflows/ci.yml",
+      "badge_url": "https://github.com/Actenon/sdk-rust/workflows/CI/badge.svg"
+    },
+    {
+      "id": 320420697,
+      "node_id": "W_kwDOTjdDe84TGTtZ",
+      "name": "Publish to crates.io",
+      "path": ".github/workflows/publish.yml",
+      "state": "active",
+      "created_at": "2026-07-25T20:10:42.000+01:00",
+      "updated_at": "2026-07-25T20:10:42.000+01:00",
+      "url": "https://api.github.com/repos/Actenon/sdk-rust/actions/workflows/320420697",
+      "html_url": "https://github.com/Actenon/sdk-rust/blob/main/.github/workflows/publish.yml",
+      "badge_url": "https://github.com/Actenon/sdk-rust/workflows/Publish%20to%20crates.io/badge.svg"
+    }
+  ]
+}
