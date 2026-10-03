@@ -1,0 +1,1592 @@
+{
+  "generated_by": "collect_ecosystem_map.py",
+  "repos": {
+    "actenon-protocol": {
+      "path": "/home/user/actenon-protocol",
+      "candidate": "45b7753",
+      "intended": "1.4.0",
+      "dists": {
+        "pypi": [
+          "actenon-protocol"
+        ],
+        "npm": [
+          "@actenon/protocol-types",
+          "@actenon/protocol"
+        ]
+      },
+      "actenon_deps": [],
+      "runtime_role": "wire contract: canonicalisation, refusal catalogue, schemas, protocol docs (13 edge binding)",
+      "release_role": "step 1 (parallel with kernel)",
+      "gate_critical": [
+        "G1",
+        "G2",
+        "G4"
+      ],
+      "remote": "https://github.com/Actenon/actenon-protocol",
+      "branch": "ross/keen-fermi-e2y72j",
+      "head": "45b775380781eafb98da0bcba2a75453f82991ce",
+      "candidate_full": "45b775380781eafb98da0bcba2a75453f82991ce",
+      "candidate_on_remote_branches": [
+        "origin/ross/keen-fermi-e2y72j"
+      ],
+      "origin_main": "b45ef3709e89fbc1423f18bde70d3fe5228d241d",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "ts-types-v1.3.0",
+        "v1.3.0",
+        "v1.2.0",
+        "ts-types-v1.0.0",
+        "v1.1.0"
+      ],
+      "workflows": [
+        {
+          "file": "actenon-scan.yml",
+          "name": "actenon-scan",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "scan": {
+              "name": "scan",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "conformance": {
+              "name": "Conformance suite (Python ${{ matrix.python-version }})",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "python-version": [
+                  "3.10",
+                  "3.11",
+                  "3.12"
+                ]
+              }
+            },
+            "lint": {
+              "name": "Lint + format check",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "typescript": {
+              "name": "TypeScript types check",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "typescript-runtime": {
+              "name": "TypeScript runtime (@actenon/protocol)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "link-check.yml",
+          "name": "Link check",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "lychee": {
+              "name": "lychee",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish-ts-runtime.yml",
+          "name": "Publish @actenon/protocol to npm",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "ts-runtime-v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify": {
+              "name": "Build + test @actenon/protocol",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "Publish to npm with provenance",
+              "needs": "verify",
+              "if": "startsWith(github.ref, 'refs/tags/ts-runtime-v')",
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish-ts-types.yml",
+          "name": "Publish TypeScript types to npm",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "ts-types-v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify": {
+              "name": "Build + test @actenon/protocol-types",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "Publish to npm",
+              "needs": "verify",
+              "if": "startsWith(github.ref, 'refs/tags/ts-types-v')",
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish.yml",
+          "name": "Publish to PyPI",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "build": {
+              "name": "build",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "publish",
+              "needs": "build",
+              "if": "startsWith(github.ref, 'refs/tags/v')",
+              "environment": "pypi",
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "verify-claims.yml",
+          "name": "Verify claims",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "41 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify-claims": {
+              "name": "Verify README claims (machine-enforced)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "version-coherence.yml",
+          "name": "Version coherence",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "23 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "version-coherence": {
+              "name": "pyproject / tag / PyPI agree",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "pypi:actenon-protocol": "1.3.0",
+        "npm:@actenon/protocol-types": "1.3.0",
+        "npm:@actenon/protocol": "not published (HTTP Error 404: Not Found)"
+      }
+    },
+    "actenon-kernel": {
+      "path": "/home/user/actenon-kernel",
+      "candidate": "142364f",
+      "code_commit": "6d6c630",
+      "intended": "1.3.0 (+ @actenon/verifier-sdk 0.2.0)",
+      "dists": {
+        "pypi": [
+          "actenon-kernel"
+        ],
+        "npm": [
+          "@actenon/verifier-sdk"
+        ],
+        "mcp_registry": [
+          "io.github.Actenon/kernel"
+        ]
+      },
+      "actenon_deps": [
+        "actenon-protocol>=1.1.0,<2"
+      ],
+      "runtime_role": "reference verifier + protected executor (single use, replay store, edge binding, revocation); TS verifier SDK",
+      "release_role": "step 2 \u2014 security floor for everything downstream",
+      "gate_critical": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6"
+      ],
+      "remote": "https://github.com/Actenon/actenon-kernel",
+      "branch": "ross/keen-fermi-e2y72j",
+      "head": "142364f421c28173bd1e723e1692528ae8de6060",
+      "candidate_full": "142364f421c28173bd1e723e1692528ae8de6060",
+      "candidate_on_remote_branches": [
+        "origin/ross/keen-fermi-e2y72j"
+      ],
+      "origin_main": "43e17adf17be4cb04fbc7bcf528f3427c5805f13",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "v1.2.1",
+        "v1.2.0",
+        "v1.1.0",
+        "v1.0.0",
+        "v0.1.0"
+      ],
+      "workflows": [
+        {
+          "file": "actenon-scan.yml",
+          "name": "actenon-scan",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "scan": {
+              "name": "scan",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "bandit.yml",
+          "name": "Bandit static analysis",
+          "triggers": [
+            "push",
+            "pull_request",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main"
+              ],
+              "paths": [
+                "actenon/**",
+                ".github/workflows/bandit.yml"
+              ]
+            },
+            "pull_request": {
+              "paths": [
+                "actenon/**",
+                ".github/workflows/bandit.yml"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "bandit": {
+              "name": "Bandit scan (actenon/, severity >= medium, gating)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            }
+          },
+          "jobs": {
+            "test": {
+              "name": "Python tests (${{ matrix.python-version }})",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "python-version": [
+                  "3.10",
+                  "3.11",
+                  "3.12"
+                ]
+              }
+            },
+            "postgres-replay": {
+              "name": "Replay store on PostgreSQL 16",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "typescript-verifier": {
+              "name": "TypeScript verifier SDK",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "go-verifier": {
+              "name": "Go verifier SDK (standalone, pinned)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "rust-verifier": {
+              "name": "Rust verifier SDK (standalone, pinned)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "conformance-release.yml",
+          "name": "Conformance release",
+          "triggers": [
+            "push"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "conformance-v*"
+              ]
+            }
+          },
+          "jobs": {
+            "release": {
+              "name": "Signed conformance vectors",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "invariants.yml",
+          "name": "Invariants",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": null
+          },
+          "jobs": {
+            "invariant-tests": {
+              "name": "Invariant tests",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "clean-install": {
+              "name": "Clean-install closure check",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "base-install-conformance": {
+              "name": "Base-install conformance (no extras)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "link-check.yml",
+          "name": "Link check",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "lychee": {
+              "name": "lychee",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "protocol-drift.yml",
+          "name": "Protocol drift gate",
+          "triggers": [
+            "push",
+            "pull_request",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "pull_request": null,
+            "schedule": [
+              {
+                "cron": "0 4 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "drift-gate": {
+              "name": "drift-gate",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish-mcp-registry.yml",
+          "name": "Publish to MCP Registry",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "publish-mcp-registry": {
+              "name": "List actenon-kernel in the MCP Registry",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish.yml",
+          "name": "Publish to PyPI",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "build": {
+              "name": "build",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "publish",
+              "needs": "build",
+              "if": "startsWith(github.ref, 'refs/tags/v')",
+              "environment": "pypi",
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "supply-chain.yml",
+          "name": "Supply chain",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ],
+              "tags": [
+                "v*"
+              ]
+            },
+            "pull_request": null
+          },
+          "jobs": {
+            "sbom": {
+              "name": "Generate SBOM (CycloneDX)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "pip-audit": {
+              "name": "Audit dependencies (pip-audit)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "sigstore-release": {
+              "name": "Sigstore-sign release wheel",
+              "needs": null,
+              "if": "startsWith(github.ref, 'refs/tags/v')",
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "verify-claims.yml",
+          "name": "Verify claims",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "47 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify-claims": {
+              "name": "Verify README claims (machine-enforced)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "verify-published.yml",
+          "name": "Verify published artefacts",
+          "triggers": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "schedule": [
+              {
+                "cron": "17 5 * * 1"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify": {
+              "name": "Published ${{ matrix.artefact }}",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "artefact": [
+                  "python",
+                  "ts",
+                  "go",
+                  "rust"
+                ]
+              }
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "version-coherence.yml",
+          "name": "Version coherence",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "23 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "version-coherence": {
+              "name": "pyproject / tag / PyPI agree",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "pypi:actenon-kernel": "1.2.1",
+        "npm:@actenon/verifier-sdk": "not published (HTTP Error 404: Not Found)"
+      }
+    },
+    "sdk-go": {
+      "path": "/home/user/sdk-go",
+      "candidate": "e3649cd",
+      "intended": "v1.1.0",
+      "dists": {
+        "go": [
+          "github.com/Actenon/sdk-go"
+        ]
+      },
+      "actenon_deps": [
+        "vendored kernel vectors (fixtures/KERNEL_PIN)"
+      ],
+      "runtime_role": "Go verifier SDK (verify only; integrator enforces single use)",
+      "release_role": "step 3 (after kernel release)",
+      "gate_critical": [
+        "G1",
+        "G2",
+        "G4",
+        "G5"
+      ],
+      "remote": "https://github.com/Actenon/sdk-go",
+      "branch": "ross/keen-fermi-e2y72j",
+      "head": "e3649cdd0bc1c940920c5b17fbb8bf1ac91b93fa",
+      "candidate_full": "e3649cdd0bc1c940920c5b17fbb8bf1ac91b93fa",
+      "candidate_on_remote_branches": [
+        "origin/ross/keen-fermi-e2y72j"
+      ],
+      "origin_main": "bbd1c0d5381e6fba9504207b778955a051bbf2d3",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "v1.0.0"
+      ],
+      "workflows": [
+        {
+          "file": "actenon-scan.yml",
+          "name": "actenon-scan",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "scan": {
+              "name": "scan",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "pull_request": null
+          },
+          "jobs": {
+            "test": {
+              "name": "Test (Go ${{ matrix.go-version }})",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "go-version": [
+                  "1.22",
+                  "stable"
+                ]
+              }
+            },
+            "kernel-vectors": {
+              "name": "Vendored kernel vectors match the pinned kernel",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "go:github.com/Actenon/sdk-go": "v1.0.0"
+      }
+    },
+    "sdk-rust": {
+      "path": "/home/user/sdk-rust",
+      "candidate": "0a16a84",
+      "intended": "0.2.0",
+      "dists": {
+        "crates": [
+          "actenon-verifier-sdk"
+        ]
+      },
+      "actenon_deps": [
+        "vendored kernel vectors (fixtures/KERNEL_PIN)"
+      ],
+      "runtime_role": "Rust verifier SDK (verify only)",
+      "release_role": "step 3 (after kernel release)",
+      "gate_critical": [
+        "G1",
+        "G2",
+        "G4",
+        "G5"
+      ],
+      "remote": "https://github.com/Actenon/sdk-rust",
+      "branch": "ross/keen-fermi-e2y72j",
+      "head": "0a16a849e29fc2041a88c6b4430daf2e15b48ac0",
+      "candidate_full": "0a16a849e29fc2041a88c6b4430daf2e15b48ac0",
+      "candidate_on_remote_branches": [
+        "origin/ross/keen-fermi-e2y72j"
+      ],
+      "origin_main": "261ffbfee09d2af8b0ac509b37104ec511c7b56a",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "v0.1.0"
+      ],
+      "workflows": [
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "pull_request": null
+          },
+          "jobs": {
+            "lint": {
+              "name": "fmt + clippy + doc",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "test": {
+              "name": "Test (Rust ${{ matrix.rust }})",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "rust": [
+                  "1.88",
+                  "stable"
+                ]
+              }
+            },
+            "kernel-vectors": {
+              "name": "Vendored kernel vectors match the pinned kernel",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish.yml",
+          "name": "Publish to crates.io",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "publish": {
+              "name": "Publish to crates.io",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "crates:actenon-verifier-sdk": "not published (HTTP Error 404: Not Found)"
+      }
+    },
+    "actenon-permit": {
+      "path": "/home/user/actenon-permit",
+      "candidate": "a5467ab",
+      "intended": "2.0.0 (+ @actenon/sdk 2.0.0)",
+      "dists": {
+        "pypi": [
+          "actenon-permit"
+        ],
+        "npm": [
+          "@actenon/sdk"
+        ]
+      },
+      "actenon_deps": [
+        "actenon-kernel[asymmetric]>=1.3.0rc1,<2",
+        "actenon-protocol>=1.1.0,<2"
+      ],
+      "runtime_role": "authority broker: grants, PDP, Ed25519 proof minting, gateway, revocation source",
+      "release_role": "step 4 (after kernel on PyPI)",
+      "gate_critical": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G6"
+      ],
+      "remote": "https://github.com/Actenon/actenon-permit",
+      "branch": "ross/keen-fermi-e2y72j",
+      "head": "a5467ab0cb7331dbc62377035e18b9ffd9d71cf5",
+      "candidate_full": "a5467ab0cb7331dbc62377035e18b9ffd9d71cf5",
+      "candidate_on_remote_branches": [
+        "origin/ross/keen-fermi-e2y72j"
+      ],
+      "origin_main": "c1eea9c232031c055403a96d6477d49463efa8e3",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "ts-sdk-v1.4.0",
+        "v1.4.0",
+        "v1.0.0-integration"
+      ],
+      "workflows": [
+        {
+          "file": "actenon-scan.yml",
+          "name": "actenon-scan",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "scan": {
+              "name": "scan",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 3 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "test-python": {
+              "name": "test-python",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "python-version": [
+                  "3.11",
+                  "3.12"
+                ]
+              }
+            },
+            "kernel-conformance": {
+              "name": "kernel-conformance",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "test-ts": {
+              "name": "test-ts",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "live-compat": {
+              "name": "live-compat",
+              "needs": null,
+              "if": "github.event_name == 'schedule'",
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "link-check.yml",
+          "name": "Link check",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "0 6 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "lychee": {
+              "name": "lychee",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "protocol-drift.yml",
+          "name": "Protocol drift gate",
+          "triggers": [
+            "push",
+            "pull_request",
+            "schedule"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": null,
+            "schedule": [
+              {
+                "cron": "0 4 * * *"
+              }
+            ]
+          },
+          "jobs": {
+            "drift-gate": {
+              "name": "drift-gate",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish-ts-sdk.yml",
+          "name": "Publish TypeScript SDK to npm",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "ts-sdk-v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "build": {
+              "name": "Build @actenon/sdk",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "Publish to npm",
+              "needs": "build",
+              "if": "startsWith(github.ref, 'refs/tags/ts-sdk-v')",
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish.yml",
+          "name": "Publish to PyPI",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "build": {
+              "name": "build",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "publish",
+              "needs": "build",
+              "if": "startsWith(github.ref, 'refs/tags/v')",
+              "environment": "pypi",
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "verify-claims.yml",
+          "name": "Verify claims",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "53 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "verify-claims": {
+              "name": "Verify README claims (machine-enforced)",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "version-coherence.yml",
+          "name": "Version coherence",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "pull_request": null,
+            "push": {
+              "branches": [
+                "main"
+              ]
+            },
+            "schedule": [
+              {
+                "cron": "23 6 * * *"
+              }
+            ],
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "version-coherence": {
+              "name": "pyproject / tag / PyPI agree",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "pypi:actenon-permit": "1.4.0",
+        "npm:@actenon/sdk": "1.4.0"
+      }
+    },
+    "blastradius": {
+      "path": "/home/user/blastradius",
+      "candidate": "d7f60a6",
+      "intended": "0.5.0",
+      "dists": {
+        "pypi": [
+          "actenon-blastradius"
+        ]
+      },
+      "actenon_deps": [],
+      "runtime_role": "independent shell-command guard (no Actenon runtime dependency)",
+      "release_role": "step 5 (independent)",
+      "gate_critical": [
+        "G2 (own CI)"
+      ],
+      "remote": "https://github.com/Actenon/blastradius",
+      "branch": "main",
+      "head": "df10b55fd8e18becd8678dcdf577fa54605e6e50",
+      "candidate_full": "d7f60a656dba4bb63a6ca604db2dc1ee681aa18b",
+      "candidate_on_remote_branches": [
+        "origin/claude/actenon-kernel-mcp-setup-qolk0h"
+      ],
+      "origin_main": "df10b55fd8e18becd8678dcdf577fa54605e6e50",
+      "dirty_tracked_files": 0,
+      "latest_tags": [
+        "v0.4.0",
+        "v0.3.0",
+        "v0.2.0",
+        "v0.1.0"
+      ],
+      "workflows": [
+        {
+          "file": "ci.yml",
+          "name": "CI",
+          "triggers": [
+            "push",
+            "pull_request"
+          ],
+          "trigger_detail": {
+            "push": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            },
+            "pull_request": {
+              "branches": [
+                "main",
+                "master"
+              ]
+            }
+          },
+          "jobs": {
+            "test": {
+              "name": "Python tests (${{ matrix.python-version }})",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": {
+                "python-version": [
+                  "3.10",
+                  "3.11",
+                  "3.12"
+                ]
+              }
+            }
+          },
+          "publishes": false,
+          "workflow_run_gate": false
+        },
+        {
+          "file": "publish.yml",
+          "name": "Publish to PyPI",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "trigger_detail": {
+            "push": {
+              "tags": [
+                "v*"
+              ]
+            },
+            "workflow_dispatch": null
+          },
+          "jobs": {
+            "build": {
+              "name": "build",
+              "needs": null,
+              "if": null,
+              "environment": null,
+              "matrix": null
+            },
+            "publish": {
+              "name": "publish",
+              "needs": "build",
+              "if": "startsWith(github.ref, 'refs/tags/v')",
+              "environment": "pypi",
+              "matrix": null
+            }
+          },
+          "publishes": true,
+          "workflow_run_gate": false
+        }
+      ],
+      "published": {
+        "pypi:actenon-blastradius": "0.4.0"
+      }
+    },
+    ".github": {
+      "path": "/home/user/dotgithub",
+      "candidate": null,
+      "intended": null,
+      "dists": {},
+      "actenon_deps": [],
+      "runtime_role": "org profile / community health files",
+      "release_role": "none (documentation claims only)",
+      "gate_critical": [
+        "G4 (public claims)"
+      ],
+      "remote": "https://github.com/Actenon/.github",
+      "branch": "main",
+      "head": "f8317f6c56f603dc817a7885afcf7c50662baa18",
+      "candidate_full": null,
+      "candidate_on_remote_branches": [],
+      "origin_main": "f8317f6c56f603dc817a7885afcf7c50662baa18",
+      "dirty_tracked_files": 0,
+      "latest_tags": [],
+      "workflows": [],
+      "published": {}
+    }
+  },
+  "out_of_scope": {
+    "actenon-scan": "CI-time dependency only (kernel/permit/protocol/sdk-go run actenon-scan.yml); dev-only dep on actenon-protocol; NOT modified (standing instruction from phase 1)",
+    "actenon-cloud": "private, optional managed control plane; not a dependency of any public component; no private data recorded here"
+  }
+}
