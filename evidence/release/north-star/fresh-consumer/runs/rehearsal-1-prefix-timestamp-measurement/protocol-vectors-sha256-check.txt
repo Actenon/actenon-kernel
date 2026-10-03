@@ -1,0 +1,4 @@
+refusal/valid/signature_invalid.v1.json: OK
+refusal/valid/target_mismatch.v1.json: OK
+refusal/valid/unsupported_protocol_version.v1.json: OK
+129 files hash-locked

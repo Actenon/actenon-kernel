@@ -1,0 +1,2 @@
+?   	github.com/Actenon/sdk-go/examples/http-protected-endpoint	[no test files]
+ok  	github.com/Actenon/sdk-go/verifier	0.217s

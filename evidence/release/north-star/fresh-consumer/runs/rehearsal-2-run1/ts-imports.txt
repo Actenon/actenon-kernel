@@ -1,0 +1,3 @@
+import OK @actenon/protocol-types file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.y86q5c/ts/node_modules/@actenon/protocol-types/dist/index.js
+import OK @actenon/sdk file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.y86q5c/ts/node_modules/@actenon/sdk/dist/index.js
+import OK @actenon/verifier-sdk file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.y86q5c/ts/node_modules/@actenon/verifier-sdk/dist/index.js

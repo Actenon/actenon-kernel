@@ -1,0 +1,5 @@
+# example.com/control_test [example.com/control.test]
+./edge_revocation_conformance_test.go:45:33: undefined: verifier.RevocationChecker
+./edge_revocation_conformance_test.go:63:40: undefined: verifier.WithRevocationChecker
+FAIL	example.com/control [build failed]
+FAIL

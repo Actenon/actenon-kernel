@@ -116,6 +116,11 @@ sys.argv = ['runner.py']
 runpy.run_path('$pa/conformance/runner.py', run_name='__main__')" ) > "$OUT/py-$label-protocol-runner.txt" 2>&1 \
     && grep -q 'Actenon-compatible v1.4.0' "$OUT/py-$label-protocol-runner.txt" \
     && record "python-$label protocol conformance runner (Actenon-compatible v1.4.0)" PASS || record "python-$label protocol conformance runner" FAIL
+  # Control v2 (candidate side): the standalone runner outside a checkout, installed schemas only.
+  mkdir -p "$d/standalone/conformance" && cp "$pa/conformance/runner.py" "$d/standalone/conformance/" && cp -r "$pa/conformance/vectors" "$d/standalone/conformance/"
+  ( cd "$d/standalone" && cenv "$d/venv/bin/python" -I conformance/runner.py ) > "$OUT/py-$label-protocol-standalone-runner.txt" 2>&1 \
+    && grep -q 'Actenon-compatible v1.4.0' "$OUT/py-$label-protocol-standalone-runner.txt" \
+    && record "python-$label protocol standalone runner, installed schemas only (control v2)" PASS || record "python-$label protocol standalone runner (control v2)" FAIL
   ( cd "$d/cwd" && cenv "$d/venv/bin/python" -I -m actenon_protocol.conformance_canonicalisation --vectors "$pa/conformance/vectors/canonicalisation" ) \
     > "$OUT/py-$label-protocol-canonicalisation.txt" 2>&1 \
     && record "python-$label protocol canonicalisation vectors" PASS || record "python-$label protocol canonicalisation vectors" FAIL
