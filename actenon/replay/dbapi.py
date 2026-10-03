@@ -413,8 +413,9 @@ class DbApiReplayStore(ReplayStore):
         return any(cls.__name__.lower().endswith("integrityerror") for cls in type(exc).__mro__)
 
     def _select_row(self, cursor: Any, replay_key: str) -> Any:
+        # SELECT_FIELDS is a module constant; replay_key is a bound parameter.
         cursor.execute(
-            self._sql(f"SELECT {SELECT_FIELDS} FROM action_consumption WHERE replay_key = ?"),
+            self._sql(f"SELECT {SELECT_FIELDS} FROM action_consumption WHERE replay_key = ?"),  # nosec B608
             (replay_key,),
         )
         return cursor.fetchone()

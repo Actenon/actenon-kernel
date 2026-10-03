@@ -1,0 +1,3 @@
+SUBFAILED(url='seal.example/x') tests/unit/test_proof_seal_client.py::HttpProofSealClientSchemeTests::test_non_http_schemes_are_refused
+SUBFAILED(url='') tests/unit/test_proof_seal_client.py::HttpProofSealClientSchemeTests::test_non_http_schemes_are_refused
+5 failed, 2 passed, 6 deselected in 0.20s

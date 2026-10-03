@@ -1,40 +1,52 @@
 name: Bandit static analysis
 
-# Runs bandit on the cryptographic and replay-prevention surfaces.
-# Results are recorded in docs/CRYPTO_REVIEW.md. This workflow does NOT
-# gate CI — it records findings so they are visible. All current findings
-# are assessed as false positives (see CRYPTO_REVIEW.md).
+# Runs bandit on the whole kernel package at medium severity and above, and
+# FAILS on any unsuppressed finding. Each suppression is an inline
+# `# nosec <test id>` on the flagged line, justified by the comment above it
+# and listed in docs/CRYPTO_REVIEW.md. A new finding turns this job red until
+# it is fixed or reviewed and justified.
 
 on:
   push:
     branches: [main]
     paths:
-      - 'actenon/proof/**'
-      - 'actenon/replay/**'
+      - 'actenon/**'
       - '.github/workflows/bandit.yml'
   pull_request:
     paths:
-      - 'actenon/proof/**'
-      - 'actenon/replay/**'
+      - 'actenon/**'
       - '.github/workflows/bandit.yml'
   schedule:
     - cron: '0 6 * * *'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   bandit:
-    name: Bandit scan on crypto surface
+    name: Bandit scan (actenon/, severity >= medium, gating)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install bandit
-      - name: Run bandit
+      - run: pip install "bandit==1.9.4"
+      - name: Record all findings (JSON, every severity)
+        # Exit status 1 only means "findings exist"; the gate is the next step.
+        # Any other status (a crash, a bad flag) fails here.
         run: |
-          bandit -r actenon/proof/ actenon/replay/ -f json -o bandit-results.json || true
-          bandit -r actenon/proof/ actenon/replay/ -ll || true
+          set +e
+          bandit -r actenon/ -f json -o bandit-results.json
+          status=$?
+          set -e
+          test "$status" -le 1
+          test -s bandit-results.json
+      - name: Gate on medium and high severity
+        run: bandit -r actenon/ -ll
       - name: Upload results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bandit-results

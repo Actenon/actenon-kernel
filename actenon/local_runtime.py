@@ -19,6 +19,7 @@ from typing import Any
 
 from actenon.api import ActionIntentIntakeService, build_invoice_payment_action_intent_payload
 from actenon.core import ProtectedExecutionKernel, RefusalException
+from actenon.core.http_url import require_http_url
 from actenon.core.json import loads_no_duplicate_keys
 from actenon.demo.local_proof import run_invoice_payment_local_proof_demo, run_local_proof_demo
 from actenon.demo.portable_local_proof import build_hello_world_action_intent_payload, FIXED_BASE_TIME
@@ -3452,9 +3453,9 @@ def _load_json_if_present(path: Path) -> dict[str, Any] | None:
 
 
 def _http_json_status(url: str) -> tuple[int, dict[str, Any]]:
-    request = urllib.request.Request(url, method="GET")
+    request = urllib.request.Request(require_http_url(url, "status URL"), method="GET")
     try:
-        with urllib.request.urlopen(request, timeout=2) as response:
+        with urllib.request.urlopen(request, timeout=2) as response:  # nosec B310
             payload = loads_no_duplicate_keys(response.read())
             if not isinstance(payload, dict):
                 raise ValueError("HTTP JSON response must contain an object")
