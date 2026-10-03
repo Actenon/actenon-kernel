@@ -1,0 +1,57 @@
+Scanning agent...
+
+Analysed 112 Python files.
+
+Detected authority:
+
+✓ HTTP POST
+  api.openai.com/v1/chat/completions
+✓ process.exec
+  git
+✓ process.exec
+  ssh
+✓ github.graphql
+  github.com
+✓ HTTP GET
+  api.github.com/notifications
+✓ filesystem.write
+  ./pyproject.toml
+✓ github.repo.read
+  github.com/Actenon/actenon-kernel
+✓ github.pull.update
+  github.com/Actenon/actenon-kernel
+✓ github.issue.comment
+  github.com/Actenon/actenon-kernel
+✓ github.pull.comment
+  github.com/Actenon/actenon-kernel
+✓ github.pull.review
+  github.com/Actenon/actenon-kernel
+✓ github.repo.read
+  github.com/Actenon/pr-agent-settings
+✓ github.contents.write
+  github.com/Actenon/actenon-kernel
+✓ github.issue.label
+  github.com/Actenon/actenon-kernel
+⚠ 25 capabilities with the file path decided at runtime: HTTP GET, HTTP POST, filesystem.delete, filesystem.write
+  pr_agent/algo/run_output.py, pr_agent/git_providers/bitbucket_provider.py, pr_agent/git_providers/gerrit_provider.py (+4 files)
+  BLOCKED · to allow one exact file path: airlock init --resolve path=./DIRECTORY/
+⚠ 15 capabilities with the destination decided at runtime: HTTP DELETE, HTTP GET, HTTP PATCH, HTTP POST, HTTP PUT
+  pr_agent/algo/run_output.py, pr_agent/git_providers/bitbucket_provider.py, pr_agent/git_providers/gerrit_provider.py (+3 files)
+  BLOCKED · to allow one exact destination: airlock approve --target ACTION HOST/PATH
+⚠ process.exec — program decided at runtime
+  pr_agent/git_providers/bitbucket_server_provider.py:756 in BitbucketServerProvider._clone_inner
+  BLOCKED
+
+14 authorised
+41 blocked (unresolved)
+
+Credentials Airlock will hold (the agent only sees placeholders):
+  ANTHROPIC_AUTH_TOKEN, GITHUB_TOKEN, GITHUB__USER_TOKEN, OPENAI.KEY, OPENAI_API_KEY, OPENAI_KEY, OPENAI__KEY
+
+Secrets the agent reads that Airlock does not manage (visible to the agent):
+  API_KEY, ARK_API_KEY, AWS_BEARER_TOKEN_BEDROCK, AWS_SECRET_ACCESS_KEY, AWS_SECURITY_TOKEN, AWS_SESSION_TOKEN, AZURE_AD_TOKEN, AZURE_API_KEY, AZURE_OPENAI_AD_TOKEN, AZURE_OPENAI_API_KEY, DATABRICKS_API_KEY, GOOGLE_APPLICATION_CREDENTIALS, VERTEXAI_CREDENTIALS
+
+1 plain read request without credentials need no authority.
+
+Ready. Run your agent with: airlock run
+wrote airlock.json (3.0s). Commit it: it is your agent's approved authority.

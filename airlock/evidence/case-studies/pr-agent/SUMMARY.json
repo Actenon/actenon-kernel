@@ -1,0 +1,30 @@
+{
+  "onboarding_seconds": {
+    "airlock_init": 3.1,
+    "first_protected_run": 16.2,
+    "total": 19.3
+  },
+  "manual_steps": [
+    "set pr-agent's own configuration variables (OPENAI__KEY, GITHUB__USER_TOKEN, CONFIG__MODEL) per its README",
+    "airlock init --resolve repository=Actenon/actenon-kernel  (one bounded decision: which repository)",
+    "airlock run -- .venv/bin/pr-agent --pr_url <PR> review"
+  ],
+  "hand_written_policy": false,
+  "normal_run": {
+    "allowed": 26,
+    "blocked": 0
+  },
+  "after_change": {
+    "blocked": [
+      [
+        "github.repo.delete",
+        "github.com/Actenon/actenon-kernel"
+      ],
+      [
+        "github.repo.delete",
+        "github.com/Actenon/actenon-kernel"
+      ]
+    ],
+    "upstream_requests_for_blocked_action": 0
+  }
+}

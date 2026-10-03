@@ -1,0 +1,54 @@
+[
+ {
+  "method": "POST",
+  "path_prefix": "/v1/chat/completions",
+  "status": 200,
+  "json": {
+   "id": "chatcmpl-standin",
+   "object": "chat.completion",
+   "created": 1791000000,
+   "model": "gpt-5.6",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "```yaml\nreview:\n  estimated_effort_to_review_[1-5]: 1\n  relevant_tests: |\n    No\n  key_issues_to_review: []\n  security_concerns: |\n    No\n```"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 50,
+    "total_tokens": 150
+   }
+  }
+ },
+ {
+  "method": "POST",
+  "path_prefix": "/v1/responses",
+  "status": 200,
+  "json": {
+   "id": "chatcmpl-standin",
+   "object": "chat.completion",
+   "created": 1791000000,
+   "model": "gpt-5.6",
+   "choices": [
+    {
+     "index": 0,
+     "message": {
+      "role": "assistant",
+      "content": "```yaml\nreview:\n  estimated_effort_to_review_[1-5]: 1\n  relevant_tests: |\n    No\n  key_issues_to_review: []\n  security_concerns: |\n    No\n```"
+     },
+     "finish_reason": "stop"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 50,
+    "total_tokens": 150
+   }
+  }
+ }
+]

