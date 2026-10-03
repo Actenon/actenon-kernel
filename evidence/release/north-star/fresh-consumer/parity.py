@@ -58,7 +58,7 @@ def classify(cases: dict, ref: dict, impl: dict) -> dict:
     return {"cases": len(cases), "agree": agree, "A": A, "B": B, "C_count": len(C), "U": U}
 
 
-report: dict = {"criteria": "A=0, U=0, B == phase-2 FINAL B set; rows equal phase-2 FINAL", "corpora": {}}
+report: dict = {"criteria": {"v1": "kernel_diff_v1 + precision addendum: A=0, U=0, B == phase-2 FINAL B set; rows equal phase-2 FINAL", "v2": "timestamp-grammar addendum: A=0, U=0, py310 == py312, reference == RFC 3339 hint, B only on DEVIATION cases or go-sdk-strict"}, "corpora": {}}
 failures: list[str] = []
 for corpus_name, (cdir, prefix, p2dir) in CORPORA.items():
     cases = {c["id"]: c for c in json.loads((cdir / "manifest.json").read_text())["cases"]}
@@ -95,6 +95,34 @@ for corpus_name, (cdir, prefix, p2dir) in CORPORA.items():
               f"B={len(now['B'])} C={now['C_count']} U={len(now['U'])} B==phase2:{b_now == b_then} "
               f"rows==phase2:{not changed_rows}", file=sys.stderr)
     report["corpora"][corpus_name] = entry
+# ---- Criterion v2 (defined 2026-10-03 before the post-fix run): timestamp-grammar addendum.
+# No phase-2 baseline exists for it, so instead: A=0 and U=0 for every implementation; the reference is
+# interpreter-independent (py310 rows == py312 rows); the reference agrees with the a-priori RFC 3339 hint on
+# every ACCEPT/REFUSE case; and a B is allowed only on a DEVIATION-labelled case, or for go-sdk-strict, whose
+# float64 decoding of numeric edge constraints refuses every case (the documented phase-2 B; UseNumber is the
+# comparison variant).
+tsg_dir = HERE.parent / "differential" / "corpus-addendum-timestamp-grammar"
+if (OUT / "difftsg-python-kernel-py312.jsonl").exists():
+    cases = {c["id"]: c for c in json.loads((tsg_dir / "manifest.json").read_text())["cases"]}
+    ref = load(OUT / "difftsg-python-kernel-py312.jsonl")
+    entry = {"case_count": len(cases), "criterion": "v2", "implementations": {}}
+    py310 = load(OUT / "difftsg-python-kernel-py310.jsonl")
+    entry["python_py310_rows_differing_from_py312"] = [k for k in cases if (py310[k]["outcome"], py310[k]["code"]) != (ref[k]["outcome"], ref[k]["code"])]
+    entry["reference_vs_rfc3339_hint_mismatches"] = [k for k, c in cases.items() if c["hint"] in ("ACCEPT", "REFUSE") and (ref[k]["outcome"] == "ACCEPT") != (c["hint"] == "ACCEPT")]
+    if entry["python_py310_rows_differing_from_py312"]:
+        failures.append(f"timestamp_grammar: py310 differs from py312 on {entry['python_py310_rows_differing_from_py312']}")
+    if entry["reference_vs_rfc3339_hint_mismatches"]:
+        failures.append(f"timestamp_grammar: reference disagrees with RFC 3339 on {entry['reference_vs_rfc3339_hint_mismatches']}")
+    for stem in IMPLS:
+        res = classify(cases, ref, load(OUT / f"difftsg-{stem}.jsonl"))
+        unjustified_b = [b["id"] for b in res["B"] if cases[b["id"]]["hint"] != "DEVIATION" and stem != "go-sdk-strict"]
+        entry["implementations"][stem] = {"installed_artefact_result": res, "unjustified_B": unjustified_b}
+        for label, bad in (("A", res["A"]), ("U", res["U"]), ("unjustified B", unjustified_b)):
+            if bad:
+                failures.append(f"timestamp_grammar: {stem} {label}={bad}")
+        print(f"{'timestamp_grammar':20} {stem:18} cases={res['cases']} agree={res['agree']} A={len(res['A'])} "
+              f"B={len(res['B'])} C={res['C_count']} U={len(res['U'])} unjustifiedB={len(unjustified_b)}", file=sys.stderr)
+    report["corpora"]["timestamp_grammar"] = entry
 report["failures"] = failures
 report["result"] = "PASS" if not failures else "FAIL"
 print(json.dumps(report, indent=2))
