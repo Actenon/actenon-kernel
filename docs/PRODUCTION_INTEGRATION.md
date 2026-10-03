@@ -158,6 +158,13 @@ store = PostgresReplayStore("postgresql://user:pass@db:5432/actenon")
 - **Sizing:** same as SQLite (~100 bytes/key).
 - **TTL:** same expiry logic; prune with the same query adapted for Postgres.
 - **Index requirements:** created automatically.
+- **Tested:** against a PostgreSQL 16 server by the `postgres-replay` CI job
+  (`tests/integration/test_postgres_real_server.py`): 4 gates with independent
+  store connections × 8 concurrent presentations of one proof give exactly one
+  execution, and an unreachable server never executes. Cross-process (4
+  worker processes, a restart, and the server stopped after the edge started:
+  `REPLAY_STORE_UNAVAILABLE`) in `evidence/release/phase2/postgres/`.
+  Requires the `postgres` extra (`psycopg`).
 
 ### 3.3 Replay store unreachable — observed behavior
 
