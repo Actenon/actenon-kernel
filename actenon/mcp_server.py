@@ -554,8 +554,15 @@ def build_demo_gate(audience: str = DEFAULT_AUDIENCE) -> tuple[ActenonGate, Any]
     return gate, signer
 
 
-def build_configured_gate(*, key_file: Path, audience: str) -> tuple[ActenonGate, Any]:
-    """Load signing material for a non-demo server. Secrets are never logged."""
+def build_configured_gate(
+    *, key_file: Path, audience: str, capabilities: tuple[str, ...] | None = None
+) -> tuple[ActenonGate, Any]:
+    """Load signing material for a non-demo server. Secrets are never logged.
+
+    ``capabilities`` are the actions this server lets through
+    (protocol/13-edge-binding.md E1); without them the gate is refused
+    outside explicit development intent.
+    """
 
     if not key_file.exists():
         raise SystemExit(
@@ -577,6 +584,7 @@ def build_configured_gate(*, key_file: Path, audience: str) -> tuple[ActenonGate
         signer=signer,
         audience=audience,
         issuer="service:actenon-mcp",
+        capabilities=capabilities or None,
     )
     return gate, signer
 
@@ -603,6 +611,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--audience",
         default=DEFAULT_AUDIENCE,
         help=f"Audience this server verifies for (default: {DEFAULT_AUDIENCE}).",
+    )
+    parser.add_argument(
+        "--capability",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="A capability this server lets through (exact string, repeatable). "
+        "Required in non-demo mode: a proof for any other capability is refused.",
     )
     return parser.parse_args(argv)
 
@@ -649,10 +665,13 @@ def main(argv: list[str] | None = None) -> int:
             )
         try:
             gate, signer = build_configured_gate(
-                key_file=args.key_file, audience=args.audience
+                key_file=args.key_file,
+                audience=args.audience,
+                capabilities=tuple(args.capability),
             )
         except (ProductionSigningGuardError, InsecureDefaultRefusedError) as exc:
-            raise SystemExit(f"actenon-mcp: {exc}") from exc
+            hint = "" if args.capability else " (actenon-mcp: pass --capability NAME, repeatable.)"
+            raise SystemExit(f"actenon-mcp: {exc}{hint}") from exc
         print(
             f"actenon-mcp: verifying for audience {args.audience}.",
             file=sys.stderr,

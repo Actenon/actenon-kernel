@@ -35,7 +35,7 @@
           "type": "positional",
           "value": "--demo",
           "isRequired": false,
-          "description": "Run offline with an ephemeral key and in-memory state. Omit for a production server, which requires --key-file and fails closed without it."
+          "description": "Run offline with an ephemeral key and in-memory state. Omit for a production server, which requires --key-file and --capability (repeatable) and fails closed without them."
         }
       ],
       "transport": {

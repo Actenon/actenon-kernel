@@ -43,7 +43,13 @@ from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, V
 from actenon.proof.service import default_disclosure_mode
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
-from actenon.security_posture import DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET, explicit_development_intent
+from actenon.security_posture import (
+    DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET,
+    DOWNGRADE_UNDECLARED_CAPABILITIES,
+    UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV,
+    explicit_development_intent,
+    permit_downgrade,
+)
 
 
 SideEffect = Callable[..., Any]
@@ -220,10 +226,23 @@ class ActenonGate:
         self._verifier = verifier
         # What this edge declares about itself (protocol/13-edge-binding.md):
         # the capabilities its side effect performs, the parameter constraints
-        # it relies on, and the resources it acts on. ``capabilities=None``
-        # keeps the 1.x behaviour of trusting the presented intent's
-        # capability; declare it so a proof for another capability cannot run
-        # this side effect.
+        # it relies on, and the resources it acts on. Without a capabilities
+        # declaration the gate would take the capability from the presented
+        # intent, so E1 would compare the request with itself: that needs
+        # development intent or the named unsafe override, and is recorded.
+        self._own_downgrades: list[str] = []
+        if capabilities is None:
+            self._own_downgrades.append(
+                permit_downgrade(
+                    DOWNGRADE_UNDECLARED_CAPABILITIES,
+                    override_env=UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV,
+                    what="An ActenonGate with no declared capabilities",
+                    fix=(
+                        "Pass capabilities=(...) naming what this gate's side effect performs "
+                        "(protocol/13-edge-binding.md E1), e.g. capabilities=(\"payment.refund\",)."
+                    ),
+                )
+            )
         self.declared_capabilities = tuple(capabilities) if capabilities is not None else None
         self.declared_parameter_constraints = dict(parameter_constraints or {})
         self.declared_resource_selectors = tuple(dict(selector) for selector in (resource_selectors or ()))
@@ -262,12 +281,15 @@ class ActenonGate:
         """Weakened guarantees this gate runs with; empty when correctly configured.
 
         ``public_development_secret``: proofs are signed/verified with the
-        public development HMAC secret. ``process_local_replay``,
+        public development HMAC secret. ``undeclared_capabilities``: the gate
+        does not declare what its side effect performs, so it runs any
+        capability a valid proof names. ``process_local_replay``,
         ``replay_protection_disabled``, ``replay_store_fail_open``: single use
         is not enforced across workers/restarts, or not at all.
         """
 
         downgrades = list(self._executor.security_downgrades)
+        downgrades.extend(d for d in self._own_downgrades if d not in downgrades)
         for material in (self.signer, self._verifier):
             if _uses_public_development_secret(material) and DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET not in downgrades:
                 downgrades.insert(0, DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET)

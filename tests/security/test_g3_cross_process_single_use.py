@@ -64,6 +64,7 @@ _ISSUER = _ED25519 + textwrap.dedent(
     signer = Signer()
     # The issuer itself is configured correctly (its own durable store).
     gate = ActenonGate(verifier=signer, signer=signer, audience="service:payments", issuer="service:issuer",
+                       capabilities=("payments.refund",),
                        replay_protector=ReplayProtector(SqliteReplayStore(sys.argv[2])))
     action = gate.build_action("refund", "payments.refund", {"amount": 100}, target_type="charge", target_id="ch_1")
     proof = gate.mint_proof(action)
@@ -77,7 +78,8 @@ _WORKER = _ED25519 + textwrap.dedent(
     from actenon.gate import ActenonGate
     d = json.load(open(sys.argv[1]))
     try:
-        gate = ActenonGate(verifier=Verifier(d["x"], d["kid"]), audience="service:payments", issuer="service:issuer")
+        gate = ActenonGate(verifier=Verifier(d["x"], d["kid"]), audience="service:payments", issuer="service:issuer",
+                           capabilities=("payments.refund",))
     except RuntimeError as exc:
         print(json.dumps({"started": False, "error": str(exc)}))
         raise SystemExit(0)

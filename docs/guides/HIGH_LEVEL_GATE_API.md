@@ -33,6 +33,11 @@ gate = ActenonGate(
     verifier=well_known_or_managed_verifier,
     audience="service:payments-protected-endpoint",
     issuer="service:payments-proof-issuer",
+    # What this side effect performs (protocol 13 E1). Required outside
+    # development: a proof for any other capability is refused.
+    capabilities=("payment.refund",),
+    # When the issuer mints revocable authority (actenon-permit >= 2.0):
+    # revocation_checker=StoreRevocationChecker(permit_state_store),
 )
 outcome = gate.protect(action_intent, supplied_proof, execute_payment)
 ```
@@ -43,6 +48,13 @@ unavailable on verifier-only gates.
 
 ## Secure defaults
 
+- The gate verifies against its own declarations, never the request's:
+  `capabilities` (required outside development), and optionally
+  `parameter_constraints` and `resource_selectors`
+  (actenon-protocol `protocol/13-edge-binding.md`).
+- A proof carrying revocable authority (`extensions.authority.revocable`) is
+  refused unless `revocation_checker` is configured and says the authority is
+  not revoked. An unreachable revocation source also refuses.
 - Replay and single-use protection are on by default.
 - `replay_protection="disabled"` is an explicit unsafe opt-out and emits a
   warning.

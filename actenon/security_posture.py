@@ -6,7 +6,9 @@ intent. Without it the kernel refuses, at construction time, to silently use:
 1. the public development HMAC secret (``LOCAL_PROOF_SECRET``);
 2. per-process replay state behind a single-use guarantee;
 3. ``replay_protection="disabled"``;
-4. ``replay_store_failure="fail_open"``.
+4. ``replay_store_failure="fail_open"``;
+5. an ``ActenonGate`` that does not declare the capabilities its side effect
+   performs (protocol 13 E1 would then compare the request with itself).
 
 Explicit development intent is one of:
 
@@ -25,7 +27,7 @@ an allowlist of development values, not a denylist of production names.
 ``ACTENON_PRODUCTION`` / ``ACTENON_CI_RELEASE`` / ``ACTENON_RELEASE_BUILD``
 always win over a development value.
 
-Items 2-4 have named unsafe overrides for operators who knowingly accept a
+Items 2-5 have named unsafe overrides for operators who knowingly accept a
 weaker guarantee. Using one is loud (a ``RuntimeWarning`` and a log record
 naming the override) and machine-visible (the downgrade is listed in the
 component's ``security_downgrades``). There is no override for the public
@@ -49,11 +51,13 @@ PRODUCTION_FLAG_ENVS = ("ACTENON_PRODUCTION", "ACTENON_CI_RELEASE", "ACTENON_REL
 UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY_ENV = "ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY"
 UNSAFE_ALLOW_REPLAY_DISABLED_ENV = "ACTENON_UNSAFE_ALLOW_REPLAY_DISABLED"
 UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV = "ACTENON_UNSAFE_ALLOW_REPLAY_FAIL_OPEN"
+UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV = "ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES"
 
 DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET = "public_development_secret"
 DOWNGRADE_PROCESS_LOCAL_REPLAY = "process_local_replay"
 DOWNGRADE_REPLAY_PROTECTION_DISABLED = "replay_protection_disabled"
 DOWNGRADE_REPLAY_STORE_FAIL_OPEN = "replay_store_fail_open"
+DOWNGRADE_UNDECLARED_CAPABILITIES = "undeclared_capabilities"
 
 HOW_TO_DECLARE_DEVELOPMENT = (
     "For local development, demos or tests set ACTENON_ENV=development "
@@ -191,12 +195,14 @@ __all__ = [
     "DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET",
     "DOWNGRADE_REPLAY_PROTECTION_DISABLED",
     "DOWNGRADE_REPLAY_STORE_FAIL_OPEN",
+    "DOWNGRADE_UNDECLARED_CAPABILITIES",
     "DevelopmentIntentConflictError",
     "InsecureDefaultRefusedError",
     "PRODUCTION_FLAG_ENVS",
     "UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY_ENV",
     "UNSAFE_ALLOW_REPLAY_DISABLED_ENV",
     "UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV",
+    "UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV",
     "declare_process_development_intent",
     "declared_development_source",
     "development_environment",

@@ -112,8 +112,17 @@ for an offline demo server with an ephemeral key.
 ```
 
 Demo mode is itself refused if the process looks production-like
-(`ACTENON_ENV` set to anything other than `local`, `dev`, `test`, or `demo`,
-or an Actenon production flag such as `ACTENON_PRODUCTION=1`).
+(`ACTENON_ENV` set to anything other than `development`, `dev`, `local` or
+`test`, or an Actenon production flag such as `ACTENON_PRODUCTION=1`).
+
+A production server must also declare which capabilities it lets through
+(`--capability NAME`, repeatable; protocol 13 E1) and where single-use state
+lives (`ACTENON_REPLAY_DB`, a path shared by every server process):
+
+```text
+ACTENON_REPLAY_DB=/var/lib/actenon/replay.sqlite3 \
+  actenon-mcp --key-file /run/secrets/actenon-mcp-key --capability payment.refund
+```
 
 An unparseable or schema-invalid `intent` or `proof` is answered with a typed
 refusal (`INTENT_MALFORMED` / `PROOF_MALFORMED`) rather than a tool error, and

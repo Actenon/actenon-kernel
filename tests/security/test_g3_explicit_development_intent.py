@@ -67,6 +67,7 @@ def _assert_names_fix(exc: BaseException, *needles: str) -> None:
 
 def _gate(**kwargs) -> ActenonGate:
     signer = _Ed25519Signer()
+    kwargs.setdefault("capabilities", ("payment.release",))
     return ActenonGate(verifier=signer, signer=signer, audience="service:payments", issuer="service:issuer", **kwargs)
 
 
@@ -192,9 +193,25 @@ def test_mcp_server_non_demo_refuses_process_local_replay(monkeypatch, env, tmp_
     key.write_bytes(b"operator-supplied-mcp-secret-0123456789")
     with mock.patch("mcp.server.fastmcp.FastMCP.run", lambda self, *a, **k: None):
         with pytest.raises(SystemExit) as excinfo:
-            mcp_server.main(["--key-file", str(key)])
+            mcp_server.main(["--key-file", str(key), "--capability", "payment.refund"])
     if env != "production":
         _assert_names_fix(excinfo.value, "ACTENON_REPLAY_DB")
+
+
+@pytest.mark.parametrize("env", NO_INTENT_ENVS, ids=NO_INTENT_IDS)
+def test_mcp_server_non_demo_refuses_undeclared_capabilities(monkeypatch, env, tmp_path):
+    # protocol/13-edge-binding.md E1: the server must say what it lets through.
+    pytest.importorskip("mcp")
+    from actenon import mcp_server
+
+    _set_env(monkeypatch, env, ACTENON_REPLAY_DB=str(tmp_path / "replay.sqlite3"))
+    key = tmp_path / "key"
+    key.write_bytes(b"operator-supplied-mcp-secret-0123456789")
+    with mock.patch("mcp.server.fastmcp.FastMCP.run", lambda self, *a, **k: None):
+        with pytest.raises(SystemExit) as excinfo:
+            mcp_server.main(["--key-file", str(key)])
+    if env != "production":
+        _assert_names_fix(excinfo.value, "--capability", "ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES")
 
 
 # ---------------------------------------------------------------------------
@@ -366,8 +383,10 @@ def test_override_does_not_unlock_the_public_secret(monkeypatch):
 def test_production_config_with_shared_replay_db_enforces_single_use_across_workers(monkeypatch, env, tmp_path):
     _set_env(monkeypatch, env, ACTENON_REPLAY_DB=str(tmp_path / "shared-replay.sqlite3"))
     signer = _Ed25519Signer()
-    worker_a = ActenonGate(verifier=signer, signer=signer, audience="service:payments", issuer="service:issuer")
-    worker_b = ActenonGate(verifier=signer, audience="service:payments", issuer="service:issuer")
+    worker_a = ActenonGate(verifier=signer, signer=signer, audience="service:payments", issuer="service:issuer",
+                           capabilities=("payment.release",))
+    worker_b = ActenonGate(verifier=signer, audience="service:payments", issuer="service:issuer",
+                           capabilities=("payment.release",))
     assert worker_a.security_downgrades == ()
     action = _action(worker_a)
     proof = worker_a.mint_proof(action)
@@ -401,6 +420,7 @@ def test_boundary_verifier_honours_actenon_replay_db_across_workers(monkeypatch,
         signer=signer,
         audience="service:payments",
         issuer="service:issuer",
+        capabilities=("payment.release",),
     )
     action = _action(minting_gate, intent_id="intent_g3_boundary")
     proof = minting_gate.mint_proof(action)

@@ -62,6 +62,7 @@ class _Ed25519Signer:
 def _gate(signer: _Ed25519Signer, tempdir: str, **kwargs) -> ActenonGate:
     from actenon.replay import ReplayProtector
 
+    kwargs.setdefault("capabilities", ("payment.release",))
     return ActenonGate(
         verifier=signer,
         signer=signer,
