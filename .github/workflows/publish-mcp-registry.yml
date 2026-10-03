@@ -37,7 +37,7 @@ jobs:
         # Applies to workflow_dispatch too: run it on the release tag, not a branch.
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 scripts/release_gate.py gate --version "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+        run: python3 scripts/release_gate.py gate --version-from pyproject.toml
 
       - name: Verify server.json version matches the tag and pyproject
         run: |

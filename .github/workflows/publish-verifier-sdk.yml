@@ -35,7 +35,7 @@ jobs:
       - name: Tag commit is on main and its required checks passed
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 scripts/release_gate.py gate --tag-prefix verifier-sdk-v --version "$(node -p "require('./sdk/typescript/package.json').version")"
+        run: python3 scripts/release_gate.py gate --tag-prefix verifier-sdk-v --version-from sdk/typescript/package.json
 
   build:
     name: Build, test and pack

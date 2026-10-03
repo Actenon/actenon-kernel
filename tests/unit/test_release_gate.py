@@ -84,3 +84,16 @@ def test_gate_refuses_a_commit_that_is_not_on_main(tmp_path):
                             cwd=repo, env=env, capture_output=True, text=True, timeout=120)
     assert result.returncode == 1, result.stdout + result.stderr
     assert "is not on origin/main" in result.stdout
+
+
+def test_unnamed_matrix_jobs_use_github_naming(tmp_path, monkeypatch):
+    pytest.importorskip("yaml")
+    gate = _load()
+    wf = tmp_path / ".github" / "workflows"
+    wf.mkdir(parents=True)
+    (wf / "ci.yml").write_text(
+        "on: pull_request\njobs:\n  test-python:\n    runs-on: ubuntu-latest\n"
+        "    strategy:\n      matrix:\n        python-version: ['3.11', '3.12']\n    steps: []\n"
+    )
+    monkeypatch.setattr(gate, "ROOT", tmp_path)
+    assert set(gate.produced_check_names()) == {"test-python (3.11)", "test-python (3.12)"}

@@ -12,7 +12,8 @@ Modes
   validate                     every listed name is produced by a job in .github/workflows
                                (matrix names expanded); exits 1 on an unknown name. Run in CI,
                                so branch protection can never reference a job that does not exist.
-  gate --version V             in a publish workflow: the ref is a v-tag equal to V (tag prefix
+  gate (--version V | --version-from FILE)
+                               in a publish workflow (FILE: pyproject.toml, package.json or Cargo.toml): the ref is a v-tag equal to V (tag prefix
                                configurable with --tag-prefix), the tagged commit is on
                                origin/<branch>, and every "release" check-run on that exact commit
                                concluded success. Needs GITHUB_TOKEN with checks:read and a checkout
@@ -66,9 +67,15 @@ def produced_check_names() -> dict[str, str]:
     for wf in sorted((ROOT / ".github" / "workflows").glob("*.y*ml")):
         doc = yaml.safe_load(wf.read_text(encoding="utf-8")) or {}
         for job_id, job in (doc.get("jobs") or {}).items():
+            explicit = "name" in job
             template = str(job.get("name", job_id))
             for row in _matrix_rows((job.get("strategy") or {}).get("matrix")):
-                names[EXPR.sub(lambda m: str(row.get(m.group(1), m.group(0))), template)] = wf.name
+                if explicit or not row:
+                    name = EXPR.sub(lambda m, row=row: str(row.get(m.group(1), m.group(0))), template)
+                else:
+                    # GitHub names an unnamed matrix job "<job id> (<values>, ...)".
+                    name = f"{job_id} ({', '.join(str(v) for v in row.values())})"
+                names[name] = wf.name
     return names
 
 
@@ -149,19 +156,32 @@ def print_protection() -> int:
     return 0
 
 
+def version_from(path: str) -> str:
+    """The version declared by pyproject.toml, a package.json, or Cargo.toml."""
+    file = ROOT / path
+    if file.name == "package.json":
+        return json.loads(file.read_text(encoding="utf-8"))["version"]
+    import tomllib  # Python >= 3.11 (publish workflows run 3.12)
+
+    data = tomllib.loads(file.read_text(encoding="utf-8"))
+    return data["package"]["version"] if file.name == "Cargo.toml" else data["project"]["version"]
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=("validate", "gate", "print-protection"))
     ap.add_argument("--version")
+    ap.add_argument("--version-from")
     ap.add_argument("--tag-prefix", default="v")
     args = ap.parse_args(argv)
     if args.mode == "validate":
         return validate()
     if args.mode == "print-protection":
         return print_protection()
-    if not args.version:
-        ap.error("gate needs --version")
-    return gate(args.version, args.tag_prefix)
+    version = args.version or (version_from(args.version_from) if args.version_from else None)
+    if not version:
+        ap.error("gate needs --version or --version-from")
+    return gate(version, args.tag_prefix)
 
 
 if __name__ == "__main__":
