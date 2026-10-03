@@ -2,7 +2,7 @@
 
 ## Current version
 
-**Kernel version:** `1.3.0rc1` (from `pyproject.toml`; checked by `tests/unit/test_versioning_doc_claims.py`)
+**Kernel version:** `1.3.0` (from `pyproject.toml`; checked by `tests/unit/test_versioning_doc_claims.py`)
 **Protocol version range:** `actenon-protocol>=1.1.0,<2`
 **Conformance version:** see `conformance/VERSION`
 **Python support:** `>=3.10` (kernel alone); `>=3.11` (composed stack with actenon-permit)

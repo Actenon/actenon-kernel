@@ -4,7 +4,7 @@ See [VERSIONING.md](VERSIONING.md) for the compatibility promise that governs
 this changelog. Within 1.x, a proof that verifies under one version verifies
 under any later version.
 
-## [Unreleased] — candidate 1.3.0rc1 (not released)
+## [1.3.0]
 
 ### Security — insecure development behaviour requires explicit development intent
 
@@ -54,7 +54,7 @@ explicit store). Local development: set `ACTENON_ENV=development` or use
 fix that changes behaviour within 1.x and requires a published security
 advisory naming the affected versions (<= 1.2.1).
 
-### Security — TypeScript verifier SDK (`@actenon/verifier-sdk`, unpublished)
+### Security — TypeScript verifier SDK (`@actenon/verifier-sdk`)
 
 - `VerifierSDK.verifyJSON` verifies proof material exactly as received and
   parses it strictly. The object API cannot see what `JSON.parse` discarded:
@@ -115,7 +115,7 @@ status probe passed configured URLs straight to `urlopen`, which also opens
 except http and https at construction. `docs/CRYPTO_REVIEW.md` had assessed
 this as validated; the addendum there corrects it.
 
-### TypeScript verifier SDK 0.2.0 (`@actenon/verifier-sdk`, unpublished)
+### TypeScript verifier SDK 0.2.0 (`@actenon/verifier-sdk`, first npm release)
 
 - Breaking: `verify` and `verifyPayloads` (parsed objects) are no longer
   public. `verifyJSON` (raw bytes, strict parse) is the only entry point.
@@ -151,7 +151,7 @@ from the wheel.
 - The packed TypeScript tarball is installed into an empty project and
   imported in plain Node.
 
-### Fixed (from the programme branch, PR #37; unreleased until this version)
+### Fixed (from the programme branch, PR #37)
 
 - `BoundaryVerifier` verified nothing: 1.2.1 returns `valid=True` for any
   16+ character token (reproduced: `"AAAAAAAAAAAAAAAA"` -> VALID). It now

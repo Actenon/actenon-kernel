@@ -3,7 +3,7 @@
   "name": "io.github.Actenon/kernel",
   "title": "Actenon Kernel",
   "description": "Verify consequential AI actions before they execute.",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "websiteUrl": "https://github.com/Actenon/actenon-kernel",
   "repository": {
     "url": "https://github.com/Actenon/actenon-kernel",
@@ -13,7 +13,7 @@
     {
       "registryType": "pypi",
       "identifier": "actenon-kernel",
-      "version": "1.2.1",
+      "version": "1.3.0",
       "runtimeHint": "uvx",
       "runtimeArguments": [
         {
