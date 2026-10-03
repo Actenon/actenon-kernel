@@ -1,0 +1,17 @@
+## ACTENON_ENV=prd  versions: {'actenon-kernel': '1.3.0rc1', 'actenon-protocol': '1.3.0'}
+### scenario A: default replay store (nothing configured)
+   (exit 1) actenon.security_posture.InsecureDefaultRefusedError: the default replay store with per-process replay state (a single-use proof would be accepted once per worker and again after a restart) requires explicit development intent and ACTENON_ENV='prd' declares none. Single-use needs replay state shared by every worker and surviving restarts: set ACTENON_REPLAY_DB to a durable path shared by all workers, or pass replay_protector=ReplayProtector(SqliteReplayStore(path) | PostgresReplayStore(dsn)). For local development, demos or tests set ACTENON_ENV=development (or dev, local, test). To accept the weaker guarantee outside development anyway, set ACTENON_UNSAFE_ALLOW_PROCESS_LOCAL_REPLAY=1 (unsafe; recorded as 'process_local_replay').
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-prd/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-prd/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-prd/proof-A.json'
+RESULT A: side effects executed for ONE single-use proof = 0
+### scenario B (control): ACTENON_REPLAY_DB = one shared durable file
+minted pccb_87974615ebc14518bc2f80cf31dfa602
+[workerA] pid=17237 ACTENON_ENV='prd' replay_store=SqliteReplayStore path=None
+[workerA] attempt 1: outcome=executed reason=None
+[workerA] attempt 2: outcome=refused reason=DUPLICATE_REPLAY
+[workerB] pid=17238 ACTENON_ENV='prd' replay_store=SqliteReplayStore path=None
+[workerB] attempt 1: outcome=refused reason=DUPLICATE_REPLAY
+[workerA-restarted] pid=17239 ACTENON_ENV='prd' replay_store=SqliteReplayStore path=None
+[workerA-restarted] attempt 1: outcome=refused reason=DUPLICATE_REPLAY
+RESULT B: side effects executed for ONE single-use proof = 1

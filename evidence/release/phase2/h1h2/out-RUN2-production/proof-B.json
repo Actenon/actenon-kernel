@@ -1,0 +1,102 @@
+{
+ "jwk": {
+  "kid": "prod-ed25519-1",
+  "x": "REC7d0_OWDV8D72by-9ZaxMSMoR8BNJul6s6ZzRBhok"
+ },
+ "action": {
+  "contract": {
+   "name": "action_intent",
+   "version": "v1"
+  },
+  "intent_id": "intent_b5141fbb6fd64564a750359cf6ef1f2b",
+  "issued_at": "2026-10-03T00:20:50.174552+00:00",
+  "expires_at": "2026-10-03T00:30:50.174552+00:00",
+  "tenant": {
+   "tenant_id": "t1"
+  },
+  "requester": {
+   "type": "agent",
+   "id": "agent-1"
+  },
+  "action": {
+   "name": "refund",
+   "capability": "payments.refund",
+   "parameters": {
+    "amount": 100,
+    "currency": "EUR"
+   }
+  },
+  "target": {
+   "resource_type": "charge",
+   "resource_id": "ch_1"
+  }
+ },
+ "proof": {
+  "contract": {
+   "name": "pccb",
+   "version": "v1"
+  },
+  "pccb_id": "pccb_1e5905193ca644e794fa299f8fd91e1a",
+  "issued_at": "2026-10-03T00:20:50.174661Z",
+  "not_before": "2026-10-03T00:20:50.174661Z",
+  "expires_at": "2026-10-03T00:30:50.174552Z",
+  "issuer": {
+   "type": "service",
+   "id": "issuer"
+  },
+  "subject": {
+   "type": "agent",
+   "id": "agent-1"
+  },
+  "tenant": {
+   "tenant_id": "t1"
+  },
+  "audience": {
+   "type": "service",
+   "id": "payments"
+  },
+  "action": {
+   "name": "refund",
+   "capability": "payments.refund",
+   "parameters": {
+    "amount": 100,
+    "currency": "EUR"
+   }
+  },
+  "target": {
+   "resource_type": "charge",
+   "resource_id": "ch_1"
+  },
+  "scope": {
+   "mode": "exact",
+   "capabilities": [
+    "payments.refund"
+   ],
+   "single_use": true,
+   "resource_selectors": [
+    {
+     "resource_id": "ch_1"
+    }
+   ],
+   "parameter_constraints": {
+    "amount": 100,
+    "currency": "EUR"
+   }
+  },
+  "nonce": "4nsrRC4ueaqJ9w9kDqO-kJzvjwnrqvRJ",
+  "action_hash": {
+   "algorithm": "sha-256",
+   "canonicalization": "ACTENON-JCS-STRICT-1",
+   "value": "ac6b6f32cee0bad05fb4f358dcd9020f2732d2705ec290f5e6233ed1ffbb30c3"
+  },
+  "intent_id": "intent_b5141fbb6fd64564a750359cf6ef1f2b",
+  "signature": {
+   "algorithm": "EdDSA",
+   "key_id": "prod-ed25519-1",
+   "encoding": "base64url",
+   "value": "_DEwSiivFQejpBYTbnionoEG7U-4kgzdXnqr1zlfeC2_wZj76sPiDqVuSyTap4kmg1c069XtTQ-alz9HZ9ZQCw"
+  }
+ },
+ "kernel_file": "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/__init__.py",
+ "ACTENON_ENV": "production"
+}

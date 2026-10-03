@@ -1,0 +1,13 @@
+## ACTENON_ENV=production  versions: {'actenon-kernel': '1.3.0rc1', 'actenon-protocol': '1.3.0'}
+### scenario A: default replay store (nothing configured)
+   (exit 1) actenon.security_posture.InsecureDefaultRefusedError: An ActenonGate with no declared capabilities requires explicit development intent and ACTENON_ENV='production' declares none. Pass capabilities=(...) naming what this gate's side effect performs (protocol/13-edge-binding.md E1), e.g. capabilities=("payment.refund",). For local development, demos or tests set ACTENON_ENV=development (or dev, local, test). To accept the weaker guarantee outside development anyway, set ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES=1 (unsafe; recorded as 'undeclared_capabilities').
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-A.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-A.json'
+RESULT A: side effects executed for ONE single-use proof = 0
+### scenario B (control): ACTENON_REPLAY_DB = one shared durable file
+   (exit 1) actenon.security_posture.InsecureDefaultRefusedError: An ActenonGate with no declared capabilities requires explicit development intent and ACTENON_ENV='production' declares none. Pass capabilities=(...) naming what this gate's side effect performs (protocol/13-edge-binding.md E1), e.g. capabilities=("payment.refund",). For local development, demos or tests set ACTENON_ENV=development (or dev, local, test). To accept the weaker guarantee outside development anyway, set ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES=1 (unsafe; recorded as 'undeclared_capabilities').
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-B.json'
+   (exit 1) FileNotFoundError: [Errno 2] No such file or directory: '/home/user/actenon-kernel/evidence/release/phase2/h1h2/out-phase1-harness-unmodified-production/proof-B.json'
+RESULT B: side effects executed for ONE single-use proof = 0
