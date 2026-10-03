@@ -134,6 +134,22 @@ now shipped. `tests/unit/test_package_data_declared.py` fails for any
 undeclared data file under `actenon/`, and the clean-install job runs `scan`
 from the wheel.
 
+### Fixed — timestamps parse identically on every supported Python
+
+`parse_timestamp` delegated to `datetime.fromisoformat`, whose grammar changed
+in Python 3.11. The same signed proof could verify on one interpreter and be
+refused on another: on 3.10 a fraction other than 3 or 6 digits was refused
+(`SCHEMA_INVALID`), and on 3.11+ week dates, basic format, `+0000`, `+00` and
+`,` fractions were accepted. On every interpreter the separator could be any
+character, and missing seconds, empty fractions and out-of-range offset
+minutes were accepted. Timestamps are now RFC 3339 section 5.6 `date-time`
+(the schemas' `"date-time"` format), with the separator `T`, `t` or a space,
+upper-case `Z`, and fractions of any length truncated to microseconds.
+`invoice_payment` dates are RFC 3339 `full-date`. Found by the north-star
+fresh-consumer rehearsal (kernel 1.3.0 on Python 3.10); measured against every
+SDK with the frozen `corpus-addendum-timestamp-grammar`. Every
+`kernel_diff_v1` reference outcome is unchanged on 3.10 and 3.11+.
+
 ### CI
 
 - The suite runs the configured testpaths (`actenon/` and `tests/`, which

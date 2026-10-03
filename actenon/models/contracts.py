@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import copy
+import re
 
 import warnings
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any, Mapping, Union
 
 
@@ -20,17 +21,52 @@ def format_timestamp(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+# RFC 3339 section 5.6 date-time (the protocol schemas' JSON Schema "date-time"), parsed the same way on
+# every supported Python. datetime.fromisoformat is not the grammar: what it accepts changed in 3.11 (any
+# fraction length, week and ordinal dates, basic format, "+0000"), which made acceptance depend on the
+# interpreter (and fromisoformat takes ANY character as the date/time separator). The grammar, measured
+# against every Actenon SDK (evidence/release/north-star/differential/corpus-addendum-timestamp-grammar):
+#   * "T", "t" or a single space between date and time (RFC 3339 5.6 NOTE permits lower case, and leaves
+#     the space to applications);
+#   * "Z" in upper case only (every Actenon implementation refuses "z");
+#   * fractional seconds of one or more digits after ".", truncated to microseconds.
+_FULL_DATE = r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
+_DATE_TIME = re.compile(
+    rf"(?P<date>{_FULL_DATE})[Tt ](?P<time>[0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}})(?:\.(?P<frac>[0-9]+))?"
+    r"(?P<offset>Z|[+-](?P<oh>[0-9]{2}):(?P<om>[0-9]{2}))?"
+)
+_DATE = re.compile(_FULL_DATE)
+
+
 def parse_timestamp(raw: Any, field_name: str) -> datetime:
     if not isinstance(raw, str):
         raise ValueError(f"{field_name} must be an RFC3339 timestamp string")
-    normalized = raw.replace("Z", "+00:00")
+    match = _DATE_TIME.fullmatch(raw)
+    if match is None:
+        raise ValueError(f"{field_name} must be an RFC3339 timestamp string")
+    if match["offset"] is None:
+        raise ValueError(f"{field_name} must include timezone information")
+    if match["offset"] != "Z" and (int(match["oh"]) > 23 or int(match["om"]) > 59):
+        raise ValueError(f"{field_name} must be an RFC3339 timestamp string")
+    fraction = (match["frac"] or "")[:6].ljust(6, "0")
+    offset = "+00:00" if match["offset"] == "Z" else match["offset"]
     try:
-        parsed = datetime.fromisoformat(normalized)
+        # This exact form (6-digit fraction, +hh:mm offset) parses identically on Python 3.10 and 3.11+,
+        # and validates the calendar and clock ranges (month 13, hour 24, second 60 are refused).
+        parsed = datetime.fromisoformat(f"{match['date']}T{match['time']}.{fraction}{offset}")
     except ValueError as exc:
         raise ValueError(f"{field_name} must be an RFC3339 timestamp string") from exc
-    if parsed.tzinfo is None:
-        raise ValueError(f"{field_name} must include timezone information")
     return parsed.astimezone(timezone.utc)
+
+
+def parse_calendar_date(raw: Any, field_name: str) -> date:
+    """RFC 3339 full-date (YYYY-MM-DD), identically on every supported Python."""
+    if not isinstance(raw, str) or _DATE.fullmatch(raw) is None:
+        raise ValueError(f"{field_name} must be a YYYY-MM-DD date")
+    try:
+        return date.fromisoformat(raw)
+    except ValueError as exc:
+        raise ValueError(f"{field_name} must be a YYYY-MM-DD date") from exc
 
 
 def expect_mapping(raw: Any, field_name: str) -> Mapping[str, Any]:

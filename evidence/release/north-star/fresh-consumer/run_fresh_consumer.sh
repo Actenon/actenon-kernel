@@ -43,6 +43,10 @@ cenv() {
     "$@"
 }
 sha() { sha256sum "$1" | cut -d' ' -f1; }
+NSDIFF=$(cd "$HERE/../differential" && pwd)
+CORPORA="diff:$DIFF/corpus diffadd:$DIFF/corpus-addendum-precision difftsg:$NSDIFF/corpus-addendum-timestamp-grammar"
+# run_corpora IMPL_STEM LABEL CMD... : CMD CORPUS OUT.jsonl LABEL for every frozen corpus
+run_corpora() { local stem=$1 label=$2; shift 2; local c; for c in $CORPORA; do "$@" "${c#*:}" "$OUT/${c%%:*}-$stem.jsonl" "$label" || return 1; done; }
 log "artefacts: $REL"; log "work dir: $W"; cp "$REL/SHA256SUMS" "$OUT/ARTEFACT-SHA256SUMS"; cp "$REL/SOURCE_COMMITS" "$OUT/" 2>/dev/null || true
 log "protocol tag archive: $ARCHIVE sha256=$(sha "$ARCHIVE")"
 
@@ -130,8 +134,7 @@ open("'"$d"'/permit_quickstart.py", "w").write(blocks[0])'
     && record "python-$label 'actenon demo'" PASS || record "python-$label 'actenon demo'" FAIL
   fi
   # 5. Frozen differential corpora through the installed kernel.
-  ( cd "$d/cwd" && cenv ACTENON_ENV=test "$d/venv/bin/python" -I "$DIFF/runner_py.py" "$DIFF/corpus" "$OUT/diff-python-kernel-$label.jsonl" "python-kernel-$EXP_KERNEL-$label" \
-    && cenv ACTENON_ENV=test "$d/venv/bin/python" -I "$DIFF/runner_py.py" "$DIFF/corpus-addendum-precision" "$OUT/diffadd-python-kernel-$label.jsonl" "python-kernel-$EXP_KERNEL-$label" ) >> "$LOG" 2>&1 \
+  ( cd "$d/cwd" && run_corpora "python-kernel-$label" "python-kernel-$EXP_KERNEL-$label" cenv ACTENON_ENV=test "$d/venv/bin/python" -I "$DIFF/runner_py.py" ) >> "$LOG" 2>&1 \
     && record "python-$label differential corpus run" PASS || record "python-$label differential corpus run" FAIL
   echo "$SITE" > "$W/site-$label"
 }
@@ -180,8 +183,7 @@ cp "$HERE/harness/ts/protocol_canonicalisation.ts" "$T/"
   && record "typescript @actenon/protocol-types canonicalisation vectors" PASS || record "typescript protocol canonicalisation" FAIL
 tail -2 "$OUT/ts-protocol-canonicalisation.txt" | tee -a "$LOG"
 cp "$DIFF2/runner_ts_strict_eddsa.mjs" "$T/"
-( cd "$T" && cenv node runner_ts_strict_eddsa.mjs "$DIFF/corpus" "$OUT/diff-ts-verifier-sdk.jsonl" "ts-verifier-sdk-$EXP_VSDK" \
-  && cenv node runner_ts_strict_eddsa.mjs "$DIFF/corpus-addendum-precision" "$OUT/diffadd-ts-verifier-sdk.jsonl" "ts-verifier-sdk-$EXP_VSDK" ) >> "$LOG" 2>&1 \
+( cd "$T" && run_corpora ts-verifier-sdk "ts-verifier-sdk-$EXP_VSDK" cenv node runner_ts_strict_eddsa.mjs ) >> "$LOG" 2>&1 \
   && record "typescript differential corpus run" PASS || record "typescript differential corpus run" FAIL
 
 # ---------------------------------------------------------------- Go (module proxy)
@@ -206,8 +208,7 @@ for variant in strict usenumber; do
   src="$DIFF/runner_go"; [ $variant = usenumber ] && src="$DIFF2/runner_go_usenumber"
   cp "$src"/*.go "$R/"
   ( cd "$R" && cenv go mod init example.com/runner && cenv go get github.com/Actenon/sdk-go@v1.1.0 && cenv go build -tags ed25519 -o runner . \
-    && ./runner "$DIFF/corpus" "$OUT/diff-go-sdk-$variant.jsonl" "go-sdk-$EXP_GO-$variant" \
-    && ./runner "$DIFF/corpus-addendum-precision" "$OUT/diffadd-go-sdk-$variant.jsonl" "go-sdk-$EXP_GO-$variant" ) >> "$LOG" 2>&1 \
+    && run_corpora "go-sdk-$variant" "go-sdk-$EXP_GO-$variant" ./runner ) >> "$LOG" 2>&1 \
     && record "go differential corpus run ($variant)" PASS || record "go differential corpus run ($variant)" FAIL
 done
 
@@ -257,8 +258,7 @@ time = { version = "0.3", features = ["formatting", "parsing"] }
 [features]
 ed25519 = []
 EOF
-( cd "$RR" && cenv cargo build -q --release --features ed25519 && ./target/release/diff-runner "$DIFF/corpus" "$OUT/diff-rust-sdk.jsonl" "rust-sdk-$EXP_CRATE" \
-  && ./target/release/diff-runner "$DIFF/corpus-addendum-precision" "$OUT/diffadd-rust-sdk.jsonl" "rust-sdk-$EXP_CRATE" ) >> "$LOG" 2>&1 \
+( cd "$RR" && cenv cargo build -q --release --features ed25519 && run_corpora rust-sdk "rust-sdk-$EXP_CRATE" ./target/release/diff-runner ) >> "$LOG" 2>&1 \
   && record "rust differential corpus run" PASS || record "rust differential corpus run" FAIL
 
 # ---------------------------------------------------------------- source-tree absence (whole run)
