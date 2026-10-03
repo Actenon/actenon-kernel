@@ -1,7 +1,9 @@
 # Owner actions (OWNER_ACTION_REQUIRED)
 
 These steps need repository-admin or registry credentials that this session does not have. Nothing below
-was done. Each item names the exact action and what it unblocks. The commands use the GitHub CLI as an org
+was done. **A1-A5 are scripted in `owner/apply-owner-actions.sh`** (dry run by default; `APPLY=1` applies). It
+applies the A3 payloads with 0 required approving reviews: every repository has a single collaborator and
+GitHub forbids self-approval, so the generated `required_approving_review_count: 1` would block every merge. Each item names the exact action and what it unblocks. The commands use the GitHub CLI as an org
 admin.
 
 ## A. Before the first publication (blocking)

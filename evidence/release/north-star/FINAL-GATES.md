@@ -33,5 +33,5 @@ as the value.
 3. The published-artefact conformance statement is false until step 6 (G4, G5).
 4. AIRLOCK-001 has not started (G6).
 5. blastradius 0.5.0 is not on `main` or a registry (B3).
-6. The kernel's skip-allowlist commit and this evidence are not yet pushed: outbound network outage in this
-   session (DNS and the egress proxy both failing since about 13:30 UTC).
+6. ~~The kernel's skip-allowlist commit and this evidence are not yet pushed~~: recovered and pushed as ce339cf;
+   kernel Python 3.10/3.11/3.12 green on GitHub. Current classification: CURRENT-STATE-20261003.md.
