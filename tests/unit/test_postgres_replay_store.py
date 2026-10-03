@@ -56,6 +56,9 @@ class _PercentStyleSqliteConnection:
         )
         self._connection.row_factory = sqlite3.Row
         self._connection.execute("PRAGMA journal_mode=WAL")
+        # PostgreSQL function the store calls before creating its schema; SQLite
+        # already serialises writers, so the stand-in only has to exist.
+        self._connection.create_function("pg_advisory_xact_lock", 1, lambda key: None)
         self._sql_log = sql_log
         self.autocommit = False
 
@@ -95,6 +98,13 @@ class PostgresReplayStoreTests(unittest.TestCase):
             ).fetchone()[0]
 
         self.assertEqual(1, table_count)
+
+    def test_schema_creation_takes_the_advisory_lock_first(self) -> None:
+        # Concurrent CREATE TABLE IF NOT EXISTS races in PostgreSQL; the lock must
+        # precede every DDL statement in the schema transaction.
+        first_ddl = next(i for i, sql in enumerate(self.sql_log) if "CREATE " in sql)
+        lock = next(i for i, sql in enumerate(self.sql_log) if "pg_advisory_xact_lock" in sql)
+        self.assertLess(lock, first_ddl)
 
     def test_requires_dsn_or_connection_factory(self) -> None:
         with self.assertRaises(ValueError):
