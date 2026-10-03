@@ -52,14 +52,59 @@ BASE_URL_OVERRIDES: dict[str, str] = {
 
 SECRET_HINTS = ("TOKEN", "SECRET", "PASSWORD", "PASSWD", "API_KEY", "APIKEY", "PRIVATE_KEY", "CREDENTIAL")
 
+# Provider names inside a credential variable's name (e.g. pr-agent's ``GITHUB.USER_TOKEN``, ``OPENAI.KEY``).
+PROVIDER_HINTS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (("GITHUB", "GH_"), ("api.github.com", "uploads.github.com")),
+    (("OPENAI",), ("api.openai.com",)),
+    (("ANTHROPIC", "CLAUDE"), ("api.anthropic.com",)),
+    (("SLACK",), ("slack.com",)),
+    (("STRIPE",), ("api.stripe.com",)),
+    (("LINEAR",), ("api.linear.app",)),
+    (("NOTION",), ("api.notion.com",)),
+    (("GROQ",), ("api.groq.com",)),
+    (("MISTRAL",), ("api.mistral.ai",)),
+    (("DEEPSEEK",), ("api.deepseek.com",)),
+    (("OPENROUTER",), ("openrouter.ai",)),
+    (("GEMINI",), ("generativelanguage.googleapis.com",)),
+)
+
+# Model-provider chat endpoints, used when the code picks the provider through configuration (e.g. LiteLLM
+# with the model in a settings file): the endpoints of the providers whose credential is configured.
+LLM_ENDPOINTS: dict[str, tuple[str, ...]] = {
+    "api.openai.com": ("api.openai.com/v1/chat/completions",),
+    "api.anthropic.com": ("api.anthropic.com/v1/messages",),
+    "api.groq.com": ("api.groq.com/openai/v1/chat/completions",),
+    "api.mistral.ai": ("api.mistral.ai/v1/chat/completions",),
+    "api.deepseek.com": ("api.deepseek.com/chat/completions",),
+    "openrouter.ai": ("openrouter.ai/api/v1/chat/completions",),
+    "generativelanguage.googleapis.com": ("generativelanguage.googleapis.com/v1beta/models/{}:generateContent",),
+}
+
 
 def looks_secret(name: str) -> bool:
     n = name.upper()
-    return any(h in n for h in SECRET_HINTS)
+    if n.endswith(("_FILE", "_DIR", "_PATH", "_URL", "_URI", "_HOME")):
+        return False  # these hold locations, not secrets
+    return any(h in n for h in SECRET_HINTS) or n.endswith((".KEY", "_KEY")) and len(n) > 4
+
+
+def infer_hosts(name: str) -> tuple[str, ...]:
+    """Hosts a secret-looking variable most plausibly authenticates to, from a provider name inside it."""
+    if name in KNOWN_CREDENTIALS:
+        return KNOWN_CREDENTIALS[name]
+    if not looks_secret(name):
+        return ()
+    n = name.upper()
+    if "AZURE" in n or "BEDROCK" in n or "VERTEX" in n:
+        return ()  # cloud-hosted variants of a provider live on other hosts
+    for hints, hosts in PROVIDER_HINTS:
+        if any(n.startswith(h) or f"_{h}" in n or f".{h}" in n for h in hints):
+            return hosts
+    return ()
 
 
 def hosts_for(name: str, env: dict[str, str]) -> tuple[str, ...]:
-    hosts = list(KNOWN_CREDENTIALS.get(name, ()))
+    hosts = list(KNOWN_CREDENTIALS.get(name, ()) or infer_hosts(name))
     override = BASE_URL_OVERRIDES.get(name)
     if override and env.get(override):
         host = (urlsplit(env[override]).hostname or "").lower()

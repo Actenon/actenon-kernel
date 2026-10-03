@@ -63,13 +63,11 @@ def init_summary(manifest: Manifest, *, files: int, reads_skipped: int, unmanage
     for e in approved:
         lines.append(f"{green('✓')} {action_label(e.action)}")
         lines.append(f"  {e.resource}")
-    for u in manifest.unresolved:
-        lines.append(f"{yellow('⚠')} {action_label(u.action)} — {missing_label(u)}")
-        lines.append(f"  {dim(f'{u.file}:{u.line} in {u.function}')}")
-        lines.append(f"  {red('BLOCKED') if u.decision != 'dynamic' else red('BLOCKED') + dim(' (marked intentionally dynamic)')}")
-    if not approved and not manifest.unresolved:
+    lines += unresolved_lines(manifest)
+    open_items = [u for u in manifest.unresolved if u.decision != "resolved-by-user"]
+    if not approved and not open_items:
         lines.append(dim("  (no consequential capabilities found)"))
-    lines += ["", f"{len(approved)} authorised", f"{len(manifest.unresolved)} blocked (unresolved)"]
+    lines += ["", f"{len(approved)} authorised", f"{len(open_items)} blocked (unresolved)"]
     if manifest.credentials:
         lines += ["", "Credentials Airlock will hold (the agent only sees placeholders):",
                   "  " + ", ".join(sorted(manifest.credentials))]
@@ -79,6 +77,29 @@ def init_summary(manifest: Manifest, *, files: int, reads_skipped: int, unmanage
         lines += ["", dim(f"{reads_skipped} plain read request{'s' if reads_skipped != 1 else ''} without credentials need no authority.")]
     lines += ["", bold("Ready.") + " Run your agent with: " + bold("airlock run" + (" -- <command>" if not manifest.command else ""))]
     return "\n".join(lines)
+
+
+def unresolved_lines(manifest: Manifest) -> list[str]:
+    from .manifest import GROUP_LABELS, group_unresolved
+
+    lines: list[str] = []
+    for part, items in group_unresolved(manifest.unresolved).items():
+        label = GROUP_LABELS.get(part, part)
+        if len(items) == 1:
+            u = items[0]
+            lines.append(f"{yellow('⚠')} {action_label(u.action)} — {missing_label(u)}")
+            lines.append(f"  {dim(f'{u.file}:{u.line} in {u.function}')}")
+        else:
+            actions = sorted({action_label(u.action) for u in items})
+            files = sorted({u.file for u in items})
+            shown = ", ".join(actions[:5]) + (f" (+{len(actions) - 5})" if len(actions) > 5 else "")
+            lines.append(f"{yellow('⚠')} {len(items)} capabilities with the {label} decided at runtime: {shown}")
+            lines.append("  " + dim(", ".join(files[:3]) + (f" (+{len(files) - 3} files)" if len(files) > 3 else "")))
+        hint = {"repository": "airlock init --resolve repository=OWNER/REPO",
+                "path": "airlock init --resolve path=./DIRECTORY/",
+                "host": "airlock approve --target ACTION HOST/PATH"}.get(part)
+        lines.append(f"  {red('BLOCKED')}" + (dim(f" · to allow one exact {label}: {hint}") if hint else ""))
+    return lines
 
 
 # --- runtime events ----------------------------------------------------------------------------------------

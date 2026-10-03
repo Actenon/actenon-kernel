@@ -24,11 +24,11 @@ from pathlib import Path
 
 from . import __version__
 from . import render as R
-from .credentials import KNOWN_CREDENTIALS, Vault, hosts_for
+from .credentials import Vault, hosts_for
 from .diff import AuthorityDiff, compute_diff, diff_manifests
 from .discovery import discover
 from .manifest import (MANIFEST_NAME, STATE_DIR, AuthorityEntry, Manifest, ManifestError, check_seal, now_iso,
-                       seal_approval, sealed_authority)
+                       resolve_group, seal_approval, sealed_authority)
 
 RUNTIME_DIR = Path(__file__).parent / "runtime"
 
@@ -87,6 +87,15 @@ def cmd_init(args: argparse.Namespace) -> int:
     if args.command:
         d.command = args.command
     manifest = d.to_manifest(root.name, approve=True, at=now_iso(), generated_by=f"airlock {__version__}")
+    for spec in args.resolve or []:
+        part, _, value = spec.partition("=")
+        err = _validate_exact_target(value) if part != "path" else (None if value and "*" not in value else "wildcards are never accepted")
+        if err or not part:
+            _err(f"--resolve {spec}: {err or 'expected PART=VALUE'}")
+            return 2
+        added = resolve_group(manifest, part.strip(), value.strip(), now_iso())
+        if not added:
+            _err(R.yellow(f"--resolve {spec}: no unresolved {part} to apply it to"))
     if manifest.unresolved and _interactive(args):
         _decide_unresolved(manifest)
     if args.json:
@@ -103,7 +112,22 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 
 def _decide_unresolved(manifest: Manifest) -> None:
+    from .manifest import GROUP_LABELS, group_unresolved
+
+    for part, items in group_unresolved(manifest.unresolved).items():
+        if len(items) < 2 or part not in ("repository", "path"):
+            continue
+        label = GROUP_LABELS[part]
+        actions = sorted({R.action_label(u.action) for u in items})
+        _out("")
+        _out(f"Airlock cannot determine the {label} for {len(items)} capabilities: {', '.join(actions)}")
+        _out(f"Allow them on one exact {label} (e.g. {'acme/project' if part == 'repository' else './output/'}), or press Enter to keep them blocked:")
+        value = input("> ").strip()
+        if value and "*" not in value:
+            resolve_group(manifest, part, value, now_iso())
     for u in manifest.unresolved:
+        if u.decision != "blocked":
+            continue
         _out("")
         _out(f"Airlock cannot determine the {R.missing_label(u).replace(' decided at runtime', '')} for:")
         _out(f"  {R.action_label(u.action)}   {u.file}:{u.line} in {u.function}")
@@ -310,8 +334,8 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     env = _project_env(root)
     names = {n: tuple(h) for n, h in manifest.credentials.items()}
-    for n in KNOWN_CREDENTIALS:  # every well-known credential present is held, discovered or not
-        if n in env and n not in names:
+    for n in env:  # every credential whose provider is known is held, discovered or not
+        if n not in names and hosts_for(n, env):
             names[n] = hosts_for(n, env)
     vault = Vault.from_environment(names, env)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + secrets.token_hex(3)
@@ -416,6 +440,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--yes", "-y", action="store_true", help="non-interactive: leave unresolved authority blocked")
     s.add_argument("--force", action="store_true", help="rediscover even if airlock.json exists")
     s.add_argument("--json", action="store_true")
+    s.add_argument("--resolve", action="append", metavar="PART=VALUE",
+                   help="answer a group of unresolved authority with one exact target: repository=OWNER/REPO, path=./DIR/")
     s.add_argument("--command", nargs=argparse.REMAINDER, help="the command that starts the agent (default: detected)")
     s.set_defaults(fn=cmd_init)
 

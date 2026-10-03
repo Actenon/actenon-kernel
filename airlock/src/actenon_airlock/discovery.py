@@ -21,7 +21,7 @@ from pathlib import Path
 
 from actenon_scan.authority import AuthorityEvidence, ResourceState, extract_authority, load_env_files
 
-from .credentials import KNOWN_CREDENTIALS, hosts_for, looks_secret
+from .credentials import LLM_ENDPOINTS, hosts_for, infer_hosts, looks_secret
 from .manifest import AuthorityEntry, Evidence, Manifest, UnresolvedItem
 
 IMPLICIT_CREDENTIALS = {  # SDKs that read a credential variable without naming it in the code
@@ -85,7 +85,11 @@ def detect_command(root: Path) -> list[str]:
     return []
 
 
+_ENV_READERS = ("getenv", "get", "environ", "pop", "setdefault")
+
+
 def _env_names_in_code(root: Path, files: list[str]) -> set[str]:
+    """Names of environment variables the code reads: os.environ[...], os.getenv(...), os.environ.get(...)."""
     names: set[str] = set()
     for rel in files:
         try:
@@ -93,11 +97,18 @@ def _env_names_in_code(root: Path, files: list[str]) -> set[str]:
         except (SyntaxError, UnicodeDecodeError, OSError, ValueError):
             continue
         for node in ast.walk(tree):
-            # Any upper-case identifier-like string literal is a candidate variable name; only well-known
-            # credential names and secret-looking names are used.
-            if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.isupper() \
-                    and 3 <= len(node.value) <= 64 and node.value.replace("_", "").isalnum():
-                names.add(node.value)
+            key = None
+            if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute) and node.value.attr == "environ":
+                key = node.slice
+            elif isinstance(node, ast.Call) and node.args:
+                f = node.func
+                if isinstance(f, ast.Attribute) and (f.attr == "getenv" or (f.attr in _ENV_READERS and isinstance(f.value, ast.Attribute)
+                                                                           and f.value.attr == "environ")):
+                    key = node.args[0]
+                elif isinstance(f, ast.Name) and f.id == "getenv":
+                    key = node.args[0]
+            if isinstance(key, ast.Constant) and isinstance(key.value, str) and 2 <= len(key.value) <= 128:
+                names.add(key.value)
     return names
 
 
@@ -110,6 +121,12 @@ def _python_files(root: Path) -> list[str]:
             if f.endswith(".py"):
                 out.append(str((Path(dirpath) / f).relative_to(root)))
     return out
+
+
+def _host_of(ev: AuthorityEvidence) -> str:
+    if ev.resource and ev.action.startswith("http."):
+        return ev.resource.split("/", 1)[0]
+    return ""
 
 
 def unresolved_id(ev: AuthorityEvidence) -> str:
@@ -132,20 +149,41 @@ def discover(root: Path, *, env: dict[str, str] | None = None) -> Discovery:
     d.evidence = list(report.evidence)
 
     # credentials ---------------------------------------------------------------------------------------
-    referenced = _env_names_in_code(root, _python_files(root)) | set(example_env) | set(file_env)
+    code_names = _env_names_in_code(root, _python_files(root))
+    referenced = code_names | set(example_env) | set(file_env)
     for ev in report.evidence:
         for prefix, name in IMPLICIT_CREDENTIALS.items():
             if ev.via.startswith(prefix):
                 referenced.add(name)
+    # Secrets configured in the environment whose provider can be named (e.g. pr-agent's GITHUB.USER_TOKEN,
+    # read through a settings library) count only when the agent's code acts on that provider's host.
+    acted_hosts = {_host_of(ev) for ev in report.evidence} | ({"api.github.com"} if any(
+        ev.action.startswith("github.") for ev in report.evidence) else set())
+    referenced |= {n for n in scan_env if looks_secret(n) and set(infer_hosts(n)) & acted_hosts}
+    declared = set(file_env) | set(example_env) | code_names
     for name in sorted(referenced):
-        if name in KNOWN_CREDENTIALS:
-            d.credentials[name] = list(hosts_for(name, scan_env))
-        elif looks_secret(name):
+        hosts = hosts_for(name, scan_env)
+        if hosts:
+            d.credentials[name] = list(hosts)
+        elif looks_secret(name) and name in declared:
             d.unmanaged_secrets.append(name)
     credential_hosts = {h for hosts in d.credentials.values() for h in hosts}
 
     # authority -----------------------------------------------------------------------------------------
+    configured = {n for n in d.credentials if n in scan_env and scan_env.get(n)}
+    llm_endpoints = sorted({ep for n in configured for h in d.credentials[n] for ep in LLM_ENDPOINTS.get(h, ())})
     for ev in report.evidence:
+        if ev.resource_state is ResourceState.UNRESOLVED and ev.unresolved_parts == ("provider",) and llm_endpoints:
+            # The code picks the model provider from configuration: authorise exactly the chat endpoints of the
+            # providers whose credential is configured for this agent (never "any host").
+            for ep in llm_endpoints:
+                key = ("http.post", ep)
+                entry = d.entries.get(key) or AuthorityEntry("http.post", ep, note="model provider from configured credentials")
+                d.entries[key] = entry
+                evid = Evidence(ev.file, ev.line, ev.function, ev.via)
+                if all((x.file, x.line) != (evid.file, evid.line) for x in entry.evidence):
+                    entry.evidence.append(evid)
+            continue
         if ev.resource_state is ResourceState.UNRESOLVED:
             d.unresolved.append(UnresolvedItem(
                 id=unresolved_id(ev), action=ev.action, missing=list(ev.unresolved_parts) or ["target"], file=ev.file,

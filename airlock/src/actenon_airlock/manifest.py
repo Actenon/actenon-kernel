@@ -56,7 +56,15 @@ class AuthorityEntry:
         return (self.action, self.resource)
 
     def matches(self, action: str, resource: str) -> bool:
-        return action == self.action and resource_matches(self.resource, resource)
+        if action != self.action:
+            return False
+        if resource_matches(self.resource, resource):
+            return True
+        # A directory ("./out/") is authority over the files below it only when a person chose it
+        # (`--resolve path=./out/`); discovery never produces one.
+        if self.origin == "user" and self.action.startswith("filesystem.") and self.resource.endswith("/"):
+            return resource.startswith(self.resource) and ".." not in resource.split("/")
+        return False
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -214,3 +222,54 @@ def sealed_authority(root: Path) -> set[tuple[str, str]]:
     except (OSError, json.JSONDecodeError):
         return set()
     return {(a, r) for a, r in rec.get("authority", [])}
+
+
+# --- grouping of unresolved authority -------------------------------------------------------------------
+
+GROUP_LABELS = {
+    "repository": "GitHub repository",
+    "owner": "GitHub account",
+    "host": "destination",
+    "path": "file path",
+    "program": "program",
+    "provider": "model provider",
+}
+
+
+def group_key(u: UnresolvedItem) -> str:
+    if u.action.startswith("github.") and ("repository" in u.missing or "owner" in u.missing):
+        return "repository"
+    return u.missing[0] if u.missing else "target"
+
+
+def group_unresolved(items: list[UnresolvedItem]) -> dict[str, list[UnresolvedItem]]:
+    out: dict[str, list[UnresolvedItem]] = {}
+    for u in items:
+        if u.decision == "resolved-by-user":
+            continue
+        out.setdefault(group_key(u), []).append(u)
+    return out
+
+
+def resolve_group(manifest: Manifest, part: str, value: str, at: str) -> list[AuthorityEntry]:
+    """Turn one person-supplied exact target into authority for every unresolved item of that group."""
+    added: list[AuthorityEntry] = []
+    for u in group_unresolved(manifest.unresolved).get(part, []):
+        if part == "repository":
+            repo = value.removeprefix("https://").removeprefix("github.com/").strip("/")
+            resource = f"github.com/{repo}"
+        elif part == "path":
+            resource = value if value.startswith(("./", "/", "~/")) else "./" + value
+        else:
+            resource = value.removeprefix("https://").removeprefix("http://")
+        if manifest.find(u.action, resource) is None and all(e.key != (u.action, resource) for e in added):
+            e = AuthorityEntry(u.action, resource, origin="user", approved_at=at, note=f"{GROUP_LABELS.get(part, part)} chosen by user",
+                               evidence=[Evidence(u.file, u.line, u.function, u.via)])
+            manifest.authority.append(e)
+            added.append(e)
+        else:
+            for e in manifest.authority + added:
+                if e.key == (u.action, resource) and all((x.file, x.line) != (u.file, u.line) for x in e.evidence):
+                    e.evidence.append(Evidence(u.file, u.line, u.function, u.via))
+        u.decision = "resolved-by-user"
+    return added
