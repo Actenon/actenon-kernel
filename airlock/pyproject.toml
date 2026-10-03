@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "actenon-airlock"
+version = "0.1.0"
+description = "Run your AI agent through Airlock: it discovers what the agent can actually do, gives it only those powers, and blocks anything new until you approve it."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [{ name = "Actenon" }]
+keywords = ["ai-agents", "security", "least-privilege", "authority", "agent-security"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Security",
+]
+# The internal components are dependencies: a user installs only Airlock.
+dependencies = [
+  "actenon-scan>=1.6.0,<2",
+  "actenon-permit>=2.0.0,<3",
+  "actenon-kernel>=1.3.0,<2",
+  "actenon-protocol>=1.4.0,<2",
+  "cryptography>=42",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "requests>=2.31", "httpx>=0.27"]
+
+[project.scripts]
+airlock = "actenon_airlock.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Actenon/actenon-kernel/tree/main/airlock"
+Source = "https://github.com/Actenon/actenon-kernel/tree/main/airlock"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = ["actenon_airlock", "actenon_airlock.runtime"]
+
+[tool.setuptools.package-data]
+"actenon_airlock.runtime" = ["*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
