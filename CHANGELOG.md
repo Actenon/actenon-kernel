@@ -143,6 +143,18 @@ added under the 1.0.0 label, so the same "Actenon Verified (Conformance 1.0.0)"
 claim would have meant different suites. `actenon-kernel conformance run` now
 reports 1.1.0, and the signed tag `conformance-v1.1.0` publishes it.
 
+### Fixed — PostgreSQL replay store: workers starting together all start
+
+`PostgresReplayStore` creates its schema in its constructor with
+`CREATE TABLE IF NOT EXISTS`, which is not safe against concurrent sessions in
+PostgreSQL: workers starting together against an empty database failed with
+`UniqueViolation` on `pg_type` (139 of 160 constructors in 20 rounds of 8
+processes; also visible in the phase-2 real-server evidence, where one of four
+workers failed to start). Schema creation now takes a transaction-scoped
+advisory lock first. It always failed closed (no execution), so this is an
+availability fix. `tests/integration/test_postgres_real_server.py` covers it
+in the `postgres-replay` CI job.
+
 ### Fixed — timestamps parse identically on every supported Python
 
 `parse_timestamp` delegated to `datetime.fromisoformat`, whose grammar changed

@@ -67,3 +67,42 @@ def test_unreachable_server_never_executes(monkeypatch):
         return  # refused at construction: fails closed
     out = gate.protect(action, proof, lambda: executed.append(1))
     assert not out.ok and executed == []
+
+
+def _construct_store(dsn: str, schema: str, barrier, results) -> None:
+    barrier.wait()
+    try:
+        PostgresReplayStore(dsn, connect_kwargs={"options": f"-c search_path={schema}"})
+        results.put("ok")
+    except Exception as exc:  # reported, then asserted on by the parent
+        results.put(f"{type(exc).__name__}: {str(exc).splitlines()[0]}")
+
+
+def test_concurrent_cold_start_creates_the_schema_once():
+    """Workers starting together against an empty database must all start.
+
+    CREATE TABLE IF NOT EXISTS is not concurrency-safe in PostgreSQL: before the
+    advisory lock, 139 of 160 such constructors failed with UniqueViolation on
+    pg_type (north-star evidence), i.e. a cold-started fleet lost workers.
+    """
+    import multiprocessing
+
+    import psycopg
+
+    ctx = multiprocessing.get_context("spawn")
+    for _ in range(3):
+        schema = f"cold_start_{uuid.uuid4().hex[:12]}"
+        with psycopg.connect(DSN, autocommit=True) as conn:
+            conn.execute(f"CREATE SCHEMA {schema}")
+        try:
+            barrier, results = ctx.Barrier(8), ctx.Queue()
+            workers = [ctx.Process(target=_construct_store, args=(DSN, schema, barrier, results)) for _ in range(8)]
+            for w in workers:
+                w.start()
+            for w in workers:
+                w.join(60)
+            outcomes = [results.get(timeout=5) for _ in workers]
+            assert outcomes == ["ok"] * 8, outcomes
+        finally:
+            with psycopg.connect(DSN, autocommit=True) as conn:
+                conn.execute(f"DROP SCHEMA {schema} CASCADE")

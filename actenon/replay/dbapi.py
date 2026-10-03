@@ -34,6 +34,9 @@ class DbApiReplayStore(ReplayStore):
     """Production-oriented abstraction for transactional relational replay stores."""
 
     parameter_placeholder = "?"
+    # Executed first, in the same transaction as the schema DDL, by backends whose
+    # CREATE ... IF NOT EXISTS is not safe against concurrent creators.
+    schema_lock_statement: str | None = None
 
     def __init__(self, connection_factory: Callable[[], Any]) -> None:
         self._connection_factory = connection_factory
@@ -47,6 +50,8 @@ class DbApiReplayStore(ReplayStore):
     def ensure_schema(self) -> None:
         with self._connect() as connection:
             cursor = connection.cursor()
+            if self.schema_lock_statement:
+                cursor.execute(self.schema_lock_statement)
             cursor.execute(
                 self._sql(
                     """
