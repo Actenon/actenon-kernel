@@ -36,7 +36,7 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             subprocess.run(
                 [
                     str(python), "-m", "pip", "install",
-                    "actenon-protocol>=1.5.0,<2",
+                    "actenon-protocol>=1.6.0,<2",
                 ],
                 check=True,
                 cwd=REPO_ROOT,

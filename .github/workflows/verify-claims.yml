@@ -18,7 +18,7 @@ on:
     - cron: "47 6 * * *"
   workflow_dispatch:
 
-# Temporary immutable input while Protocol 1.5.0 awaits registry publication.
+# Temporary immutable input while Protocol 1.6.0 awaits registry publication.
 env:
   PIP_CONSTRAINT: ${{ github.workspace }}/.github/candidate-constraints.txt
 
@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "actenon-protocol>=1.5.0,<2"
+          python -m pip install "actenon-protocol>=1.6.0,<2"
           python -m pip install -e ".[mcp,dev]"
 
       - name: Verify zero network calls during verification (neutrality)
@@ -230,8 +230,8 @@ jobs:
           with open('pyproject.toml', 'rb') as f:
               data = tomllib.load(f)
           deps = data['project']['dependencies']
-          assert any('actenon-protocol' in d and '1.5.0' in d for d in deps), (
-              f'actenon-protocol >= 1.5.0 not pinned in dependencies: {deps}'
+          assert any('actenon-protocol' in d and '1.6.0' in d for d in deps), (
+              f'actenon-protocol >= 1.6.0 not pinned in dependencies: {deps}'
           )
-          print('OK: actenon-protocol >= 1.5.0 pinned')
+          print('OK: actenon-protocol >= 1.6.0 pinned')
           "

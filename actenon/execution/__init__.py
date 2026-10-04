@@ -1,5 +1,6 @@
 """Protected execution helpers."""
 
+from .effects import EffectProtector, EffectReference
 from .mode_aware import (
     BROKERED_TRANSITIONS,
     RESOURCE_OWNED_TRANSITIONS,
@@ -18,6 +19,8 @@ from .protected_executor import BrokeredHandler, ProtectedExecutor
 __all__ = [
     "BROKERED_TRANSITIONS",
     "BrokeredHandler",
+    "EffectProtector",
+    "EffectReference",
     "BrokeredStateMachine",
     "ModeAwareExecutionResult",
     "RESOURCE_OWNED_TRANSITIONS",

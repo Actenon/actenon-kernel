@@ -25,7 +25,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "actenon-protocol>=1.5.0,<2",
+  "actenon-protocol>=1.6.0,<2",
   "pyyaml>=6.0,<7",
   # The reference broker (actenon-permit) mints Ed25519 proofs in
   # production. A verifier whose default install cannot verify those
@@ -49,7 +49,7 @@ postgres = ["psycopg[binary]>=3.1"]
 
 [tool.uv.sources]
 # Coordinated source testing only; remove before registry publication.
-actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "4cbd8f04e0db331b2ffd490d50c0a7aede2d35ff" }
+actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "3442bf3cffe0b55ac7d531e66ca0355d2c0784e5" }
 
 [project.scripts]
 # The kernel's CLI is `actenon-kernel`. The unified developer CLI `actenon`

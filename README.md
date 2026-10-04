@@ -503,3 +503,15 @@ The Kernel depends only on [`actenon-protocol`](https://github.com/Actenon/acten
 ## License
 
 Apache-2.0 — see [`LICENSE`](LICENSE).
+
+### Effect ownership at a protected edge
+
+For consequential retry safety, configure `EffectProtector` from
+`actenon.execution.effects` with a resource-owner namespace and the authority
+engine's atomic ledger claim hook. Kernel recomputes the effect identity and
+requires the signed `extensions.effect` reference to match the exact execution
+attempt before acquiring credentials. An edge without this hook refuses
+effect-bearing proofs. A trusted boundary must return matching `effect_evidence`
+with `COMMITTED`, `NOT_EXECUTED`, or `AMBIGUOUS` certainty; transport success alone
+does not establish a committed consequence. Ambiguity holds the reservation
+until trusted reconciliation. See [integration requirements and attack evidence](docs/evidence/effect-reference/README.md).

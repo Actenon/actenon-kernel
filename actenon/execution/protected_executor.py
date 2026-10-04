@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Literal
 
 from actenon.core.errors import RefusalException
@@ -12,12 +12,27 @@ from actenon.core.redaction import (
 )
 from actenon.credentials import BrokeredCredential, CredentialBroker
 from actenon.escrow import CapabilityEscrow
-from actenon.idempotency import IdempotencyStore, OutcomeState
-from actenon.models.runtime import ExecutionResult, PolicyDecision, ProtectedExecutionRequest
+from .effects import EffectProtector
+from actenon_protocol.effects import validate_effect_outcome
+from actenon.proof.canonical import sha256_hex
+from actenon.idempotency import IdempotencyStore
+from actenon.models.runtime import (
+    ExecutionResult,
+    PolicyDecision,
+    ProtectedExecutionRequest,
+)
 from actenon.proof import PCCBVerifier
-from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
+from actenon.receipts import (
+    InMemoryOutcomeWriter,
+    OutcomeWriter,
+    ReceiptFactory,
+    RefusalFactory,
+)
 from actenon.replay import ReplayProtector
-from actenon.replay.service import default_replay_db_path, default_replay_store_downgrades
+from actenon.replay.service import (
+    default_replay_db_path,
+    default_replay_store_downgrades,
+)
 from actenon.replay.sqlite import SqliteReplayStore
 from actenon.security_posture import (
     DOWNGRADE_REPLAY_PROTECTION_DISABLED,
@@ -28,7 +43,9 @@ from actenon.security_posture import (
 )
 
 
-BrokeredHandler = Callable[[ProtectedExecutionRequest, BrokeredCredential], dict[str, Any]]
+BrokeredHandler = Callable[
+    [ProtectedExecutionRequest, BrokeredCredential], dict[str, Any]
+]
 REPLAY_PROTECTION_DISABLED_WARNING = (
     "Actenon: replay/single-use protection DISABLED — the same proof can execute more than once. "
     "This is unsafe for consequential actions."
@@ -40,7 +57,9 @@ REPLAY_STORE_FAIL_OPEN_WARNING = (
 
 
 def _policy_refusal(decision: PolicyDecision) -> RefusalException:
-    reason_code = decision.reason_codes[0] if decision.reason_codes else "POLICY_REFUSED"
+    reason_code = (
+        decision.reason_codes[0] if decision.reason_codes else "POLICY_REFUSED"
+    )
     return RefusalException(
         category="policy",
         refusal_code=reason_code,
@@ -102,6 +121,7 @@ class ProtectedExecutor:
     replay_protection: Literal["default", "disabled"] = "default"
     replay_store_failure: Literal["fail_closed", "fail_open"] = "fail_closed"
     idempotency_store: IdempotencyStore | None = None
+    effect_protector: EffectProtector | None = None
     # Weakened guarantees this executor was built with (empty in a correctly
     # configured production deployment). See actenon.security_posture.
     security_downgrades: tuple[str, ...] = field(default=(), init=False)
@@ -110,12 +130,18 @@ class ProtectedExecutor:
         if self.replay_protection not in {"default", "disabled"}:
             raise ValueError("replay_protection must be 'default' or 'disabled'")
         if self.replay_store_failure not in {"fail_closed", "fail_open"}:
-            raise ValueError("replay_store_failure must be 'fail_closed' or 'fail_open'")
+            raise ValueError(
+                "replay_store_failure must be 'fail_closed' or 'fail_open'"
+            )
         if self.replay_protection == "disabled":
             if self.replay_protector is not None:
-                raise ValueError("replay_protector cannot be supplied when replay_protection is 'disabled'")
+                raise ValueError(
+                    "replay_protector cannot be supplied when replay_protection is 'disabled'"
+                )
             if self.replay_store_failure != "fail_closed":
-                raise ValueError("replay_store_failure cannot be 'fail_open' when replay_protection is 'disabled'")
+                raise ValueError(
+                    "replay_store_failure cannot be 'fail_open' when replay_protection is 'disabled'"
+                )
             downgrade = permit_downgrade(
                 DOWNGRADE_REPLAY_PROTECTION_DISABLED,
                 override_env=UNSAFE_ALLOW_REPLAY_DISABLED_ENV,
@@ -138,7 +164,9 @@ class ProtectedExecutor:
             logging.warning(REPLAY_STORE_FAIL_OPEN_WARNING)
         if self.replay_protector is None:
             downgrades.extend(default_replay_store_downgrades())
-            self.replay_protector = ReplayProtector(SqliteReplayStore(default_replay_db_path()))
+            self.replay_protector = ReplayProtector(
+                SqliteReplayStore(default_replay_db_path())
+            )
         self.security_downgrades = tuple(downgrades)
 
     def _claim_replay(self, request: ProtectedExecutionRequest):
@@ -159,11 +187,15 @@ class ProtectedExecutor:
                 details={"operation": "claim"},
             ) from exc
 
-    def _mark_replay_consumed(self, replay_state, *, request: ProtectedExecutionRequest) -> bool:
+    def _mark_replay_consumed(
+        self, replay_state, *, request: ProtectedExecutionRequest
+    ) -> bool:
         if self.replay_protector is None or replay_state is None:
             return False
         try:
-            self.replay_protector.mark_consumed(replay_state.replay_key, now=request.context.now)
+            self.replay_protector.mark_consumed(
+                replay_state.replay_key, now=request.context.now
+            )
             return True
         except RefusalException:
             raise
@@ -178,7 +210,9 @@ class ProtectedExecutor:
                 details={"operation": "consume"},
             ) from exc
 
-    def _release_replay_claim(self, replay_state, *, request: ProtectedExecutionRequest, reason: str) -> None:
+    def _release_replay_claim(
+        self, replay_state, *, request: ProtectedExecutionRequest, reason: str
+    ) -> None:
         if self.replay_protector is None or replay_state is None:
             return
         try:
@@ -218,10 +252,21 @@ class ProtectedExecutor:
         replay_consumed = False
         brokered_credential: BrokeredCredential | None = None
         escrow_id = request.pccb.escrow_id
+        handler_started = False
+        effect_reference = None
+        effect_evidence = None
         try:
             self.proof_verifier.verify(request.intent, request.pccb, request.context)
             if policy_decision is not None and not policy_decision.allowed:
                 raise _policy_refusal(policy_decision)
+            # A signed effect extension is a mandatory ownership constraint,
+            # never an optional hint an older edge can silently ignore.
+            if "effect" in request.pccb.extensions and self.effect_protector is None:
+                raise RefusalException(
+                    category="policy",
+                    refusal_code="POLICY_REFUSAL",
+                    message="This proof requires authoritative effect ownership verification at the edge.",
+                )
             replay_state = self._claim_replay(request)
             # ── Idempotency check (after verification AND the replay claim) ──
             # A retry of the same operation_id + action_hash with a NEW
@@ -231,7 +276,11 @@ class ProtectedExecutor:
             # proof, a replayed proof is DUPLICATE_REPLAY like any other, and
             # neither the prior result nor the prior action_hash is disclosed
             # to an unverified caller.
-            if operation_id is not None and self.idempotency_store is not None:
+            if (
+                operation_id is not None
+                and self.idempotency_store is not None
+                and self.effect_protector is None
+            ):
                 prior = self.idempotency_store.lookup(operation_id)
                 if prior is not None:
                     if prior["action_hash"] != action_hash_value:
@@ -251,7 +300,9 @@ class ProtectedExecutor:
                         )
                     # Same operation_id + same action_hash → idempotent retry.
                     # The new proof is spent; the prior result is returned.
-                    replay_consumed = self._mark_replay_consumed(replay_state, request=request)
+                    replay_consumed = self._mark_replay_consumed(
+                        replay_state, request=request
+                    )
                     prior_result = prior["result"]
                     receipt = self.receipt_factory.create_execution_receipt(
                         request.intent,
@@ -262,7 +313,9 @@ class ProtectedExecutor:
                         action_hash=request.pccb.action_hash,
                     )
                     self.outcome_writer.write_receipt(receipt)
-                    return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
+                    return ExecutionResult(
+                        receipt=receipt, refusal=None, payload=prior_result
+                    )
             if self.escrow is not None:
                 if escrow_id is None:
                     raise RefusalException(
@@ -276,9 +329,53 @@ class ProtectedExecutor:
                     capability=request.intent.action.capability,
                     now=request.context.now,
                 )
-            brokered_credential = self.credential_broker.acquire(request.intent, request.pccb, request.context)
+            if self.effect_protector is not None:
+                effect_reference = self.effect_protector.claim_request(request)
+            brokered_credential = self.credential_broker.acquire(
+                request.intent, request.pccb, request.context
+            )
             replay_consumed = self._mark_replay_consumed(replay_state, request=request)
+            handler_started = True
             payload = handler(request, brokered_credential)
+            if effect_reference is not None:
+                # This is returned by the trusted protected boundary, never
+                # inferred from transport success or an agent's report.
+                raw_evidence = (payload or {}).get("effect_evidence")
+                try:
+                    if not isinstance(raw_evidence, dict) or set(raw_evidence) != {
+                        *effect_reference.to_dict(),
+                        "outcome",
+                        "execution_occurred",
+                        "evidence_hash",
+                    }:
+                        raise ValueError("missing boundary consequence evidence")
+                    if any(
+                        raw_evidence.get(k) != v
+                        for k, v in effect_reference.to_dict().items()
+                    ):
+                        raise ValueError("boundary evidence refers to another effect")
+                    validate_effect_outcome(
+                        raw_evidence["outcome"],
+                        raw_evidence["execution_occurred"],
+                        raw_evidence["evidence_hash"],
+                    )
+                    effect_evidence = dict(raw_evidence)
+                    if effect_evidence["outcome"] != "COMMITTED":
+                        raise RefusalException(
+                            category="execution",
+                            refusal_code="OUTCOME_UNKNOWN"
+                            if effect_evidence["outcome"] == "AMBIGUOUS"
+                            else "PROVIDER_REFUSAL",
+                            message="The protected boundary did not confirm a committed consequence.",
+                        )
+                except RefusalException:
+                    raise
+                except Exception as exc:
+                    raise RefusalException(
+                        category="execution",
+                        refusal_code="OUTCOME_UNKNOWN",
+                        message="The protected boundary did not provide valid consequence evidence; the effect remains held.",
+                    ) from exc
             broker_payload = {
                 "brokered_credential": brokered_credential.to_public_dict(),
                 "credential_broker": {
@@ -287,7 +384,9 @@ class ProtectedExecutor:
                 },
             }
             receipt_payload = {**(payload or {}), **broker_payload}
-            self.credential_broker.release(brokered_credential, {"outcome": "executed", "payload": payload})
+            self.credential_broker.release(
+                brokered_credential, {"outcome": "executed", "payload": payload}
+            )
             receipt = self.receipt_factory.create_execution_receipt(
                 request.intent,
                 request.context,
@@ -296,18 +395,45 @@ class ProtectedExecutor:
                 payload=receipt_payload,
                 action_hash=request.pccb.action_hash,
             )
+            if effect_evidence is not None:
+                receipt = replace(
+                    receipt,
+                    extensions={**receipt.extensions, "effect": effect_evidence},
+                )
             self.outcome_writer.write_receipt(receipt)
             # ── Record in idempotency store ──────────────────────────
-            if operation_id is not None and self.idempotency_store is not None:
+            if (
+                operation_id is not None
+                and self.idempotency_store is not None
+                and self.effect_protector is None
+            ):
                 self.idempotency_store.record(operation_id, action_hash_value, payload)
             return ExecutionResult(receipt=receipt, refusal=None, payload=payload)
-        except RefusalException as exc:
+        except RefusalException as caught_refusal:
+            exc = caught_refusal
+            if (
+                effect_reference is not None
+                and handler_started
+                and effect_evidence is None
+            ):
+                exc = RefusalException(
+                    category="execution",
+                    refusal_code="OUTCOME_UNKNOWN",
+                    message="Execution may have crossed the protected boundary; the effect remains held for reconciliation.",
+                )
             self._release_credential(
                 brokered_credential,
-                {"outcome": "refused", "reason_code": exc.refusal_code},
+                {
+                    "outcome": "ambiguous"
+                    if exc.refusal_code == "OUTCOME_UNKNOWN"
+                    else "refused",
+                    "reason_code": exc.refusal_code,
+                },
             )
             if not replay_consumed:
-                self._release_replay_claim(replay_state, request=request, reason=exc.refusal_code)
+                self._release_replay_claim(
+                    replay_state, request=request, reason=exc.refusal_code
+                )
             refusal = self.refusal_factory.create_from_exception(
                 exc,
                 occurred_at=request.context.now,
@@ -317,23 +443,37 @@ class ProtectedExecutor:
                 escrow_id=escrow_id,
                 action_hash=request.pccb.action_hash,
             )
-            receipt = self.receipt_factory.create_refused_receipt(request.intent, request.context, refusal)
+            receipt = self.receipt_factory.create_refused_receipt(
+                request.intent, request.context, refusal
+            )
+            if effect_reference is not None:
+                receipt = self._effect_refusal_receipt(
+                    receipt, effect_reference, handler_started, effect_evidence
+                )
             self.outcome_writer.write_refusal(refusal)
             self.outcome_writer.write_receipt(receipt)
             return ExecutionResult(receipt=receipt, refusal=refusal, payload=None)
-        except Exception as exc:  # pragma: no cover - defensive conversion for protected handlers
-            redacted_details = redacted_handler_exception_details(exc, request_id=request.context.request_id)
+        except (
+            Exception
+        ) as exc:  # pragma: no cover - defensive conversion for protected handlers
+            redacted_details = redacted_handler_exception_details(
+                exc, request_id=request.context.request_id
+            )
             self._release_credential(
                 brokered_credential,
                 {
-                    "outcome": "failed",
+                    "outcome": "ambiguous"
+                    if effect_reference is not None and handler_started
+                    else "failed",
                     "safe_error_code": SAFE_HANDLER_EXCEPTION_CODE,
                     **redacted_details,
                 },
             )
             if not replay_consumed and replay_state is not None:
                 try:
-                    replay_consumed = self._mark_replay_consumed(replay_state, request=request)
+                    replay_consumed = self._mark_replay_consumed(
+                        replay_state, request=request
+                    )
                 except RefusalException:
                     logging.error(
                         "Actenon: replay consumption could not be confirmed after execution ambiguity; "
@@ -343,8 +483,12 @@ class ProtectedExecutor:
             refusal = self.refusal_factory.create_from_exception(
                 RefusalException(
                     category="execution",
-                    refusal_code="EXECUTION_FAILED",
-                    message=SAFE_HANDLER_EXCEPTION_MESSAGE,
+                    refusal_code="OUTCOME_UNKNOWN"
+                    if effect_reference is not None and handler_started
+                    else "EXECUTION_FAILED",
+                    message="The execution outcome is unknown; the effect remains held for reconciliation."
+                    if effect_reference is not None and handler_started
+                    else SAFE_HANDLER_EXCEPTION_MESSAGE,
                     details=redacted_details,
                 ),
                 occurred_at=request.context.now,
@@ -354,7 +498,40 @@ class ProtectedExecutor:
                 escrow_id=escrow_id,
                 action_hash=request.pccb.action_hash,
             )
-            receipt = self.receipt_factory.create_refused_receipt(request.intent, request.context, refusal)
+            receipt = self.receipt_factory.create_refused_receipt(
+                request.intent, request.context, refusal
+            )
+            if effect_reference is not None:
+                receipt = self._effect_refusal_receipt(
+                    receipt, effect_reference, handler_started, effect_evidence
+                )
             self.outcome_writer.write_refusal(refusal)
             self.outcome_writer.write_receipt(receipt)
             return ExecutionResult(receipt=receipt, refusal=refusal, payload=None)
+
+    @staticmethod
+    def _effect_refusal_receipt(receipt, reference, handler_started, evidence):
+        if evidence is None:
+            outcome = "AMBIGUOUS" if handler_started else "NOT_EXECUTED"
+            occurred = None if handler_started else False
+            evidence = {
+                **reference.to_dict(),
+                "outcome": outcome,
+                "execution_occurred": occurred,
+                "evidence_hash": sha256_hex(
+                    {
+                        "reference": reference.to_dict(),
+                        "handler_started": handler_started,
+                        "reason": list(receipt.reason_codes),
+                    }
+                ),
+            }
+        ambiguous = evidence["outcome"] == "AMBIGUOUS"
+        return replace(
+            receipt,
+            summary="Execution outcome is unknown; blind retry is refused until reconciliation."
+            if ambiguous
+            else receipt.summary,
+            side_effects={"state": "unknown" if ambiguous else "none"},
+            extensions={**receipt.extensions, "effect": evidence},
+        )
