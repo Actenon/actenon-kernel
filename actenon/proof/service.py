@@ -420,6 +420,16 @@ class PCCBVerifier:
                 pccb=pccb,
                 context=context,
             )
+        # The capability must be one this edge declares it performs.
+        # An empty declaration performs nothing. Callers that have not
+        # declared an allow-list pass the presented intent's own capability,
+        # which does not add a second allow-list.
+        if intent.action.capability not in tuple(context.scope_capabilities or ()):
+            self._raise_post_auth_failure(
+                "SCOPE_CAPABILITY_MISMATCH",
+                pccb=pccb,
+                context=context,
+            )
 
         # Intent ID (the signed intent_id differs from the supplied intent_id)
         if pccb.intent_id and pccb.intent_id != intent.intent_id:

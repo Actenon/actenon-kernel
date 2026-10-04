@@ -171,6 +171,12 @@ class ActenonGate:
     trust configuration. Pass a separate signer only when this process is also
     authorized to mint proofs, such as a KMS/HSM-backed issuer. Verifier-only
     protected endpoints can omit ``signer`` and still call :meth:`protect`.
+
+    ``capabilities`` is the allow-list of actions this edge will perform.
+    ``revocation_checker`` is ``callable(pccb, context) -> bool`` and must
+    return true only when the proof's authority is not revoked; an exception
+    or a false result refuses the attempt. Airlock constructs the gate this
+    way (see the README section "How Airlock calls the Kernel").
     """
 
     def __init__(
@@ -192,6 +198,8 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
     ) -> None:
         if verifier is None:
             raise ValueError(
@@ -203,6 +211,13 @@ class ActenonGate:
         self.audience = _coerce_audience(audience)
         self.issuer = _coerce_party(issuer)
         self.signer = signer
+        # Allow-list of capabilities this edge will perform. When set,
+        # protect() refuses an intent whose capability is not in the list
+        # even if the proof is otherwise valid. Airlock passes the Scan
+        # powers on the signed grant. None keeps the historical behaviour:
+        # the presented intent's own capability is the scope, which does
+        # not add a separate allow-list.
+        self.declared_capabilities = tuple(capabilities) if capabilities is not None else None
         self.policy_pack = policy_pack
         self.escrow = escrow
         self.clock = clock
@@ -214,7 +229,11 @@ class ActenonGate:
         self._intake = ActionIntentIntakeService()
         self._minter = PCCBMinter(signer=signer, issuer=self.issuer) if signer is not None else None
         self._executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
+            proof_verifier=PCCBVerifier(
+                verifier,
+                disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                revocation_checker=revocation_checker,
+            ),
             credential_broker=credential_broker or InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             replay_protection=replay_protection,
@@ -336,6 +355,8 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
     ) -> "ActenonGate":
         """Build a local-only HMAC gate for demos and development.
 
@@ -361,6 +382,8 @@ class ActenonGate:
             clock=clock,
             request_id_factory=request_id_factory,
             escrow_id_factory=escrow_id_factory,
+            revocation_checker=revocation_checker,
+            capabilities=capabilities,
         )
 
     def mint_proof(
@@ -376,7 +399,7 @@ class ActenonGate:
         if decision != "allow":
             raise ValueError("PCCB minting requires decision='allow'")
         intent = self._coerce_action(action)
-        context = self._build_context(intent, audience=self.audience)
+        context = self._build_context(intent, audience=self.audience, for_minting=True)
         policy_decision = PolicyDecision(
             outcome="allow",
             summary="The configured issuer allowed proof minting for this exact action.",
@@ -549,13 +572,21 @@ class ActenonGate:
         *,
         audience: AudienceRef,
         evidence: Mapping[str, Any] | None = None,
+        for_minting: bool = False,
     ) -> DynamicContextInput:
         selectors = intent.target.selectors or {"resource_id": intent.target.resource_id}
         parameter_constraints = intent.action.constraints or intent.action.parameters
+        if for_minting or self.declared_capabilities is None:
+            # Issuance signs the exact capability being granted. Verification
+            # with no declared allow-list keeps that same scope so existing
+            # callers are unchanged.
+            capabilities: tuple[str, ...] = (intent.action.capability,)
+        else:
+            capabilities = self.declared_capabilities
         return DynamicContextInput(
             request_id=self.request_id_factory(),
             audience=audience,
-            scope_capabilities=(intent.action.capability,),
+            scope_capabilities=capabilities,
             now=self.clock(),
             facts=dict(evidence or {}),
             parameter_constraints=dict(parameter_constraints),

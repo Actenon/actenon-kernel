@@ -4,6 +4,17 @@ See [VERSIONING.md](VERSIONING.md) for the compatibility promise that governs
 this changelog. Within 1.x, a proof that verifies under one version verifies
 under any later version.
 
+## [Unreleased]
+
+### Security
+
+- **`BoundaryVerifier` no longer accepts an unverified token.** A string of 16 or more characters used to be reported valid. Verification now requires a configured `PCCBVerifier` and a signed PCCB for the exact Action Intent. Forged tokens are refused (`PROOF_INVALID`, or `ISSUER_UNTRUSTED` when no trust root is configured). This is a security-defect exception under [VERSIONING.md](VERSIONING.md) §1.4: inputs that previously produced a successful boundary result now refuse.
+- **Edge allow-list.** `PCCBVerifier` refuses when the intent's capability is not in `context.scope_capabilities` (`SCOPE_CAPABILITY_MISMATCH`). Callers that already pass the intent's own capability are unchanged. `ActenonGate(..., capabilities=...)` sets that allow-list to the capabilities the edge declares, which is how Airlock passes the signed grant.
+
+### Added
+
+- **`ActenonGate` `capabilities` and `revocation_checker`.** These are the arguments Airlock passes in `src/actenon_airlock/broker.py` (`ActenonGate` then `protect(intent, proof, side_effect)`). A revocation checker that returns false or raises is `AUTHORITY_REVOKED`, and the side effect does not run.
+
 ## [1.2.1] — 2026-07-25
 
 ### Fixed
