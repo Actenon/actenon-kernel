@@ -515,3 +515,8 @@ effect-bearing proofs. A trusted boundary must return matching `effect_evidence`
 with `COMMITTED`, `NOT_EXECUTED`, or `AMBIGUOUS` certainty; transport success alone
 does not establish a committed consequence. Ambiguity holds the reservation
 until trusted reconciliation. See [integration requirements and attack evidence](docs/evidence/effect-reference/README.md).
+
+Python resource boundaries and VerifierSDK also enforce mandatory signed effect
+constraints. Legacy escrow middleware refuses effect-bearing proofs. Verification
+never establishes that a consequence committed: receipt construction requires
+matching trusted effect evidence. See [entry-point coverage and preserved attacks](docs/evidence/effect-edge-entrypoints/README.md).

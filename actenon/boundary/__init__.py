@@ -35,11 +35,17 @@ from uuid import uuid4
 from actenon.api import ActionIntentIntakeService
 from actenon.core.errors import ProofVerificationError, RefusalException
 from actenon.core.json import loads_no_duplicate_keys
+from actenon.execution.effects import EffectProtector, EffectReference
 from actenon.models import PCCB, ActionIntent, AudienceRef, DynamicContextInput
+from actenon.models.runtime import ProtectedExecutionRequest
 from actenon.proof.canonical import sha256_hex
 from actenon.proof.service import PCCBVerifier
 from actenon.replay.base import ReplayStore
-from actenon.replay.service import build_action_consumption_claim, permit_process_local_replay
+from actenon_protocol.effects import validate_effect_outcome
+from actenon.replay.service import (
+    build_action_consumption_claim,
+    permit_process_local_replay,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,15 +92,26 @@ class BoundaryVerificationResult:
     proof_id: str | None = None
     receipt_id: str | None = None
     verified_at: str = ""
+    effect_reference: EffectReference | None = None
+    verified_request_hash: str = ""
 
     @classmethod
-    def success(cls, proof_id: str, receipt_id: str) -> BoundaryVerificationResult:
+    def success(
+        cls,
+        proof_id: str,
+        receipt_id: str,
+        *,
+        effect_reference: EffectReference | None = None,
+        verified_request_hash: str = "",
+    ) -> BoundaryVerificationResult:
         return cls(
             valid=True,
             reason="verified",
             proof_id=proof_id,
             receipt_id=receipt_id,
             verified_at=datetime.now(timezone.utc).isoformat(),
+            effect_reference=effect_reference,
+            verified_request_hash=verified_request_hash,
         )
 
     @classmethod
@@ -121,7 +138,9 @@ def _decode_proof_token(token: str) -> PCCB:
                 (text + padding).encode("ascii"), altchars=b"-_", validate=True
             ).decode("utf-8")
         except (binascii.Error, UnicodeError) as exc:
-            raise ValueError("proof token is neither PCCB JSON nor base64url-encoded PCCB JSON") from exc
+            raise ValueError(
+                "proof token is neither PCCB JSON nor base64url-encoded PCCB JSON"
+            ) from exc
     payload = loads_no_duplicate_keys(text)
     if not isinstance(payload, Mapping):
         raise ValueError("proof token must decode to a JSON object")
@@ -150,12 +169,20 @@ class BoundaryVerifier:
       - Check replay (single-use), keyed on proof identity rather than on
         the token's encoding
       - Return a structured result
-      - Construct a receipt on success
+      - Claim signed effect ownership with a configured EffectProtector
+      - Construct a receipt from a trusted caller's execution evidence
 
     The verifier does NOT:
       - Execute the action (handler's job)
       - Resolve credentials (broker's job)
       - Issue proofs (authority's job)
+
+    An effect-bearing proof requires ``effect_protector``. Its atomic claim
+    runs after verification/replay and before valid=True permits dispatch.
+    A configured protector also refuses a proof omitting its effect reference.
+    Claiming is not evidence of execution: construct_receipt requires trusted
+    matching consequence evidence for such proofs. The caller must settle or
+    reconcile the ledger, never automatically refund a crash or lost response.
 
     Without a ``pccb_verifier`` (the trust root) every token is refused
     with ``ISSUER_UNTRUSTED``. Single use is enforced against a durable
@@ -171,8 +198,10 @@ class BoundaryVerifier:
         *,
         pccb_verifier: PCCBVerifier | None = None,
         replay_store: ReplayStore | None = None,
+        effect_protector: EffectProtector | None = None,
     ) -> None:
         self._pccb_verifier = pccb_verifier
+        self._effect_protector = effect_protector
         self._security_downgrades: tuple[str, ...] = ()
         if replay_store is None and pccb_verifier is not None:
             # No trust root means every proof is refused, so there is no
@@ -183,7 +212,9 @@ class BoundaryVerifier:
 
                 replay_store = SqliteReplayStore(configured)
             else:
-                self._security_downgrades = (permit_process_local_replay("BoundaryVerifier"),)
+                self._security_downgrades = (
+                    permit_process_local_replay("BoundaryVerifier"),
+                )
         self._replay_store = replay_store
         self._replay_lock = threading.Lock()
         self._replay_keys: set[str] = set()
@@ -205,7 +236,9 @@ class BoundaryVerifier:
                 "boundary verification failed unexpectedly", "OUTCOME_UNKNOWN"
             )
 
-    def _verify(self, request: BoundaryVerificationRequest) -> BoundaryVerificationResult:
+    def _verify(
+        self, request: BoundaryVerificationRequest
+    ) -> BoundaryVerificationResult:
         # Step 1: Proof presence.
         if not request.proof_token:
             return BoundaryVerificationResult.failure(
@@ -243,17 +276,20 @@ class BoundaryVerifier:
             audience = _parse_audience(request.audience)
         except (RefusalException, ValueError, TypeError):
             return BoundaryVerificationResult.failure(
-                "the Action Intent or boundary audience is malformed", "MALFORMED_REQUEST"
+                "the Action Intent or boundary audience is malformed",
+                "MALFORMED_REQUEST",
             )
 
         # Step 5: The route's declared action and target bind the intent.
         if intent.action.name != request.action_type:
             return BoundaryVerificationResult.failure(
-                "the intent's action does not match this boundary's action", "ACTION_MISMATCH"
+                "the intent's action does not match this boundary's action",
+                "ACTION_MISMATCH",
             )
         if request.target and intent.target.resource_id != request.target:
             return BoundaryVerificationResult.failure(
-                "the intent's target does not match this request's target", "TARGET_MISMATCH"
+                "the intent's target does not match this request's target",
+                "TARGET_MISMATCH",
             )
 
         # Step 6: Full PCCB verification against the intent and this audience.
@@ -272,7 +308,14 @@ class BoundaryVerifier:
             )
         if request.action_hash and request.action_hash != pccb.action_hash.value:
             return BoundaryVerificationResult.failure(
-                "the declared action hash does not match the proof", "ACTION_HASH_MISMATCH"
+                "the declared action hash does not match the proof",
+                "ACTION_HASH_MISMATCH",
+            )
+
+        if "effect" in pccb.extensions and self._effect_protector is None:
+            return BoundaryVerificationResult.failure(
+                "This proof requires authoritative effect ownership verification at the edge.",
+                "POLICY_REFUSAL",
             )
 
         # Step 7: Single use. Keyed on proof identity, not on the token's
@@ -280,6 +323,18 @@ class BoundaryVerifier:
         replay_refusal = self._claim_single_use(intent, pccb, context)
         if replay_refusal is not None:
             return replay_refusal
+
+        # A signature authenticates the reservation reference; it does not
+        # establish ownership. Claim once, after proof/replay verification,
+        # before the boundary can authorize credential access or dispatch.
+        effect_reference = None
+        if self._effect_protector is not None:
+            try:
+                effect_reference = self._effect_protector.claim_request(
+                    ProtectedExecutionRequest(intent, pccb, context)
+                )
+            except ProofVerificationError as exc:
+                return BoundaryVerificationResult.failure(exc.message, exc.refusal_code)
 
         # Step 8: Construct receipt ID.
         receipt_id = f"rcpt_{uuid4().hex[:16]}"
@@ -298,6 +353,24 @@ class BoundaryVerifier:
         return BoundaryVerificationResult.success(
             proof_id=pccb.pccb_id,
             receipt_id=receipt_id,
+            effect_reference=effect_reference,
+            verified_request_hash=self._receipt_request_hash(request),
+        )
+
+    def _receipt_request_hash(self, request: BoundaryVerificationRequest) -> str:
+        intent = request.intent
+        if not isinstance(intent, ActionIntent):
+            intent = self._intake.parse(intent)
+        return sha256_hex(
+            {
+                "proof": _decode_proof_token(request.proof_token).to_dict(),
+                "intent": intent.to_dict(),
+                "action_type": request.action_type,
+                "action_hash": request.action_hash,
+                "target": request.target,
+                "audience": request.audience,
+                "boundary_id": request.boundary_id,
+            }
         )
 
     def _claim_single_use(
@@ -314,7 +387,8 @@ class BoundaryVerifier:
                 )
             except Exception:
                 return BoundaryVerificationResult.failure(
-                    "replay state could not be established; refusing", "REPLAY_STORE_UNAVAILABLE"
+                    "replay state could not be established; refusing",
+                    "REPLAY_STORE_UNAVAILABLE",
                 )
             return None
 
@@ -338,29 +412,74 @@ class BoundaryVerifier:
         self,
         request: BoundaryVerificationRequest,
         result: BoundaryVerificationResult,
-        outcome: str = "succeeded",
+        outcome: str | None = None,
+        *,
+        effect_evidence: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Construct a receipt for a verified boundary execution."""
         if not result.valid:
-            raise ValueError("a boundary receipt can only be constructed for a verified result")
-        return {
+            raise ValueError(
+                "a boundary receipt can only be constructed for a verified result"
+            )
+        receipt = {
             "receipt_id": result.receipt_id,
             "boundary_id": request.boundary_id,
             "action": request.action_type,
             "action_hash": request.action_hash[:16] + "...",
             "proof_id": result.proof_id,
-            "outcome": outcome,
+            "outcome": outcome or "succeeded",
             "executed_at": datetime.now(timezone.utc).isoformat(),
             "execution_mode": "resource_owned",
             "verified_at": result.verified_at,
         }
+        if result.effect_reference is not None:
+            if (
+                not result.verified_request_hash
+                or self._receipt_request_hash(request) != result.verified_request_hash
+            ):
+                raise ValueError(
+                    "receipt request differs from the verified execution request"
+                )
+            reference = result.effect_reference.to_dict()
+            fields = {*reference, "outcome", "execution_occurred", "evidence_hash"}
+            if (
+                not isinstance(effect_evidence, Mapping)
+                or set(effect_evidence) != fields
+                or any(
+                    effect_evidence[key] != value for key, value in reference.items()
+                )
+            ):
+                raise ValueError("effect verification is not execution evidence")
+            validate_effect_outcome(
+                effect_evidence["outcome"],
+                effect_evidence["execution_occurred"],
+                effect_evidence["evidence_hash"],
+            )
+            reported = {
+                "COMMITTED": "succeeded",
+                "NOT_EXECUTED": "refused",
+                "AMBIGUOUS": "outcome_unknown",
+            }[effect_evidence["outcome"]]
+            if outcome is not None and outcome != reported:
+                raise ValueError("receipt outcome contradicts effect evidence")
+            receipt.update(
+                outcome=reported,
+                execution_occurred=effect_evidence["execution_occurred"],
+                extensions={"effect": dict(effect_evidence)},
+            )
+        elif effect_evidence is not None:
+            raise ValueError("effect evidence has no verified effect reference")
+        return receipt
 
     def health(self) -> dict[str, Any]:
         """Health check."""
         return {
             "ok": self._pccb_verifier is not None,
             "pccb_verifier_configured": self._pccb_verifier is not None,
-            "replay_store": "durable" if self._replay_store is not None else "in_memory_set",
+            "effect_protector_configured": self._effect_protector is not None,
+            "replay_store": "durable"
+            if self._replay_store is not None
+            else "in_memory_set",
             "replay_keys_tracked": len(self._replay_keys),
             "security_downgrades": list(self._security_downgrades),
         }

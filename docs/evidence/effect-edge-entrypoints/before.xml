@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.158" timestamp="2026-10-04T17:50:04.556271+01:00" hostname="Rosss-MacBook-Air.local"><testcase classname="tests.security.test_effect_edge_entrypoints" name="test_signed_effect_requires_ownership_at_every_verification_edge[boundary]" time="0.024"><failure message="AssertionError: assert not True&#10; +  where True = BoundaryVerificationResult(valid=True, reason='verified', refusal_code='', proof_id='pccb_security_001', receipt_id='rcpt_90657d0724304cd4', verified_at='2026-10-04T16:50:04.668086+00:00').valid">tmp_path = PosixPath('/private/var/folders/tz/y04t4d0900xdbmz96jp608180000gn/T/pytest-of-ross/pytest-295/test_signed_effect_requires_ow0')
+case = (ActionIntent(intent_id='exec_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', issued_at=datetime.datetime(2026, 1, 1, 12, 0, tzinfo...urity.test_effect_edge_entrypoints.PublicVerifier object at 0x10a552810&gt;, &lt;function case.&lt;locals&gt;.mint at 0x10a533420&gt;)
+surface = 'boundary'
+
+    @pytest.mark.parametrize("surface", ["boundary", "sdk"])
+    def test_signed_effect_requires_ownership_at_every_verification_edge(tmp_path, case, surface):
+        intent, context, _, verifier, mint = case
+        proof = mint()
+        provider_calls = []
+        if surface == "boundary":
+            edge = BoundaryVerifier(pccb_verifier=PCCBVerifier(verifier), replay_store=SqliteReplayStore(tmp_path / "replay.db"))
+            result = edge.verify_boundary(boundary_request(intent, proof))
+            if result.valid:
+                provider_calls.append("unowned effect dispatched")
+&gt;           assert not result.valid
+E           AssertionError: assert not True
+E            +  where True = BoundaryVerificationResult(valid=True, reason='verified', refusal_code='', proof_id='pccb_security_001', receipt_id='rcpt_90657d0724304cd4', verified_at='2026-10-04T16:50:04.668086+00:00').valid
+
+tests/security/test_effect_edge_entrypoints.py:102: AssertionError</failure></testcase><testcase classname="tests.security.test_effect_edge_entrypoints" name="test_signed_effect_requires_ownership_at_every_verification_edge[sdk]" time="0.001"><failure message="Failed: DID NOT RAISE ProofVerificationError">tmp_path = PosixPath('/private/var/folders/tz/y04t4d0900xdbmz96jp608180000gn/T/pytest-of-ross/pytest-295/test_signed_effect_requires_ow1')
+case = (ActionIntent(intent_id='exec_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', issued_at=datetime.datetime(2026, 1, 1, 12, 0, tzinfo...urity.test_effect_edge_entrypoints.PublicVerifier object at 0x10a552ed0&gt;, &lt;function case.&lt;locals&gt;.mint at 0x10a55f6a0&gt;)
+surface = 'sdk'
+
+    @pytest.mark.parametrize("surface", ["boundary", "sdk"])
+    def test_signed_effect_requires_ownership_at_every_verification_edge(tmp_path, case, surface):
+        intent, context, _, verifier, mint = case
+        proof = mint()
+        provider_calls = []
+        if surface == "boundary":
+            edge = BoundaryVerifier(pccb_verifier=PCCBVerifier(verifier), replay_store=SqliteReplayStore(tmp_path / "replay.db"))
+            result = edge.verify_boundary(boundary_request(intent, proof))
+            if result.valid:
+                provider_calls.append("unowned effect dispatched")
+            assert not result.valid
+            assert result.refusal_code == "POLICY_REFUSAL"
+        else:
+&gt;           with pytest.raises(ProofVerificationError, match="POLICY_REFUSAL"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ProofVerificationError
+
+tests/security/test_effect_edge_entrypoints.py:105: Failed</failure></testcase><testcase classname="tests.security.test_effect_edge_entrypoints" name="test_legacy_execution_helpers_refuse_before_escrow_or_provider[middleware]" time="0.003"><failure message="AssertionError: assert None is not None&#10; +  where None = ExecutionResult(receipt=Receipt(receipt_id='rcpt_c2592090ecde458086694222d07a2a78', intent_id='exec_aaaaaaaaaaaaaaaaaa..., follow_up={}, side_effects={'state': 'completed'}, details={}, metadata={}, extensions={}), refusal=None, payload={}).refusal">tmp_path = PosixPath('/private/var/folders/tz/y04t4d0900xdbmz96jp608180000gn/T/pytest-of-ross/pytest-295/test_legacy_execution_helpers_0')
+case = (ActionIntent(intent_id='exec_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', issued_at=datetime.datetime(2026, 1, 1, 12, 0, tzinfo...urity.test_effect_edge_entrypoints.PublicVerifier object at 0x10a553fb0&gt;, &lt;function case.&lt;locals&gt;.mint at 0x10a55f7e0&gt;)
+surface = 'middleware'
+
+    @pytest.mark.parametrize("surface", ["middleware", "python-endpoint"])
+    def test_legacy_execution_helpers_refuse_before_escrow_or_provider(tmp_path, case, surface):
+        intent, context, _, verifier, mint = case
+        proof = mint()
+        escrow = InMemoryCapabilityEscrow()
+        escrow.issue(escrow_id=proof.escrow_id, pccb_id=proof.pccb_id, capability=intent.action.capability, expires_at=proof.expires_at)
+        writer, calls = InMemoryOutcomeWriter(), []
+        request = ProtectedExecutionRequest(intent, proof, context)
+        if surface == "middleware":
+            edge = ProtectedEndpointMiddleware(
+                proof_verifier=PCCBVerifier(verifier), escrow=escrow,
+                receipt_factory=ReceiptFactory(), refusal_factory=RefusalFactory(),
+                outcome_writer=writer, replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "replay.db")),
+            )
+            result = edge.execute(request, lambda _q: calls.append(True) or {})
+        else:
+            edge = PythonProtectedEndpoint(verifier, escrow, SqliteReplayStore(tmp_path / "replay.db"), writer)
+            result = edge.execute(request=request, handler=lambda _q: calls.append(True) or {})
+&gt;       assert result.refusal is not None
+E       AssertionError: assert None is not None
+E        +  where None = ExecutionResult(receipt=Receipt(receipt_id='rcpt_c2592090ecde458086694222d07a2a78', intent_id='exec_aaaaaaaaaaaaaaaaaa..., follow_up={}, side_effects={'state': 'completed'}, details={}, metadata={}, extensions={}), refusal=None, payload={}).refusal
+
+tests/security/test_effect_edge_entrypoints.py:129: AssertionError</failure></testcase><testcase classname="tests.security.test_effect_edge_entrypoints" name="test_legacy_execution_helpers_refuse_before_escrow_or_provider[python-endpoint]" time="0.003"><failure message="AssertionError: assert None is not None&#10; +  where None = ExecutionResult(receipt=Receipt(receipt_id='rcpt_437c8f7f9d6d4aecabec0df4c1fc5040', intent_id='exec_aaaaaaaaaaaaaaaaaa..., follow_up={}, side_effects={'state': 'completed'}, details={}, metadata={}, extensions={}), refusal=None, payload={}).refusal">tmp_path = PosixPath('/private/var/folders/tz/y04t4d0900xdbmz96jp608180000gn/T/pytest-of-ross/pytest-295/test_legacy_execution_helpers_1')
+case = (ActionIntent(intent_id='exec_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', issued_at=datetime.datetime(2026, 1, 1, 12, 0, tzinfo...urity.test_effect_edge_entrypoints.PublicVerifier object at 0x10a5cb860&gt;, &lt;function case.&lt;locals&gt;.mint at 0x10a5a8040&gt;)
+surface = 'python-endpoint'
+
+    @pytest.mark.parametrize("surface", ["middleware", "python-endpoint"])
+    def test_legacy_execution_helpers_refuse_before_escrow_or_provider(tmp_path, case, surface):
+        intent, context, _, verifier, mint = case
+        proof = mint()
+        escrow = InMemoryCapabilityEscrow()
+        escrow.issue(escrow_id=proof.escrow_id, pccb_id=proof.pccb_id, capability=intent.action.capability, expires_at=proof.expires_at)
+        writer, calls = InMemoryOutcomeWriter(), []
+        request = ProtectedExecutionRequest(intent, proof, context)
+        if surface == "middleware":
+            edge = ProtectedEndpointMiddleware(
+                proof_verifier=PCCBVerifier(verifier), escrow=escrow,
+                receipt_factory=ReceiptFactory(), refusal_factory=RefusalFactory(),
+                outcome_writer=writer, replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "replay.db")),
+            )
+            result = edge.execute(request, lambda _q: calls.append(True) or {})
+        else:
+            edge = PythonProtectedEndpoint(verifier, escrow, SqliteReplayStore(tmp_path / "replay.db"), writer)
+            result = edge.execute(request=request, handler=lambda _q: calls.append(True) or {})
+&gt;       assert result.refusal is not None
+E       AssertionError: assert None is not None
+E        +  where None = ExecutionResult(receipt=Receipt(receipt_id='rcpt_437c8f7f9d6d4aecabec0df4c1fc5040', intent_id='exec_aaaaaaaaaaaaaaaaaa..., follow_up={}, side_effects={'state': 'completed'}, details={}, metadata={}, extensions={}), refusal=None, payload={}).refusal
+
+tests/security/test_effect_edge_entrypoints.py:129: AssertionError</failure></testcase></testsuite></testsuites>
