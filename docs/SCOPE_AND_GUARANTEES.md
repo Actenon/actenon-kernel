@@ -74,6 +74,10 @@ Actenon does not:
 - guarantee that a compromised trusted issuer will not authorize a bad action
 - replace IAM, DLP, output filtering, sandboxing, API gateways, service mesh,
   human approval, or provider-native controls
+- jail an operating system. The Kernel does not intercept syscalls, confine
+  a process, or stop native code that never presents a proof. It verifies
+  an explicit action at a protected edge. Process isolation is a separate
+  control.
 
 ## Safe Product Description
 

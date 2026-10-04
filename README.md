@@ -63,8 +63,10 @@ The Kernel is one of the independent repositories that together close the **exec
 | **`actenon-kernel`** ← you are here | The open verifier — defines what a valid proof is | `actenon-protocol` | `actenon-kernel` (PyPI) |
 | **`actenon-permit`** | The developer on-ramp and authority broker | `actenon-kernel`, `actenon-protocol` | `actenon-permit` (PyPI) · `@actenon/sdk` (npm) |
 | **`actenon-scan`** | The independent static-analysis scanner | — | `actenon-scan` (PyPI) |
+| **`sdk-go`** | Go verifier SDK — protected-endpoint proof verification in Go | `actenon-protocol` | [repo](https://github.com/Actenon/sdk-go) |
+| **`sdk-rust`** | Rust verifier SDK — protected-endpoint proof verification in Rust | `actenon-protocol` | [repo](https://github.com/Actenon/sdk-rust) |
 
-**Optional:** [`actenon-cloud`](https://github.com/Actenon/actenon-cloud) — a managed control plane (source-available; see its LICENSE). Not required by any component above; every capability in this ecosystem works without it.
+**Optional:** `actenon-cloud` — a managed control plane (private repository, not publicly available). Not required by any component above; every capability in this ecosystem works without it.
 <!-- ECOSYSTEM-TABLE:END -->
 
 Every repo can be adopted independently. The Kernel in particular can be wired in **at the agent framework** (LangChain tool, MCP tool, Claude Managed Agents custom tool, etc.) **or independently at the resource boundary** (FastAPI route, Express route, Go HTTP handler). Both placements are first-class.
@@ -126,7 +128,7 @@ any caller (agent / human / service / attacker)
        Receipt or Refusal
 ```
 
-This is the path you take when you cannot fully trust the agent framework, when the resource is shared by multiple callers, or when the resource team and the agent team are different organizations. See the **Boundary Kit** in [`actenon-permit`](https://github.com/Actenon/actenon-permit) and the [`BoundaryVerifier`](actenon/boundary/) API in this repo.
+This is the path you take when you cannot fully trust the agent framework, when the resource is shared by multiple callers, or when the resource team and the agent team are different organizations. See the **Boundary Kit** in [`actenon-permit`](https://github.com/Actenon/actenon-permit) and the [`BoundaryVerifier`](actenon/boundary/) API in this repo. `BoundaryVerifier` verifies a signed PCCB against the exact Action Intent; it does not treat a token string as proof.
 
 Both placements use the same Kernel, the same PCCB shape, the same conformance vectors, and the same Receipt/Refusal artefacts. You can mix them in one deployment.
 
@@ -243,20 +245,48 @@ verifier.verify(intent, pccb, context)
 
 ## Use as a boundary verifier (Boundary Kit, resource-owned mode)
 
+`BoundaryVerifier()` with no trust root refuses every token (`ISSUER_UNTRUSTED`), including a long or `v1.`-prefixed string. Pass the same `PCCBVerifier` the issuer's key can satisfy, and the exact Action Intent the request is performing:
+
 ```python
 from actenon.boundary import BoundaryVerifier, BoundaryVerificationRequest
+from actenon.proof import PCCBVerifier
 
-verifier = BoundaryVerifier()
+verifier = BoundaryVerifier(pccb_verifier=PCCBVerifier(signer=issuer_verifier))
 result = verifier.verify_boundary(BoundaryVerificationRequest(
-    proof_token="v1.eyJ...",
-    action_type="payment.refund",
-    action_hash="abc123...",
+    proof_token=proof_token,          # JSON, base64url, or "v1." + base64url(JSON)
+    action_type=intent.action.name,
+    action_hash=pccb.action_hash.value,
     audience="service:payments",
+    target=intent.target.resource_id,
+    intent=intent,
 ))
-# result.valid         → True / False
-# result.refusal_code  → "PROOF_INVALID" | "REPLAY_DETECTED" | ""
-# result.proof_id      → "proof_..."  (for receipt correlation)
+# result.valid is True only after signature, binding, and single-use checks.
+# A forged or unsigned token yields result.valid is False
+# (PROOF_INVALID, or ISSUER_UNTRUSTED when no trust root is configured).
 ```
+
+## How Airlock calls the Kernel
+
+[Airlock](https://github.com/Actenon/actenon-airlock/pull/3) is the cooperative Python broker in front of an agent. Scan names the powers, Permit signs a grant for those powers, and Airlock asks the Kernel to verify the proof before a side effect. That call, from `src/actenon_airlock/broker.py`, is:
+
+```python
+from actenon.gate import ActenonGate
+from actenon.replay import ReplayProtector, SqliteReplayStore
+
+self.edge = ActenonGate(
+    verifier=Ed25519PublicKeyVerifier([key.public_key_jwk]),  # actenon-permit
+    audience="service:actenon-permit-gateway",
+    issuer="service:actenon-permit",
+    capabilities=tuple(sorted(self.allowed)) or ("airlock.none",),
+    replay_protector=ReplayProtector(SqliteReplayStore(state.local / "replay.sqlite3")),
+    revocation_checker=StoreRevocationChecker(self.store),    # actenon-permit
+)
+outcome = self.edge.protect(intent, proof, dispatch.run)
+```
+
+`capabilities` is the edge allow-list (the grant's Scan powers). A proof for any other capability is refused with `SCOPE_CAPABILITY_MISMATCH` before `dispatch.run`. `revocation_checker(pccb, context)` must return true when the authority is not revoked; a false result or an exception is `AUTHORITY_REVOKED`. `Ed25519PublicKeyVerifier` and `StoreRevocationChecker` are Permit types that satisfy those Kernel interfaces. The Kernel does not import Permit or Scan.
+
+The pipeline is Scan vocabulary, then a signed grant, then this Kernel check, then a signed receipt. Airlock writes its own hash-chained receipt around `outcome.to_dict()`. The Kernel's job inside that pipeline is the check and the Receipt or Refusal for the protected call.
 
 ## Use as a minter + executor (brokered mode, full local proof)
 
@@ -412,7 +442,9 @@ The repo ships an auditor-readable [`THREAT_MODEL.md`](docs/THREAT_MODEL.md) and
 
 Actenon gates explicit execution-edge actions; it does not inspect or filter prompts, model output, or in-band response content. It can require proof for an explicit export or transmit action, but it does not stop data disclosed inside ordinary output unless that disclosure is itself modeled and routed as a protected action.
 
+- Act as an operating-system jail. It does not intercept syscalls, confine a process, sandbox native code, or stop a program that never calls `protect()` or `BoundaryVerifier`. Hostile native code and same-user programs need OS isolation; Airlock's own docs say the same about the broker around this Kernel.
 - Issue grants or proofs — that's Permit's job.
+- Name which powers a program uses — that's Scan's job. The Kernel checks a proof against an allow-list the caller declares (`capabilities=`).
 - Resolve credentials — that's the broker's job.
 - Execute provider calls — that's the adapter's job.
 - Manage tenants — that's Cloud's job.
