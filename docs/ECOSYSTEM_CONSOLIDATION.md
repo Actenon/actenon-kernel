@@ -36,3 +36,9 @@ pins those tested SDK commits. This avoids a circular commit-pin dependency.
 Old PRs remain open until the unified candidate demonstrates parity and its full
 required CI matrix is green. The historical North Star evidence is preserved;
 its old candidate/artifact hashes are not claims about this new candidate.
+
+## Final verifier pins
+
+Kernel core `c6564b90be8bdb7a871c176df5673d5b3a4ab5fc` freezes the unified proof/vector implementation. The coordinated Go candidate is `bf9fbc15a32cdb49fbd6f308cb5d4b154d94591a`; Rust is `e7984d4df5534b4a7f0cb40c554b94ba3480c8fa`. They vendor that core lock. Kernel then pins those SDK commits without changing the vector/core bytes, avoiding a circular commit-hash dependency. This is one ancestor-descendant candidate line, not alternative Kernel implementations.
+
+Protocol contract documentation and its canonical source pin are finalized at `4cbd8f04e0db331b2ffd490d50c0a7aede2d35ff` ([Protocol #22](https://github.com/Actenon/actenon-protocol/pull/22)); source integration still does not imply registry publication.
