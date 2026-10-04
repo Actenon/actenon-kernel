@@ -1,0 +1,6 @@
+# kernel e775389 test suite against its built wheel; export of the commit with actenon/ removed
+actenon from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2-final/lib/python3.11/site-packages/actenon/__init__.py
+10 failed, 819 passed, 2 skipped, 202 subtests passed in 57.97s
+53 passed, 57 subtests passed in 0.32s
+27 passed in 2.75s
+executed test cases: 906; unexpected skips: 0

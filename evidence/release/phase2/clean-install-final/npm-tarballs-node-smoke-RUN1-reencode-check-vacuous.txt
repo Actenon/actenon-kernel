@@ -1,0 +1,1 @@
+@actenon/sdk 2.0.0-rc.1: 7 valid tokens verified, 6 tampered refused; @actenon/verifier-sdk imports, no parsed-object verify

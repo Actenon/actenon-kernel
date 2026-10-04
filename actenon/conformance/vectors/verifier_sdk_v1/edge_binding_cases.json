@@ -1,0 +1,422 @@
+{
+  "contract": {
+    "name": "verifier_sdk_edge_binding",
+    "version": "v1"
+  },
+  "spec": "actenon-protocol protocol/13-edge-binding.md (rules E1-E4)",
+  "base": {
+    "intent": "action_intent.json",
+    "pccb": "pccb.json",
+    "context": {
+      "request_id": "req_shared_sdk_conformance_001",
+      "audience": {
+        "type": "service",
+        "id": "portable-hello-world-endpoint"
+      },
+      "now": "2026-01-01T12:00:00Z",
+      "scope_capabilities": [
+        "protected_resource.read"
+      ],
+      "parameter_constraints": {
+        "exact_message": "portable hello world"
+      },
+      "resource_selectors": [
+        {
+          "resource_id": "hello_resource_demo_001"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "e1_declared_capability",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e1_superset_declaration",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "protected_resource.write"
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e1_other_capability",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.write"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      },
+      "note": "the endpoint performs write; a read proof for a read intent must not run here"
+    },
+    {
+      "id": "e1_empty_declaration",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": []
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "e1_pattern_not_expanded",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.*"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "e1_case_sensitive",
+      "rule": "E1",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "Protected_Resource.Read"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "e2_empty_constraints",
+      "rule": "E2",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "parameter_constraints"
+        ],
+        "value": {}
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e2_signed_constraint_declared",
+      "rule": "E2",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e2_value_differs",
+      "rule": "E2",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "parameter_constraints"
+        ],
+        "value": {
+          "exact_message": "something else"
+        }
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PARAMETER_MISMATCH",
+        "message": "The proof parameter constraints do not cover this endpoint's constraints."
+      }
+    },
+    {
+      "id": "e2_key_not_signed",
+      "rule": "E2",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "parameter_constraints"
+        ],
+        "value": {
+          "exact_message": "portable hello world",
+          "max_bytes": 64
+        }
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PARAMETER_MISMATCH",
+        "message": "The proof parameter constraints do not cover this endpoint's constraints."
+      }
+    },
+    {
+      "id": "e2_type_differs",
+      "rule": "E2",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "parameter_constraints"
+        ],
+        "value": {
+          "exact_message": [
+            "portable hello world"
+          ]
+        }
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "PARAMETER_MISMATCH",
+        "message": "The proof parameter constraints do not cover this endpoint's constraints."
+      }
+    },
+    {
+      "id": "e3_empty_selectors",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": []
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e3_resource_id_matches",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e3_resource_type_matches",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "resource_type": "hello_resource"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e3_id_and_type_match",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "resource_id": "hello_resource_demo_001",
+            "resource_type": "hello_resource"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e3_any_of",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "resource_id": "other_resource"
+          },
+          {
+            "resource_id": "hello_resource_demo_001"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e3_other_resource",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "resource_id": "other_resource"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "TARGET_MISMATCH",
+        "message": "The proof target does not satisfy this endpoint's resource selectors."
+      }
+    },
+    {
+      "id": "e3_partial_match_is_not_a_match",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "resource_id": "hello_resource_demo_001",
+            "resource_type": "other_type"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "TARGET_MISMATCH",
+        "message": "The proof target does not satisfy this endpoint's resource selectors."
+      }
+    },
+    {
+      "id": "e3_unknown_selector_key",
+      "rule": "E3",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "resource_selectors"
+        ],
+        "value": [
+          {
+            "region": "eu"
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "TARGET_MISMATCH",
+        "message": "The proof target does not satisfy this endpoint's resource selectors."
+      }
+    },
+    {
+      "id": "e4_single_use_true",
+      "rule": "E4",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e4_single_use_false_signed",
+      "rule": "E4",
+      "clock_skew_tolerance_ms": 0,
+      "pccb": "edge_single_use_false_pccb.json",
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_MODE_INVALID",
+        "message": "The proof scope mode is not supported."
+      },
+      "note": "validly signed proof whose scope.single_use is false"
+    },
+    {
+      "id": "mixed_edge_scope_star",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "*"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "mixed_edge_scope_question",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "?"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "mixed_edge_scope_brackets",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "resource[id]"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    }
+  ]
+}

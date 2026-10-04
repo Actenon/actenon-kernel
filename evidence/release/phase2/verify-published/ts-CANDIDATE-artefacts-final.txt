@@ -1,0 +1,2 @@
+@actenon/verifier-sdk 0.2.0: 29 vectors, 0 failures
+PASS: published ts artefact (/home/user/actenon-kernel/evidence/release/phase2/artefacts-final/actenon-verifier-sdk-0.2.0.tgz) conforms to this checkout's vectors

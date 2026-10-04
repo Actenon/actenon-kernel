@@ -35,8 +35,8 @@ jobs:
       - name: Check version coherence
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            MODE=pr
+            MODE="pr"
           else
-            MODE=main
+            MODE="main"
           fi
           python scripts/check_version_coherence.py --mode "$MODE"

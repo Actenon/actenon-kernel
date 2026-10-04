@@ -1,0 +1,95 @@
+name: Publish @actenon/verifier-sdk to npm
+
+# Publishes sdk/typescript as @actenon/verifier-sdk.
+#   tag verifier-sdk-v<version>  (must equal sdk/typescript/package.json "version")
+# Order of operations: release gate (tag commit on main, required checks green on
+# that commit) -> build + test + pack ONCE -> the packed tarball runs this
+# commit's shared verifier vectors in plain Node -> that same tarball is
+# published with npm provenance -> the registry copy is installed back and the
+# vectors are run again. Secrets: NPM_TOKEN_ACTENON (automation token with
+# publish rights on @actenon); environment `npm` (add required reviewers).
+
+on:
+  push:
+    tags: ["verifier-sdk-v*"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    name: Release gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag commit is on main and its required checks passed
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/release_gate.py gate --tag-prefix verifier-sdk-v --version-from sdk/typescript/package.json
+
+  build:
+    name: Build, test and pack
+    needs: release-gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - name: Pack
+        run: npm pack --pack-destination "$RUNNER_TEMP/pkg"
+      - name: The packed tarball passes the shared verifier vectors in plain Node
+        run: bash ../../scripts/verify_published.sh ts "$(ls "$RUNNER_TEMP"/pkg/actenon-verifier-sdk-*.tgz)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verifier-sdk-tarball
+          path: ${{ runner.temp }}/pkg/
+          if-no-files-found: error
+
+  publish:
+    name: Publish the tested tarball
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/verifier-sdk-v')
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write   # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/download-artifact@v4
+        with:
+          name: verifier-sdk-tarball
+          path: pkg
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_ACTENON }}
+        run: npm publish pkg/actenon-verifier-sdk-*.tgz --access public --provenance
+      - name: Install from the registry and run the shared vectors
+        run: |
+          version="$(node -p "require('./sdk/typescript/package.json').version")"
+          for _ in $(seq 1 30); do
+            npm view "@actenon/verifier-sdk@${version}" version >/dev/null 2>&1 && break
+            sleep 10
+          done
+          bash scripts/verify_published.sh ts "@actenon/verifier-sdk@${version}"

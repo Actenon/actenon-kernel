@@ -1,0 +1,47 @@
+diff --git a/profile/README.md b/profile/README.md
+index e9afe65..0989ef0 100644
+--- a/profile/README.md
++++ b/profile/README.md
+@@ -41,33 +41,32 @@ That unanswered question is the **execution gap**. Actenon closes it.
+ | Repo | Role | Depends on | Badges |
+ |---|---|---|---|
+ | [**`actenon-protocol`**](https://github.com/Actenon/actenon-protocol) | The neutral wire contract. Zero dependencies. | *nothing* | [![PyPI](https://img.shields.io/pypi/v/actenon-protocol?label=PyPI)](https://pypi.org/project/actenon-protocol/) [![npm](https://img.shields.io/npm/v/@actenon/protocol-types?label=npm)](https://www.npmjs.com/package/@actenon/protocol-types) |
+-| [**`actenon-kernel`**](https://github.com/Actenon/actenon-kernel) | The open verifier. Verifies proofs at the execution edge; issues no grants; runs no policy decisions. | `actenon-protocol` | [![PyPI](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/) [![Conformance](https://img.shields.io/badge/Conformance-1.0.0--51%20vectors-success.svg)](https://github.com/Actenon/actenon-kernel/blob/main/docs/CONFORMANCE.md) |
++| [**`actenon-kernel`**](https://github.com/Actenon/actenon-kernel) | The open verifier. Verifies proofs at the execution edge; issues no grants; runs no policy decisions. | `actenon-protocol` | [![PyPI](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/) [![Conformance](https://img.shields.io/badge/Conformance-1.1.0--53%20vectors-success.svg)](https://github.com/Actenon/actenon-kernel/blob/main/docs/CONFORMANCE.md) |
+ | [**`actenon-permit`**](https://github.com/Actenon/actenon-permit) | The developer on-ramp + authority broker. Issues signed grants, runs the PDP, brokers credentials. | `actenon-kernel`, `actenon-protocol` | [![PyPI](https://img.shields.io/pypi/v/actenon-permit?label=PyPI)](https://pypi.org/project/actenon-permit/) [![npm](https://img.shields.io/npm/v/@actenon/sdk?label=npm)](https://www.npmjs.com/package/@actenon/sdk) |
+-| [**`actenon-cloud`**](https://github.com/Actenon/actenon-cloud) | The optional managed control plane. Multi-tenant, hosted, 9-layer evidence bundles. | `actenon-kernel`, `actenon-permit` | [![Optional](https://img.shields.io/badge/Deployment-optional-2ea44f.svg)](https://github.com/Actenon/actenon-cloud) |
++| **`actenon-cloud`** | The optional managed control plane (private repository, not publicly available). Not required by any component above. | `actenon-kernel`, `actenon-permit` | ![Optional](https://img.shields.io/badge/Deployment-optional-2ea44f.svg) |
+ | [**`actenon-scan`**](https://github.com/Actenon/actenon-scan) | The independent scanner. Finds the execution gap in any codebase. Zero dependencies. | *nothing* | [![PyPI](https://img.shields.io/pypi/v/actenon-scan?label=PyPI)](https://pypi.org/project/actenon-scan/) [![GitHub Action](https://img.shields.io/badge/GitHub%20Action-v1-blue.svg)](https://github.com/Actenon/actenon-scan#github-action) |
+-| [**`sdk-go`**](https://github.com/Actenon/sdk-go) | Go verifier SDK. Protected-endpoint proof verification in Go HTTP services. |  | [![Go](https://img.shields.io/badge/Go-v1.0.0-00ADD8.svg)](https://github.com/Actenon/sdk-go/releases/tag/v1.0.0) |
+-| [**`sdk-rust`**](https://github.com/Actenon/sdk-rust) | Rust verifier SDK. Protected-endpoint proof verification in systems components. |  | [![Rust](https://img.shields.io/badge/Rust-v0.1.0-CE422B.svg)](https://github.com/Actenon/sdk-rust/releases/tag/v0.1.0) |
++| [**`sdk-go`**](https://github.com/Actenon/sdk-go) | Go verifier SDK. Protected-endpoint proof verification in Go HTTP services. |  | [![Go](https://img.shields.io/badge/Go-v1.1.0-00ADD8.svg)](https://github.com/Actenon/sdk-go/releases/tag/v1.1.0) |
++| [**`sdk-rust`**](https://github.com/Actenon/sdk-rust) | Rust verifier SDK. Protected-endpoint proof verification in systems components. |  | [![crates.io](https://img.shields.io/crates/v/actenon-verifier-sdk?label=crates.io)](https://crates.io/crates/actenon-verifier-sdk) |
+ 
+ ### How to choose where to start
+ 
+ | If you are... | Start here | Why |
+ |---|---|---|
+ | An engineer evaluating Actenon for the first time | [`actenon-permit`](https://github.com/Actenon/actenon-permit) | The on-ramp. `Actenon.local()` gives you the full feature set in-process — no Cloud, no login. |
+-| A security reviewer or auditor | [`actenon-kernel`](https://github.com/Actenon/actenon-kernel) | The trust anchor. 51 conformance vectors, public threat model, audit responses. |
++| A security reviewer or auditor | [`actenon-kernel`](https://github.com/Actenon/actenon-kernel) | The trust anchor. Versioned conformance suite (Conformance 1.1.0), public threat model, audit responses. |
+ | A platform team deciding on a wire format | [`actenon-protocol`](https://github.com/Actenon/actenon-protocol) | The neutral contract. Zero dependencies. Any language, any framework, any cloud. |
+ | A DevSecOps engineer who wants CI integration today | [`actenon-scan`](https://github.com/Actenon/actenon-scan) | Zero-dependency scanner with a GitHub Action that emits SARIF to the Security tab. |
+-| A platform team that wants a hosted control plane | [`actenon-cloud`](https://github.com/Actenon/actenon-cloud) | Multi-tenant, 9-layer evidence bundles, insurer-facing clarity. **Optional** — everything else runs without it. |
+ 
+ ## Multi-language SDKs
+ 
+ | Language | Package | Use case |
+ |---|---|---|
+ | **Python** | `pip install actenon-permit` · `pip install actenon-kernel` · `pip install actenon-protocol` · `pip install actenon-scan` (all on PyPI) | Reference implementation. Full kernel: minter, verifier, executor, CLI, conformance. |
+-| **TypeScript** | `npm install @actenon/sdk` (v1.4.0) · `npm install @actenon/protocol-types` (v1.3.0) | Discriminated result types, receipt verification, protocol parity with Python. |
+-| **Go** | `go get github.com/actenon/sdk-go@v1.0.0` | Verifier-edge proof checking in Go HTTP services. |
+-| **Rust** | `cargo add --git https://github.com/Actenon/sdk-rust` (crates.io pending) | Verifier-edge proof checking in systems components. |
++| **TypeScript** | `npm install @actenon/sdk` (v2.0.0) · `npm install @actenon/verifier-sdk` (v0.2.0) · `npm install @actenon/protocol-types` (v1.4.0) | Permit client and grant tokens; protected-edge proof verification; protocol types and canonicalisation. |
++| **Go** | `go get github.com/Actenon/sdk-go@v1.1.0` | Verifier-edge proof checking in Go HTTP services. |
++| **Rust** | `cargo add actenon-verifier-sdk@0.2` | Verifier-edge proof checking in systems components. |
+ 
+-Every SDK runs against the same 51 conformance vectors in the Kernel. Conformance, not pedigree, decides validity.
++The Python, TypeScript, Go and Rust verifiers run the kernel's shared verifier vectors (Conformance 1.1.0); the Go and Rust SDKs vendor them byte-identically, pinned to a kernel commit. Conformance, not pedigree, decides validity.
+ 
+ ## Principles
+ 

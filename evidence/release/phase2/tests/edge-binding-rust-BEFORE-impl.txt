@@ -1,0 +1,2 @@
+thread 'edge_binding_vectors' (3715) panicked at tests/verifier_conformance_test.rs:324:28:
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s

@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main, master]
 
+# bash with -o pipefail: a failing command piped into tee/tail fails the step.
+defaults:
+  run:
+    shell: bash
+
+# Temporary immutable input while Protocol 1.5.0 awaits registry publication.
+env:
+  PIP_CONSTRAINT: ${{ github.workspace }}/.github/candidate-constraints.txt
+
 jobs:
   test:
     name: Python tests (${{ matrix.python-version }})
@@ -28,10 +37,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Install the protocol package first so the kernel's pyproject
-          # constraint `actenon-protocol>=1.1.0,<2` resolves cleanly.
-          python -m pip install "actenon-protocol>=1.1.0,<2"
-          python -m pip install -e ".[asymmetric,mcp,dev]"
-          python -m pip install fastapi httpx
+          # constraint `actenon-protocol>=1.5.0,<2` resolves cleanly.
+          python -m pip install "actenon-protocol>=1.5.0,<2"
+          # Every optional integration the suite exercises is installed, so
+          # its tests execute instead of skipping (see the skip gate below).
+          python -m pip install -e ".[asymmetric,mcp,dev,langchain,fastapi]"
+          python -m pip install httpx
 
       - name: Compile package and examples
         run: |
@@ -41,10 +52,18 @@ jobs:
         run: make demo
 
       - name: Run full test suite
-        # The full test suite (561+ tests) runs on every supported Python
-        # version, not just one. Previously only a narrow subset ran in CI;
-        # Fable 5's Part 3A flagged this as a drift between docs and reality.
-        run: python -m pytest tests/ -q
+        # The configured testpaths (actenon/ and tests/) on every supported
+        # Python version. `pytest tests/` alone missed actenon/conformance,
+        # the shared verifier-vector runner (edge binding, revocation).
+        run: python -m pytest -q -rs --junitxml=junit-suite.xml
+
+      - name: Run example tests
+        # The examples are documentation that executes; they must pass.
+        run: python -m pytest examples -q -rs --junitxml=junit-examples.xml
+
+      - name: No unexpected skips
+        # A skipped test is work CI claims but did not do.
+        run: python scripts/assert_no_unexpected_skips.py junit-suite.xml junit-examples.xml
 
       - name: Run conformance suite
         # The conformance suite MUST run on every push and PR, not just on
@@ -54,11 +73,57 @@ jobs:
       # Claim-verification steps moved to verify-claims.yml (one copy of
       # each check; the README badge links there).
 
+  required-checks:
+    # Branch protection and the publish workflows' release gate read
+    # .github/required-checks.json. Every name in it must be produced by a job.
+    name: Required-check names exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pyyaml
+      - run: python scripts/release_gate.py validate
+
+  postgres-replay:
+    # PostgresReplayStore against a real PostgreSQL 16 server: one execution
+    # across independent store connections, and fail-closed when the server is
+    # unreachable. No skip is allowed in this job.
+    name: Replay store on PostgreSQL 16
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: actenon-ci
+          POSTGRES_DB: actenon
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACTENON_TEST_POSTGRES_DSN: postgresql://postgres:actenon-ci@localhost:5432/actenon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "actenon-protocol>=1.5.0,<2"
+          python -m pip install -e ".[asymmetric,postgres,dev]"
+      - name: Real-server tests
+        run: python -m pytest tests/integration/test_postgres_real_server.py -v -rs --junitxml=junit-postgres.xml
+      - name: The tests executed (no skips)
+        run: python scripts/assert_no_unexpected_skips.py --no-allowlist junit-postgres.xml
+
   typescript-verifier:
     name: TypeScript verifier SDK
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: sdk/typescript
 
     steps:
@@ -74,7 +139,9 @@ jobs:
         run: npm ci
 
       - name: Typecheck
-        run: npm run typecheck --if-present
+        # The package's typecheck script is `check`; `typecheck --if-present`
+        # matched no script and silently ran nothing.
+        run: npm run check
 
       - name: Test
         # The test files use node:test (not bun:test), so we must use
@@ -82,55 +149,96 @@ jobs:
         # `bun test` (which doesn't support nested node:test calls).
         run: npm test
 
-  go-verifier:
-    name: Go verifier SDK
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdk/go
+      - name: Packed tarball imports in plain Node
+        # What npm consumers get: the packed tarball, installed into an empty
+        # project, imported as ESM with no TypeScript tooling.
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install "$RUNNER_TEMP"/actenon-verifier-sdk-*.tgz
+          node --input-type=module -e '
+            import { VerifierSDK, Ed25519Verifier, buildLocalProofVerifier } from "@actenon/verifier-sdk";
+            const sdk = new VerifierSDK(buildLocalProofVerifier());
+            if (typeof sdk.verifyJSON !== "function" || typeof sdk.verify !== "undefined") process.exit(1);
+            if (typeof Ed25519Verifier !== "function") process.exit(1);
+            console.log("packed @actenon/verifier-sdk imports OK");
+          '
 
+  go-verifier:
+    # The Go verifier SDK lives in github.com/Actenon/sdk-go. This job runs it
+    # at the commit pinned in sdk/standalone-sdk-pins.json against THIS
+    # kernel's vectors, so a vector change here fails until the SDK follows.
+    name: Go verifier SDK (standalone, pinned)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read the sdk-go pin
+        id: pin
+        run: |
+          python3 -c "import json; p=json.load(open('sdk/standalone-sdk-pins.json'))['sdk-go']; print('repository=' + p['repository']); print('sha=' + p['sha'])" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _sdk/sdk-go
+
+      - name: Check the checkout is the pinned commit
+        run: test "$(git -C _sdk/sdk-go rev-parse HEAD)" = "${{ steps.pin.outputs.sha }}"
+
+      - name: Vendored kernel vectors match this kernel
+        run: python3 scripts/check_standalone_sdk_fixtures.py _sdk/sdk-go
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-          cache: true
-          cache-dependency-path: sdk/go/go.sum
+          go-version-file: _sdk/sdk-go/go.mod
+          cache: false
 
-      - name: Vet
-        run: go vet ./...
-
-      - name: Test
-        run: go test ./... -v
+      - name: Test sdk-go and its vendored vectors against this kernel
+        working-directory: _sdk/sdk-go
+        env:
+          ACTENON_KERNEL_VECTOR_LOCK: ${{ github.workspace }}/conformance/vector-lock.json
+        run: |
+          go vet ./...
+          go test -race -count=1 ./...
 
   rust-verifier:
-    name: Rust verifier SDK
+    # The Rust verifier SDK lives in github.com/Actenon/sdk-rust; see go-verifier.
+    # Lints (fmt, clippy) are the SDK repository's own gate, so a new stable
+    # clippy lint cannot turn this job red without a behaviour change.
+    name: Rust verifier SDK (standalone, pinned)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdk/rust
-
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read the sdk-rust pin
+        id: pin
+        run: |
+          python3 -c "import json; p=json.load(open('sdk/standalone-sdk-pins.json'))['sdk-rust']; print('repository=' + p['repository']); print('sha=' + p['sha'])" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _sdk/sdk-rust
+
+      - name: Check the checkout is the pinned commit
+        run: test "$(git -C _sdk/sdk-rust rev-parse HEAD)" = "${{ steps.pin.outputs.sha }}"
+
+      - name: Vendored kernel vectors match this kernel
+        run: python3 scripts/check_standalone_sdk_fixtures.py _sdk/sdk-rust
+
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: 'stable'
-          components: rustfmt, clippy
 
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: sdk/rust
-
-      - name: Format check
-        run: cargo fmt -- --check
-
-      - name: Clippy
-        run: cargo clippy -- -D warnings
-
-      - name: Test
-        run: cargo test --verbose
+      - name: Test sdk-rust and its vendored vectors against this kernel
+        working-directory: _sdk/sdk-rust
+        env:
+          ACTENON_KERNEL_VECTOR_LOCK: ${{ github.workspace }}/conformance/vector-lock.json
+        run: |
+          cargo test --all-targets --locked
+          cargo test --doc --locked
 
   # The verify-claims job moved to verify-claims.yml so the README
   # badge can link to a dedicated gate.

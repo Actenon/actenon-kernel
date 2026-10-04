@@ -1,0 +1,21 @@
+Conformance version: 1.0.0
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/demo/local_proof.py:93: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer()
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/conformance/test_canonicalization_strict_conformance.py:95: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = _security_signer()
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/conformance/test_canonicalization_strict_conformance.py:265: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer=_security_signer(),
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/conformance/test_outcome_attestation_conformance.py:16: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer=build_local_proof_signer(),
+/usr/lib/python3.11/unittest/case.py:579: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  if method() is not None:
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/conformance/test_replay_conformance.py:16: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  kernel, writer, payload, context = build_replay_kernel(tempdir)
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/conformance/test_verifier_sdk_conformance.py:44: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  self.signer = build_local_proof_signer()
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-rel/lib/python3.11/site-packages/actenon/demo/portable_local_proof.py:69: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer()
+Conformance tests passed.
+Ran 51 test(s).
+Skipped: 0.
+Mark eligibility: Actenon Verified (Conformance 1.0.0)

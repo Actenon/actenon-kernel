@@ -292,7 +292,8 @@ def main() -> int:
             amount_cents=25_000,
         ),
         "refused",
-        "INTENT_MISMATCH",
+        # The swapped payee is the proof's target: the target binding fails first.
+        "TARGET_MISMATCH",
     )
 
     run(
@@ -304,7 +305,8 @@ def main() -> int:
             amount_cents=25_000,
         ),
         "refused",
-        ("SCOPE_CAPABILITY_MISMATCH", "INTENT_MISMATCH"),
+        # The refund tool's target (an order) is not the proof's target (a vendor).
+        "TARGET_MISMATCH",
     )
 
     run(

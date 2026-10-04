@@ -1,0 +1,6 @@
+Refusal links verified.
+Refusal: rfsl_0001
+Category: policy
+Code: WORKFLOW_DENY
+Checked against: action intent, receipt
+Not verified: the refusal itself carries no signature (v1), so its origin and integrity are established only through the linked artifacts above. For signed provenance use attest-refusal / verify-refusal-attestation.

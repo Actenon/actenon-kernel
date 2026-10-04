@@ -1,0 +1,27 @@
+[10:05:00] current vectors: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/vec/lib/python3.12/site-packages/actenon/conformance/vectors/verifier_sdk_v1 (actenon-kernel 1.3.0)
+[10:05:05] PyPI actenon-kernel resolved to 1.2.1
+[10:05:06] CONTROL python actenon-kernel 1.2.1 (PyPI): FAIL (current verifier vectors: 14 failed, 8 passed, 9 warnings, 37 subtests passed in 0.22s)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.2.1-published: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/diff-python-kernel-1.2.1-published.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/py/lib/python3.12/site-packages/actenon/__init__.py)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.2.1-published: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/diffadd-python-kernel-1.2.1-published.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/py/lib/python3.12/site-packages/actenon/__init__.py)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.2.1-published: 53 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/difftsg-python-kernel-1.2.1-published.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/py/lib/python3.12/site-packages/actenon/__init__.py)
+[10:05:07] CONTROL ts @actenon/verifier-sdk (npm): FAIL (not installable: E404)
+[10:05:07] CONTROL ts @actenon/protocol-types error (npm): FAIL (plain-node import: )
+[10:05:07] CONTROL ts @actenon/sdk error (npm): FAIL (plain-node import: )
+go: creating new go.mod: module example.com/control
+go: downloading github.com/Actenon/sdk-go v1.0.0
+go: added github.com/Actenon/sdk-go v1.0.0
+[10:05:09] proxy.golang.org sdk-go@latest = v1.0.0
+[10:05:15] CONTROL go sdk-go v1.0.0 (proxy.golang.org): FAIL (current vectors via public API: ./edge_revocation_conformance_test.go:45:33: undefined: verifier.RevocationChecker)
+go: creating new go.mod: module example.com/runner
+go: to add module requirements and sums:
+	go mod tidy
+go: added github.com/Actenon/sdk-go v1.0.0
+go-sdk-v1.0.0-published: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/diff-go-sdk-v1.0.0-published.jsonl
+go-sdk-v1.0.0-published: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/diffadd-go-sdk-v1.0.0-published.jsonl
+go-sdk-v1.0.0-published: 53 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/controls-r2/difftsg-go-sdk-v1.0.0-published.jsonl
+[10:05:16] CONTROL rust actenon-verifier-sdk (crates.io): FAIL (not resolvable: error: no matching package named `actenon-verifier-sdk` found)
+[10:05:21] CONTROL python actenon-protocol 1.3.0 (PyPI): PASS (release-tag conformance runner)
+[10:05:21] controls: 6 expected failures observed, 1 unexpected passes

@@ -9,7 +9,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 <!-- PYTHON-BADGE:END -->
 [![PyPI: actenon-kernel](https://img.shields.io/pypi/v/actenon-kernel?label=PyPI)](https://pypi.org/project/actenon-kernel/)
-[![Conformance 1.0.0](https://img.shields.io/badge/Conformance-1.0.0--51%20vectors-success.svg)](docs/CONFORMANCE.md)
+[![Conformance 1.1.0](https://img.shields.io/badge/Conformance-1.1.0--53%20vectors-success.svg)](docs/CONFORMANCE.md)
 [![Spec v1](https://img.shields.io/badge/Spec-v1-stable.svg)](docs/SPEC_INDEX.md)
 [![Versioning: SemVer 1.x](https://img.shields.io/badge/Versioning-SemVer%201.x-blue.svg)](VERSIONING.md)
 [![SDKs: Py · TS · Go · Rust](https://img.shields.io/badge/SDKs-Py%20%C2%B7%20TS%20%C2%B7%20Go%20%C2%B7%20Rust-orange.svg)](docs/SDK_SELECTION_GUIDE.md)
@@ -35,7 +35,7 @@ makes about the kernel stops being true:
   plus a source scan proving the kernel never imports Cloud or Permit, plus
   [`scripts/assert_dep_direction.py`](scripts/assert_dep_direction.py)
   (runtime deps are exactly `actenon-protocol`).
-- **The conformance count** — "51 conformance vectors" is compared against
+- **The conformance count** — every "N conformance vectors" / "N tests pass" here is compared against
   what `actenon-kernel conformance run` actually executes; the vector files
   themselves are hash-locked by
   [`scripts/verify_conformance_manifest.py`](scripts/verify_conformance_manifest.py).
@@ -63,8 +63,10 @@ The Kernel is one of the independent repositories that together close the **exec
 | **`actenon-kernel`** ← you are here | The open verifier — defines what a valid proof is | `actenon-protocol` | `actenon-kernel` (PyPI) |
 | **`actenon-permit`** | The developer on-ramp and authority broker | `actenon-kernel`, `actenon-protocol` | `actenon-permit` (PyPI) · `@actenon/sdk` (npm) |
 | **`actenon-scan`** | The independent static-analysis scanner | — | `actenon-scan` (PyPI) |
+| **`sdk-go`** | Go verifier SDK — protected-endpoint proof verification in Go | `actenon-protocol` | [repo](https://github.com/Actenon/sdk-go) |
+| **`sdk-rust`** | Rust verifier SDK — protected-endpoint proof verification in Rust | `actenon-protocol` | [repo](https://github.com/Actenon/sdk-rust) |
 
-**Optional:** [`actenon-cloud`](https://github.com/Actenon/actenon-cloud) — a managed control plane (source-available; see its LICENSE). Not required by any component above; every capability in this ecosystem works without it.
+**Optional:** `actenon-cloud` — a managed control plane (private repository, not publicly available). Not required by any component above; every capability in this ecosystem works without it.
 <!-- ECOSYSTEM-TABLE:END -->
 
 Every repo can be adopted independently. The Kernel in particular can be wired in **at the agent framework** (LangChain tool, MCP tool, Claude Managed Agents custom tool, etc.) **or independently at the resource boundary** (FastAPI route, Express route, Go HTTP handler). Both placements are first-class.
@@ -77,7 +79,7 @@ The Kernel is the **trust anchor** of the Actenon ecosystem. It is:
 
 - **Independent** — runs without Permit, Cloud, or Scan. Zero network calls during verification.
 - **The verifier at the execution edge** — the `PCCBVerifier` is pure and stateless; the `ProtectedExecutor` enforces replay, escrow, idempotency, and credential brokering at the edge before any side effect, then emits the Receipt or Refusal.
-- **Conformance-locked** — 51 conformance vectors define exactly what "a valid PCCB" means, in any language.
+- **Conformance-locked** — 53 conformance vectors define exactly what "a valid PCCB" means, in any language.
 - **Multi-language** — Python reference, plus TypeScript, Go, and Rust verifier SDKs that all conform to the same vectors.
 - **Framework-agnostic** — proof verification is a function call, not a framework. The same verifier runs inside a LangChain `_run`, an MCP tool handler, an Express route, or a Go HTTP handler.
 
@@ -126,7 +128,7 @@ any caller (agent / human / service / attacker)
        Receipt or Refusal
 ```
 
-This is the path you take when you cannot fully trust the agent framework, when the resource is shared by multiple callers, or when the resource team and the agent team are different organizations. See the **Boundary Kit** in [`actenon-permit`](https://github.com/Actenon/actenon-permit) and the [`BoundaryVerifier`](actenon/boundary/) API in this repo.
+This is the path you take when you cannot fully trust the agent framework, when the resource is shared by multiple callers, or when the resource team and the agent team are different organizations. See the **Boundary Kit** in [`actenon-permit`](https://github.com/Actenon/actenon-permit) and the [`BoundaryVerifier`](actenon/boundary/) API in this repo. `BoundaryVerifier` verifies a signed PCCB against the exact Action Intent; it does not treat a token string as proof.
 
 Both placements use the same Kernel, the same PCCB shape, the same conformance vectors, and the same Receipt/Refusal artefacts. You can mix them in one deployment.
 
@@ -206,6 +208,12 @@ else that speaks MCP):
 }
 ```
 
+Using Claude Code? One command registers the same server:
+
+```bash
+claude mcp add actenon -- uvx --from 'actenon-kernel[mcp]' actenon-mcp --demo
+```
+
 `uvx` fetches and runs it — nothing to install first. `--demo` runs offline
 with an ephemeral key and in-memory state; it is clearly marked **DEMO MODE**
 in every tool description and must not be used in production.
@@ -243,20 +251,50 @@ verifier.verify(intent, pccb, context)
 
 ## Use as a boundary verifier (Boundary Kit, resource-owned mode)
 
+`BoundaryVerifier()` with no trust root refuses every token (`ISSUER_UNTRUSTED`), including a long or `v1.`-prefixed string. Pass the same `PCCBVerifier` the issuer's key can satisfy, and the exact Action Intent the request is performing:
+
 ```python
 from actenon.boundary import BoundaryVerifier, BoundaryVerificationRequest
+from actenon.proof import PCCBVerifier
 
-verifier = BoundaryVerifier()
+# The trust root is mandatory: without a PCCBVerifier every proof is
+# refused (ISSUER_UNTRUSTED). Pass a durable replay_store= when more than
+# one worker serves the same boundary.
+verifier = BoundaryVerifier(pccb_verifier=PCCBVerifier(signer=issuer_verifier))
 result = verifier.verify_boundary(BoundaryVerificationRequest(
-    proof_token="v1.eyJ...",
-    action_type="payment.refund",
-    action_hash="abc123...",
-    audience="service:payments",
+    proof_token=proof_header,         # PCCB JSON, or "v1." + base64url(PCCB JSON)
+    intent=action_intent,             # the exact Action Intent this request performs
+    action_type="payment.refund",     # must equal the intent's action name
+    action_hash="",                   # optional; when set, must equal the proof's action hash
+    audience="service:payments",      # this boundary's identity (required)
 ))
-# result.valid         → True / False
-# result.refusal_code  → "PROOF_INVALID" | "REPLAY_DETECTED" | ""
-# result.proof_id      → "proof_..."  (for receipt correlation)
+# result.valid         → True only after signature + exact-action verification
+# result.refusal_code  → "PROOF_INVALID" | "AUDIENCE_MISMATCH" | "REPLAY_DETECTED" | ...
+# result.proof_id      → the PCCB's pccb_id (for receipt correlation)
 ```
+
+## How Airlock calls the Kernel
+
+[Airlock](https://github.com/Actenon/actenon-airlock/pull/3) is the cooperative Python broker in front of an agent. Scan names the powers, Permit signs a grant for those powers, and Airlock asks the Kernel to verify the proof before a side effect. That call, from `src/actenon_airlock/broker.py`, is:
+
+```python
+from actenon.gate import ActenonGate
+from actenon.replay import ReplayProtector, SqliteReplayStore
+
+self.edge = ActenonGate(
+    verifier=Ed25519PublicKeyVerifier([key.public_key_jwk]),  # actenon-permit
+    audience="service:actenon-permit-gateway",
+    issuer="service:actenon-permit",
+    capabilities=tuple(sorted(self.allowed)) or ("airlock.none",),
+    replay_protector=ReplayProtector(SqliteReplayStore(state.local / "replay.sqlite3")),
+    revocation_checker=StoreRevocationChecker(self.store),    # actenon-permit
+)
+outcome = self.edge.protect(intent, proof, dispatch.run)
+```
+
+`capabilities` is the edge allow-list (the grant's Scan powers). A proof for any other capability is refused with `SCOPE_CAPABILITY_MISMATCH` before `dispatch.run`. `revocation_checker(pccb, context)` must return true when the authority is not revoked; a false result or an exception is `AUTHORITY_REVOKED`. `Ed25519PublicKeyVerifier` and `StoreRevocationChecker` are Permit types that satisfy those Kernel interfaces. The Kernel does not import Permit or Scan.
+
+The pipeline is Scan vocabulary, then a signed grant, then this Kernel check, then a signed receipt. Airlock writes its own hash-chained receipt around `outcome.to_dict()`. The Kernel's job inside that pipeline is the check and the Receipt or Refusal for the protected call.
 
 ## Use as a minter + executor (brokered mode, full local proof)
 
@@ -279,10 +317,10 @@ python3 -m examples.refund_guard_local.server --runtime-dir artifacts/local_runt
 |---|---|---|
 | **Python** (reference) | Full kernel: minter, verifier, executor, CLI, conformance, local proof mode | this repo |
 | **TypeScript** | Verifier-edge proof checking in Node / Express / TS services | [`sdk/typescript/`](sdk/typescript/README.md) |
-| **Go** | Verifier-edge proof checking in Go HTTP services | [`sdk/go/`](sdk/go/README.md) |
-| **Rust** | Verifier-edge proof checking in systems components | [`sdk/rust/`](sdk/rust/README.md) |
+| **Go** | Verifier-edge proof checking in Go HTTP services | [`Actenon/sdk-go`](https://github.com/Actenon/sdk-go) (standalone; kernel CI tests the pinned commit) |
+| **Rust** | Verifier-edge proof checking in systems components | [`Actenon/sdk-rust`](https://github.com/Actenon/sdk-rust) (standalone; kernel CI tests the pinned commit) |
 
-Every SDK runs against the same 51 conformance vectors. See [`SDK_SELECTION_GUIDE.md`](docs/SDK_SELECTION_GUIDE.md).
+Every SDK runs the same hash-locked verifier vectors (`actenon/conformance/vectors/verifier_sdk_v1`, locked in `conformance/vector-lock.json`; the Go and Rust SDKs vendor them byte-identically). See [`SDK_SELECTION_GUIDE.md`](docs/SDK_SELECTION_GUIDE.md).
 
 ## Framework & platform adapters
 
@@ -388,7 +426,7 @@ Full mapping in [`COMPLIANCE_MAPPING.md`](docs/COMPLIANCE_MAPPING.md).
 
 ```bash
 actenon-kernel conformance run --require-complete
-# → 51 tests pass. Mark: Actenon Verified (Conformance 1.0.0)
+# → 53 tests pass. Mark: Actenon Verified (Conformance 1.1.0)
 ```
 
 The active v1 compatibility surface is: Action Intent, PCCB, Receipt, Refusal, Protected Endpoint, Replay. Reserved surfaces (Reconciliation, Policy Bundle) are **not** active v1 conformance targets. Third-party verifier implementers should target these surfaces and run the same suite. See [`CONFORMANCE.md`](docs/CONFORMANCE.md).
@@ -412,7 +450,9 @@ The repo ships an auditor-readable [`THREAT_MODEL.md`](docs/THREAT_MODEL.md) and
 
 Actenon gates explicit execution-edge actions; it does not inspect or filter prompts, model output, or in-band response content. It can require proof for an explicit export or transmit action, but it does not stop data disclosed inside ordinary output unless that disclosure is itself modeled and routed as a protected action.
 
+- Act as an operating-system jail. It does not intercept syscalls, confine a process, sandbox native code, or stop a program that never calls `protect()` or `BoundaryVerifier`. Hostile native code and same-user programs need OS isolation; Airlock's own docs say the same about the broker around this Kernel.
 - Issue grants or proofs — that's Permit's job.
+- Name which powers a program uses — that's Scan's job. The Kernel checks a proof against an allow-list the caller declares (`capabilities=`).
 - Resolve credentials — that's the broker's job.
 - Execute provider calls — that's the adapter's job.
 - Manage tenants — that's Cloud's job.
@@ -447,10 +487,10 @@ See the signing backends table above for the exact wiring paths. The full produc
 | `actenon/anchors/` | External-anchor verification |
 | `actenon/policy/` | Policy preflight |
 | `actenon/preflight/` | Action preflight checks |
-| `actenon/conformance/` | 51 conformance vectors + suite |
+| `actenon/conformance/` | 53 conformance vectors + suite |
 | `actenon/cli.py` | Unified CLI (`actenon-kernel verify-proof`, `actenon-kernel up`, `actenon-kernel simulate`, `actenon-kernel conformance run`) |
 | `actenon/local_runtime.py` | Local trust runtime (no external accounts) |
-| `sdk/typescript/` `sdk/go/` `sdk/rust/` | Verifier-only SDKs |
+| `sdk/typescript/` | TypeScript verifier-only SDK (Go and Rust SDKs are standalone repos pinned in `sdk/standalone-sdk-pins.json`) |
 | `examples/` | 20+ framework & platform adapters (see above) |
 | `spec/` | Active v1 specs (11 surfaces) |
 | `docs/incidents/` | Pattern-based incident library |

@@ -1,0 +1,197 @@
+[09:33:25] artefacts: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/rel
+[09:33:25] work dir: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb
+[09:33:25] protocol tag archive: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/tagarch/actenon-protocol-ed8904d.tar.gz sha256=6b6809e05e451249522240eed3b67830bbbf9389ddfb487b4a050a49023acc96
+[09:33:25] == python py310 (/root/.local/bin/python3.10)
+OK   actenon-kernel 1.3.0 from http://127.0.0.1:18765/pypi/files/actenon_kernel-1.3.0-py3-none-any.whl sha256=75038a00be2131cac306072cc6e3a7bc0b19110aa741243363db7d48bf69cea7
+OK   actenon-protocol 1.4.0 from http://127.0.0.1:18765/pypi/files/actenon_protocol-1.4.0-py3-none-any.whl sha256=f116a78e89ab347a30b3c40aab627f531632b5112081ee286be89fc44ff8b810
+resolved: {'actenon-protocol': '1.4.0', 'actenon-kernel': '1.3.0'} python 3.10.18
+[09:33:35] RESULT python-py310 kernel conformance (shipped suite): PASS
+53 passed, 23 warnings, 57 subtests passed in 0.31s
+[09:33:36] RESULT python-py310 actenon-kernel scan: PASS
+[09:33:36] RESULT protocol tag vectors match vectors.sha256: FAIL
+[09:33:36] RESULT python-py310 protocol conformance runner (Actenon-compatible v1.4.0): PASS
+[09:33:36] RESULT python-py310 protocol canonicalisation vectors: PASS
+[09:33:36] RESULT python-py310 permit steps: N/A (actenon-permit Requires-Python >=3.11)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py310: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-python-kernel-py310.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py310/venv/lib/python3.10/site-packages/actenon/__init__.py)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py310: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-python-kernel-py310.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py310/venv/lib/python3.10/site-packages/actenon/__init__.py)
+[09:33:36] RESULT python-py310 differential corpus run: PASS
+[09:33:36] == python py311 (/usr/bin/python3.11)
+OK   actenon-permit 2.0.0 from http://127.0.0.1:18765/pypi/files/actenon_permit-2.0.0-py3-none-any.whl sha256=5c6f9dc51073937b3ea8754262c556f5433a56cbba5c7d5e8ad886eb9c82b6d6
+OK   actenon-kernel 1.3.0 from http://127.0.0.1:18765/pypi/files/actenon_kernel-1.3.0-py3-none-any.whl sha256=75038a00be2131cac306072cc6e3a7bc0b19110aa741243363db7d48bf69cea7
+OK   actenon-protocol 1.4.0 from http://127.0.0.1:18765/pypi/files/actenon_protocol-1.4.0-py3-none-any.whl sha256=f116a78e89ab347a30b3c40aab627f531632b5112081ee286be89fc44ff8b810
+resolved: {'actenon-protocol': '1.4.0', 'actenon-permit': '2.0.0', 'actenon-kernel': '1.3.0'} python 3.11.15
+[09:33:47] RESULT python-py311 kernel conformance (shipped suite): PASS
+53 passed, 23 warnings, 57 subtests passed in 0.36s
+[09:33:47] RESULT python-py311 actenon-kernel scan: PASS
+[09:33:47] RESULT protocol tag vectors match vectors.sha256: FAIL
+[09:33:47] RESULT python-py311 protocol conformance runner (Actenon-compatible v1.4.0): PASS
+[09:33:47] RESULT python-py311 protocol canonicalisation vectors: PASS
+[09:33:48] RESULT python-py311 permit README quickstart: PASS
+[09:33:48] RESULT python-py311 'actenon demo': PASS
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py311: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-python-kernel-py311.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py311/venv/lib/python3.11/site-packages/actenon/__init__.py)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py311: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-python-kernel-py311.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py311/venv/lib/python3.11/site-packages/actenon/__init__.py)
+[09:33:48] RESULT python-py311 differential corpus run: PASS
+[09:33:48] == python py312 (/usr/bin/python3.12)
+OK   actenon-permit 2.0.0 from http://127.0.0.1:18765/pypi/files/actenon_permit-2.0.0-py3-none-any.whl sha256=5c6f9dc51073937b3ea8754262c556f5433a56cbba5c7d5e8ad886eb9c82b6d6
+OK   actenon-kernel 1.3.0 from http://127.0.0.1:18765/pypi/files/actenon_kernel-1.3.0-py3-none-any.whl sha256=75038a00be2131cac306072cc6e3a7bc0b19110aa741243363db7d48bf69cea7
+OK   actenon-protocol 1.4.0 from http://127.0.0.1:18765/pypi/files/actenon_protocol-1.4.0-py3-none-any.whl sha256=f116a78e89ab347a30b3c40aab627f531632b5112081ee286be89fc44ff8b810
+resolved: {'actenon-protocol': '1.4.0', 'actenon-permit': '2.0.0', 'actenon-kernel': '1.3.0'} python 3.12.3
+[09:34:00] RESULT python-py312 kernel conformance (shipped suite): PASS
+53 passed, 23 warnings, 57 subtests passed in 0.29s
+[09:34:00] RESULT python-py312 actenon-kernel scan: PASS
+[09:34:00] RESULT protocol tag vectors match vectors.sha256: FAIL
+[09:34:00] RESULT python-py312 protocol conformance runner (Actenon-compatible v1.4.0): PASS
+[09:34:00] RESULT python-py312 protocol canonicalisation vectors: PASS
+[09:34:00] RESULT python-py312 permit README quickstart: PASS
+[09:34:01] RESULT python-py312 'actenon demo': PASS
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py312: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-python-kernel-py312.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/venv/lib/python3.12/site-packages/actenon/__init__.py)
+sys:1: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+python-kernel-1.3.0-py312: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-python-kernel-py312.jsonl (kernel /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/venv/lib/python3.12/site-packages/actenon/__init__.py)
+[09:34:01] RESULT python-py312 differential corpus run: PASS
+[09:34:01] vectors for other languages: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/venv/lib/python3.12/site-packages/actenon/conformance/vectors/verifier_sdk_v1 (installed kernel wheel), lock: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/venv/lib/python3.12/site-packages/conformance/vector-lock.json sha256=ecc68d8388c5c813abd4c6348eda6265b1b8a87fec5620297ebc9d717718d5d6
+[09:34:01] == typescript
+
+added 3 packages in 231ms
+OK   @actenon/verifier-sdk 0.2.0 from http://127.0.0.1:18765/npm/-/actenon-verifier-sdk-0.2.0.tgz = actenon-verifier-sdk-0.2.0.tgz
+OK   @actenon/sdk 2.0.0 from http://127.0.0.1:18765/npm/-/actenon-sdk-2.0.0.tgz = actenon-sdk-2.0.0.tgz
+OK   @actenon/protocol-types 1.4.0 from http://127.0.0.1:18765/npm/-/actenon-protocol-types-1.4.0.tgz = actenon-protocol-types-1.4.0.tgz
+[09:34:02] RESULT typescript plain-node imports of all three packages: PASS
+[09:34:02] RESULT typescript @actenon/verifier-sdk kernel vectors (cases+timestamps+edge+revocation): PASS
+@actenon/verifier-sdk 0.2.0: 51 vectors, 0 failures
+[09:34:02] RESULT typescript @actenon/protocol-types canonicalisation vectors: PASS
+Canonicalisation conformance (TypeScript): 29 passed, 0 failed, 12 skipped
+============================================================
+ts-verifier-sdk-0.2.0: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-ts-verifier-sdk.jsonl (file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/ts/node_modules/@actenon/verifier-sdk/dist/index.js)
+ts-verifier-sdk-0.2.0: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-ts-verifier-sdk.jsonl (file:///tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/ts/node_modules/@actenon/verifier-sdk/dist/index.js)
+[09:34:03] RESULT typescript differential corpus run: PASS
+[09:34:03] == go
+go: creating new go.mod: module example.com/freshconsumer
+go: downloading github.com/Actenon/sdk-go v1.1.0
+go: added github.com/Actenon/sdk-go v1.1.0
+[09:34:03] go module v1.1.0 at /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/gopath/pkg/mod/github.com/!actenon/sdk-go@v1.1.0; downloaded zip sha256=969c6f501a665e3b344f85e44e61a135d26551b187eb0aa235c1495af53fd528 (artefact 969c6f501a665e3b344f85e44e61a135d26551b187eb0aa235c1495af53fd528)
+[09:34:03] RESULT go module provenance (v1.1.0 zip digest = artefact, module cache path): PASS
+github.com/Actenon/sdk-go v1.1.0 h1:lLWVKdc0nE8RAHEKkuzr+G78vc2Qg3OxSV5OB0Zfkk4=
+github.com/Actenon/sdk-go v1.1.0/go.mod h1:yeOA1lt5N4bb9uLRW4jLbLf7f4GwM5WNdhbi3f22Rgs=
+[09:34:09] RESULT go consumer: kernel vectors from installed wheel via public API: PASS
+--- PASS: TestEdgeRevocationVectors (0.00s)
+--- PASS: TestSharedVerifierConformanceVectors (0.01s)
+--- PASS: TestSharedFractionalSecondTimestampVectors (0.00s)
+--- PASS: TestSharedVerifierVectorsAreAllExecuted (0.00s)
+ok  	example.com/freshconsumer	0.018s
+[09:34:16] RESULT go module's own test suite from the module cache (lock = installed wheel): PASS
+?   	github.com/Actenon/sdk-go/examples/http-protected-endpoint	[no test files]
+ok  	github.com/Actenon/sdk-go/verifier	0.203s
+go: creating new go.mod: module example.com/runner
+go: to add module requirements and sums:
+	go mod tidy
+go: added github.com/Actenon/sdk-go v1.1.0
+go-sdk-v1.1.0-strict: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-go-sdk-strict.jsonl
+go-sdk-v1.1.0-strict: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-go-sdk-strict.jsonl
+[09:34:17] RESULT go differential corpus run (strict): PASS
+go: creating new go.mod: module example.com/runner
+go: to add module requirements and sums:
+	go mod tidy
+go: added github.com/Actenon/sdk-go v1.1.0
+go-sdk-v1.1.0-usenumber: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-go-sdk-usenumber.jsonl
+go-sdk-v1.1.0-usenumber: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-go-sdk-usenumber.jsonl
+[09:34:17] RESULT go differential corpus run (usenumber): PASS
+[09:34:17] == rust
+    Updating `actenon-rehearsal` index
+    Updating crates.io index
+     Locking 49 packages to latest compatible versions
+      Adding base64ct v1.6.0 (available: v1.8.3)
+      Adding ed25519-dalek v2.1.1 (available: v2.2.0)
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding time v0.3.47 (available: v0.3.55)
+      Adding time-core v0.1.8 (available: v0.1.9)
+      Adding time-macros v0.2.27 (available: v0.2.32)
+ Downloading crates ...
+  Downloaded actenon-verifier-sdk v0.2.0 (registry `actenon-rehearsal`)
+  Downloaded generic-array v0.14.7
+  Downloaded const-oid v0.9.6
+  Downloaded sha2 v0.10.9
+  Downloaded crypto-common v0.1.7
+  Downloaded rustc_version v0.4.1
+  Downloaded signature v2.2.0
+  Downloaded subtle v2.6.1
+  Downloaded wasi v0.11.1+wasi-snapshot-preview1
+  Downloaded cfg-if v1.0.5
+  Downloaded curve25519-dalek-derive v0.1.1
+  Downloaded cpufeatures v0.2.17
+  Downloaded itoa v1.0.18
+  Downloaded powerfmt v0.2.0
+  Downloaded time-core v0.1.8
+  Downloaded version_check v0.9.5
+  Downloaded block-buffer v0.10.4
+  Downloaded num-conv v0.2.2
+  Downloaded digest v0.10.7
+  Downloaded spki v0.7.3
+  Downloaded base64ct v1.6.0
+  Downloaded ed25519 v2.2.3
+  Downloaded rand_core v0.6.4
+  Downloaded deranged v0.5.8
+  Downloaded time-macros v0.2.27
+  Downloaded pkcs8 v0.10.2
+  Downloaded zeroize v1.9.0
+  Downloaded zmij v1.0.23
+  Downloaded hmac v0.12.1
+  Downloaded quote v1.0.47
+  Downloaded getrandom v0.2.17
+  Downloaded semver v1.0.28
+  Downloaded serde_core v1.0.229
+  Downloaded unicode-ident v1.0.26
+  Downloaded proc-macro2 v1.0.107
+  Downloaded serde_derive v1.0.229
+  Downloaded base64 v0.22.1
+  Downloaded ed25519-dalek v2.1.1
+  Downloaded serde v1.0.229
+  Downloaded der v0.7.10
+  Downloaded memchr v2.8.3
+  Downloaded typenum v1.20.1
+  Downloaded serde_json v1.0.151
+  Downloaded time v0.3.47
+  Downloaded syn v3.0.6
+  Downloaded curve25519-dalek v4.1.3
+  Downloaded syn v2.0.119
+  Downloaded fiat-crypto v0.2.9
+  Downloaded libc v0.2.190
+OK   actenon-verifier-sdk 0.2.0 source=sparse+http://127.0.0.1:18765/cargo/index/ checksum=d1d0c30beb3d5c4548fc5b8caeec4ae12f757812e7f28730c59f4184cebe6b6f artefact=d1d0c30beb3d5c4548fc5b8caeec4ae12f757812e7f28730c59f4184cebe6b6f manifest=/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/cargo-home/registry/src/127.0.0.1-61fcc1b120e4ea9c/actenon-verifier-sdk-0.2.0/Cargo.toml
+[09:34:20] RESULT rust crate provenance (Cargo.lock checksum = artefact, registry source): PASS
+[09:34:27] RESULT rust consumer: kernel vectors from installed wheel via public API: PASS
+.....
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+parsed intent intent_portable_hello_world_001 and pccb pccb_portable_hello_world_001
+[09:34:36] RESULT rust crate's own test suite from the downloaded .crate (lock = installed wheel): PASS
+warning: unexpected `cfg` condition value: `ed25519`
+  --> src/main.rs:37:7
+   |
+37 | #[cfg(feature = "ed25519")]
+   |       ^^^^^^^^^^^^^^^^^^^ help: remove the condition
+   |
+   = note: no expected values for `feature`
+   = help: consider adding `ed25519` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unexpected `cfg` condition value: `ed25519`
+  --> src/main.rs:41:11
+   |
+41 | #[cfg(not(feature = "ed25519"))]
+   |           ^^^^^^^^^^^^^^^^^^^ help: remove the condition
+   |
+   = note: no expected values for `feature`
+   = help: consider adding `ed25519` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+rust-sdk-0.2.0: 179 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diff-rust-sdk.jsonl
+rust-sdk-0.2.0: 14 cases -> /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/fc-dry3/diffadd-rust-sdk.jsonl
+[09:34:45] RESULT rust differential corpus run: PASS
+[09:34:45] RESULT no /home/user source path in any resolver state: PASS
+[09:34:45] registry requests served: 127
+[09:34:45] fresh-consumer steps: 37, failures: 3

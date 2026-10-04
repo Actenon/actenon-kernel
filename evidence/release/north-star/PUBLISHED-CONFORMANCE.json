@@ -1,0 +1,90 @@
+{
+  "statement": "ALL FOUR PUBLISHED ARTEFACTS PASS CURRENT RELEASE CONFORMANCE: FALSE (nothing has been released). Every artefact the public registries serve today fails the current release checks.",
+  "as_of": "2026-10-03",
+  "authority": "published-artefact results are final; candidate results are listed for contrast only",
+  "published_today": [
+    {
+      "family": "python",
+      "artefact": "actenon-kernel 1.2.1 (PyPI)",
+      "observed": "FAIL",
+      "detail": "current verifier vectors: 14 failed, 8 passed, 9 warnings, 37 subtests passed in 0.21s"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/verifier-sdk (npm)",
+      "observed": "FAIL",
+      "detail": "not installable: E404"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/protocol-types 1.3.0 (npm)",
+      "observed": "FAIL",
+      "detail": "plain-node import:     throw new ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING(filename);"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/sdk 1.4.0 (npm)",
+      "observed": "FAIL",
+      "detail": "plain-node import:     throw new ERR_MODULE_NOT_FOUND("
+    },
+    {
+      "family": "go",
+      "artefact": "sdk-go v1.0.0 (proxy.golang.org)",
+      "observed": "FAIL",
+      "detail": "current vectors via public API: ./edge_revocation_conformance_test.go:45:33: undefined: verifier.RevocationChecker"
+    },
+    {
+      "family": "rust",
+      "artefact": "actenon-verifier-sdk (crates.io)",
+      "observed": "FAIL",
+      "detail": "not resolvable: error: no matching package named `actenon-verifier-sdk` found"
+    },
+    {
+      "family": "python",
+      "artefact": "actenon-protocol 1.3.0 (PyPI) [control v2]",
+      "observed": "FAIL",
+      "detail": "standalone runner, installed schemas only: KeyError: 'urn:actenon:protocol:execution-result:v1'"
+    }
+  ],
+  "candidates_same_checks": [
+    {
+      "family": "python",
+      "check": "python-py312 kernel conformance (shipped suite)",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript @actenon/verifier-sdk kernel vectors (cases+timestamps+edge+revocation)",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript plain-node imports of all three packages",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript plain-node imports of all three packages",
+      "observed": "PASS"
+    },
+    {
+      "family": "go",
+      "check": "go consumer: kernel vectors from installed wheel via public API",
+      "observed": "PASS"
+    },
+    {
+      "family": "rust",
+      "check": "rust consumer: kernel vectors from installed wheel via public API",
+      "observed": "PASS"
+    },
+    {
+      "family": "python",
+      "check": "python-py312 protocol standalone runner, installed schemas only (control v2)",
+      "observed": "PASS"
+    }
+  ],
+  "non_discriminating_rows_excluded": [
+    "actenon-protocol 1.3.0 (PyPI)"
+  ],
+  "to_complete_after_release": "Run controls/run_published_controls.sh unchanged and fresh-consumer/run_fresh_consumer.sh with the public registries (no local_registry). The four families (Python wheel, TS packages, Go module, Rust crate) must PASS. Record the run here."
+}

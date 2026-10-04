@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def test_conformance_version_manifest_and_required_vectors_are_declared() -> None:
     manifest = validate_conformance_manifest(REPO_ROOT)
 
-    assert manifest.version == CONFORMANCE_VERSION == "1.0.0"
+    assert manifest.version == CONFORMANCE_VERSION == "1.1.0"
     assert manifest.verified_mark == VERIFIED_MARK
     assert manifest.vector_file_count >= 50
     assert {
@@ -39,7 +39,7 @@ def test_manifest_verification_command_passes() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert "Conformance 1.0.0 manifest verified" in result.stdout
+    assert "Conformance 1.1.0 manifest verified" in result.stdout
     assert VERIFIED_MARK in result.stdout
 
 
@@ -60,7 +60,7 @@ def test_conformance_release_archive_is_deterministic_and_complete() -> None:
             text=True,
             capture_output=True,
         )
-        archive = output_dir / "actenon-conformance-1.0.0.tar.gz"
+        archive = output_dir / "actenon-conformance-1.1.0.tar.gz"
         first_digest = hashlib.sha256(archive.read_bytes()).hexdigest()
         subprocess.run(
             command,
@@ -79,7 +79,7 @@ def test_conformance_release_archive_is_deterministic_and_complete() -> None:
 
         with tarfile.open(archive) as release:
             names = set(release.getnames())
-        prefix = "actenon-conformance-1.0.0"
+        prefix = "actenon-conformance-1.1.0"
         assert f"{prefix}/conformance/suite.json" in names
         assert f"{prefix}/conformance/vector-lock.json" in names
         assert (

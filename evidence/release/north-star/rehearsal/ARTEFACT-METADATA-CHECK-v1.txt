@@ -1,0 +1,28 @@
+pypi/actenon_kernel-1.3.0-py3-none-any.whl Version: 1.3.0 ['Requires-Dist: actenon-protocol<2,>=1.1.0']
+PASS pypi/actenon_kernel-1.3.0-py3-none-any.whl: no direct/git references in Requires-Dist
+PASS kernel wheel ships the scanner registry
+PASS kernel wheel ships the edge-binding vectors
+PASS kernel version 1.3.0
+pypi/actenon_permit-2.0.0-py3-none-any.whl Version: 2.0.0 ['Requires-Dist: actenon-kernel[asymmetric]<2,>=1.3.0', 'Requires-Dist: actenon-protocol<2,>=1.1.0']
+PASS pypi/actenon_permit-2.0.0-py3-none-any.whl: no direct/git references in Requires-Dist
+PASS permit version 2.0.0
+PASS permit requires actenon-kernel>=1.3.0,<2
+pypi/actenon_protocol-1.4.0-py3-none-any.whl Version: 1.4.0 ['Requires-Dist: actenon-protocol[types]; extra == "all"', 'Requires-Dist: actenon-protocol[yaml]; extra == "all"', 'Requires-Dist: actenon-protocol[conformance]; extra == "all"', 'Requires-Dist: actenon-protocol[all]; extra == "dev"']
+PASS pypi/actenon_protocol-1.4.0-py3-none-any.whl: no direct/git references in Requires-Dist
+PASS protocol wheel ships every schema
+PASS protocol version 1.4.0
+npm/actenon-protocol-types-1.4.0.tgz @actenon/protocol-types 1.4.0 deps= None
+PASS npm/actenon-protocol-types-1.4.0.tgz: registry-resolvable dependencies only
+PASS @actenon/protocol-types version 1.4.0
+npm/actenon-sdk-2.0.0.tgz @actenon/sdk 2.0.0 deps= None
+PASS npm/actenon-sdk-2.0.0.tgz: registry-resolvable dependencies only
+PASS @actenon/sdk version 2.0.0
+npm/actenon-verifier-sdk-0.2.0.tgz @actenon/verifier-sdk 0.2.0 deps= None
+PASS npm/actenon-verifier-sdk-0.2.0.tgz: registry-resolvable dependencies only
+PASS @actenon/verifier-sdk version 0.2.0
+PASS crate version 0.2.0
+PASS crate ships the kernel vector lock
+FAIL crate has no git/path dependencies
+FAIL go module zip paths are github.com/!actenon/sdk-go@v1.1.0/...
+PASS go module ships the kernel vector lock
+FAILURES PRESENT

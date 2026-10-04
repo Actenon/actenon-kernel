@@ -1,0 +1,4 @@
+FAILED conformance/python/test_package_schemas.py::test_schema_is_shipped_identically[boundary_manifest.v1.json]
+FAILED conformance/python/test_package_schemas.py::test_schema_is_shipped_identically[execution_result.v1.json]
+FAILED conformance/python/test_package_schemas.py::test_runner_finds_schemas_outside_a_checkout
+========================= 3 failed, 7 passed in 0.08s ==========================

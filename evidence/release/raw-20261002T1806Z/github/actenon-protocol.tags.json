@@ -1,0 +1,62 @@
+[
+  {
+    "name": "v1.3.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/v1.3.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/v1.3.0",
+    "commit": {
+      "sha": "e4f42f6bc2479c4a715c7fc2b3098e694f2d167c",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/e4f42f6bc2479c4a715c7fc2b3098e694f2d167c"
+    },
+    "node_id": "REF_kwDOTflTvbByZWZzL3RhZ3MvdjEuMy4w"
+  },
+  {
+    "name": "v1.2.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/v1.2.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/v1.2.0",
+    "commit": {
+      "sha": "668e4a985875cd33be3dd0b4114d36c346d4027c",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/668e4a985875cd33be3dd0b4114d36c346d4027c"
+    },
+    "node_id": "REF_kwDOTflTvbByZWZzL3RhZ3MvdjEuMi4w"
+  },
+  {
+    "name": "v1.1.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/v1.1.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/v1.1.0",
+    "commit": {
+      "sha": "7f452df81cfc2b53f271a7c8b412af33e2ffca26",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/7f452df81cfc2b53f271a7c8b412af33e2ffca26"
+    },
+    "node_id": "REF_kwDOTflTvbByZWZzL3RhZ3MvdjEuMS4w"
+  },
+  {
+    "name": "v1.0.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/v1.0.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/v1.0.0",
+    "commit": {
+      "sha": "f395f0b5d919d943488df0a106866e0aee5afe54",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/f395f0b5d919d943488df0a106866e0aee5afe54"
+    },
+    "node_id": "REF_kwDOTflTvbByZWZzL3RhZ3MvdjEuMC4w"
+  },
+  {
+    "name": "ts-types-v1.3.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/ts-types-v1.3.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/ts-types-v1.3.0",
+    "commit": {
+      "sha": "30af5f426fd4bf1c375fc6a6623d13d4dc8cfb2f",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/30af5f426fd4bf1c375fc6a6623d13d4dc8cfb2f"
+    },
+    "node_id": "REF_kwDOTflTvblyZWZzL3RhZ3MvdHMtdHlwZXMtdjEuMy4w"
+  },
+  {
+    "name": "ts-types-v1.0.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-protocol/zipball/refs/tags/ts-types-v1.0.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-protocol/tarball/refs/tags/ts-types-v1.0.0",
+    "commit": {
+      "sha": "b9dbbaa25d1350e77b77cf3dcf264465ab884ece",
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/b9dbbaa25d1350e77b77cf3dcf264465ab884ece"
+    },
+    "node_id": "REF_kwDOTflTvblyZWZzL3RhZ3MvdHMtdHlwZXMtdjEuMC4w"
+  }
+]

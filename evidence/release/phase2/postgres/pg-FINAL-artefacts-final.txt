@@ -1,0 +1,13 @@
+## {'actenon-kernel': '1.3.0rc1', 'psycopg': '3.3.6'} server=16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
+{"label": "workerD", "started": false, "error": "UniqueViolation: duplicate key value violates unique constraint \"pg_type_typname_nsp_index\"\nDETAIL:  Key (typname, typnamespace)=(action_consumption, 2200) already exists."}
+{"label": "workerB", "started": true, "outcomes": [["refused", "DUPLICATE_REPLAY"]], "count": 8, "downgrades": []}
+{"label": "workerC", "started": true, "outcomes": [["executed", null], ["refused", "DUPLICATE_REPLAY"]], "count": 8, "downgrades": []}
+{"label": "workerA", "started": true, "outcomes": [["refused", "DUPLICATE_REPLAY"]], "count": 8, "downgrades": []}
+  4 worker processes x 8 concurrent presentations: side effects = 1
+  restarted worker: {"label": "workerA-restarted", "started": true, "outcomes": [["refused", "DUPLICATE_REPLAY"]], "count": 1, "downgrades": []}
+RESULT PG1: PASS (exactly one execution)
+  unreachable database: {"label": "unreachable", "started": false, "error": "OperationalError: connection is bad: connection to server on socket \"/nonexistent/.s.PGSQL.1\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?"}
+RESULT PG2: PASS (fail closed, no execution)
+  db: consumed|1
+  database stopped after the edge started: {"label": "outage", "started": true, "outcomes": [["refused", "REPLAY_STORE_UNAVAILABLE"]], "count": 1, "downgrades": []}
+RESULT PG3: PASS (fail closed mid-operation)

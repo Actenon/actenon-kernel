@@ -1,0 +1,13 @@
+(fail) token encode/decode > round-trips a grant through the wire format [8.51ms]
+101 |     throw new Error(`server did not become ready: ${err.slice(0, 500)}`);
+error: server did not become ready:   × No solution found when resolving dependencies:
+(fail) control plane + gateway end-to-end > issues a grant, mints a token, calls refund (ALLOW), then over-budget (DENY) [6088.43ms]
+101 |     throw new Error(`server did not become ready: ${err.slice(0, 500)}`);
+error: server did not become ready:   × No solution found when resolving dependencies:
+(fail) control plane + gateway end-to-end > attenuates a parent grant to a weaker child [6064.28ms]
+101 |     throw new Error(`server did not become ready: ${err.slice(0, 500)}`);
+error: server did not become ready:   × No solution found when resolving dependencies:
+(fail) control plane + gateway end-to-end > ledger verifies as intact after a series of calls [6052.98ms]
+(fail) control plane requires the admin token > refuses a client without it (an agent) and accepts the operator [5000.17ms]
+ 51 pass
+ 5 fail

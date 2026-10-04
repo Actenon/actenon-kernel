@@ -2,8 +2,8 @@
 
 ## Current version
 
-**Kernel version:** `1.0.0`
-**Protocol version range:** `actenon-protocol>=1.1.0,<2`
+**Kernel version:** `1.3.0` (from `pyproject.toml`; checked by `tests/unit/test_versioning_doc_claims.py`)
+**Protocol version range:** `actenon-protocol>=1.5.0,<2`
 **Conformance version:** see `conformance/VERSION`
 **Python support:** `>=3.10` (kernel alone); `>=3.11` (composed stack with actenon-permit)
 
@@ -63,7 +63,7 @@ change within the 1.x series without a major bump:
 - **The wire format of any artefact.** The wire format of Action Intent,
   PCCB, Receipt, Refusal, and ExecutionResult is defined by
   `actenon-protocol`, not by the kernel. The kernel targets
-  `actenon-protocol>=1.1.0,<2`. If the protocol publishes a breaking
+  `actenon-protocol>=1.5.0,<2`. If the protocol publishes a breaking
   change (a 2.0.0), the kernel will publish a corresponding major bump.
 
 - **Integration adapters under `actenon/adapters/`.** The LangChain,

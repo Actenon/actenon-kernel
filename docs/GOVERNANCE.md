@@ -115,7 +115,7 @@ Public conformance claims must stay scoped to the active public compatibility su
 
 A passing result supports a statement like:
 
-> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, and is Actenon Verified (Conformance 1.0.0) at the stated implementation revision.
+> This implementation targets the Actenon Kernel active v1 compatibility surface for Action Intent, PCCB, Protected Endpoint, Replay, Receipt, and Refusal, and is Actenon Verified (Conformance 1.1.0) at the stated implementation revision.
 
 Use of the mark requires the unmodified vectors for that semantic version to
 pass with no skipped checks. The version, tested implementation, and revision

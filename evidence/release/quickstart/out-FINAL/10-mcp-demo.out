@@ -1,0 +1,5 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/mcp_server.py:547: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer = build_local_proof_signer(token_bytes(32))
+actenon-mcp: DEMO MODE — ephemeral key, not for production.
+actenon-mcp: ephemeral in-process key, in-memory replay store, no network calls, no configuration read.
+actenon-mcp: proofs minted here verify nowhere else and do not survive a restart.

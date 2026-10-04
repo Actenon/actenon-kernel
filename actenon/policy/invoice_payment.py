@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
 from typing import Any
 
 from actenon.api.invoice_payment import compute_invoice_payment_batch_hash, normalize_invoice_ids
-from actenon.models.contracts import ActionIntent
+from actenon.models.contracts import ActionIntent, parse_calendar_date
 from actenon.models.runtime import DynamicContextInput, RuleEvaluation
 from actenon.receipts import ReceiptStore
 from .evidence import ReceiptEvidenceVerificationRule
@@ -115,7 +114,7 @@ class InvoicePaymentActionShapeRule:
             )
 
         try:
-            date.fromisoformat(params["payment_date"])
+            parse_calendar_date(params["payment_date"], "payment_date")
         except ValueError:
             return RuleEvaluation(
                 rule_id=self.rule_id,

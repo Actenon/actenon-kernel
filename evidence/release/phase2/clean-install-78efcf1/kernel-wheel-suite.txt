@@ -1,0 +1,9 @@
+# kernel 78efcf1 test suite against the installed wheel; export of the commit with actenon/ removed
+actenon from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/__init__.py
+SKIPPED [1] tests/security/test_operation_idempotency.py:329: Reconciliation module not yet implemented (Phase 4B)
+SKIPPED [1] tests/security/test_operation_idempotency.py:344: Reconciliation module not yet implemented (Phase 4B)
+70 failed, 773 passed, 2 skipped, 177 subtests passed in 53.53s
+.....................................................                                   [100%]
+53 passed, 57 subtests passed in 0.29s
+27 passed in 2.31s
+executed test cases: 905; unexpected skips: 0

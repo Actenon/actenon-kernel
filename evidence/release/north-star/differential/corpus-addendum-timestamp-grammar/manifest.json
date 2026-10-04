@@ -1,0 +1,377 @@
+{
+ "corpus": "kernel_diff_v1_addendum_timestamp_grammar",
+ "base_now": "2026-01-01T12:01:00Z",
+ "cases": [
+  {
+   "id": "tsg_intent_issued_at_frac_1_digit",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "time-secfrac = '.' 1*DIGIT"
+  },
+  {
+   "id": "tsg_pccb_expires_at_frac_1_digit",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "time-secfrac = '.' 1*DIGIT"
+  },
+  {
+   "id": "tsg_intent_issued_at_frac_3_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_frac_3_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_frac_7_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "beyond microseconds"
+  },
+  {
+   "id": "tsg_pccb_expires_at_frac_7_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "beyond microseconds"
+  },
+  {
+   "id": "tsg_intent_issued_at_frac_9_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "nanoseconds"
+  },
+  {
+   "id": "tsg_pccb_expires_at_frac_9_digits",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "nanoseconds"
+  },
+  {
+   "id": "tsg_intent_issued_at_frac_6_digits_offset",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_frac_6_digits_offset",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_minus0000",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "RFC 3339 4.3 unknown local offset"
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_minus0000",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "RFC 3339 4.3 unknown local offset"
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_plus0530",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "same instant"
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_plus0530",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "same instant"
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_minus0500",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "same instant"
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_minus0500",
+   "category": "timestamp_grammar",
+   "hint": "ACCEPT",
+   "alg": "HS256",
+   "note": "same instant"
+  },
+  {
+   "id": "tsg_intent_issued_at_no_seconds",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "partial-time requires time-second"
+  },
+  {
+   "id": "tsg_pccb_expires_at_no_seconds",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "partial-time requires time-second"
+  },
+  {
+   "id": "tsg_intent_issued_at_empty_fraction",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "secfrac needs 1*DIGIT"
+  },
+  {
+   "id": "tsg_pccb_expires_at_empty_fraction",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "secfrac needs 1*DIGIT"
+  },
+  {
+   "id": "tsg_intent_issued_at_basic_format",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO 8601 basic format"
+  },
+  {
+   "id": "tsg_pccb_expires_at_basic_format",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO 8601 basic format"
+  },
+  {
+   "id": "tsg_intent_issued_at_basic_time",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_basic_time",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_week_date",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO week date (2026-01-01 is W01-4)"
+  },
+  {
+   "id": "tsg_pccb_expires_at_week_date",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO week date (2026-01-01 is W01-4)"
+  },
+  {
+   "id": "tsg_intent_issued_at_ordinal_date",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO ordinal date"
+  },
+  {
+   "id": "tsg_pccb_expires_at_ordinal_date",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO ordinal date"
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_no_colon",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "time-numoffset needs ':'"
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_no_colon",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "time-numoffset needs ':'"
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_hours_only",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_hours_only",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_offset_with_seconds",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_offset_with_seconds",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_comma_fraction",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO comma decimal sign"
+  },
+  {
+   "id": "tsg_pccb_expires_at_comma_fraction",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO comma decimal sign"
+  },
+  {
+   "id": "tsg_intent_issued_at_space_before_z",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_space_before_z",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_leading_space",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_leading_space",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_trailing_newline",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_trailing_newline",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_one_digit_month",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_pccb_expires_at_one_digit_month",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": ""
+  },
+  {
+   "id": "tsg_intent_issued_at_arabic_indic_digits",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "non-ASCII digit"
+  },
+  {
+   "id": "tsg_pccb_expires_at_arabic_indic_digits",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "non-ASCII digit"
+  },
+  {
+   "id": "tsg_intent_issued_at_space_separator",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE: application choice"
+  },
+  {
+   "id": "tsg_pccb_expires_at_space_separator",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE: application choice"
+  },
+  {
+   "id": "tsg_intent_issued_at_lowercase_t",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE permits; ecosystem refuses"
+  },
+  {
+   "id": "tsg_pccb_expires_at_lowercase_t",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE permits; ecosystem refuses"
+  },
+  {
+   "id": "tsg_intent_issued_at_lowercase_z",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE permits; ecosystem refuses"
+  },
+  {
+   "id": "tsg_pccb_expires_at_lowercase_z",
+   "category": "timestamp_grammar",
+   "hint": "DEVIATION",
+   "alg": "HS256",
+   "note": "RFC 3339 5.6 NOTE permits; ecosystem refuses"
+  },
+  {
+   "id": "tsg_intent_issued_at_hour_only",
+   "category": "timestamp_grammar",
+   "hint": "REFUSE",
+   "alg": "HS256",
+   "note": "ISO reduced precision"
+  }
+ ]
+}

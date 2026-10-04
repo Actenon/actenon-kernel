@@ -27,10 +27,13 @@ export {
   verify_approval_artifact,
   verify_issuer_status,
 } from "./trust-artifacts.js";
-export { buildLocalProofVerifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
+export { buildLocalProofVerifier, Ed25519Verifier, HmacSha256Verifier, LOCAL_PROOF_KEY_ID, LOCAL_PROOF_SECRET } from "./signers.js";
+export type { Ed25519PublicJwk } from "./signers.js";
 export { DEFAULT_CLOCK_SKEW_TOLERANCE_MS, VerifierSDK } from "./verifier.js";
+export { MAX_JSON_BYTES, MAX_JSON_DEPTH, parseStrictJson, StrictJsonError } from "./strict-json.js";
+export { ACCEPTED_CANONICALIZATION_PROFILES, isAcceptedCanonicalizationProfile } from "./types.js";
 export type { SignatureVerifier } from "./signers.js";
-export type { VerifierSDKOptions } from "./verifier.js";
+export type { VerifierSDKOptions, VerifyJSONInput } from "./verifier.js";
 export type {
   CounterSignatureVerificationErrorCode,
   ReceiptDigest,
@@ -53,6 +56,7 @@ export type {
 export type {
   ActionHashSpec,
   ActionIntent,
+  CanonicalizationProfile,
   ActionSpec,
   AudienceRef,
   JsonScalar,

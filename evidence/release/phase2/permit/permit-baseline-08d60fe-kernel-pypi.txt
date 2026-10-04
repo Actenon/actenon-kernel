@@ -1,0 +1,4 @@
+    self._sync.register_credential(ref, value, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 514 passed, 1 skipped, 67 warnings in 18.26s =================

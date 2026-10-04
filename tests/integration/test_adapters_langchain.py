@@ -88,5 +88,8 @@ def test_langchain_tool_hides_proof_schema_and_refuses_laundered_proof() -> None
     assert "pccb_json" not in tool.args
     assert valid["outcome"] == "executed"
     assert refused["outcome"] == "refused"
-    assert refused["reason_code"] == "INTENT_MISMATCH"
+    # The laundered proof breaks several bindings at once (target, intent id,
+    # parameters). The verifier reports the first in its order, which is the
+    # target binding (protocol 05 step 8 precedes the action checks).
+    assert refused["reason_code"] == "TARGET_MISMATCH"
     assert side_effects == [(1250, "bank:approved")]

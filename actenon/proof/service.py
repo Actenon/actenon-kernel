@@ -1,24 +1,33 @@
 from __future__ import annotations
 
+import copy
 import logging
 import os
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import Enum
 from secrets import token_urlsafe
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 from uuid import uuid4
+
+from actenon_protocol import (
+    CapabilityError,
+    capability_in_scope,
+    parse_authority_extension,
+    scope_capabilities_for_mint,
+)
 
 from actenon.core.errors import ProofVerificationError
 from actenon.models.contracts import (
+    PCCB,
     ActionHashSpec,
     ActionIntent,
-    PCCB,
     PartyRef,
     ScopeSpec,
     SignatureSpec,
 )
 from actenon.models.runtime import DynamicContextInput, PolicyDecision
+
 from .audit import AuditLogSink, PCCBMintAuditRecord
 from .canonical import (
     ACCEPTED_CANONICALIZATION_PROFILES,
@@ -26,9 +35,11 @@ from .canonical import (
     canonicalize_bytes,
     sha256_hex,
 )
-from .refusal_messages import public_proof_refusal_message
+from .refusal_messages import (
+    EDGE_BINDING_REFUSAL_MESSAGES,
+    public_proof_refusal_message,
+)
 from .signing import SignatureVerifier, Signer
-
 
 DEFAULT_CLOCK_SKEW_TOLERANCE = timedelta(0)
 
@@ -59,13 +70,27 @@ class VerifierDisclosureMode(str, Enum):
 
 # Environments where local_debug mode is permitted. Anything else
 # (production, staging, etc.) refuses local_debug at construction time.
-_LOCAL_DEBUG_ALLOWED_ENVS = frozenset({"local", "dev", "test", "demo", ""})
+_LOCAL_DEBUG_ALLOWED_ENVS = frozenset({"development", "local", "dev", "test", "demo", ""})
 
 
 def _is_production_like_env() -> bool:
     """Return True if ACTENON_ENV indicates a production-like environment."""
     env = os.environ.get("ACTENON_ENV", "").strip().lower()
     return env not in _LOCAL_DEBUG_ALLOWED_ENVS
+
+
+def default_disclosure_mode() -> "VerifierDisclosureMode":
+    """The disclosure profile for kernel-built execution paths.
+
+    ``LOCAL_DEBUG`` (granular pre-authentication codes) where the
+    environment permits it, and ``TRUSTED_DETAILED`` (pre-authentication
+    failures collapse to ``PROOF_INVALID``) in a production-like
+    environment, where ``LOCAL_DEBUG`` is refused at construction.
+    """
+
+    if _is_production_like_env():
+        return VerifierDisclosureMode.TRUSTED_DETAILED
+    return VerifierDisclosureMode.LOCAL_DEBUG
 
 
 def build_action_hash_input(intent: ActionIntent) -> dict[str, Any]:
@@ -101,6 +126,30 @@ def _canonical_equal(a: Any, b: Any) -> bool:
         return False
 
 
+_MISSING = object()
+
+
+def _target_satisfies(target: Any, selector: Any) -> bool:
+    """protocol/13-edge-binding.md E3: does the bound target satisfy one selector?
+
+    ``resource_id`` / ``resource_type`` compare with the target's fields, any
+    other key with ``target.selectors``. A key the target does not carry is
+    not satisfied; an empty or non-object selector is not satisfied.
+    """
+    if not isinstance(selector, dict) or not selector:
+        return False
+    for key, value in selector.items():
+        if key == "resource_id":
+            actual = target.resource_id
+        elif key == "resource_type":
+            actual = target.resource_type
+        else:
+            actual = (target.selectors or {}).get(key, _MISSING)
+        if actual is _MISSING or not _canonical_equal(actual, value):
+            return False
+    return True
+
+
 @dataclass
 class PCCBMinter:
     signer: Signer
@@ -109,14 +158,22 @@ class PCCBMinter:
     nonce_factory: Callable[[], str] = field(default=lambda: token_urlsafe(24))
     audit_sink: AuditLogSink | None = None
 
-    def mint(self, intent: ActionIntent, decision: PolicyDecision, context: DynamicContextInput, *, escrow_id: str | None = None) -> PCCB:
+    def mint(
+        self,
+        intent: ActionIntent,
+        decision: PolicyDecision,
+        context: DynamicContextInput,
+        *,
+        escrow_id: str | None = None,
+        extensions: Mapping[str, Any] | None = None,
+    ) -> PCCB:
         if not decision.allowed:
             raise ValueError("PCCB minting requires an allow decision")
 
         issued_at = context.now
         scope = ScopeSpec(
             mode="exact",
-            capabilities=tuple(sorted(set(context.scope_capabilities or (intent.action.capability,)))),
+            capabilities=tuple(sorted(set(scope_capabilities_for_mint(context.scope_capabilities)))),
             single_use=True,
             resource_selectors=context.resource_selectors,
             parameter_constraints=context.parameter_constraints,
@@ -143,6 +200,8 @@ class PCCBMinter:
             action_hash=action_hash,
             escrow_id=escrow_id,
             signature=SignatureSpec(algorithm=self.signer.algorithm, key_id=self.signer.key_id, encoding="base64url", value="pending"),
+            # Deep copy: the signed extensions must not alias caller state.
+            extensions=copy.deepcopy(dict(extensions or {})),
         )
         signature = self.signer.sign(canonicalize_bytes(unsigned.unsigned_payload()))
         pccb = PCCB(
@@ -168,6 +227,8 @@ class PCCBMinter:
             self.audit_sink.record_pccb_mint(PCCBMintAuditRecord(pccb))
         return pccb
 
+
+AUTHORITY_STATUS_UNKNOWN_MESSAGE = "The proof authority's revocation status could not be established."
 
 # Type alias for the optional revocation checker callable.
 # Returns True if the proof/issuer is NOT revoked, False if revoked.
@@ -408,17 +469,28 @@ class PCCBVerifier:
 
         # ── Step 10: Action binding (canonical comparison) ───────────
         # Scope mode + capability check (part of action binding)
-        if pccb.scope.mode != "exact":
+        # Protocol v1 proofs are exact and single-use only
+        # (protocol/13-edge-binding.md E4).
+        if pccb.scope.mode != "exact" or pccb.scope.single_use is not True:
             self._raise_post_auth_failure(
                 "SCOPE_MODE_INVALID",
                 pccb=pccb,
                 context=context,
             )
-        if intent.action.capability not in pccb.scope.capabilities:
+        if not capability_in_scope(intent.action.capability, pccb.scope.capabilities):
             self._raise_post_auth_failure(
                 "SCOPE_CAPABILITY_MISMATCH",
                 pccb=pccb,
                 context=context,
+            )
+        # E1: the capability must be one this edge declares it performs
+        # (exact strings; an empty declaration performs nothing).
+        if not capability_in_scope(intent.action.capability, context.scope_capabilities):
+            self._raise_post_auth_failure(
+                "SCOPE_CAPABILITY_MISMATCH",
+                pccb=pccb,
+                context=context,
+                edge_binding=True,
             )
 
         # Intent ID (the signed intent_id differs from the supplied intent_id)
@@ -478,6 +550,27 @@ class PCCBVerifier:
                 context=context,
             )
 
+        # ── Step 11b: Edge declarations (protocol/13-edge-binding.md) ──
+        # E2: every constraint the edge relies on was signed into the proof.
+        signed_constraints = pccb.scope.parameter_constraints or {}
+        for key, value in (context.parameter_constraints or {}).items():
+            if key not in signed_constraints or not _canonical_equal(signed_constraints[key], value):
+                self._raise_post_auth_failure(
+                    "PARAMETER_MISMATCH",
+                    pccb=pccb,
+                    context=context,
+                    edge_binding=True,
+                )
+        # E3: the bound target satisfies at least one declared selector.
+        selectors = tuple(context.resource_selectors or ())
+        if selectors and not any(_target_satisfies(pccb.target, selector) for selector in selectors):
+            self._raise_post_auth_failure(
+                "TARGET_MISMATCH",
+                pccb=pccb,
+                context=context,
+                edge_binding=True,
+            )
+
         # ── Step 12: Authority reference binding ─────────────────────
         # If the PCCB carries an escrow_id (authority reference), verify
         # that the intent's authority reference matches. This binds the
@@ -490,17 +583,38 @@ class PCCBVerifier:
         # If a revocation_checker is configured, call it AFTER all other
         # checks pass. This is the last non-mutating check before the
         # executor takes over (steps 14–15: replay + execution eligibility).
-        if self.revocation_checker is not None:
+        # protocol/13-edge-binding.md E5: a proof whose signed authority
+        # reference declares it revocable needs a revocation source that
+        # answers "not revoked". No source, a malformed reference or a source
+        # that cannot be consulted all fail closed.
+        authority_revocable = False
+        if "authority" in (pccb.extensions or {}):
             try:
-                is_not_revoked = self.revocation_checker(pccb, context)
+                authority = parse_authority_extension(pccb.extensions)
+            except CapabilityError:
+                self._raise_post_auth_failure(
+                    "AUTHORITY_REVOKED", pccb=pccb, context=context, message=AUTHORITY_STATUS_UNKNOWN_MESSAGE
+                )
+            authority_revocable = authority["revocable"] is True
+        if self.revocation_checker is None:
+            if authority_revocable:
+                self._raise_post_auth_failure(
+                    "AUTHORITY_REVOKED", pccb=pccb, context=context, message=AUTHORITY_STATUS_UNKNOWN_MESSAGE
+                )
+        else:
+            try:
+                is_not_revoked = self.revocation_checker(pccb, context) is True
+                status_message = None
             except Exception:
-                # Fail-closed: if the revocation checker errors, refuse.
+                # Fail-closed: if the revocation source errors, refuse.
                 is_not_revoked = False
+                status_message = AUTHORITY_STATUS_UNKNOWN_MESSAGE
             if not is_not_revoked:
                 self._raise_post_auth_failure(
                     "AUTHORITY_REVOKED",
                     pccb=pccb,
                     context=context,
+                    message=status_message,
                 )
 
         # ── Steps 14–15: Replay state + execution eligibility ────────
@@ -574,6 +688,8 @@ class PCCBVerifier:
         pccb: PCCB,
         context: DynamicContextInput,
         internal_detail: str | None = None,
+        edge_binding: bool = False,
+        message: str | None = None,
     ) -> None:
         """Raise a ProofVerificationError for a post-authentication failure.
 
@@ -608,5 +724,6 @@ class PCCBVerifier:
         # trusted_detailed + local_debug: disclose the detailed code
         raise ProofVerificationError(
             detailed_code,
-            public_proof_refusal_message(detailed_code),
+            message
+            or (EDGE_BINDING_REFUSAL_MESSAGES[detailed_code] if edge_binding else public_proof_refusal_message(detailed_code)),
         )

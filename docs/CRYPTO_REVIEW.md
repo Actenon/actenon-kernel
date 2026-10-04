@@ -28,6 +28,30 @@ and replay-prevention surfaces.
 | 2 | MEDIUM | HIGH | B310 | `actenon/proof/signers/proof_seal.py:84` | Audit url open for permitted schemes | **False positive.** The `urlopen` call is to a configured proof-seal service URL (not user-controlled). The URL scheme is validated by the proof-seal client configuration. |
 | 3 | MEDIUM | LOW | B608 | `actenon/replay/dbapi.py:417` | Possible SQL injection via string-based query construction | **False positive.** The query uses a parameterized placeholder (`?`) for the user-controlled `replay_key` value. `SELECT_FIELDS` is a module-level constant, not user input. No injection vector. |
 
+**Addendum 2026-10-02 (production-readiness phase 2).** The assessment of
+finding #2 above was wrong. `HttpProofSealClient` did not validate the URL
+scheme, so a `file://` or custom-scheme endpoint reached `urlopen`. The
+endpoint is operator configuration, not request input, so the impact was low.
+Now `actenon.core.http_url.require_http_url` rejects every scheme but
+http/https at construction, for `HttpProofSealClient`,
+`HttpExecutionGraphClient` and the local runtime's status probe. The new test
+is `tests/unit/test_proof_seal_client.py::HttpProofSealClientSchemeTests`,
+and its before-state is in `evidence/release/phase2/tests/proof-seal-scheme-*`.
+
+From this date bandit scans all of `actenon/` and fails CI on any unsuppressed
+finding of medium severity or above. Each suppression is an inline
+`# nosec <id>` on the flagged line, with its justification:
+
+| File:line | Test | Justification |
+|---|---|---|
+| `actenon/proof/signers/proof_seal.py` (`urlopen`) | B310 | http(s) only: `require_http_url` at construction |
+| `actenon/execution_graph.py` (`urlopen`) | B310 | http(s) only: `require_http_url` at construction |
+| `actenon/local_runtime.py` (`_http_json_status`) | B310 | http(s) only: `require_http_url` before the request |
+| `actenon/replay/dbapi.py` (`_select_row`) | B608 | `SELECT_FIELDS` is a module constant; `replay_key` is a bound parameter |
+| `actenon/escrow/sqlite.py` (`_select_row`) | B608 | `SELECT_FIELDS` is a module constant; `escrow_id` is a bound parameter |
+
+Finding #1 (B105, low severity) is below the gate and remains as assessed.
+
 **Command to reproduce:**
 ```bash
 bandit -r actenon/proof/ actenon/replay/ -f json -o bandit-results.json

@@ -6,6 +6,16 @@ import { fileURLToPath } from "node:url";
 
 import { buildLocalProofVerifier, VerificationError, VerifierSDK, type ActionIntent, type PCCB } from "../src/index.js";
 
+// The SDK only verifies raw bytes (verifyJSON). These tests build their
+// inputs as objects, so serialise them first.
+function verifyObjects(
+  sdk: VerifierSDK,
+  input: { intent: unknown; pccb: unknown; context: Parameters<VerifierSDK["verifyJSON"]>[0]["context"] },
+) {
+  return sdk.verifyJSON({ intent: JSON.stringify(input.intent), pccb: JSON.stringify(input.pccb), context: input.context });
+}
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fixturesDir = path.resolve(__dirname, "../fixtures/portable-local-proof");
@@ -35,7 +45,7 @@ test("verifier accepts a valid local proof", async () => {
   const intent = await loadFixture<ActionIntent>("action_intent.json");
   const pccb = await loadFixture<PCCB>("pccb.json");
 
-  const verified = sdk.verify({ intent, pccb, context: buildContext() });
+  const verified = verifyObjects(sdk, { intent, pccb, context: buildContext() });
 
   assert.equal(verified.intent.action.name, "hello_world.read");
   assert.equal(verified.pccb.pccb_id, "pccb_portable_hello_world_001");
@@ -48,7 +58,7 @@ test("verifier refuses audience mismatch", async () => {
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent,
         pccb,
         context: {
@@ -81,7 +91,7 @@ test("verifier refuses action mutation", async () => {
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent: mutatedIntent,
         pccb,
         context: buildContext(),
@@ -101,7 +111,7 @@ test("verifier refuses expired proof", async () => {
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent,
         pccb,
         context: {
@@ -124,7 +134,7 @@ test("verifier keeps strict not-before behavior by default", async () => {
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent,
         pccb,
         context: {
@@ -145,7 +155,7 @@ test("verifier accepts proof within configured clock skew tolerance", async () =
   const intent = await loadFixture<ActionIntent>("action_intent.json");
   const pccb = await loadFixture<PCCB>("pccb.json");
 
-  const early = sdk.verify({
+  const early = verifyObjects(sdk, {
     intent,
     pccb,
     context: {
@@ -155,7 +165,7 @@ test("verifier accepts proof within configured clock skew tolerance", async () =
   });
   assert.equal(early.pccb.pccb_id, "pccb_portable_hello_world_001");
 
-  const late = sdk.verify({
+  const late = verifyObjects(sdk, {
     intent,
     pccb,
     context: {
@@ -173,7 +183,7 @@ test("verifier refuses proof beyond configured clock skew tolerance", async () =
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent,
         pccb,
         context: {
@@ -190,7 +200,7 @@ test("verifier refuses proof beyond configured clock skew tolerance", async () =
 
   assert.throws(
     () =>
-      sdk.verify({
+      verifyObjects(sdk, {
         intent,
         pccb,
         context: {

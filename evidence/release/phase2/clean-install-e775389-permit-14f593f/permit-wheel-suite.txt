@@ -1,0 +1,9 @@
+# actenon-permit 14f593f test suite against the installed permit 2.0.0rc1 + kernel 1.3.0rc1 wheels; src/ removed
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2-final/lib/python3.11/site-packages/actenon_permit/__init__.py
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2-final/lib/python3.11/site-packages/actenon/__init__.py
+SKIPPED [1] tests/test_cross_repo_conformance.py:197: cloud checkout not found — set ACTENON_CLOUD_PATH or clone actenon-cloud as a sibling directory
+SKIPPED [1] tests/test_real_agent.py:229: z-ai CLI not on PATH
+================= 556 passed, 3 skipped, 64 warnings in 17.52s =================
+executed test cases: 556; unexpected skips: 2
+UNEXPECTED SKIP tests.test_cross_repo_conformance::test_permit_and_cloud_produce_identical_action_hashes: cloud checkout not found — set ACTENON_CLOUD_PATH or clone actenon-cloud as a sibling directory
+UNEXPECTED SKIP tests.test_cross_repo_conformance::test_cloud_pccb_verifies_with_kernel_verifier: cloud checkout not found — set ACTENON_CLOUD_PATH or clone actenon-cloud as a sibling directory

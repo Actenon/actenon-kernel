@@ -1,0 +1,152 @@
+{
+  "contract": {
+    "name": "verifier_sdk_edge_revocation",
+    "version": "v1"
+  },
+  "spec": "actenon-protocol protocol/13-edge-binding.md (rule E5)",
+  "revocation_sources": {
+    "none": "no revocation source configured",
+    "not_revoked": "source answers not revoked",
+    "revoked": "source answers revoked",
+    "unavailable": "source raises / cannot be consulted"
+  },
+  "base": {
+    "intent": "action_intent.json",
+    "context": {
+      "request_id": "req_shared_sdk_conformance_001",
+      "audience": {
+        "type": "service",
+        "id": "portable-hello-world-endpoint"
+      },
+      "now": "2026-01-01T12:00:00Z",
+      "scope_capabilities": [
+        "protected_resource.read"
+      ],
+      "parameter_constraints": {
+        "exact_message": "portable hello world"
+      },
+      "resource_selectors": [
+        {
+          "resource_id": "hello_resource_demo_001"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "e5_revocable_not_revoked",
+      "pccb": "edge_revocable_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e5_revocable_revoked",
+      "pccb": "edge_revocable_pccb.json",
+      "revocation_source": "revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority has been revoked."
+      }
+    },
+    {
+      "id": "e5_revocable_source_unavailable",
+      "pccb": "edge_revocable_pccb.json",
+      "revocation_source": "unavailable",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "e5_revocable_no_source",
+      "pccb": "edge_revocable_pccb.json",
+      "revocation_source": "none",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "e5_non_revocable_no_source",
+      "pccb": "edge_non_revocable_pccb.json",
+      "revocation_source": "none",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e5_non_revocable_revoked_source",
+      "pccb": "edge_non_revocable_pccb.json",
+      "revocation_source": "revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority has been revoked."
+      }
+    },
+    {
+      "id": "e5_no_authority_no_source",
+      "pccb": "pccb.json",
+      "revocation_source": "none",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "verified"
+      }
+    },
+    {
+      "id": "e5_malformed_authority",
+      "pccb": "edge_revocable_malformed_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "authority_missing_issuer",
+      "pccb": "edge_authority_missing_issuer_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "authority_missing_grant_id",
+      "pccb": "edge_authority_missing_grant_id_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "authority_missing_revocable",
+      "pccb": "edge_authority_missing_revocable_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    }
+  ]
+}

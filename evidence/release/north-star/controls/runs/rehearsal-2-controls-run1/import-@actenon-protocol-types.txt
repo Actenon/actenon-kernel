@@ -1,0 +1,2 @@
+npm error Invalid name: "imp-@actenon-protocol-types"
+npm error A complete log of this run can be found in: /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/npm-cache/_logs/2026-10-03T10_05_07_596Z-debug-0.log

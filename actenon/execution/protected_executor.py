@@ -16,7 +16,16 @@ from actenon.idempotency import IdempotencyStore, OutcomeState
 from actenon.models.runtime import ExecutionResult, PolicyDecision, ProtectedExecutionRequest
 from actenon.proof import PCCBVerifier
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
-from actenon.replay import ReplayProtector, build_default_replay_store
+from actenon.replay import ReplayProtector
+from actenon.replay.service import default_replay_db_path, default_replay_store_downgrades
+from actenon.replay.sqlite import SqliteReplayStore
+from actenon.security_posture import (
+    DOWNGRADE_REPLAY_PROTECTION_DISABLED,
+    DOWNGRADE_REPLAY_STORE_FAIL_OPEN,
+    UNSAFE_ALLOW_REPLAY_DISABLED_ENV,
+    UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV,
+    permit_downgrade,
+)
 
 
 BrokeredHandler = Callable[[ProtectedExecutionRequest, BrokeredCredential], dict[str, Any]]
@@ -69,7 +78,10 @@ class ProtectedExecutor:
 
     Idempotency:
       If the intent's metadata contains an `operation_id`, the executor checks
-      the idempotency store BEFORE claiming replay. If a prior result exists
+      the idempotency store AFTER the proof verifies, any policy decision
+      allows, and the proof's single-use replay claim succeeds. A replayed
+      proof is therefore DUPLICATE_REPLAY; a NEW proof for the same
+      operation_id + action_hash is spent and, if a prior result exists
       for the same operation_id + same action_hash, the prior result is
       returned without re-executing the handler (idempotent replay). If the
       same operation_id has a different action_hash, IDEMPOTENCY_CONFLICT is
@@ -90,6 +102,9 @@ class ProtectedExecutor:
     replay_protection: Literal["default", "disabled"] = "default"
     replay_store_failure: Literal["fail_closed", "fail_open"] = "fail_closed"
     idempotency_store: IdempotencyStore | None = None
+    # Weakened guarantees this executor was built with (empty in a correctly
+    # configured production deployment). See actenon.security_posture.
+    security_downgrades: tuple[str, ...] = field(default=(), init=False)
 
     def __post_init__(self) -> None:
         if self.replay_protection not in {"default", "disabled"}:
@@ -101,12 +116,30 @@ class ProtectedExecutor:
                 raise ValueError("replay_protector cannot be supplied when replay_protection is 'disabled'")
             if self.replay_store_failure != "fail_closed":
                 raise ValueError("replay_store_failure cannot be 'fail_open' when replay_protection is 'disabled'")
+            downgrade = permit_downgrade(
+                DOWNGRADE_REPLAY_PROTECTION_DISABLED,
+                override_env=UNSAFE_ALLOW_REPLAY_DISABLED_ENV,
+                what='replay_protection="disabled" (the same proof can execute more than once)',
+                fix="Keep replay protection on and configure a durable replay store.",
+            )
             logging.warning(REPLAY_PROTECTION_DISABLED_WARNING)
+            self.security_downgrades = (downgrade,)
             return
+        downgrades: list[str] = []
         if self.replay_store_failure == "fail_open":
+            downgrades.append(
+                permit_downgrade(
+                    DOWNGRADE_REPLAY_STORE_FAIL_OPEN,
+                    override_env=UNSAFE_ALLOW_REPLAY_FAIL_OPEN_ENV,
+                    what='replay_store_failure="fail_open" (an action may execute when single use cannot be enforced)',
+                    fix='Use replay_store_failure="fail_closed" (the default).',
+                )
+            )
             logging.warning(REPLAY_STORE_FAIL_OPEN_WARNING)
         if self.replay_protector is None:
-            self.replay_protector = ReplayProtector(build_default_replay_store())
+            downgrades.extend(default_replay_store_downgrades())
+            self.replay_protector = ReplayProtector(SqliteReplayStore(default_replay_db_path()))
+        self.security_downgrades = tuple(downgrades)
 
     def _claim_replay(self, request: ProtectedExecutionRequest):
         if self.replay_protector is None:
@@ -178,19 +211,31 @@ class ProtectedExecutor:
         *,
         policy_decision: PolicyDecision | None = None,
     ) -> ExecutionResult:
-        # ── Idempotency check (before replay claim) ──────────────────
-        # If the intent has an operation_id, check the idempotency store
-        # BEFORE claiming replay. This allows safe retry of the same
-        # operation with a NEW proof (the old proof was consumed).
         operation_id = request.intent.metadata.get("operation_id")
         action_hash_value = request.pccb.action_hash.value
-        if operation_id is not None and self.idempotency_store is not None:
-            prior = self.idempotency_store.lookup(operation_id)
-            if prior is not None:
-                if prior["action_hash"] != action_hash_value:
-                    # Same operation_id + different action_hash → conflict
-                    refusal = self.refusal_factory.create_from_exception(
-                        RefusalException(
+
+        replay_state = None
+        replay_consumed = False
+        brokered_credential: BrokeredCredential | None = None
+        escrow_id = request.pccb.escrow_id
+        try:
+            self.proof_verifier.verify(request.intent, request.pccb, request.context)
+            if policy_decision is not None and not policy_decision.allowed:
+                raise _policy_refusal(policy_decision)
+            replay_state = self._claim_replay(request)
+            # ── Idempotency check (after verification AND the replay claim) ──
+            # A retry of the same operation_id + action_hash with a NEW
+            # proof returns the prior result without re-executing. It runs
+            # only after the presented proof has verified and its single-use
+            # claim succeeded: an idempotency key is never a substitute for
+            # proof, a replayed proof is DUPLICATE_REPLAY like any other, and
+            # neither the prior result nor the prior action_hash is disclosed
+            # to an unverified caller.
+            if operation_id is not None and self.idempotency_store is not None:
+                prior = self.idempotency_store.lookup(operation_id)
+                if prior is not None:
+                    if prior["action_hash"] != action_hash_value:
+                        raise RefusalException(
                             category="idempotency",
                             refusal_code="IDEMPOTENCY_CONFLICT",
                             message=(
@@ -203,43 +248,21 @@ class ProtectedExecutor:
                                 "expected_action_hash": prior["action_hash"],
                                 "actual_action_hash": action_hash_value,
                             },
-                        ),
-                        occurred_at=request.context.now,
-                        intent=request.intent,
-                        context=request.context,
+                        )
+                    # Same operation_id + same action_hash → idempotent retry.
+                    # The new proof is spent; the prior result is returned.
+                    replay_consumed = self._mark_replay_consumed(replay_state, request=request)
+                    prior_result = prior["result"]
+                    receipt = self.receipt_factory.create_execution_receipt(
+                        request.intent,
+                        request.context,
                         pccb_id=request.pccb.pccb_id,
+                        escrow_id=request.pccb.escrow_id,
+                        payload=prior_result,
                         action_hash=request.pccb.action_hash,
                     )
-                    receipt = self.refusal_factory.create_refused_receipt(  # type: ignore[attr-defined]
-                        request.intent, request.context, refusal
-                    ) if hasattr(self.refusal_factory, 'create_refused_receipt') else self.receipt_factory.create_refused_receipt(
-                        request.intent, request.context, refusal
-                    )
-                    self.outcome_writer.write_refusal(refusal)
-                    return ExecutionResult(receipt=receipt, refusal=refusal, payload=None)
-                # Same operation_id + same action_hash → idempotent replay
-                # Return the prior result without re-executing.
-                prior_result = prior["result"]
-                receipt = self.receipt_factory.create_execution_receipt(
-                    request.intent,
-                    request.context,
-                    pccb_id=request.pccb.pccb_id,
-                    escrow_id=request.pccb.escrow_id,
-                    payload=prior_result,
-                    action_hash=request.pccb.action_hash,
-                )
-                self.outcome_writer.write_receipt(receipt)
-                return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
-
-        replay_state = None
-        replay_consumed = False
-        brokered_credential: BrokeredCredential | None = None
-        escrow_id = request.pccb.escrow_id
-        try:
-            self.proof_verifier.verify(request.intent, request.pccb, request.context)
-            if policy_decision is not None and not policy_decision.allowed:
-                raise _policy_refusal(policy_decision)
-            replay_state = self._claim_replay(request)
+                    self.outcome_writer.write_receipt(receipt)
+                    return ExecutionResult(receipt=receipt, refusal=None, payload=prior_result)
             if self.escrow is not None:
                 if escrow_id is None:
                     raise RefusalException(

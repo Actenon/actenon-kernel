@@ -1,0 +1,103 @@
+{
+  "name": "main",
+  "commit": {
+    "sha": "b45ef3709e89fbc1423f18bde70d3fe5228d241d",
+    "node_id": "C_kwDOTflTvdoAKGI0NWVmMzcwOWU4OWZiYzE0MjNmMThiZGU3MGQzZmU1MjI4ZDI0MWQ",
+    "commit": {
+      "author": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-07-26T23:37:49Z"
+      },
+      "committer": {
+        "name": "Bucko",
+        "email": "ross.buckley1990@gmail.com",
+        "date": "2026-07-26T23:37:49Z"
+      },
+      "message": "ci: add actenon-scan workflow",
+      "tree": {
+        "sha": "0645c53e95a21ba590ff7ec6c937890b323d4945",
+        "url": "https://api.github.com/repos/Actenon/actenon-protocol/git/trees/0645c53e95a21ba590ff7ec6c937890b323d4945"
+      },
+      "url": "https://api.github.com/repos/Actenon/actenon-protocol/git/commits/b45ef3709e89fbc1423f18bde70d3fe5228d241d",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/b45ef3709e89fbc1423f18bde70d3fe5228d241d",
+    "html_url": "https://github.com/Actenon/actenon-protocol/commit/b45ef3709e89fbc1423f18bde70d3fe5228d241d",
+    "comments_url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/b45ef3709e89fbc1423f18bde70d3fe5228d241d/comments",
+    "author": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "rossbuckley1990-hash",
+      "id": 255341254,
+      "node_id": "U_kgDODzgyxg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/255341254?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rossbuckley1990-hash",
+      "html_url": "https://github.com/rossbuckley1990-hash",
+      "followers_url": "https://api.github.com/users/rossbuckley1990-hash/followers",
+      "following_url": "https://api.github.com/users/rossbuckley1990-hash/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rossbuckley1990-hash/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rossbuckley1990-hash/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rossbuckley1990-hash/subscriptions",
+      "organizations_url": "https://api.github.com/users/rossbuckley1990-hash/orgs",
+      "repos_url": "https://api.github.com/users/rossbuckley1990-hash/repos",
+      "events_url": "https://api.github.com/users/rossbuckley1990-hash/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rossbuckley1990-hash/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "064d91e1b9f9f501fc71069847e50c7c2b7e3a07",
+        "url": "https://api.github.com/repos/Actenon/actenon-protocol/commits/064d91e1b9f9f501fc71069847e50c7c2b7e3a07",
+        "html_url": "https://github.com/Actenon/actenon-protocol/commit/064d91e1b9f9f501fc71069847e50c7c2b7e3a07"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/Actenon/actenon-protocol/branches/main",
+    "html": "https://github.com/Actenon/actenon-protocol/tree/main"
+  },
+  "protected": true,
+  "protection": {
+    "enabled": true,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [
+
+      ],
+      "checks": [
+
+      ]
+    }
+  },
+  "protection_url": "https://api.github.com/repos/Actenon/actenon-protocol/branches/main/protection"
+}

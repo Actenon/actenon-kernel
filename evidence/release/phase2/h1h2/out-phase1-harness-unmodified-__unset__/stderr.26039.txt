@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/h1h2/h1_issuer.py", line 15, in <module>
+    gate = ActenonGate(verifier=Ed25519Verifier(signer.x, signer.key_id), signer=signer,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/gate.py", line 236, in __init__
+    permit_downgrade(
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon/security_posture.py", line 184, in permit_downgrade
+    raise InsecureDefaultRefusedError(
+actenon.security_posture.InsecureDefaultRefusedError: An ActenonGate with no declared capabilities requires explicit development intent and ACTENON_ENV='<unset>' declares none. Pass capabilities=(...) naming what this gate's side effect performs (protocol/13-edge-binding.md E1), e.g. capabilities=("payment.refund",). For local development, demos or tests set ACTENON_ENV=development (or dev, local, test). To accept the weaker guarantee outside development anyway, set ACTENON_UNSAFE_ALLOW_UNDECLARED_CAPABILITIES=1 (unsafe; recorded as 'undeclared_capabilities').

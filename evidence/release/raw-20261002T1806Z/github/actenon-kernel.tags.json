@@ -1,0 +1,72 @@
+[
+  {
+    "name": "v1.2.1",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v1.2.1",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v1.2.1",
+    "commit": {
+      "sha": "238b3abdf39596784b1877afb68eb985c5f65279",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/238b3abdf39596784b1877afb68eb985c5f65279"
+    },
+    "node_id": "REF_kwDOSxt657ByZWZzL3RhZ3MvdjEuMi4x"
+  },
+  {
+    "name": "v1.2.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v1.2.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v1.2.0",
+    "commit": {
+      "sha": "c34a40abfee4dcc5f53efc8fb57906f24aea45d1",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/c34a40abfee4dcc5f53efc8fb57906f24aea45d1"
+    },
+    "node_id": "REF_kwDOSxt657ByZWZzL3RhZ3MvdjEuMi4w"
+  },
+  {
+    "name": "v1.1.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v1.1.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v1.1.0",
+    "commit": {
+      "sha": "6df0ef65a1cfc469bfcc7874dafa34473a72bdb7",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/6df0ef65a1cfc469bfcc7874dafa34473a72bdb7"
+    },
+    "node_id": "REF_kwDOSxt657ByZWZzL3RhZ3MvdjEuMS4w"
+  },
+  {
+    "name": "v1.0.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v1.0.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v1.0.0",
+    "commit": {
+      "sha": "cfd5fa756f6cd5cb837ea0c2655922d66c4113c2",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/cfd5fa756f6cd5cb837ea0c2655922d66c4113c2"
+    },
+    "node_id": "REF_kwDOSxt657ByZWZzL3RhZ3MvdjEuMC4w"
+  },
+  {
+    "name": "v1.0.0-integration",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v1.0.0-integration",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v1.0.0-integration",
+    "commit": {
+      "sha": "45e237a64f49f5d50e8689a6555d0d72d67e3d13",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/45e237a64f49f5d50e8689a6555d0d72d67e3d13"
+    },
+    "node_id": "REF_kwDOSxt657xyZWZzL3RhZ3MvdjEuMC4wLWludGVncmF0aW9u"
+  },
+  {
+    "name": "v0.1.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v0.1.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v0.1.0",
+    "commit": {
+      "sha": "f9dee98ed40ef4603c9aac5f3f811c9404bef17e",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/f9dee98ed40ef4603c9aac5f3f811c9404bef17e"
+    },
+    "node_id": "REF_kwDOSxt657ByZWZzL3RhZ3MvdjAuMS4w"
+  },
+  {
+    "name": "v0.1.0-public-kernel",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-kernel/zipball/refs/tags/v0.1.0-public-kernel",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-kernel/tarball/refs/tags/v0.1.0-public-kernel",
+    "commit": {
+      "sha": "553b530b94d6ccf581ee00208d5520428a30381d",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/553b530b94d6ccf581ee00208d5520428a30381d"
+    },
+    "node_id": "REF_kwDOSxt6575yZWZzL3RhZ3MvdjAuMS4wLXB1YmxpYy1rZXJuZWw"
+  }
+]

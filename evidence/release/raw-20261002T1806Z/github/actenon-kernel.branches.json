@@ -1,0 +1,178 @@
+[
+  {
+    "name": "claude/actenon-kernel-mcp-setup-qolk0h",
+    "commit": {
+      "sha": "3c6ca76e3928b1004566f905634417133eb31dfa",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/3c6ca76e3928b1004566f905634417133eb31dfa"
+    },
+    "protected": false
+  },
+  {
+    "name": "dependabot/uv/cryptography-50.0.0",
+    "commit": {
+      "sha": "7738af79083c8b08d344ef5c1c5088be9fa900b2",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/7738af79083c8b08d344ef5c1c5088be9fa900b2"
+    },
+    "protected": false
+  },
+  {
+    "name": "evidence/north-star-20261002",
+    "commit": {
+      "sha": "8bdf9fd0032a0bda8b30b42f684d48147d81afaa",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/8bdf9fd0032a0bda8b30b42f684d48147d81afaa"
+    },
+    "protected": false
+  },
+  {
+    "name": "feat/ecosystem-renderer",
+    "commit": {
+      "sha": "65591b0750c6dc3de9ad2acda0178e07fa02a990",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/65591b0750c6dc3de9ad2acda0178e07fa02a990"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/crypto-review-automated",
+    "commit": {
+      "sha": "d146027038393823b58f9e00f583982c324d1e0e",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/d146027038393823b58f9e00f583982c324d1e0e"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/five-refs",
+    "commit": {
+      "sha": "c0bb34f55ad72e886b2def9c85774bbfe5f2ec40",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/c0bb34f55ad72e886b2def9c85774bbfe5f2ec40"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/guarantee-precondition-next-to-tagline",
+    "commit": {
+      "sha": "095bcbcda970b589d150ac66b9a69c563c94822b",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/095bcbcda970b589d150ac66b9a69c563c94822b"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/lychee-green",
+    "commit": {
+      "sha": "dfe5bf07dcf3115fbf5c3265015a096ef49cdb85",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/dfe5bf07dcf3115fbf5c3265015a096ef49cdb85"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/metadata-truth",
+    "commit": {
+      "sha": "1344d48786169f720a1e88895ba2ac3af5cd2a8c",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/1344d48786169f720a1e88895ba2ac3af5cd2a8c"
+    },
+    "protected": false
+  },
+  {
+    "name": "fix/security-policy-update",
+    "commit": {
+      "sha": "f7f44ea979cafc77c6147c7e4c95099187657157",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/f7f44ea979cafc77c6147c7e4c95099187657157"
+    },
+    "protected": false
+  },
+  {
+    "name": "harden/replay-idempotency-key-lifecycle",
+    "commit": {
+      "sha": "1cbc173a0f030876244c681888215a0027a73d8b",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/1cbc173a0f030876244c681888215a0027a73d8b"
+    },
+    "protected": false
+  },
+  {
+    "name": "harden/verification-pipeline",
+    "commit": {
+      "sha": "5f496b93fb61c791756d4ec9b073f644d246cb53",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/5f496b93fb61c791756d4ec9b073f644d246cb53"
+    },
+    "protected": false
+  },
+  {
+    "name": "integrate/actenon-protocol-v1.0.0",
+    "commit": {
+      "sha": "2c1eb4c65782644a36c705a81efd5a390e874e25",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/2c1eb4c65782644a36c705a81efd5a390e874e25"
+    },
+    "protected": false
+  },
+  {
+    "name": "launch-readme-upgrade",
+    "commit": {
+      "sha": "0b0470d59eec3b27141962da48750f413b81d0a5",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/0b0470d59eec3b27141962da48750f413b81d0a5"
+    },
+    "protected": false
+  },
+  {
+    "name": "main",
+    "commit": {
+      "sha": "43e17adf17be4cb04fbc7bcf528f3427c5805f13",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/43e17adf17be4cb04fbc7bcf528f3427c5805f13"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/drift-closure",
+    "commit": {
+      "sha": "5f241928be359e1436aaf31d03b59e0dafb93b0d",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/5f241928be359e1436aaf31d03b59e0dafb93b0d"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/kms-aws-signer",
+    "commit": {
+      "sha": "11a830cbab0459654000f5f98226a0967ce8b0a5",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/11a830cbab0459654000f5f98226a0967ce8b0a5"
+    },
+    "protected": false
+  },
+  {
+    "name": "north-star/supply-chain-hardening",
+    "commit": {
+      "sha": "ee0a8dd1e64f5e7ed8430590e6d443a16e249d3a",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/ee0a8dd1e64f5e7ed8430590e6d443a16e249d3a"
+    },
+    "protected": false
+  },
+  {
+    "name": "release/v1.0.0",
+    "commit": {
+      "sha": "354983d842c06db05641c33c9d678e91a5add21b",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/354983d842c06db05641c33c9d678e91a5add21b"
+    },
+    "protected": false
+  },
+  {
+    "name": "ross/great-ptolemy-we9wbx",
+    "commit": {
+      "sha": "43fc7cc04cdf9a0d844940b788ec7c860f03d609",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/43fc7cc04cdf9a0d844940b788ec7c860f03d609"
+    },
+    "protected": false
+  },
+  {
+    "name": "security/cross-repo-hardening",
+    "commit": {
+      "sha": "a5022b5c6343f91c8222c8aad5cd490d1070ed9a",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/a5022b5c6343f91c8222c8aad5cd490d1070ed9a"
+    },
+    "protected": false
+  },
+  {
+    "name": "wip/north-star-20261002/secure-defaults",
+    "commit": {
+      "sha": "4fc292e28516fd726d1914879ea3969d3caad35e",
+      "url": "https://api.github.com/repos/Actenon/actenon-kernel/commits/4fc292e28516fd726d1914879ea3969d3caad35e"
+    },
+    "protected": false
+  }
+]

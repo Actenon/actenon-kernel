@@ -74,13 +74,15 @@ The Go verifier SDK declares:
 
 For launch, the repository CI covers:
 
-- `go test ./...`
+- `go test -race -count=1 ./...` in [github.com/Actenon/sdk-go](https://github.com/Actenon/sdk-go), checked out at the commit pinned in
+  `sdk/standalone-sdk-pins.json`, run against this kernel's `conformance/vector-lock.json`
+- `scripts/check_standalone_sdk_fixtures.py`: the SDK's vendored kernel vectors must be byte-identical to this kernel's
 
-under `sdk/go/`.
+The SDK repository runs its own CI as well (format, lints, tests, and the reverse vector check against its `KERNEL_PIN`).
 
 For local contributor verification, use:
 
-- `cd sdk/go && go test ./...`
+- `bash scripts/verify_sdk_conformance.sh` (fetches the pinned commit into `.sdk-cache/`)
 
 This supports the honest public Go claim for launch:
 
@@ -96,13 +98,15 @@ The Rust verifier SDK declares:
 
 For launch, the repository CI covers:
 
-- `cargo test`
+- `cargo test --all-targets --locked` in [github.com/Actenon/sdk-rust](https://github.com/Actenon/sdk-rust), checked out at the commit pinned in
+  `sdk/standalone-sdk-pins.json`, run against this kernel's `conformance/vector-lock.json`
+- `scripts/check_standalone_sdk_fixtures.py`: the SDK's vendored kernel vectors must be byte-identical to this kernel's
 
-under `sdk/rust/`.
+The SDK repository runs its own CI as well (format, lints, tests, and the reverse vector check against its `KERNEL_PIN`).
 
 For local contributor verification, use:
 
-- `cd sdk/rust && cargo test`
+- `bash scripts/verify_sdk_conformance.sh` (fetches the pinned commit into `.sdk-cache/`)
 
 This supports the honest public Rust claim for launch:
 

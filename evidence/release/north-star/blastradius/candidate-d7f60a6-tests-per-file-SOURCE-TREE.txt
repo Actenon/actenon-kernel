@@ -1,0 +1,7 @@
+test_adversarial.py                           27 passed in 0.08s
+test_bypass_shell_semantics.py                144 passed in 0.30s
+test_bypass_wrappers.py                       12 passed in 0.04s
+test_performance.py                           5 passed in 0.09s
+test_resolve.py                               19 passed in 0.04s
+test_rules.py                                 36 passed in 0.12s
+test_tokenise_commands.py                     51 passed in 0.06s

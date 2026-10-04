@@ -1,0 +1,97 @@
+{
+  "status": "NONE RELEASED by this programme. Stopped before the first publication (RELEASE GATE READY).",
+  "as_of": "2026-10-03",
+  "fill_in_after_release": "For each step of RELEASE-GRAPH.md: commit, tag, workflow run URL, registry, version, artefact digest(s), post-publish verification result.",
+  "registry_state_observed": {
+    "PyPI actenon-protocol": "1.3.0",
+    "PyPI actenon-kernel": "1.2.1",
+    "PyPI actenon-permit": "1.4.0",
+    "PyPI actenon-blastradius": "0.4.0",
+    "PyPI actenon-scan": "1.5.0",
+    "npm @actenon/protocol-types": "1.3.0 (plain-node import fails: untranspiled TypeScript)",
+    "npm @actenon/sdk": "1.4.0 (plain-node import fails: ERR_MODULE_NOT_FOUND)",
+    "npm @actenon/verifier-sdk": "not published (E404)",
+    "npm @actenon/protocol": "not published",
+    "Go github.com/Actenon/sdk-go": "v1.0.0 (latest on proxy.golang.org)",
+    "crates.io actenon-verifier-sdk": "not published"
+  },
+  "planned": [
+    {
+      "step": 1,
+      "package": "actenon-protocol",
+      "registry": "PyPI",
+      "version": "1.4.0",
+      "tag": "v1.4.0",
+      "workflow": "publish.yml"
+    },
+    {
+      "step": 1,
+      "package": "@actenon/protocol-types",
+      "registry": "npm",
+      "version": "1.4.0",
+      "tag": "ts-types-v1.4.0",
+      "workflow": "publish-ts-types.yml",
+      "expected_sha256": "c01c86b684fd8edb810b340af670e5993b8794f3706d9b528a17eec70a0992a5"
+    },
+    {
+      "step": 2,
+      "package": "actenon-kernel",
+      "registry": "PyPI",
+      "version": "1.3.0",
+      "tag": "v1.3.0",
+      "workflow": "publish.yml + publish-mcp-registry.yml"
+    },
+    {
+      "step": 2,
+      "package": "@actenon/verifier-sdk",
+      "registry": "npm",
+      "version": "0.2.0",
+      "tag": "verifier-sdk-v0.2.0",
+      "workflow": "publish-verifier-sdk.yml",
+      "expected_sha256": "adfa3bcc762b88fb96e7f1a4f741655065de8af26af8a917a27282ecfc57e8bb"
+    },
+    {
+      "step": 2,
+      "package": "Actenon Conformance",
+      "registry": "GitHub release",
+      "version": "1.1.0",
+      "tag": "conformance-v1.1.0 (signed)",
+      "workflow": "conformance-release.yml"
+    },
+    {
+      "step": 3,
+      "package": "github.com/Actenon/sdk-go",
+      "registry": "Go module proxy",
+      "version": "v1.1.0",
+      "tag": "v1.1.0",
+      "workflow": "verify-tag.yml",
+      "expected_h1": "h1:Q368pwEy+sNg/hb5++Vr1QzE/G90QvSqyX4WS83xMew="
+    },
+    {
+      "step": 4,
+      "package": "actenon-verifier-sdk",
+      "registry": "crates.io",
+      "version": "0.2.0",
+      "tag": "v0.2.0",
+      "workflow": "publish.yml",
+      "expected_sha256": "80572e8467024b4272be3edd66a70707ad3827a31f906113fd06dc7bd0ede81c"
+    },
+    {
+      "step": 5,
+      "package": "actenon-permit",
+      "registry": "PyPI",
+      "version": "2.0.0",
+      "tag": "v2.0.0",
+      "workflow": "publish.yml"
+    },
+    {
+      "step": 5,
+      "package": "@actenon/sdk",
+      "registry": "npm",
+      "version": "2.0.0",
+      "tag": "ts-sdk-v2.0.0",
+      "workflow": "publish-ts-sdk.yml",
+      "expected_sha256": "0322270b9790235c8a56f498e54447028ecfc792b79c3a4da4237e4dcd3a9b1f"
+    }
+  ]
+}

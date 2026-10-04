@@ -19,6 +19,7 @@ from typing import Any
 
 from actenon.api import ActionIntentIntakeService, build_invoice_payment_action_intent_payload
 from actenon.core import ProtectedExecutionKernel, RefusalException
+from actenon.core.http_url import require_http_url
 from actenon.core.json import loads_no_duplicate_keys
 from actenon.demo.local_proof import run_invoice_payment_local_proof_demo, run_local_proof_demo
 from actenon.demo.portable_local_proof import build_hello_world_action_intent_payload, FIXED_BASE_TIME
@@ -46,7 +47,7 @@ from actenon.policy import (
     build_invoice_payment_policy_engine,
 )
 from actenon.proof import LOCAL_PROOF_KEY_ID, PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_action_hash_input, build_local_proof_signer
-from actenon.proof.canonical import sha256_hex
+from actenon.proof.canonical import CANONICALIZATION_PROFILE, sha256_hex
 from actenon.preflight import PreflightDecision, PreflightEngine
 from actenon.receipts import (
     JsonArtifactOutcomeWriter,
@@ -1422,7 +1423,7 @@ def _minimal_simulation_pccb_payload(intent: Any, context: DynamicContextInput) 
         "nonce": f"nonce-broker-demo-{intent.intent_id}",
         "action_hash": {
             "algorithm": "sha-256",
-            "canonicalization": "actenon-jcs-sha256-v1",
+            "canonicalization": CANONICALIZATION_PROFILE,
             "value": action_hash_value,
         },
         "signature": {
@@ -3101,6 +3102,24 @@ def _bundle_candidate_chain_dirs(paths: LocalRuntimePaths) -> tuple[Path, ...]:
     return tuple(directories)
 
 
+def _bundle_member(root: Path, relative: str) -> Path | None:
+    """Resolve a manifest-declared path, or None if it escapes the bundle.
+
+    The manifest is attacker-controlled: an absolute path or a ``..``
+    path would otherwise make verification read (and vouch for) files on
+    the verifying host instead of files carried in the bundle.
+    """
+
+    try:
+        resolved_root = root.resolve()
+        target = (root / relative).resolve()
+    except (OSError, RuntimeError, ValueError):
+        return None
+    if target != resolved_root and resolved_root not in target.parents:
+        return None
+    return target
+
+
 def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_kind: str) -> dict[str, Any]:
     manifest_path = root / "bundle_manifest.json"
     if not manifest_path.exists():
@@ -3120,7 +3139,10 @@ def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_k
         if not isinstance(relative, str):
             errors.append("bundle manifest contains a non-string entry path")
             continue
-        path = root / relative
+        path = _bundle_member(root, relative)
+        if path is None:
+            errors.append(f"bundle manifest entry path points outside the bundle: {relative}")
+            continue
         if path.exists():
             continue
         # Zip archives do not reliably preserve empty directory roots.
@@ -3134,7 +3156,10 @@ def _verify_local_runtime_bundle_root(root: Path, *, bundle_path: Path, bundle_k
         if not isinstance(relative, str):
             errors.append("bundle manifest file_hashes contains a non-string path")
             continue
-        target = root / relative
+        target = _bundle_member(root, relative)
+        if target is None:
+            errors.append(f"Hashed file path points outside the bundle: {relative}")
+            continue
         if not target.exists() or not target.is_file():
             errors.append(f"Missing hashed file: {relative}")
             continue
@@ -3303,7 +3328,9 @@ def _verify_bundle_artifact(
     path_value = payload.get("path")
     if not isinstance(path_value, str):
         return [f"bundle {expected_type} entry is missing a path"]
-    target = root / path_value
+    target = _bundle_member(root, path_value)
+    if target is None:
+        return [f"bundle {expected_type} artifact path points outside the bundle: {path_value}"]
     if not target.exists():
         return [f"bundle {expected_type} artifact is missing: {path_value}"]
     artifact = loader(target)
@@ -3426,9 +3453,9 @@ def _load_json_if_present(path: Path) -> dict[str, Any] | None:
 
 
 def _http_json_status(url: str) -> tuple[int, dict[str, Any]]:
-    request = urllib.request.Request(url, method="GET")
+    request = urllib.request.Request(require_http_url(url, "status URL"), method="GET")
     try:
-        with urllib.request.urlopen(request, timeout=2) as response:
+        with urllib.request.urlopen(request, timeout=2) as response:  # nosec B310
             payload = loads_no_duplicate_keys(response.read())
             if not isinstance(payload, dict):
                 raise ValueError("HTTP JSON response must contain an object")

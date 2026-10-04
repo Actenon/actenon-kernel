@@ -112,7 +112,7 @@ The examples below follow that order for framework and platform paths. They are 
 | an existing Python service | [examples/fastapi_protected_route/README.md](examples/fastapi_protected_route/README.md) | `cd examples/fastapi_protected_route && uvicorn app:app --reload` | Shows a real protected route with receipt and refusal handling. |
 | an existing Node or TypeScript service | [examples/express_protected_route/README.md](examples/express_protected_route/README.md) | `cd examples/express_protected_route && npm start` | Shows the verifier-edge path with the TypeScript SDK. |
 | an OpenAI Agents SDK tool | [examples/openai_agents_sdk_protected_tool/README.md](examples/openai_agents_sdk_protected_tool/README.md) | `cd examples/openai_agents_sdk_protected_tool && python3 app.py --mode direct` | Shows proof verification inside tool execution without needing a hosted layer. |
-| a Go protected endpoint | [sdk/go/README.md](sdk/go/README.md) | `cd sdk/go && go run ./examples/http-protected-endpoint` | Shows verifier-edge proof checking in a Go HTTP service. |
+| a Go protected endpoint | [Actenon/sdk-go](https://github.com/Actenon/sdk-go) | `git clone https://github.com/Actenon/sdk-go && cd sdk-go && go run ./examples/http-protected-endpoint` | Shows verifier-edge proof checking in a Go HTTP service. |
 
 ## What Every Integration Path Has In Common
 
@@ -155,8 +155,8 @@ These examples are useful adoption surfaces, but they are not part of the primar
 | --- | --- | --- |
 | [Python verifier and kernel path](docs/guides/INTEGRATION_QUICKSTART.md) | the full OSS kernel reference path, local proof mode, CLI verification, and protected-endpoint examples | kernel plus verifier-first adoption |
 | [TypeScript verifier SDK](sdk/typescript/README.md) | verifier-edge proof checking in Node or TypeScript services | verifier-only |
-| [Go verifier SDK](sdk/go/README.md) | verifier-edge proof checking in Go services | verifier-only |
-| [Rust verifier SDK](sdk/rust/README.md) | verifier-edge proof checking in Rust services or systems components | verifier-only |
+| [Go verifier SDK](https://github.com/Actenon/sdk-go) | verifier-edge proof checking in Go services | verifier-only |
+| [Rust verifier SDK](https://github.com/Actenon/sdk-rust) | verifier-edge proof checking in Rust services or systems components | verifier-only |
 
 Use [SDK_SELECTION_GUIDE.md](SDK_SELECTION_GUIDE.md) if you want a fast chooser instead of reading each SDK README.
 

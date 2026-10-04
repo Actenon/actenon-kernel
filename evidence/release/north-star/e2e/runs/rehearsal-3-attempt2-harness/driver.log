@@ -1,0 +1,35 @@
+[13:17:24] consumers from /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/rel3 (actenon-protocol e988c4d43f8b59d459628a306cd0117109e59d70 actenon-kernel 185e0fd834bda7318893f7cda51100c5708091bc sdk-go 0198ef597e67a31de778c38628d10d99a5c60d8e sdk-rust c149ab681be437b68f699b4f734a1a18ed7ad0e7 actenon-permit a0d2b8dae74972a06f5774e4667774df26fbad97 )
+{'actenon-kernel': '1.3.0', 'actenon-permit': '2.0.0', 'actenon-protocol': '1.4.0', 'psycopg': '3.3.6'}
+
+added 1 package in 185ms
+go: creating new go.mod: module example.com/goedge
+go: to add module requirements and sums:
+	go mod tidy
+go: downloading github.com/Actenon/sdk-go v1.1.0
+go: downloading modernc.org/sqlite v1.38.2
+go: downloading golang.org/x/sys v0.34.0
+go: downloading modernc.org/libc v1.66.3
+go: downloading github.com/dustin/go-humanize v1.0.1
+go: downloading github.com/mattn/go-isatty v0.0.20
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/ncruces/go-strftime v0.1.9
+go: downloading golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+go: downloading modernc.org/mathutil v1.7.1
+go: downloading modernc.org/memory v1.11.0
+go: downloading github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+go: added github.com/Actenon/sdk-go v1.1.0
+go: added github.com/dustin/go-humanize v1.0.1
+go: added github.com/google/uuid v1.6.0
+go: added github.com/mattn/go-isatty v0.0.20
+go: added github.com/ncruces/go-strftime v0.1.9
+go: added github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+go: added golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+go: added golang.org/x/sys v0.34.0
+go: added modernc.org/libc v1.66.3
+go: added modernc.org/mathutil v1.7.1
+go: added modernc.org/memory v1.11.0
+go: added modernc.org/sqlite v1.38.2
+github.com/Actenon/sdk-go v1.1.0
+name = "actenon-verifier-sdk"
+version = "0.2.0"
+source = "sparse+http://127.0.0.1:18766/cargo/index/"

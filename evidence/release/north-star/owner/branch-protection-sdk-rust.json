@@ -1,0 +1,31 @@
+{
+  "required_status_checks": {
+    "strict": true,
+    "checks": [
+      {
+        "context": "fmt + clippy + doc"
+      },
+      {
+        "context": "Test (Rust 1.88)"
+      },
+      {
+        "context": "Test (Rust stable)"
+      },
+      {
+        "context": "Vendored kernel vectors match the pinned kernel"
+      },
+      {
+        "context": "Required-check names exist"
+      }
+    ]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "restrictions": null,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}

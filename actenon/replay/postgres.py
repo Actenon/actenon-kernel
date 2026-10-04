@@ -14,6 +14,11 @@ class PostgresReplayStore(DbApiReplayStore):
     """
 
     parameter_placeholder = "%s"
+    # CREATE TABLE IF NOT EXISTS races between sessions in PostgreSQL (UniqueViolation on
+    # pg_type), so workers starting together against an empty database failed to start.
+    # A transaction-scoped advisory lock serialises schema creation; it is released at commit.
+    # Key: int.from_bytes(b"ACTENON1", "big").
+    schema_lock_statement = "SELECT pg_advisory_xact_lock(4702695092548226609)"
 
     def __init__(
         self,

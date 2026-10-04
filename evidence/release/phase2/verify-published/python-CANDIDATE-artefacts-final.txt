@@ -1,0 +1,21 @@
+actenon-kernel 1.3.0rc1
+........              [100%]
+=============================== warnings summary ===============================
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_shared_cross_sdk_conformance_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_accepts_valid_local_proof
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_action_mutation
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_audience_mismatch
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_expired_proof
+  /tmp/tmp.OWKwrFPpFR/t/test_verifier_sdk_conformance.py:44: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    self.signer = build_local_proof_signer()
+
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+  /tmp/tmp.OWKwrFPpFR/venv/lib/python3.11/site-packages/actenon/demo/portable_local_proof.py:69: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer = build_local_proof_signer()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+8 passed, 9 warnings, 51 subtests passed in 0.12s
+PASS: published python artefact (/home/user/actenon-kernel/evidence/release/phase2/artefacts-final/actenon_kernel-1.3.0rc1-py3-none-any.whl) conforms to this checkout's vectors

@@ -1,0 +1,33 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/local_runtime.py:1492: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  signer=build_local_proof_signer(),
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-final/lib/python3.11/site-packages/actenon/local_runtime.py:1539: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  sdk = VerifierSDK(build_local_proof_signer(), disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG)
+Local incident simulation.
+Runtime root: /tmp/tmp.nwwnrgS10Z/artifacts/local_runtime
+Mode: incident
+Scenario: replit
+Succeeded: yes
+Framing: Educational simulations and pattern reconstructions. They illustrate boundary failures and protective outcomes without claiming exact forensic reconstruction.
+Takeaways:
+- Incident simulations are educational pattern reconstructions. They teach the boundary, not a private forensic timeline.
+- Weak controls fail when a dangerous request reaches the side effect path without execution-edge verification of the exact action, audience, and target.
+- Proof helps only when the execution edge actually verifies it. Upstream approval state without execution-edge enforcement is still weak control.
+- Proof alone is not the whole story: replay defense and other runtime checks still live at the protected endpoint.
+- Bounded Action Intent changes the outcome by constraining what may execute, where it may execute, and what artifacts prove the result afterward.
+- Incidents covered: Replit-Style Destructive Drift.
+Results:
+- Replit-Style Destructive Drift: REFUSED
+  Replit-Style Destructive Drift was stopped before side effects with SIGNATURE_INVALID.
+  Lesson: If the execution edge does not verify the exact bounded action, an agent can widen a safe change into a destructive one and still say it was following intent.
+  Artifacts: /tmp/tmp.nwwnrgS10Z/artifacts/local_runtime/simulations/replit
+  Incident summary: /tmp/tmp.nwwnrgS10Z/artifacts/local_runtime/simulations/replit/INCIDENT_SUMMARY.md
+  Perspectives:
+  - weak_control_path [counterfactual]: WOULD_EXECUTE
+    Counterfactual weak control path: a broadly trusted development agent turns an intended schema migration into a destructive database action and the execution edge never rechecks the exact action.
+  - proof_bound_path [observed]: REFUSED
+    Observed: the protected endpoint refused the mutated action because the presented PCCB no longer matched the Action Intent hash.
+  - proof_only_gap [generalized-runtime-gap]: STILL_NEEDS_RUNTIME_STATE
+    Even a correctly signed destructive action would still need protected-endpoint replay and runtime controls. Signature alone does not make repeated or misrouted execution safe.
+  - bounded_intent_change [observed]: CONSTRAINED
+    Observed: bounded intent froze the exact migration, target database, and change-set hash so the request could not silently widen into a destructive operation.
+  Trace viewer: Start `actenon-kernel up` if you want a local trace viewer after the simulation finishes.

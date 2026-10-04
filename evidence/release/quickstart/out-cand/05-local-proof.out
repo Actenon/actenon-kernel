@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/demo/local_proof.py", line 652, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/demo/local_proof.py", line 637, in main
+    manifest = run_all_local_proof_demos(Path(args.artifacts_dir))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/demo/local_proof.py", line 596, in run_all_local_proof_demos
+    refund_manifest = run_local_proof_demo(artifact_root)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/demo/local_proof.py", line 179, in run_local_proof_demo
+    kernel, in_memory_writer = _build_kernel(artifact_root, policy_engine=build_refund_policy_engine())
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/demo/local_proof.py", line 93, in _build_kernel
+    signer = build_local_proof_signer()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/proof/signers/local.py", line 150, in build_local_proof_signer
+    return HmacSha256Signer(secret=resolved_secret, key_id=key_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 6, in __init__
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/proof/signers/local.py", line 112, in __post_init__
+    _guard_public_secret(self.secret)
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-cand/lib/python3.11/site-packages/actenon/proof/signers/local.py", line 83, in _guard_public_secret
+    raise LocalHmacProductionGuardError(
+actenon.proof.signers.local.LocalHmacProductionGuardError: the public development HMAC secret (LOCAL_PROOF_SECRET) is refused without explicit development intent (ACTENON_ENV='<unset>'). It is published in the package, so a proof signed with it proves nothing. For local development, demos or tests set ACTENON_ENV=development (or dev, local, test) or use ActenonGate.local_dev(...). In production use asymmetric well-known/KMS/HSM signing custody.

@@ -68,7 +68,7 @@ For most external implementers, `actenon-kernel conformance run` is the fastest 
 and a mandatory check would otherwise be skipped. It is required for use of
 the versioned mark:
 
-> Actenon Verified (Conformance 1.0.0)
+> Actenon Verified (Conformance 1.1.0)
 
 The mark is a scoped self-certification statement. It must identify the exact
 suite version and tested implementation revision. It is not an endorsement,

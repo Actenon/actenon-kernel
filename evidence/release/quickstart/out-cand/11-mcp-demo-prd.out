@@ -1,0 +1,1 @@
+actenon-mcp: --demo refused: actenon-mcp --demo is a development-only entry point, but this environment is declared non-development (ACTENON_ENV='prd'). Development behaviour is refused. Unset ACTENON_ENV or set it to development, dev, local or test to run it locally.

@@ -8,6 +8,30 @@ from actenon.core.json import loads_no_duplicate_keys
 from actenon.models import Receipt, Refusal
 
 
+def _artifact_file(directory: Path, artifact_id: str) -> Path | None:
+    """Return ``directory/<artifact_id>.json`` only if it stays inside ``directory``.
+
+    Artifact ids reach these stores from untrusted input (for example an
+    Action Intent's ``evidence_refs[].value``), so an id must be a single
+    path segment: no separators, no ``..``, no absolute paths.
+    """
+
+    if (
+        not isinstance(artifact_id, str)
+        or not artifact_id
+        or artifact_id in {".", ".."}
+        or any(char in artifact_id for char in ("/", "\\", "\x00"))
+    ):
+        return None
+    target = directory / f"{artifact_id}.json"
+    try:
+        if target.resolve().parent != directory.resolve():
+            return None
+    except (OSError, RuntimeError):
+        return None
+    return target
+
+
 class ReceiptStore(Protocol):
     def get_receipt(self, receipt_id: str) -> Receipt | None:
         ...
@@ -50,11 +74,14 @@ class JsonArtifactReceiptStore:
         return self.artifact_root / "receipts"
 
     def get_receipt(self, receipt_id: str) -> Receipt | None:
-        target = self._receipts_dir() / f"{receipt_id}.json"
-        if not target.exists():
+        target = _artifact_file(self._receipts_dir(), receipt_id)
+        if target is None or not target.is_file():
             return None
         payload = loads_no_duplicate_keys(target.read_text(encoding="utf-8"))
-        return Receipt.from_dict(payload)
+        receipt = Receipt.from_dict(payload)
+        if receipt.receipt_id != receipt_id:
+            return None
+        return receipt
 
     def list_receipts(self) -> tuple[Receipt, ...]:
         root = self._receipts_dir()
@@ -93,11 +120,14 @@ class JsonArtifactRefusalStore:
         return self.artifact_root / "refusals"
 
     def get_refusal(self, refusal_id: str) -> Refusal | None:
-        target = self._refusals_dir() / f"{refusal_id}.json"
-        if not target.exists():
+        target = _artifact_file(self._refusals_dir(), refusal_id)
+        if target is None or not target.is_file():
             return None
         payload = loads_no_duplicate_keys(target.read_text(encoding="utf-8"))
-        return Refusal.from_dict(payload)
+        refusal = Refusal.from_dict(payload)
+        if refusal.refusal_id != refusal_id:
+            return None
+        return refusal
 
     def list_refusals(self) -> tuple[Refusal, ...]:
         root = self._refusals_dir()

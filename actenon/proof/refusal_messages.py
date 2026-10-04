@@ -23,6 +23,17 @@ PUBLIC_PROOF_REFUSAL_MESSAGES = MappingProxyType(
         "SIGNATURE_INVALID": "The proof signature could not be verified.",
         "UNSUPPORTED_PROTOCOL_VERSION": "The proof declares an unsupported protocol version.",
         "AUTHORITY_REVOKED": "The proof authority has been revoked.",
+        "PARAMETER_MISMATCH": "The proof parameter constraints do not cover this endpoint's constraints.",
+    }
+)
+
+# protocol/13-edge-binding.md: refusals caused by the edge's own declarations.
+# Same codes as the proof-vs-intent checks, distinct public messages.
+EDGE_BINDING_REFUSAL_MESSAGES = MappingProxyType(
+    {
+        "SCOPE_CAPABILITY_MISMATCH": "The action capability is not one this endpoint performs.",
+        "PARAMETER_MISMATCH": "The proof parameter constraints do not cover this endpoint's constraints.",
+        "TARGET_MISMATCH": "The proof target does not satisfy this endpoint's resource selectors.",
     }
 )
 
@@ -35,6 +46,7 @@ def public_proof_refusal_message(reason_code: str) -> str:
 
 
 __all__ = [
+    "EDGE_BINDING_REFUSAL_MESSAGES",
     "PUBLIC_PROOF_REFUSAL_MESSAGES",
     "public_proof_refusal_message",
 ]

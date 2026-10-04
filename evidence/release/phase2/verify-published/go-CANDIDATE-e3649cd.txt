@@ -1,0 +1,4 @@
+go: added github.com/Actenon/sdk-go v1.0.1-0.20261003002543-e3649cdd0bc1
+github.com/Actenon/sdk-go v1.0.1-0.20261003002543-e3649cdd0bc1
+ok  	github.com/Actenon/sdk-go/verifier	0.192s
+PASS: published go artefact (v1.0.1-0.20261003002543-e3649cdd0bc1) conforms to this checkout's vectors

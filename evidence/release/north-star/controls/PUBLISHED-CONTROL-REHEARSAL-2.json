@@ -1,0 +1,93 @@
+{
+  "run": "rehearsal-2 controls run2 + fresh-consumer run2",
+  "criterion": "old published artefact FAILS the current release check; the rehearsal candidate PASSES the same check",
+  "old_release_expected_failures": [
+    {
+      "family": "python",
+      "artefact": "actenon-kernel 1.2.1 (PyPI)",
+      "observed": "FAIL",
+      "detail": "current verifier vectors: 14 failed, 8 passed, 9 warnings, 37 subtests passed in 0.22s"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/verifier-sdk (npm)",
+      "observed": "FAIL",
+      "detail": "not installable: E404"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/protocol-types 1.3.0 (npm)",
+      "observed": "FAIL",
+      "detail": "plain-node import:     throw new ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING(filename);"
+    },
+    {
+      "family": "ts",
+      "artefact": "@actenon/sdk 1.4.0 (npm)",
+      "observed": "FAIL",
+      "detail": "plain-node import:     throw new ERR_MODULE_NOT_FOUND("
+    },
+    {
+      "family": "go",
+      "artefact": "sdk-go v1.0.0 (proxy.golang.org)",
+      "observed": "FAIL",
+      "detail": "current vectors via public API: ./edge_revocation_conformance_test.go:45:33: undefined: verifier.RevocationChecker"
+    },
+    {
+      "family": "rust",
+      "artefact": "actenon-verifier-sdk (crates.io)",
+      "observed": "FAIL",
+      "detail": "not resolvable: error: no matching package named `actenon-verifier-sdk` found"
+    },
+    {
+      "family": "python",
+      "artefact": "actenon-protocol 1.3.0 (PyPI) [control v2]",
+      "observed": "FAIL",
+      "detail": "standalone runner, installed schemas only: KeyError: 'urn:actenon:protocol:execution-result:v1'"
+    }
+  ],
+  "candidate_expected_passes": [
+    {
+      "family": "python",
+      "check": "python-py312 kernel conformance (shipped suite)",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript @actenon/verifier-sdk kernel vectors (cases+timestamps+edge+revocation)",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript plain-node imports of all three packages",
+      "observed": "PASS"
+    },
+    {
+      "family": "ts",
+      "check": "typescript plain-node imports of all three packages",
+      "observed": "PASS"
+    },
+    {
+      "family": "go",
+      "check": "go consumer: kernel vectors from installed wheel via public API",
+      "observed": "PASS"
+    },
+    {
+      "family": "rust",
+      "check": "rust consumer: kernel vectors from installed wheel via public API",
+      "observed": "PASS"
+    },
+    {
+      "family": "python",
+      "check": "python-py312 protocol standalone runner, installed schemas only (control v2)",
+      "observed": "PASS"
+    }
+  ],
+  "non_discriminating": [
+    {
+      "artefact": "actenon-protocol 1.3.0 (PyPI)",
+      "observed": "PASS",
+      "why": "protocol 1.4.0 changes no wire format; the in-archive runner uses the archive's schemas/ (see runs/rehearsal-2-controls-run1/README.md)"
+    }
+  ],
+  "result": "PASS"
+}

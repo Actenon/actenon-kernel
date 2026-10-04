@@ -1,0 +1,40 @@
+{
+  "comment": "Single source of truth for branch protection (pull_request) and the publish workflows' release gate (release). Names are GitHub check-run names, verified against real PR check runs and validated against .github/workflows by scripts/release_gate.py validate (CI job 'Required-check names exist'). Not required: lychee (external link availability), Sigstore (tag-only).",
+  "branch": "main",
+  "pull_request": [
+    "Python tests (3.10)",
+    "Python tests (3.11)",
+    "Python tests (3.12)",
+    "Required-check names exist",
+    "Replay store on PostgreSQL 16",
+    "TypeScript verifier SDK",
+    "Go verifier SDK (standalone, pinned)",
+    "Rust verifier SDK (standalone, pinned)",
+    "Invariant tests",
+    "Clean-install closure check",
+    "Base-install conformance (no extras)",
+    "Bandit scan (actenon/, severity >= medium, gating)",
+    "Audit dependencies (pip-audit)",
+    "Generate SBOM (CycloneDX)",
+    "Verify README claims (machine-enforced)",
+    "pyproject / tag / PyPI agree",
+    "drift-gate",
+    "scan"
+  ],
+  "release": [
+    "Python tests (3.10)",
+    "Python tests (3.11)",
+    "Python tests (3.12)",
+    "Required-check names exist",
+    "Replay store on PostgreSQL 16",
+    "TypeScript verifier SDK",
+    "Go verifier SDK (standalone, pinned)",
+    "Rust verifier SDK (standalone, pinned)",
+    "Invariant tests",
+    "Clean-install closure check",
+    "Base-install conformance (no extras)",
+    "Bandit scan (actenon/, severity >= medium, gating)",
+    "Audit dependencies (pip-audit)",
+    "Verify README claims (machine-enforced)"
+  ]
+}

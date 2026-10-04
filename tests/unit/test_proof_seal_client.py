@@ -305,5 +305,21 @@ class HttpProofSealClientTests(unittest.TestCase):
             client.seal(intent=intent, decision=decision, context=context, pccb=pccb)
 
 
+
+class HttpProofSealClientSchemeTests(unittest.TestCase):
+    # bandit B310: urlopen also opens file:// and custom schemes. The seal
+    # endpoint must be an HTTP(S) URL; anything else is refused at
+    # construction, before any request is made.
+    def test_non_http_schemes_are_refused(self) -> None:
+        for url in ("file:///etc/passwd", "ftp://seal.example/x", "data:,{}", "seal.example/x", ""):
+            with self.subTest(url=url):
+                with self.assertRaises(ValueError):
+                    HttpProofSealClient(endpoint_url=url)
+
+    def test_http_and_https_are_accepted(self) -> None:
+        HttpProofSealClient(endpoint_url="https://seal.example/v1/seal")
+        HttpProofSealClient(endpoint_url="http://127.0.0.1:8080/seal")
+
+
 if __name__ == "__main__":
     unittest.main()

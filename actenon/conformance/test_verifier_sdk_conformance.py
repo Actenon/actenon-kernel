@@ -16,9 +16,9 @@ from actenon.demo.portable_local_proof import (
     build_hello_world_action_intent_payload,
     run_portable_local_proof_demo,
 )
-from actenon.models import AudienceRef, PolicyDecision
+from actenon.models import PCCB, AudienceRef, DynamicContextInput, PolicyDecision
 from actenon.models.contracts import parse_timestamp
-from actenon.proof import PCCBMinter, VerifierDisclosureMode, build_local_proof_signer
+from actenon.proof import PCCBMinter, PCCBVerifier, VerifierDisclosureMode, build_local_proof_signer
 from actenon.verifier import VerifierSDK
 
 
@@ -184,6 +184,123 @@ class VerifierSdkConformanceTests(unittest.TestCase):
                     expected["reason_code"],
                     raised.exception.refusal_code,
                 )
+                self.assertEqual(expected["message"], raised.exception.message)
+
+        # Fractional-second timestamps under the ACTENON-JCS-STRICT-1 label:
+        # every SDK must re-serialise timestamps exactly as this reference
+        # does and compare time windows at microsecond precision.
+        timestamp_manifest = _load_vector("timestamp_cases.json")
+        for case in timestamp_manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(
+                        milliseconds=timestamp_manifest["clock_skew_tolerance_ms"]
+                    ),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context_payload = case["context"]
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(case["intent"])
+                pccb = _load_vector(case["pccb"])
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verified = sdk.verify(intent=intent, pccb=pccb, context=context)
+                    self.assertEqual(
+                        "ACTENON-JCS-STRICT-1",
+                        verified.pccb.action_hash.canonicalization,
+                    )
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
+                self.assertEqual(expected["message"], raised.exception.message)
+
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
+                self.assertEqual(expected["message"], raised.exception.message)
+
+
+    def test_edge_revocation_vectors(self) -> None:
+        # protocol/13-edge-binding.md E5.
+        manifest = _load_vector("edge_revocation_cases.json")
+        base = manifest["base"]
+
+        def unavailable(pccb, context):
+            raise ConnectionError("revocation source unavailable")
+
+        sources = {
+            "none": None,
+            "not_revoked": lambda pccb, context: True,
+            "revoked": lambda pccb, context: False,
+            "unavailable": unavailable,
+        }
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                verifier = PCCBVerifier(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                    revocation_checker=sources[case["revocation_source"]],
+                )
+                ctx = base["context"]
+                context = DynamicContextInput(
+                    request_id=ctx["request_id"],
+                    audience=AudienceRef.from_dict(ctx["audience"], "context.audience"),
+                    now=parse_timestamp(ctx["now"], "context.now"),
+                    scope_capabilities=tuple(ctx["scope_capabilities"]),
+                    parameter_constraints=dict(ctx["parameter_constraints"]),
+                    resource_selectors=tuple(ctx["resource_selectors"]),
+                )
+                intent = self.intake.parse(_load_vector(base["intent"]))
+                pccb = PCCB.from_dict(_load_vector(case["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verifier.verify(intent, pccb, context)
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    verifier.verify(intent, pccb, context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
                 self.assertEqual(expected["message"], raised.exception.message)
 
 

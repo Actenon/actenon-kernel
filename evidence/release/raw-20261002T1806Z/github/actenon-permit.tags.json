@@ -1,0 +1,32 @@
+[
+  {
+    "name": "v1.4.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-permit/zipball/refs/tags/v1.4.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-permit/tarball/refs/tags/v1.4.0",
+    "commit": {
+      "sha": "6e10af513c1cd72a4600f55899f225905289311f",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/6e10af513c1cd72a4600f55899f225905289311f"
+    },
+    "node_id": "REF_kwDOTSIuvLByZWZzL3RhZ3MvdjEuNC4w"
+  },
+  {
+    "name": "v1.0.0-integration",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-permit/zipball/refs/tags/v1.0.0-integration",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-permit/tarball/refs/tags/v1.0.0-integration",
+    "commit": {
+      "sha": "63f14f7278019bd774a7c53655ea33da77ec2e05",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/63f14f7278019bd774a7c53655ea33da77ec2e05"
+    },
+    "node_id": "REF_kwDOTSIuvLxyZWZzL3RhZ3MvdjEuMC4wLWludGVncmF0aW9u"
+  },
+  {
+    "name": "ts-sdk-v1.4.0",
+    "zipball_url": "https://api.github.com/repos/Actenon/actenon-permit/zipball/refs/tags/ts-sdk-v1.4.0",
+    "tarball_url": "https://api.github.com/repos/Actenon/actenon-permit/tarball/refs/tags/ts-sdk-v1.4.0",
+    "commit": {
+      "sha": "1924aae672ee72b57fb7f1da1b05297a485420b8",
+      "url": "https://api.github.com/repos/Actenon/actenon-permit/commits/1924aae672ee72b57fb7f1da1b05297a485420b8"
+    },
+    "node_id": "REF_kwDOTSIuvLdyZWZzL3RhZ3MvdHMtc2RrLXYxLjQuMA"
+  }
+]

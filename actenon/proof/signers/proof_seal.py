@@ -6,6 +6,7 @@ from typing import Any, Callable, Mapping, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from actenon.core.http_url import require_http_url
 from actenon.core.json import loads_no_duplicate_keys
 from actenon.core.errors import RefusalException
 from actenon.models.contracts import ActionIntent, PCCB, format_timestamp
@@ -81,7 +82,8 @@ def _default_post_json(endpoint_url: str, payload: bytes, timeout_seconds: float
         method="POST",
     )
     try:
-        with urlopen(request, timeout=timeout_seconds) as response:
+        # HttpProofSealClient admits only http(s) URLs (require_http_url).
+        with urlopen(request, timeout=timeout_seconds) as response:  # nosec B310
             return response.read()
     except HTTPError as exc:
         raise ProofSealError(
@@ -182,6 +184,9 @@ class HttpProofSealClient:
     endpoint_url: str
     timeout_seconds: float = 5.0
     transport: ProofSealTransport = _default_post_json
+
+    def __post_init__(self) -> None:
+        require_http_url(self.endpoint_url, "proof seal endpoint_url")
 
     def seal(
         self,

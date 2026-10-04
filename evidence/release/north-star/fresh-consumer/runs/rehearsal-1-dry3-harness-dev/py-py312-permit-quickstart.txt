@@ -1,0 +1,5 @@
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/permit_quickstart.py:4: UserWarning: register_credential('GITHUB_TOKEN', ...) is development-only. The credential is stored in process memory and will be refused in production_mode. For production, use EnvironmentSecretProvider or CloudManagedRefProvider.
+  client.register_credential("GITHUB_TOKEN", "ghp_YOUR_TOKEN")
+/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-fresh-consumer.D9UREb/py-py312/venv/lib/python3.12/site-packages/actenon_permit/ed25519_signer.py:294: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+  return build_local_proof_signer(secret=secret)
+succeeded  final

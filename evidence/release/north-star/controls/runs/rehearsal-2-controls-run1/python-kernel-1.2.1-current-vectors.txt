@@ -1,0 +1,604 @@
+........              [100%]
+=================================== FAILURES ===================================
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e1_other_capability') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e1_empty_declaration') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e1_pattern_not_expanded') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e1_case_sensitive') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e2_value_differs') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e2_key_not_signed') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e2_type_differs') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e3_other_resource') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e3_partial_match_is_not_a_match') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e3_unknown_selector_key') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_binding_vectors (case='e4_single_use_false_signed') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_binding_vectors>
+
+    def test_edge_binding_vectors(self) -> None:
+        # protocol/13-edge-binding.md E1-E4: the edge's own declarations
+        # (capabilities, parameter constraints, resource selectors) are
+        # enforced, and only single-use proofs are accepted.
+        manifest = _load_vector("edge_binding_cases.json")
+        base = manifest["base"]
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                context_payload = deepcopy(base["context"])
+                mutation = case.get("context_mutation")
+                if mutation is not None:
+                    _set_path(context_payload, mutation["path"], mutation["value"])
+                sdk = VerifierSDK(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                )
+                context = sdk.build_context(
+                    request_id=context_payload["request_id"],
+                    audience=AudienceRef.from_dict(context_payload["audience"], "context.audience"),
+                    now=parse_timestamp(context_payload["now"], "context.now"),
+                    scope_capabilities=tuple(context_payload["scope_capabilities"]),
+                    parameter_constraints=dict(context_payload["parameter_constraints"]),
+                    resource_selectors=tuple(context_payload["resource_selectors"]),
+                )
+                intent = _load_vector(base["intent"])
+                pccb = _load_vector(case.get("pccb", base["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    sdk.verify(intent=intent, pccb=pccb, context=context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:258: AssertionError
+_ VerifierSdkConformanceTests.test_edge_revocation_vectors (case='e5_revocable_source_unavailable') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_revocation_vectors>
+
+    def test_edge_revocation_vectors(self) -> None:
+        # protocol/13-edge-binding.md E5.
+        manifest = _load_vector("edge_revocation_cases.json")
+        base = manifest["base"]
+    
+        def unavailable(pccb, context):
+            raise ConnectionError("revocation source unavailable")
+    
+        sources = {
+            "none": None,
+            "not_revoked": lambda pccb, context: True,
+            "revoked": lambda pccb, context: False,
+            "unavailable": unavailable,
+        }
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                verifier = PCCBVerifier(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                    revocation_checker=sources[case["revocation_source"]],
+                )
+                ctx = base["context"]
+                context = DynamicContextInput(
+                    request_id=ctx["request_id"],
+                    audience=AudienceRef.from_dict(ctx["audience"], "context.audience"),
+                    now=parse_timestamp(ctx["now"], "context.now"),
+                    scope_capabilities=tuple(ctx["scope_capabilities"]),
+                    parameter_constraints=dict(ctx["parameter_constraints"]),
+                    resource_selectors=tuple(ctx["resource_selectors"]),
+                )
+                intent = self.intake.parse(_load_vector(base["intent"]))
+                pccb = PCCB.from_dict(_load_vector(case["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verifier.verify(intent, pccb, context)
+                    continue
+                with self.assertRaises(ProofVerificationError) as raised:
+                    verifier.verify(intent, pccb, context)
+                self.assertEqual(expected["reason_code"], raised.exception.refusal_code)
+>               self.assertEqual(expected["message"], raised.exception.message)
+E               AssertionError: "The proof authority's revocation status could not be established." != 'The proof authority has been revoked.'
+E               - The proof authority's revocation status could not be established.
+E               + The proof authority has been revoked.
+
+test_verifier_sdk_conformance.py:304: AssertionError
+_ VerifierSdkConformanceTests.test_edge_revocation_vectors (case='e5_revocable_no_source') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_revocation_vectors>
+
+    def test_edge_revocation_vectors(self) -> None:
+        # protocol/13-edge-binding.md E5.
+        manifest = _load_vector("edge_revocation_cases.json")
+        base = manifest["base"]
+    
+        def unavailable(pccb, context):
+            raise ConnectionError("revocation source unavailable")
+    
+        sources = {
+            "none": None,
+            "not_revoked": lambda pccb, context: True,
+            "revoked": lambda pccb, context: False,
+            "unavailable": unavailable,
+        }
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                verifier = PCCBVerifier(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                    revocation_checker=sources[case["revocation_source"]],
+                )
+                ctx = base["context"]
+                context = DynamicContextInput(
+                    request_id=ctx["request_id"],
+                    audience=AudienceRef.from_dict(ctx["audience"], "context.audience"),
+                    now=parse_timestamp(ctx["now"], "context.now"),
+                    scope_capabilities=tuple(ctx["scope_capabilities"]),
+                    parameter_constraints=dict(ctx["parameter_constraints"]),
+                    resource_selectors=tuple(ctx["resource_selectors"]),
+                )
+                intent = self.intake.parse(_load_vector(base["intent"]))
+                pccb = PCCB.from_dict(_load_vector(case["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verifier.verify(intent, pccb, context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:301: AssertionError
+_ VerifierSdkConformanceTests.test_edge_revocation_vectors (case='e5_malformed_authority') _
+
+self = <test_verifier_sdk_conformance.VerifierSdkConformanceTests testMethod=test_edge_revocation_vectors>
+
+    def test_edge_revocation_vectors(self) -> None:
+        # protocol/13-edge-binding.md E5.
+        manifest = _load_vector("edge_revocation_cases.json")
+        base = manifest["base"]
+    
+        def unavailable(pccb, context):
+            raise ConnectionError("revocation source unavailable")
+    
+        sources = {
+            "none": None,
+            "not_revoked": lambda pccb, context: True,
+            "revoked": lambda pccb, context: False,
+            "unavailable": unavailable,
+        }
+        for case in manifest["cases"]:
+            with self.subTest(case=case["id"]):
+                verifier = PCCBVerifier(
+                    self.signer,
+                    clock_skew_tolerance=timedelta(milliseconds=case["clock_skew_tolerance_ms"]),
+                    disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG,
+                    revocation_checker=sources[case["revocation_source"]],
+                )
+                ctx = base["context"]
+                context = DynamicContextInput(
+                    request_id=ctx["request_id"],
+                    audience=AudienceRef.from_dict(ctx["audience"], "context.audience"),
+                    now=parse_timestamp(ctx["now"], "context.now"),
+                    scope_capabilities=tuple(ctx["scope_capabilities"]),
+                    parameter_constraints=dict(ctx["parameter_constraints"]),
+                    resource_selectors=tuple(ctx["resource_selectors"]),
+                )
+                intent = self.intake.parse(_load_vector(base["intent"]))
+                pccb = PCCB.from_dict(_load_vector(case["pccb"]))
+                expected = case["expected"]
+                if expected["outcome"] == "verified":
+                    verifier.verify(intent, pccb, context)
+                    continue
+>               with self.assertRaises(ProofVerificationError) as raised:
+E               AssertionError: ProofVerificationError not raised
+
+test_verifier_sdk_conformance.py:301: AssertionError
+=============================== warnings summary ===============================
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_shared_cross_sdk_conformance_vectors
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_accepts_valid_local_proof
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_action_mutation
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_audience_mismatch
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_verifier_sdk_refuses_expired_proof
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/pyt/test_verifier_sdk_conformance.py:44: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    self.signer = build_local_proof_signer()
+
+test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_portable_local_proof_demo_runs
+  /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ns/actenon-controls.E0rr3F/py/lib/python3.12/site-packages/actenon/demo/portable_local_proof.py:69: RuntimeWarning: ACTENON LOCAL HMAC SIGNER IS FOR LOCAL/DEV/DEMO ONLY. The default local proof secret is public; production must use asymmetric well-known/KMS/HSM signing custody.
+    signer = build_local_proof_signer()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SUBFAILED(case='e1_other_capability') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e1_empty_declaration') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e1_pattern_not_expanded') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e1_case_sensitive') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e2_value_differs') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e2_key_not_signed') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e2_type_differs') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e3_other_resource') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e3_partial_match_is_not_a_match') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e3_unknown_selector_key') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e4_single_use_false_signed') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_binding_vectors
+SUBFAILED(case='e5_revocable_source_unavailable') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+SUBFAILED(case='e5_revocable_no_source') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+SUBFAILED(case='e5_malformed_authority') test_verifier_sdk_conformance.py::VerifierSdkConformanceTests::test_edge_revocation_vectors
+14 failed, 8 passed, 9 warnings, 37 subtests passed in 0.22s

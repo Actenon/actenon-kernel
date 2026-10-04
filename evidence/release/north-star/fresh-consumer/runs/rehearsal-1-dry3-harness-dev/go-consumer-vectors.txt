@@ -1,0 +1,114 @@
+=== RUN   TestEdgeBindingVectors
+=== RUN   TestEdgeBindingVectors/e1_declared_capability
+=== RUN   TestEdgeBindingVectors/e1_superset_declaration
+=== RUN   TestEdgeBindingVectors/e1_other_capability
+=== RUN   TestEdgeBindingVectors/e1_empty_declaration
+=== RUN   TestEdgeBindingVectors/e1_pattern_not_expanded
+=== RUN   TestEdgeBindingVectors/e1_case_sensitive
+=== RUN   TestEdgeBindingVectors/e2_empty_constraints
+=== RUN   TestEdgeBindingVectors/e2_signed_constraint_declared
+=== RUN   TestEdgeBindingVectors/e2_value_differs
+=== RUN   TestEdgeBindingVectors/e2_key_not_signed
+=== RUN   TestEdgeBindingVectors/e2_type_differs
+=== RUN   TestEdgeBindingVectors/e3_empty_selectors
+=== RUN   TestEdgeBindingVectors/e3_resource_id_matches
+=== RUN   TestEdgeBindingVectors/e3_resource_type_matches
+=== RUN   TestEdgeBindingVectors/e3_id_and_type_match
+=== RUN   TestEdgeBindingVectors/e3_any_of
+=== RUN   TestEdgeBindingVectors/e3_other_resource
+=== RUN   TestEdgeBindingVectors/e3_partial_match_is_not_a_match
+=== RUN   TestEdgeBindingVectors/e3_unknown_selector_key
+=== RUN   TestEdgeBindingVectors/e4_single_use_true
+=== RUN   TestEdgeBindingVectors/e4_single_use_false_signed
+--- PASS: TestEdgeBindingVectors (0.01s)
+    --- PASS: TestEdgeBindingVectors/e1_declared_capability (0.00s)
+    --- PASS: TestEdgeBindingVectors/e1_superset_declaration (0.00s)
+    --- PASS: TestEdgeBindingVectors/e1_other_capability (0.00s)
+    --- PASS: TestEdgeBindingVectors/e1_empty_declaration (0.00s)
+    --- PASS: TestEdgeBindingVectors/e1_pattern_not_expanded (0.00s)
+    --- PASS: TestEdgeBindingVectors/e1_case_sensitive (0.00s)
+    --- PASS: TestEdgeBindingVectors/e2_empty_constraints (0.00s)
+    --- PASS: TestEdgeBindingVectors/e2_signed_constraint_declared (0.00s)
+    --- PASS: TestEdgeBindingVectors/e2_value_differs (0.00s)
+    --- PASS: TestEdgeBindingVectors/e2_key_not_signed (0.00s)
+    --- PASS: TestEdgeBindingVectors/e2_type_differs (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_empty_selectors (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_resource_id_matches (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_resource_type_matches (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_id_and_type_match (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_any_of (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_other_resource (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_partial_match_is_not_a_match (0.00s)
+    --- PASS: TestEdgeBindingVectors/e3_unknown_selector_key (0.00s)
+    --- PASS: TestEdgeBindingVectors/e4_single_use_true (0.00s)
+    --- PASS: TestEdgeBindingVectors/e4_single_use_false_signed (0.00s)
+=== RUN   TestEdgeRevocationVectors
+=== RUN   TestEdgeRevocationVectors/e5_revocable_not_revoked
+=== RUN   TestEdgeRevocationVectors/e5_revocable_revoked
+=== RUN   TestEdgeRevocationVectors/e5_revocable_source_unavailable
+=== RUN   TestEdgeRevocationVectors/e5_revocable_no_source
+=== RUN   TestEdgeRevocationVectors/e5_non_revocable_no_source
+=== RUN   TestEdgeRevocationVectors/e5_non_revocable_revoked_source
+=== RUN   TestEdgeRevocationVectors/e5_no_authority_no_source
+=== RUN   TestEdgeRevocationVectors/e5_malformed_authority
+--- PASS: TestEdgeRevocationVectors (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_revocable_not_revoked (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_revocable_revoked (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_revocable_source_unavailable (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_revocable_no_source (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_non_revocable_no_source (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_non_revocable_revoked_source (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_no_authority_no_source (0.00s)
+    --- PASS: TestEdgeRevocationVectors/e5_malformed_authority (0.00s)
+=== RUN   TestSharedVerifierConformanceVectors
+=== RUN   TestSharedVerifierConformanceVectors/valid_exact_action
+=== RUN   TestSharedVerifierConformanceVectors/audience_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/scope_capability_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/intent_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/tenant_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/subject_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/action_parameter_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/target_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/action_hash_mismatch
+=== RUN   TestSharedVerifierConformanceVectors/signature_invalid
+=== RUN   TestSharedVerifierConformanceVectors/strict_not_before
+=== RUN   TestSharedVerifierConformanceVectors/strict_expiry
+=== RUN   TestSharedVerifierConformanceVectors/not_before_minus_skew_boundary
+=== RUN   TestSharedVerifierConformanceVectors/before_not_before_minus_skew
+=== RUN   TestSharedVerifierConformanceVectors/expiry_plus_skew_boundary
+=== RUN   TestSharedVerifierConformanceVectors/after_expiry_plus_skew
+--- PASS: TestSharedVerifierConformanceVectors (0.01s)
+    --- PASS: TestSharedVerifierConformanceVectors/valid_exact_action (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/audience_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/scope_capability_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/intent_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/tenant_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/subject_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/action_parameter_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/target_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/action_hash_mismatch (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/signature_invalid (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/strict_not_before (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/strict_expiry (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/not_before_minus_skew_boundary (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/before_not_before_minus_skew (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/expiry_plus_skew_boundary (0.00s)
+    --- PASS: TestSharedVerifierConformanceVectors/after_expiry_plus_skew (0.00s)
+=== RUN   TestSharedFractionalSecondTimestampVectors
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_500000_short_and_offset_forms_verify
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_123456_verifies
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_123456_not_before_boundary
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_123456_one_microsecond_before_not_before
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_123456_expiry_boundary
+=== RUN   TestSharedFractionalSecondTimestampVectors/fractional_123456_one_microsecond_after_expiry
+--- PASS: TestSharedFractionalSecondTimestampVectors (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_500000_short_and_offset_forms_verify (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_123456_verifies (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_123456_not_before_boundary (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_123456_one_microsecond_before_not_before (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_123456_expiry_boundary (0.00s)
+    --- PASS: TestSharedFractionalSecondTimestampVectors/fractional_123456_one_microsecond_after_expiry (0.00s)
+=== RUN   TestSharedVerifierVectorsAreAllExecuted
+--- PASS: TestSharedVerifierVectorsAreAllExecuted (0.00s)
+PASS
+ok  	example.com/freshconsumer	0.018s

@@ -7,7 +7,9 @@ inside the resource boundary, not inside the agent framework.
 from __future__ import annotations
 
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+UTC = timezone.utc  # datetime.UTC is Python >= 3.11; the kernel supports 3.10
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request

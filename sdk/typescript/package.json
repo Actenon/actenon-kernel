@@ -1,6 +1,6 @@
 {
   "name": "@actenon/verifier-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Minimal TypeScript verifier SDK for proof-bound protected endpoints.",
   "license": "Apache-2.0",
   "type": "module",

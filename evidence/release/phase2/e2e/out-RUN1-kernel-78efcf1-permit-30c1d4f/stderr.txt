@@ -1,0 +1,540 @@
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p0.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p1.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p1.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p1.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p3.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p3.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p6.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p4.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p6b.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p7.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 37, in <module>
+    print(json.dumps({"revoked": a.arg1, "status": str(store.get_grant(a.arg1).status)})); sys.exit(0)
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'status'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 63, in <module>
+    decide(a.arg1, store.get_grant(a.arg2))
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 48, in decide
+    action = Action(grant_id=g.id, type="payments.refund", target="ch_e2e_1",
+                             ^^^^
+AttributeError: 'NoneType' object has no attribute 'id'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 60, in <module>
+    parent = grant(a.parent_scope) if a.parent_scope else None
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 37, in <module>
+    print(json.dumps({"revoked": a.arg1, "status": str(store.get_grant(a.arg1).status)})); sys.exit(0)
+                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'status'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8c.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 61, in <module>
+    decide(a.arg1, grant(a.scope, parent))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/authority.py", line 43, in grant
+    parent_grant_id=parent.id if parent else None, delegation_depth=1 if parent else 0).sign()
+                                                                                        ^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 402, in sign
+    self.signature = sign(self._signing_payload())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 226, in sign
+    _get_signing_key(), canonical_json(payload).encode("utf-8"), hashlib.sha256
+    ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/venv-p2/lib/python3.11/site-packages/actenon_permit/model.py", line 107, in _get_signing_key
+    raise RuntimeError(
+RuntimeError: no grant signing key is configured: set ACTENON_SIGNING_KEY (or ACTENON_SIGNING_KEY_FILE, or run `permit init-key`). For local development, demos or tests set ACTENON_ENV=development.
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8d.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8d.json'
+node:internal/modules/esm/resolve:313
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /tmp/claude-0/-home-user-actenon-kernel/a5cdc2bb-0b0f-558a-8e39-86712122b041/scratchpad/ts-edge-78efcf1/node_modules/@actenon/verifier-sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:313:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:603:13)
+    at resolveExports (node:internal/modules/cjs/loader:650:36)
+    at Function._findPath (node:internal/modules/cjs/loader:717:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1369:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///home/user/actenon-kernel/evidence/release/phase2/e2e/ts_edge.mjs:17:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.22.0
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8d.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8d.json'
+Traceback (most recent call last):
+  File "/home/user/actenon-kernel/evidence/release/phase2/e2e/edge.py", line 23, in <module>
+    d = json.load(open(a.proof)); jwk = json.load(open(a.jwk))
+                  ^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.0JBiN7YKVR/p8d.json'

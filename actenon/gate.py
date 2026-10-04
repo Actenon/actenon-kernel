@@ -40,8 +40,16 @@ from actenon.preflight import (
     Requirement,
 )
 from actenon.proof import PCCBMinter, PCCBVerifier, SignatureVerifier, Signer, VerifierDisclosureMode, build_local_proof_signer
+from actenon.proof.service import default_disclosure_mode
 from actenon.receipts import InMemoryOutcomeWriter, OutcomeWriter, ReceiptFactory, RefusalFactory
 from actenon.replay import ReplayProtector
+from actenon.security_posture import (
+    DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET,
+    DOWNGRADE_UNDECLARED_CAPABILITIES,
+    UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV,
+    explicit_development_intent,
+    permit_downgrade,
+)
 
 
 SideEffect = Callable[..., Any]
@@ -85,6 +93,13 @@ class GateOutcome:
         if self.refusal is not None:
             payload["refusal"] = self.refusal.to_dict()
         return payload
+
+
+def _uses_public_development_secret(material: Any) -> bool:
+    from actenon.proof.signers.local import LOCAL_PROOF_SECRET
+
+    secret = getattr(material, "secret", None)
+    return isinstance(secret, bytes) and secret == LOCAL_PROOF_SECRET
 
 
 def _coerce_audience(value: AudienceRef | str) -> AudienceRef:
@@ -171,6 +186,12 @@ class ActenonGate:
     trust configuration. Pass a separate signer only when this process is also
     authorized to mint proofs, such as a KMS/HSM-backed issuer. Verifier-only
     protected endpoints can omit ``signer`` and still call :meth:`protect`.
+
+    ``capabilities`` is the allow-list of actions this edge will perform.
+    ``revocation_checker`` is ``callable(pccb, context) -> bool`` and must
+    return true only when the proof's authority is not revoked; an exception
+    or a false result refuses the attempt. Airlock constructs the gate this
+    way (see the README section "How Airlock calls the Kernel").
     """
 
     def __init__(
@@ -192,6 +213,11 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        disclosure_mode: VerifierDisclosureMode | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
+        parameter_constraints: Mapping[str, Any] | None = None,
+        resource_selectors: tuple[Mapping[str, Any], ...] | list[Mapping[str, Any]] | None = None,
     ) -> None:
         if verifier is None:
             raise ValueError(
@@ -203,6 +229,29 @@ class ActenonGate:
         self.audience = _coerce_audience(audience)
         self.issuer = _coerce_party(issuer)
         self.signer = signer
+        self._verifier = verifier
+        # What this edge declares about itself (protocol/13-edge-binding.md):
+        # the capabilities its side effect performs, the parameter constraints
+        # it relies on, and the resources it acts on. Without a capabilities
+        # declaration the gate would take the capability from the presented
+        # intent, so E1 would compare the request with itself: that needs
+        # development intent or the named unsafe override, and is recorded.
+        self._own_downgrades: list[str] = []
+        if capabilities is None:
+            self._own_downgrades.append(
+                permit_downgrade(
+                    DOWNGRADE_UNDECLARED_CAPABILITIES,
+                    override_env=UNSAFE_ALLOW_UNDECLARED_CAPABILITIES_ENV,
+                    what="An ActenonGate with no declared capabilities",
+                    fix=(
+                        "Pass capabilities=(...) naming what this gate's side effect performs "
+                        "(protocol/13-edge-binding.md E1), e.g. capabilities=(\"payment.refund\",)."
+                    ),
+                )
+            )
+        self.declared_capabilities = tuple(capabilities) if capabilities is not None else None
+        self.declared_parameter_constraints = dict(parameter_constraints or {})
+        self.declared_resource_selectors = tuple(dict(selector) for selector in (resource_selectors or ()))
         self.policy_pack = policy_pack
         self.escrow = escrow
         self.clock = clock
@@ -214,7 +263,14 @@ class ActenonGate:
         self._intake = ActionIntentIntakeService()
         self._minter = PCCBMinter(signer=signer, issuer=self.issuer) if signer is not None else None
         self._executor = ProtectedExecutor(
-            proof_verifier=PCCBVerifier(verifier, disclosure_mode=VerifierDisclosureMode.LOCAL_DEBUG),
+            # Granular codes for local development; in a production-like
+            # environment (where LOCAL_DEBUG is refused) pre-authentication
+            # failures collapse to PROOF_INVALID.
+            proof_verifier=PCCBVerifier(
+                verifier,
+                disclosure_mode=disclosure_mode or default_disclosure_mode(),
+                revocation_checker=revocation_checker,
+            ),
             credential_broker=credential_broker or InMemoryCredentialBroker(),
             replay_protector=replay_protector,
             replay_protection=replay_protection,
@@ -225,6 +281,25 @@ class ActenonGate:
             outcome_writer=self.outcome_writer,
         )
 
+
+    @property
+    def security_downgrades(self) -> tuple[str, ...]:
+        """Weakened guarantees this gate runs with; empty when correctly configured.
+
+        ``public_development_secret``: proofs are signed/verified with the
+        public development HMAC secret. ``undeclared_capabilities``: the gate
+        does not declare what its side effect performs, so it runs any
+        capability a valid proof names. ``process_local_replay``,
+        ``replay_protection_disabled``, ``replay_store_fail_open``: single use
+        is not enforced across workers/restarts, or not at all.
+        """
+
+        downgrades = list(self._executor.security_downgrades)
+        downgrades.extend(d for d in self._own_downgrades if d not in downgrades)
+        for material in (self.signer, self._verifier):
+            if _uses_public_development_secret(material) and DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET not in downgrades:
+                downgrades.insert(0, DOWNGRADE_PUBLIC_DEVELOPMENT_SECRET)
+        return tuple(downgrades)
 
     def build_action(
         self,
@@ -336,13 +411,62 @@ class ActenonGate:
         clock: Callable[[], datetime] = utc_now,
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
+        disclosure_mode: VerifierDisclosureMode | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
     ) -> "ActenonGate":
         """Build a local-only HMAC gate for demos and development.
 
         The local signer uses public development material and is not a
-        production trust root.
+        production trust root. Calling this is explicit development intent:
+        the gate may use the public secret and per-process replay state, both
+        listed in :attr:`security_downgrades`. It is refused when
+        ``ACTENON_ENV`` declares a non-development environment.
         """
 
+        with explicit_development_intent("ActenonGate.local_dev"):
+            return cls._local_dev_in_scope(
+                audience=audience,
+                issuer=issuer,
+                policy_pack=policy_pack,
+                replay_protector=replay_protector,
+                replay_protection=replay_protection,
+                replay_store_failure=replay_store_failure,
+                escrow=escrow,
+                credential_broker=credential_broker,
+                receipt_factory=receipt_factory,
+                refusal_factory=refusal_factory,
+                outcome_writer=outcome_writer,
+                clock=clock,
+                request_id_factory=request_id_factory,
+                escrow_id_factory=escrow_id_factory,
+                disclosure_mode=disclosure_mode,
+                revocation_checker=revocation_checker,
+                capabilities=capabilities,
+            )
+
+    @classmethod
+    def _local_dev_in_scope(
+        cls,
+        *,
+        audience,
+        issuer,
+        policy_pack,
+        replay_protector,
+        replay_protection,
+        replay_store_failure,
+        escrow,
+        credential_broker,
+        receipt_factory,
+        refusal_factory,
+        outcome_writer,
+        clock,
+        request_id_factory,
+        escrow_id_factory,
+        disclosure_mode,
+        revocation_checker,
+        capabilities,
+    ) -> "ActenonGate":
         signer = build_local_proof_signer()
         return cls(
             verifier=signer,
@@ -361,6 +485,9 @@ class ActenonGate:
             clock=clock,
             request_id_factory=request_id_factory,
             escrow_id_factory=escrow_id_factory,
+            disclosure_mode=disclosure_mode,
+            revocation_checker=revocation_checker,
+            capabilities=capabilities,
         )
 
     def mint_proof(
@@ -368,15 +495,21 @@ class ActenonGate:
         action: dict[str, Any] | ActionIntent,
         *,
         decision: str = "allow",
+        authority: Mapping[str, Any] | Any | None = None,
     ) -> PCCB:
-        """Mint a single-use proof for an exact Action Intent."""
+        """Mint a single-use proof for an exact Action Intent.
+
+        ``authority`` is signed into ``extensions.authority``. When it declares
+        ``"revocable": true`` every edge must consult the authority's
+        revocation source before executing (protocol/13-edge-binding.md E5).
+        """
 
         if self._minter is None:
             raise RuntimeError("this gate is verifier-only; configure a signer to mint proofs")
         if decision != "allow":
             raise ValueError("PCCB minting requires decision='allow'")
         intent = self._coerce_action(action)
-        context = self._build_context(intent, audience=self.audience)
+        context = self._build_context(intent, audience=self.audience, for_minting=True)
         policy_decision = PolicyDecision(
             outcome="allow",
             summary="The configured issuer allowed proof minting for this exact action.",
@@ -384,7 +517,13 @@ class ActenonGate:
             reason_codes=("GATE_PROOF_MINTED",),
         )
         escrow_id = self.escrow_id_factory() if self.escrow is not None else None
-        pccb = self._minter.mint(intent, policy_decision, context, escrow_id=escrow_id)
+        pccb = self._minter.mint(
+            intent,
+            policy_decision,
+            context,
+            escrow_id=escrow_id,
+            extensions={"authority": authority} if authority is not None else None,
+        )
         if self.escrow is not None and escrow_id is not None:
             self.escrow.issue(
                 escrow_id=escrow_id,
@@ -549,17 +688,33 @@ class ActenonGate:
         *,
         audience: AudienceRef,
         evidence: Mapping[str, Any] | None = None,
+        for_minting: bool = False,
     ) -> DynamicContextInput:
-        selectors = intent.target.selectors or {"resource_id": intent.target.resource_id}
-        parameter_constraints = intent.action.constraints or intent.action.parameters
+        if for_minting:
+            # The issuer signs the scope it is granting for this exact intent.
+            selectors = intent.target.selectors or {"resource_id": intent.target.resource_id}
+            return DynamicContextInput(
+                request_id=self.request_id_factory(),
+                audience=audience,
+                scope_capabilities=(intent.action.capability,),
+                now=self.clock(),
+                facts=dict(evidence or {}),
+                parameter_constraints=dict(intent.action.constraints or intent.action.parameters),
+                resource_selectors=(dict(selectors),),
+            )
+        # Verification: the edge's own declarations, never values derived from
+        # the presented request (which would make E1-E3 vacuous).
+        capabilities = (
+            self.declared_capabilities if self.declared_capabilities is not None else (intent.action.capability,)
+        )
         return DynamicContextInput(
             request_id=self.request_id_factory(),
             audience=audience,
-            scope_capabilities=(intent.action.capability,),
+            scope_capabilities=capabilities,
             now=self.clock(),
             facts=dict(evidence or {}),
-            parameter_constraints=dict(parameter_constraints),
-            resource_selectors=(dict(selectors),),
+            parameter_constraints=dict(self.declared_parameter_constraints),
+            resource_selectors=self.declared_resource_selectors,
         )
 
     def _refuse(

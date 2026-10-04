@@ -1,0 +1,15 @@
+--- FAIL: TestEdgeBindingVectors (0.01s)
+    --- FAIL: TestEdgeBindingVectors/e1_other_capability (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e1_empty_declaration (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e1_pattern_not_expanded (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e1_case_sensitive (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e2_value_differs (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e2_key_not_signed (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e2_type_differs (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e3_other_resource (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e3_partial_match_is_not_a_match (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e3_unknown_selector_key (0.00s)
+    --- FAIL: TestEdgeBindingVectors/e4_single_use_false_signed (0.00s)
+FAIL
+FAIL	github.com/Actenon/sdk-go/verifier	0.175s
+FAIL

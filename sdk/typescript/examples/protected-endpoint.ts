@@ -3,16 +3,15 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildLocalProofVerifier, VerifierSDK, VerificationError, type ActionIntent, type PCCB } from "../src/index.js";
+import { buildLocalProofVerifier, parseStrictJson, StrictJsonError, VerifierSDK, VerificationError } from "../src/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fixturesDir = path.resolve(__dirname, "../fixtures/portable-local-proof");
 const port = Number(process.env.PORT ?? "3000");
 
-async function readJsonFixture<T>(filename: string): Promise<T> {
-  const raw = await readFile(path.join(fixturesDir, filename), "utf-8");
-  return JSON.parse(raw) as T;
+async function readFixture(filename: string): Promise<Buffer> {
+  return readFile(path.join(fixturesDir, filename));
 }
 
 async function readBody(request: import("node:http").IncomingMessage): Promise<unknown> {
@@ -23,7 +22,9 @@ async function readBody(request: import("node:http").IncomingMessage): Promise<u
   if (chunks.length === 0) {
     return {};
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+  // Untrusted body: parse strictly (no duplicate members, no float/exponent
+  // number lexemes) before handing members to the verifier.
+  return parseStrictJson(Buffer.concat(chunks));
 }
 
 const verifier = new VerifierSDK(buildLocalProofVerifier());
@@ -42,19 +43,18 @@ const server = createServer(async (request, response) => {
   }
 
   try {
-    const body = (await readBody(request)) as { intent?: ActionIntent; pccb?: PCCB };
-    const fallbackIntent = await readJsonFixture<ActionIntent>("action_intent.json");
-    const fallbackPccb = await readJsonFixture<PCCB>("pccb.json");
-
-    const verified = verifier.verifyPayloads({
-      intent_payload: body.intent ?? fallbackIntent,
-      pccb_payload: body.pccb ?? fallbackPccb,
-      request_id: `ts_example_${Date.now()}`,
-      audience: { type: "service", id: "portable-hello-world-endpoint" },
-      now: "2026-01-01T12:00:00Z",
-      scope_capabilities: ["protected_resource.read"],
-      parameter_constraints: { exact_message: "portable hello world" },
-      resource_selectors: [{ resource_id: "hello_resource_demo_001" }],
+    const body = (await readBody(request)) as { intent?: unknown; pccb?: unknown };
+    const verified = verifier.verifyJSON({
+      intent: body.intent !== undefined ? JSON.stringify(body.intent) : await readFixture("action_intent.json"),
+      pccb: body.pccb !== undefined ? JSON.stringify(body.pccb) : await readFixture("pccb.json"),
+      context: {
+        request_id: `ts_example_${Date.now()}`,
+        audience: { type: "service", id: "portable-hello-world-endpoint" },
+        now: "2026-01-01T12:00:00Z",
+        scope_capabilities: ["protected_resource.read"],
+        parameter_constraints: { exact_message: "portable hello world" },
+        resource_selectors: [{ resource_id: "hello_resource_demo_001" }],
+      },
     });
 
     const message = String(verified.intent.action.parameters.message ?? "hello");
@@ -67,6 +67,11 @@ const server = createServer(async (request, response) => {
       }),
     );
   } catch (error) {
+    if (error instanceof StrictJsonError) {
+      response.writeHead(400, { "content-type": "application/json" });
+      response.end(JSON.stringify({ ok: false, category: "request", code: "MALFORMED_REQUEST" }));
+      return;
+    }
     if (error instanceof VerificationError) {
       response.writeHead(403, { "content-type": "application/json" });
       response.end(
