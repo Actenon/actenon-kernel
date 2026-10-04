@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.148" timestamp="2026-10-04T16:49:10.127368+01:00" hostname="Rosss-MacBook-Air.local"><testcase classname="tests.security.test_effect_reference" name="test_signed_effect_is_not_silently_ignored" time="0.007"><failure message="AssertionError: assert not True&#10; +  where True = GateOutcome(receipt=Receipt(receipt_id='rcpt_2e0974aec73b4784aeb9635dcfba3d7a', intent_id='intent_security_001', occur..., 'credential_material_exposed': False}}, metadata={}, extensions={}), refusal=None, payload={}, unmet_requirements=()).ok">tmp_path = PosixPath('/private/var/folders/tz/y04t4d0900xdbmz96jp608180000gn/T/pytest-of-ross/pytest-268/test_signed_effect_is_not_sile0')
+
+    def test_signed_effect_is_not_silently_ignored(tmp_path):
+        intent = build_security_intent(capability="payment.release")
+        proof = mint_security_pccb(intent=intent, context=build_security_context(audience_id="actenon-permit-gateway", scope_capabilities=(intent.action.capability,)))
+        unsigned = replace(proof, extensions={"effect": {
+            "profile": "ACTENON-EFFECT-1", "effect_id": "effect_" + "a" * 64,
+            "reservation_id": "reservation_" + "b" * 32, "owner_attempt_id": "exec_" + "c" * 32,
+        }})
+        from actenon.proof.canonical import canonicalize_bytes
+        proof = replace(unsigned, signature=security_signer().sign(canonicalize_bytes(unsigned.unsigned_payload())))
+        calls = []
+        gate = ActenonGate(verifier=security_signer(), audience="service:actenon-permit-gateway", issuer="service:issuer", capabilities=(intent.action.capability,), clock=lambda: NOW, replay_protector=ReplayProtector(SqliteReplayStore(tmp_path / "replay.db")))
+        result = gate.protect(intent, proof, lambda: calls.append(True) or {})
+&gt;       assert not result.ok
+E       AssertionError: assert not True
+E        +  where True = GateOutcome(receipt=Receipt(receipt_id='rcpt_2e0974aec73b4784aeb9635dcfba3d7a', intent_id='intent_security_001', occur..., 'credential_material_exposed': False}}, metadata={}, extensions={}), refusal=None, payload={}, unmet_requirements=()).ok
+
+tests/security/test_effect_reference.py:21: AssertionError</failure></testcase></testsuite></testsuites>

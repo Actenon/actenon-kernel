@@ -19,6 +19,7 @@ from actenon.core import (
 from actenon.credentials import BrokeredCredential, CredentialBroker, InMemoryCredentialBroker
 from actenon.escrow import CapabilityEscrow
 from actenon.execution import ProtectedExecutor
+from actenon.execution.effects import EffectProtector
 from actenon.models import (
     ActionIntent,
     AudienceRef,
@@ -216,6 +217,7 @@ class ActenonGate:
         disclosure_mode: VerifierDisclosureMode | None = None,
         revocation_checker: Callable[[PCCB, Any], bool] | None = None,
         capabilities: tuple[str, ...] | list[str] | None = None,
+        effect_protector: EffectProtector | None = None,
         parameter_constraints: Mapping[str, Any] | None = None,
         resource_selectors: tuple[Mapping[str, Any], ...] | list[Mapping[str, Any]] | None = None,
     ) -> None:
@@ -276,6 +278,7 @@ class ActenonGate:
             replay_protection=replay_protection,
             replay_store_failure=replay_store_failure,
             escrow=escrow,
+            effect_protector=effect_protector,
             receipt_factory=self.receipt_factory,
             refusal_factory=self.refusal_factory,
             outcome_writer=self.outcome_writer,
