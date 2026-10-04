@@ -57,6 +57,18 @@ def test_coordinated_source_candidate_cannot_publish(monkeypatch, capsys):
     assert "registry release refuses coordinated source constraints" in capsys.readouterr().out
 
 
+def test_uv_source_override_cannot_publish_after_pip_override_removed(tmp_path, monkeypatch, capsys):
+    gate = _load()
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.uv.sources]\nactenon-protocol = { git = "https://example.invalid/protocol", rev = "frozen" }\n'
+    )
+    monkeypatch.setattr(gate, "ROOT", tmp_path)
+    monkeypatch.setenv("GITHUB_REF", "refs/tags/v1.3.0")
+    monkeypatch.setattr(gate, "_api", lambda _path: pytest.fail("must refuse before reading checks"))
+    assert gate.gate("1.3.0", "v") == 1
+    assert "registry release refuses tool.uv.sources" in capsys.readouterr().out
+
+
 @pytest.mark.parametrize(
     ("ref", "version"),
     [("refs/heads/main", "1.3.0"), ("refs/tags/v9.9.9", "1.3.0"), ("refs/tags/verifier-sdk-v1.3.0", "1.3.0")],

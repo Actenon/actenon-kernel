@@ -129,12 +129,31 @@ jobs:
           test "$status" -le 1
           test -s pip-audit.json
 
+      - name: Install uv for the locked contributor environment
+        uses: astral-sh/setup-uv@v3
+
+      - name: Verify and install the committed dependency lock
+        run: uv sync --locked --all-extras --python 3.12
+
+      - name: Audit the actual locked environment
+        run: |
+          python -m pip_audit --strict --vulnerability-service osv \
+            --path .venv/lib/python3.12/site-packages --format json --output pip-audit.locked.json
+
+      - name: Test against the locked dependencies
+        run: |
+          uv run --locked --all-extras --no-sync python -m pytest -q -rs --junitxml=locked-junit.xml
+          python scripts/assert_no_unexpected_skips.py locked-junit.xml
+
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pip-audit
-          path: pip-audit.json
+          path: |
+            pip-audit.json
+            pip-audit.locked.json
+            locked-junit.xml
           retention-days: 30
 
   sigstore-release:
