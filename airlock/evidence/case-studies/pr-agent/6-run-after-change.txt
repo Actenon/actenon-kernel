@@ -1,0 +1,59 @@
+airlock: the code has 1 power(s) that are not approved; they will be blocked. See `airlock diff`.
+airlock: TEST STAND-INS ACTIVE: api.github.com -> 127.0.0.1:42091, api.openai.com -> 127.0.0.1:41843
+airlock: running .venv/bin/pr-agent --pr_url https://github.com/Actenon/actenon-kernel/pull/36 review with 14 approved power(s); holding 3 credential(s)
+2026-10-03 20:27:51.562 | WARNING  | pr_agent.custom_merge_loader:load:67 - Settings file not found: <work>/pr-agent/pr_agent/settings/.secrets.toml. Skipping it.
+2026-10-03 20:27:51.562 | WARNING  | pr_agent.custom_merge_loader:load:67 - Settings file not found: <work>/pr-agent/pr_agent/settings_prod/.secrets.toml. Skipping it.
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_a9bddbd8bf7ee799]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_0094ae1a76c33434]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_ff31735f568deced]
+airlock ✓ github.repo.read github.com/Actenon/pr-agent-settings · 403 · credential GITHUB__USER_TOKEN released [rcpt_46529c68af882a86]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 404 · credential GITHUB__USER_TOKEN released [rcpt_5a105f6f3ef5847c]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_750c58715638f4fa]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_f28cdaa1b0d42cbb]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_ae1b34fd81f9370d]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_f347734c8e942d8e]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_29623494af77366c]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 404 · credential GITHUB__USER_TOKEN released [rcpt_ac5d071f4774faf9]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_55aaab8a8ba3c35f]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_fad08a7460989e77]
+airlock ✓ github.graphql github.com · 201 · credential GITHUB__USER_TOKEN released [rcpt_4b14ade829fa9ff4]
+airlock ✓ github.issue.comment github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_ec6bd194224155fd]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_43ffab7c49338bf4]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_5ca7a49d72376475]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_ecee986a51b59601]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_56d2519f0060914e]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_38979393175a766d]
+airlock ✓ HTTP POST api.openai.com/v1/chat/completions · 200 · credential OPENAI__KEY released [rcpt_1985d34060feb11b]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_917b802698b58258]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_3006ed7a7b11e0f5]
+airlock ✓ github.issue.label github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_2b368439f896cf56]
+airlock ✓ github.repo.read github.com/Actenon/actenon-kernel · 200 · credential GITHUB__USER_TOKEN released [rcpt_d0f520f5e4ac5db0]
+airlock ✓ github.issue.comment github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_115b644768f5bee4]
+
+BLOCKED
+
+github.repo.delete
+github.com/Actenon/actenon-kernel
+
+Authority not present in approved manifest.
+
+Credential released: NO
+Execution occurred: NO
+
+Receipt: rcpt_ea837493e85cdf54
+
+airlock ✓ github.issue.comment github.com/Actenon/actenon-kernel · 201 · credential GITHUB__USER_TOKEN released [rcpt_fb48e95d079b057f]
+
+BLOCKED
+
+github.repo.delete
+github.com/Actenon/actenon-kernel
+
+Authority not present in approved manifest.
+
+Credential released: NO
+Execution occurred: NO
+
+Receipt: rcpt_fff76bbb539c43a7
+
+airlock: 27 allowed, 2 blocked, 1 plain reads · receipts: .airlock/runs/20261003T202747Z-a91673

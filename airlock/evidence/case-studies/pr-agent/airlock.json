@@ -1,0 +1,1612 @@
+{
+  "schema": "airlock/manifest/v1",
+  "project": "pr-agent",
+  "runtime": "python",
+  "command": [
+    "pr-agent"
+  ],
+  "authority": [
+    {
+      "action": "filesystem.write",
+      "resource": "./pyproject.toml",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "scripts/set_pyproject_version.py",
+          "line": 34,
+          "function": "main",
+          "via": "pathlib.Path.write_text"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    },
+    {
+      "action": "github.contents.write",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1801,
+          "function": "GithubProvider.create_or_update_pr_file",
+          "via": "PyGithub Repository.update_file"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1818,
+          "function": "GithubProvider.create_or_update_pr_file",
+          "via": "PyGithub Repository.create_file"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.graphql",
+      "resource": "github.com",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1014,
+          "function": "GithubProvider.resolve_comment_thread",
+          "via": "PyGithub requester.requestJson"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1066,
+          "function": "GithubProvider.resolve_comment_thread",
+          "via": "PyGithub requester.requestJson"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1974,
+          "function": "GithubProvider.fetch_sub_issues",
+          "via": "PyGithub requester.requestJson"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 2007,
+          "function": "GithubProvider.fetch_sub_issues",
+          "via": "PyGithub requester.requestJson"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    },
+    {
+      "action": "github.issue.comment",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 815,
+          "function": "GithubProvider.publish_comment",
+          "via": "PyGithub Issue.create_comment"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 817,
+          "function": "GithubProvider.publish_comment",
+          "via": "PyGithub PullRequest.create_issue_comment"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.issue.label",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1847,
+          "function": "GithubProvider.publish_labels",
+          "via": "PyGithub requester.requestJsonAndCheck"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.pull.comment",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 833,
+          "function": "GithubProvider.publish_inline_comment",
+          "via": "PyGithub PullRequest.create_review_comment"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.pull.review",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 910,
+          "function": "GithubProvider.publish_inline_comments",
+          "via": "PyGithub PullRequest.create_review"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1102,
+          "function": "GithubProvider._publish_inline_comments_fallback_with_verification",
+          "via": "PyGithub PullRequest.create_review"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1144,
+          "function": "GithubProvider._verify_code_comment",
+          "via": "PyGithub requester.requestJsonAndCheck"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1155,
+          "function": "GithubProvider._verify_code_comment",
+          "via": "PyGithub requester.requestJsonAndCheck"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 2044,
+          "function": "GithubProvider.auto_approve",
+          "via": "PyGithub PullRequest.create_review"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.pull.update",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 542,
+          "function": "GithubProvider.publish_description",
+          "via": "PyGithub PullRequest.edit"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 544,
+          "function": "GithubProvider.publish_description",
+          "via": "PyGithub PullRequest.edit"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.repo.read",
+      "resource": "github.com/Actenon/actenon-kernel",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 96,
+          "function": "GithubProvider.__init__",
+          "via": "PyGithub PullRequest.get_commits"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 100,
+          "function": "GithubProvider.__init__",
+          "via": "PyGithub Repository.get_commit"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 115,
+          "function": "GithubProvider._get_issue_handle",
+          "via": "PyGithub Github.get_repo"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 121,
+          "function": "GithubProvider._get_issue_handle",
+          "via": "PyGithub Repository.get_issue"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 249,
+          "function": "GithubProvider._get_incremental_commits",
+          "via": "PyGithub PullRequest.get_commits"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 298,
+          "function": "GithubProvider.get_previous_review",
+          "via": "PyGithub PullRequest.get_issue_comments"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 331,
+          "function": "GithubProvider._get_complete_files",
+          "via": "PyGithub PullRequest.get_files"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 948,
+          "function": "GithubProvider.get_review_thread_comments",
+          "via": "PyGithub PullRequest.get_comments"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1278,
+          "function": "GithubProvider.get_languages",
+          "via": "PyGithub Repository.get_languages"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1289,
+          "function": "GithubProvider.get_owning_namespace",
+          "via": "PyGithub Github.get_repo"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1312,
+          "function": "GithubProvider.get_issue_comments",
+          "via": "PyGithub PullRequest.get_issue_comments"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1320,
+          "function": "GithubProvider.get_persistent_comment_bodies",
+          "via": "PyGithub PullRequest.get_comments"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1354,
+          "function": "GithubProvider.get_repo_settings",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1370,
+          "function": "GithubProvider.get_repo_settings",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1501,
+          "function": "GithubProvider.get_repo_file_content",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1503,
+          "function": "GithubProvider.get_repo_file_content",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1524,
+          "function": "GithubProvider.get_sibling_repo_file_content",
+          "via": "PyGithub Github.get_repo"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1539,
+          "function": "GithubProvider.get_sibling_repo_file_content",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1752,
+          "function": "GithubProvider._get_repo",
+          "via": "PyGithub Github.get_repo"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1757,
+          "function": "GithubProvider._get_pr",
+          "via": "PyGithub Repository.get_pull"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1762,
+          "function": "GithubProvider.get_pr_file_content",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1784,
+          "function": "GithubProvider.get_pr_file_content_snapshot",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1810,
+          "function": "GithubProvider.create_or_update_pr_file",
+          "via": "PyGithub Repository.get_contents"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1875,
+          "function": "GithubProvider.get_pr_labels",
+          "via": "PyGithub requester.requestJsonAndCheck"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1895,
+          "function": "GithubProvider.get_commit_messages",
+          "via": "PyGithub PullRequest.get_commits"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "github.repo.read",
+      "resource": "github.com/Actenon/pr-agent-settings",
+      "status": "approved",
+      "origin": "user",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1477,
+          "function": "GithubProvider._fetch_global_repo_settings",
+          "via": "PyGithub Github.get_repo"
+        },
+        {
+          "file": "pr_agent/git_providers/github_provider.py",
+          "line": 1478,
+          "function": "GithubProvider._fetch_global_repo_settings",
+          "via": "PyGithub Repository.get_contents"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z",
+      "note": "GitHub repository chosen by user"
+    },
+    {
+      "action": "http.get",
+      "resource": "api.github.com/notifications",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "pr_agent/servers/github_polling.py",
+          "line": 431,
+          "function": "polling_loop",
+          "via": "aiohttp.ClientSession.get"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    },
+    {
+      "action": "http.post",
+      "resource": "api.openai.com/v1/chat/completions",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "pr_agent/algo/ai_handlers/openai_ai_handler.py",
+          "line": 56,
+          "function": "OpenAIHandler.chat_completion",
+          "via": "openai.AsyncOpenAI.chat.completions.create"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    },
+    {
+      "action": "process.exec",
+      "resource": "git",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/gerrit_provider.py",
+          "line": 28,
+          "function": "_call",
+          "via": "subprocess.run"
+        },
+        {
+          "file": "pr_agent/git_providers/git_provider.py",
+          "line": 487,
+          "function": "GitProvider._clone_inner",
+          "via": "subprocess.run"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    },
+    {
+      "action": "process.exec",
+      "resource": "ssh",
+      "status": "approved",
+      "origin": "discovered",
+      "evidence": [
+        {
+          "file": "pr_agent/git_providers/gerrit_provider.py",
+          "line": 28,
+          "function": "_call",
+          "via": "subprocess.run"
+        }
+      ],
+      "approved_at": "2026-10-03T20:27:16Z"
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "u_bc0f1e191134",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/algo/run_output.py",
+      "line": 28,
+      "function": "github_action_output",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: configuration variable GITHUB_OUTPUT is not set",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_3d3e3457757a",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/algo/run_output.py",
+      "line": 90,
+      "function": "push_outputs",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: result of cfg.get()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_c2bbfbecc361",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/algo/run_output.py",
+      "line": 101,
+      "function": "push_outputs",
+      "via": "requests.post",
+      "reason": "requests.post sends an HTTP POST request; unknown: result of _push_outputs_sink_url() is assigned more than once with different values",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_27383d9c066e",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/algo/run_output.py",
+      "line": 113,
+      "function": "push_outputs",
+      "via": "requests.post",
+      "reason": "requests.post sends an HTTP POST request; unknown: result of _push_outputs_sink_url() is assigned more than once with different values",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_1b2cbc810318",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 135,
+      "function": "BitbucketProvider.get_repo_settings",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: None; subscript",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/{}/src/{}/.pr_agent.toml"
+    },
+    {
+      "id": "u_1f2956e32122",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 152,
+      "function": "BitbucketProvider._fetch_global_repo_settings",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: parameter 'workspace' of BitbucketProvider._fetch_global_repo_settings",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/pr-agent-settings"
+    },
+    {
+      "id": "u_b342fdb651c0",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 159,
+      "function": "BitbucketProvider._fetch_global_repo_settings",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: parameter 'workspace' of BitbucketProvider._fetch_global_repo_settings; result of urllib.parse.quote()",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/pr-agent-settings/refs/branches/{}"
+    },
+    {
+      "id": "u_735e248d7929",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 167,
+      "function": "BitbucketProvider._fetch_global_repo_settings",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: parameter 'workspace' of BitbucketProvider._fetch_global_repo_settings; result of (ref_resp.json().get('target') or {}).get()",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/pr-agent-settings/src/{}/.pr_agent.toml"
+    },
+    {
+      "id": "u_84e1261d87b2",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 529,
+      "function": "BitbucketProvider._post_inline_comment",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP POST request; unknown: subscript",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_9c72e766bb61",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 592,
+      "function": "BitbucketProvider.get_repo_default_branch",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: None",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/{}/"
+    },
+    {
+      "id": "u_4c832685bdf0",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 715,
+      "function": "BitbucketProvider.get_pr_file_content",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: None; conditional value; parameter 'file_path' of BitbucketProvider.get_repo_file_content",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/{}/src/{}/{}"
+    },
+    {
+      "id": "u_e86ec41c7dc1",
+      "action": "http.get",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 737,
+      "function": "BitbucketProvider.get_pr_file_content_snapshot",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: None; parameter 'file_path' of BitbucketProvider.get_pr_file_content_snapshot; subscript",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/{}/src/{}/{}"
+    },
+    {
+      "id": "u_9238d47aa8c3",
+      "action": "http.post",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 763,
+      "function": "BitbucketProvider.create_or_update_pr_file",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP POST request; unknown: None",
+      "decision": "blocked",
+      "template": "https://api.bitbucket.org/2.0/repositories/{}/{}/src/"
+    },
+    {
+      "id": "u_0d2ac883fa55",
+      "action": "http.get",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 768,
+      "function": "BitbucketProvider._get_pr_file_content",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP GET request; unknown: subscript",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_52fecf67c5b0",
+      "action": "http.put",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_provider.py",
+      "line": 786,
+      "function": "BitbucketProvider.publish_description",
+      "via": "requests.request",
+      "reason": "requests.request sends an HTTP PUT request; unknown: subscript",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_57bae74065f8",
+      "action": "process.exec",
+      "missing": [
+        "program"
+      ],
+      "file": "pr_agent/git_providers/bitbucket_server_provider.py",
+      "line": 756,
+      "function": "BitbucketServerProvider._clone_inner",
+      "via": "subprocess.run",
+      "reason": "subprocess.run runs a program that is not statically known: List expression",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_41cb43ad1ec0",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/gerrit_provider.py",
+      "line": 117,
+      "function": "prepare_repo",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: result of tempfile.mkdtemp()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_b3645e8ec7a0",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/gerrit_provider.py",
+      "line": 189,
+      "function": "add_suggestion",
+      "via": "shutil.copy",
+      "reason": "shutil.copy writes to a path that is not statically known: result of (repo_root / suggestion['relevant_file']).resolve()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_2254c781703e",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/gerrit_provider.py",
+      "line": 190,
+      "function": "add_suggestion",
+      "via": "os.remove",
+      "reason": "os.remove writes to a path that is not statically known: attribute name of an unknown value",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_761d1446ec25",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/gerrit_provider.py",
+      "line": 199,
+      "function": "upload_patch",
+      "via": "requests.post",
+      "reason": "requests.post sends an HTTP POST request; unknown: 'patch_server_endpoint' is assigned more than once with different values",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_9c8a412346d2",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/gerrit_provider.py",
+      "line": 472,
+      "function": "GerritProvider.cleanup",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: result of tempfile.mkdtemp()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_ec06f4048434",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/git_provider.py",
+      "line": 452,
+      "function": "ScopedClonedRepo.__del__",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: parameter 'dest_folder' of ScopedClonedRepo.__init__",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_abca571180ce",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/git_provider.py",
+      "line": 509,
+      "function": "GitProvider.clone",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: parameter 'dest_folder' of GitProvider.clone",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_c4a062620e0a",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/git_provider.py",
+      "line": 518,
+      "function": "GitProvider.clone",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: parameter 'dest_folder' of GitProvider.clone",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_9a7de7a545f1",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/git_provider.py",
+      "line": 520,
+      "function": "GitProvider.clone",
+      "via": "shutil.rmtree",
+      "reason": "shutil.rmtree writes to a path that is not statically known: parameter 'dest_folder' of GitProvider.clone",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_877f75be96d2",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 96,
+      "function": "GithubProvider.__init__",
+      "via": "PyGithub PullRequest.get_commits",
+      "reason": "PyGithub PullRequest.get_commits performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_066930f6d6fb",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 100,
+      "function": "GithubProvider.__init__",
+      "via": "PyGithub Repository.get_commit",
+      "reason": "PyGithub Repository.get_commit performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_b8d4746508b8",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 115,
+      "function": "GithubProvider._get_issue_handle",
+      "via": "PyGithub Github.get_repo",
+      "reason": "PyGithub Github.get_repo performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_6ec94a681444",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 121,
+      "function": "GithubProvider._get_issue_handle",
+      "via": "PyGithub Repository.get_issue",
+      "reason": "PyGithub Repository.get_issue performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_966daed85419",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 249,
+      "function": "GithubProvider._get_incremental_commits",
+      "via": "PyGithub PullRequest.get_commits",
+      "reason": "PyGithub PullRequest.get_commits performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_62ec13063acb",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 298,
+      "function": "GithubProvider.get_previous_review",
+      "via": "PyGithub PullRequest.get_issue_comments",
+      "reason": "PyGithub PullRequest.get_issue_comments performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_95681f1e5571",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 331,
+      "function": "GithubProvider._get_complete_files",
+      "via": "PyGithub PullRequest.get_files",
+      "reason": "PyGithub PullRequest.get_files performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_e34a61cb8caf",
+      "action": "github.pull.update",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 542,
+      "function": "GithubProvider.publish_description",
+      "via": "PyGithub PullRequest.edit",
+      "reason": "PyGithub PullRequest.edit performs github.pull.update; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_a08a9659bd52",
+      "action": "github.pull.update",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 544,
+      "function": "GithubProvider.publish_description",
+      "via": "PyGithub PullRequest.edit",
+      "reason": "PyGithub PullRequest.edit performs github.pull.update; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_789b677c29fd",
+      "action": "http.patch",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 759,
+      "function": "GithubProvider._upsert_check_run",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP PATCH request; unknown: 'existing_id' is assigned more than once with different values; None; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/check-runs/{}"
+    },
+    {
+      "id": "u_aefaad9b9973",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 769,
+      "function": "GithubProvider._upsert_check_run",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP POST request; unknown: None; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/check-runs"
+    },
+    {
+      "id": "u_3cecad6f3996",
+      "action": "http.get",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 789,
+      "function": "GithubProvider._find_existing_check_run",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP GET request; unknown: 'url' is assigned more than once with different values",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_54e2215ebd4b",
+      "action": "github.issue.comment",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 815,
+      "function": "GithubProvider.publish_comment",
+      "via": "PyGithub Issue.create_comment",
+      "reason": "PyGithub Issue.create_comment performs github.issue.comment; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_34a9af1a2fc9",
+      "action": "github.issue.comment",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 817,
+      "function": "GithubProvider.publish_comment",
+      "via": "PyGithub PullRequest.create_issue_comment",
+      "reason": "PyGithub PullRequest.create_issue_comment performs github.issue.comment; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_c83e0eda6ec7",
+      "action": "github.pull.comment",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 833,
+      "function": "GithubProvider.publish_inline_comment",
+      "via": "PyGithub PullRequest.create_review_comment",
+      "reason": "PyGithub PullRequest.create_review_comment performs github.pull.comment; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_337469e3093f",
+      "action": "github.pull.review",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 910,
+      "function": "GithubProvider.publish_inline_comments",
+      "via": "PyGithub PullRequest.create_review",
+      "reason": "PyGithub PullRequest.create_review performs github.pull.review; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_b379d39edbd0",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 948,
+      "function": "GithubProvider.get_review_thread_comments",
+      "via": "PyGithub PullRequest.get_comments",
+      "reason": "PyGithub PullRequest.get_comments performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_ba0634e74d7d",
+      "action": "http.get",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 980,
+      "function": "GithubProvider.resolve_comment_thread",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP GET request; unknown: None; parameter 'comment_id' of GithubProvider.resolve_comment_thread; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/pulls/comments/{}"
+    },
+    {
+      "id": "u_328ff4a71b87",
+      "action": "github.pull.review",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1102,
+      "function": "GithubProvider._publish_inline_comments_fallback_with_verification",
+      "via": "PyGithub PullRequest.create_review",
+      "reason": "PyGithub PullRequest.create_review performs github.pull.review; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_29341c273dc3",
+      "action": "github.pull.review",
+      "missing": [
+        "owner",
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1144,
+      "function": "GithubProvider._verify_code_comment",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP POST request; unknown: None; number",
+      "decision": "resolved-by-user",
+      "template": "https://api.github.com/repos/{}/pulls/{}/reviews"
+    },
+    {
+      "id": "u_3c8a9fcd58ef",
+      "action": "github.pull.review",
+      "missing": [
+        "owner",
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1155,
+      "function": "GithubProvider._verify_code_comment",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP DELETE request; unknown: None; number; subscript",
+      "decision": "resolved-by-user",
+      "template": "https://api.github.com/repos/{}/pulls/{}/reviews/{}"
+    },
+    {
+      "id": "u_2e72532fe613",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1253,
+      "function": "GithubProvider.reply_to_comment_from_comment_id",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP POST request; unknown: None; parameter 'comment_id' of GithubProvider.reply_to_comment_from_comment_id; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/pulls/{}/comments/{}/replies"
+    },
+    {
+      "id": "u_35fd58f791d6",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1278,
+      "function": "GithubProvider.get_languages",
+      "via": "PyGithub Repository.get_languages",
+      "reason": "PyGithub Repository.get_languages performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_6708d8e492e6",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1289,
+      "function": "GithubProvider.get_owning_namespace",
+      "via": "PyGithub Github.get_repo",
+      "reason": "PyGithub Github.get_repo performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_9ea51fec413e",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1312,
+      "function": "GithubProvider.get_issue_comments",
+      "via": "PyGithub PullRequest.get_issue_comments",
+      "reason": "PyGithub PullRequest.get_issue_comments performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_fc2af30b7110",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1320,
+      "function": "GithubProvider.get_persistent_comment_bodies",
+      "via": "PyGithub PullRequest.get_comments",
+      "reason": "PyGithub PullRequest.get_comments performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_7c181b0b3f7b",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1354,
+      "function": "GithubProvider.get_repo_settings",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_12b867da3ae3",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1370,
+      "function": "GithubProvider.get_repo_settings",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_2c310b74375e",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1477,
+      "function": "GithubProvider._fetch_global_repo_settings",
+      "via": "PyGithub Github.get_repo",
+      "reason": "PyGithub Github.get_repo performs github.repo.read; repository unknown: parameter 'repo_owner' of GithubProvider._fetch_global_repo_settings",
+      "decision": "resolved-by-user",
+      "template": "{}/pr-agent-settings"
+    },
+    {
+      "id": "u_d609b605c692",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1478,
+      "function": "GithubProvider._fetch_global_repo_settings",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: parameter 'repo_owner' of GithubProvider._fetch_global_repo_settings",
+      "decision": "resolved-by-user",
+      "template": "{}/pr-agent-settings"
+    },
+    {
+      "id": "u_9540978a87a7",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1501,
+      "function": "GithubProvider.get_repo_file_content",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_1d97fd2f0519",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1503,
+      "function": "GithubProvider.get_repo_file_content",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_59f9d7942761",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1524,
+      "function": "GithubProvider.get_sibling_repo_file_content",
+      "via": "PyGithub Github.get_repo",
+      "reason": "PyGithub Github.get_repo performs github.repo.read; repository unknown: result of (repo_id or '').strip().strip()",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_58e4b04169b9",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1539,
+      "function": "GithubProvider.get_sibling_repo_file_content",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: result of (repo_id or '').strip().strip()",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_d096486c6a14",
+      "action": "http.post",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1623,
+      "function": "GithubProvider.add_reaction",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP POST request; unknown: None; parameter 'issue_comment_id' of GithubProvider.add_reaction; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/issues/comments/{}/reactions"
+    },
+    {
+      "id": "u_3752a12906ae",
+      "action": "http.delete",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1635,
+      "function": "GithubProvider.remove_reaction",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP DELETE request; unknown: None; parameter 'issue_comment_id' of GithubProvider.remove_reaction; parameter 'reaction_id' of GithubProvider.remove_reaction; result of get_settings().get('GITHUB.BASE_URL', 'https://api.github.com').rstrip()",
+      "decision": "blocked",
+      "template": "{}/repos/{}/issues/comments/{}/reactions/{}"
+    },
+    {
+      "id": "u_336dd8b39bb4",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1752,
+      "function": "GithubProvider._get_repo",
+      "via": "PyGithub Github.get_repo",
+      "reason": "PyGithub Github.get_repo performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_4608885f4df0",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1757,
+      "function": "GithubProvider._get_pr",
+      "via": "PyGithub Repository.get_pull",
+      "reason": "PyGithub Repository.get_pull performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_76f5fd324ce6",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1762,
+      "function": "GithubProvider.get_pr_file_content",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_014e24ab607b",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1784,
+      "function": "GithubProvider.get_pr_file_content_snapshot",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_1824f987ac97",
+      "action": "github.contents.write",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1801,
+      "function": "GithubProvider.create_or_update_pr_file",
+      "via": "PyGithub Repository.update_file",
+      "reason": "PyGithub Repository.update_file performs github.contents.write; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_1980e09298a7",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1810,
+      "function": "GithubProvider.create_or_update_pr_file",
+      "via": "PyGithub Repository.get_contents",
+      "reason": "PyGithub Repository.get_contents performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_c87d727be82e",
+      "action": "github.contents.write",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1818,
+      "function": "GithubProvider.create_or_update_pr_file",
+      "via": "PyGithub Repository.create_file",
+      "reason": "PyGithub Repository.create_file performs github.contents.write; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_2f6e89cbcffc",
+      "action": "github.issue.label",
+      "missing": [
+        "owner",
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1847,
+      "function": "GithubProvider.publish_labels",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP PUT request; unknown: None; number",
+      "decision": "resolved-by-user",
+      "template": "https://api.github.com/repos/{}/issues/{}/labels"
+    },
+    {
+      "id": "u_80145d3c9c2d",
+      "action": "github.repo.read",
+      "missing": [
+        "owner"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1875,
+      "function": "GithubProvider.get_pr_labels",
+      "via": "PyGithub requester.requestJsonAndCheck",
+      "reason": "PyGithub requester.requestJsonAndCheck sends an HTTP GET request; unknown: None; number",
+      "decision": "resolved-by-user",
+      "template": "https://api.github.com/repos/{}/issues/{}/labels"
+    },
+    {
+      "id": "u_95fef391e504",
+      "action": "github.repo.read",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 1895,
+      "function": "GithubProvider.get_commit_messages",
+      "via": "PyGithub PullRequest.get_commits",
+      "reason": "PyGithub PullRequest.get_commits performs github.repo.read; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_08eb3642db34",
+      "action": "github.pull.review",
+      "missing": [
+        "repository"
+      ],
+      "file": "pr_agent/git_providers/github_provider.py",
+      "line": 2044,
+      "function": "GithubProvider.auto_approve",
+      "via": "PyGithub PullRequest.create_review",
+      "reason": "PyGithub PullRequest.create_review performs github.pull.review; repository unknown: None",
+      "decision": "resolved-by-user",
+      "template": "{}"
+    },
+    {
+      "id": "u_dc3988f3fab3",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/local_git_provider.py",
+      "line": 136,
+      "function": "LocalGitProvider.publish_description",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: conditional value",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_3a2bf3336370",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/local_git_provider.py",
+      "line": 145,
+      "function": "LocalGitProvider.publish_comment",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: conditional value",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_1630c56bf67c",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/local_git_provider.py",
+      "line": 191,
+      "function": "LocalGitProvider.publish_code_suggestions_artifact",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: conditional value",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_d20af44a9961",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/plain_diff_provider.py",
+      "line": 114,
+      "function": "PlainDiffGitProvider._write_output",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: result of get_settings().get()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_826930e07854",
+      "action": "filesystem.write",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/plain_diff_provider.py",
+      "line": 132,
+      "function": "PlainDiffGitProvider.publish_structured_review",
+      "via": "builtins.open",
+      "reason": "builtins.open writes to a path that is not statically known: result of get_settings().get()",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_93e92ecc1b9b",
+      "action": "http.get",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/git_providers/utils.py",
+      "line": 134,
+      "function": "_resolve_extra_config_to_file",
+      "via": "urllib.request.urlopen",
+      "reason": "urllib.request.urlopen sends an HTTP GET request; unknown: string method on unknown value",
+      "decision": "blocked",
+      "template": "{}"
+    },
+    {
+      "id": "u_659afb1671f7",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/utils.py",
+      "line": 263,
+      "function": "apply_repo_settings",
+      "via": "os.remove",
+      "reason": "os.remove writes to a path that is not statically known: None",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_aaa74e51bcae",
+      "action": "filesystem.delete",
+      "missing": [
+        "path"
+      ],
+      "file": "pr_agent/git_providers/utils.py",
+      "line": 324,
+      "function": "apply_repo_settings",
+      "via": "os.remove",
+      "reason": "os.remove writes to a path that is not statically known: None",
+      "decision": "blocked",
+      "template": ""
+    },
+    {
+      "id": "u_7e69494df949",
+      "action": "http.get",
+      "missing": [
+        "host"
+      ],
+      "file": "pr_agent/mosaico/dispatch.py",
+      "line": 274,
+      "function": "_fetch_public_diff",
+      "via": "aiohttp.ClientSession.get",
+      "reason": "aiohttp.ClientSession.get sends an HTTP GET request; unknown: 'url' is assigned more than once with different values",
+      "decision": "blocked",
+      "template": "{}"
+    }
+  ],
+  "credentials": {
+    "ANTHROPIC_AUTH_TOKEN": [
+      "api.anthropic.com"
+    ],
+    "GITHUB_TOKEN": [
+      "api.github.com",
+      "uploads.github.com"
+    ],
+    "GITHUB__USER_TOKEN": [
+      "api.github.com",
+      "uploads.github.com"
+    ],
+    "OPENAI.KEY": [
+      "api.openai.com"
+    ],
+    "OPENAI_API_KEY": [
+      "api.openai.com"
+    ],
+    "OPENAI_KEY": [
+      "api.openai.com"
+    ],
+    "OPENAI__KEY": [
+      "api.openai.com"
+    ]
+  },
+  "resolutions": {
+    "repository": "github.com/Actenon/actenon-kernel"
+  },
+  "generated_by": "airlock 0.1.0"
+}
