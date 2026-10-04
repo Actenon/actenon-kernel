@@ -25,7 +25,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "actenon-protocol>=1.1.0,<2",
+  "actenon-protocol>=1.5.0,<2",
   "pyyaml>=6.0,<7",
   # The reference broker (actenon-permit) mints Ed25519 proofs in
   # production. A verifier whose default install cannot verify those

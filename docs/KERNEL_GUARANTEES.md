@@ -44,6 +44,7 @@ See [Scope And Guarantees](docs/SCOPE_AND_GUARANTEES.md).
 - multi-tenant hosted-service isolation
 - business correctness outside the kernel boundary
 - prompt, model-output, or in-band response filtering
+- operating-system isolation. The Kernel is not a jail: it does not intercept syscalls, confine a process, or sandbox native code
 - prevention of data disclosure through ordinary output on an unprotected path
 - portable cryptographic attestation of origin for copied receipts or refusals unless an Outcome Attestation envelope is present and verified against a trusted key
 - provider-backed reconciliation or finality as an active v1 standard

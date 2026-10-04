@@ -115,6 +115,9 @@ def gate(version: str, tag_prefix: str) -> int:
         # Decisive: nothing else is worth checking for a run that is not the release tag.
         print(f"::error::publishing requires the tag {expected_ref}; this run is for {ref or '<no ref>'}")
         return 1
+    if (ROOT / ".github/candidate-constraints.txt").exists():
+        print("::error::registry release refuses coordinated source constraints: publish and verify Protocol 1.5.0, remove candidate-constraints.txt, and rerun the required suite first")
+        return 1
     branch = cfg.get("branch", "main")
     fetched = subprocess.run(["git", "fetch", "--no-tags", "--quiet", "origin", branch], cwd=ROOT)
     on_branch = fetched.returncode == 0 and subprocess.run(

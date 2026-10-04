@@ -48,6 +48,15 @@ def test_matrix_names_are_expanded():
     assert {"Python tests (3.10)", "Python tests (3.11)", "Python tests (3.12)"} <= set(names)
 
 
+def test_coordinated_source_candidate_cannot_publish(monkeypatch, capsys):
+    gate = _load()
+    monkeypatch.setenv("GITHUB_REF", "refs/tags/v1.3.0")
+    monkeypatch.setenv("GITHUB_SHA", "0" * 40)
+    monkeypatch.setattr(gate, "_api", lambda _path: pytest.fail("must refuse before reading checks"))
+    assert gate.gate("1.3.0", "v") == 1
+    assert "registry release refuses coordinated source constraints" in capsys.readouterr().out
+
+
 @pytest.mark.parametrize(
     ("ref", "version"),
     [("refs/heads/main", "1.3.0"), ("refs/tags/v9.9.9", "1.3.0"), ("refs/tags/verifier-sdk-v1.3.0", "1.3.0")],

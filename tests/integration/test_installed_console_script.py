@@ -31,13 +31,12 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
             # Fable 5 Part 3A.
             actenon_kernel = bin_dir / ("actenon-kernel.exe" if os.name == "nt" else "actenon-kernel")
 
-            # Install the pinned actenon-protocol dependency first. The
-            # kernel's pyproject.toml pins it to ==1.0.0; pip install
-            # resolves it from GitHub because it is not on PyPI yet.
+            # Install the current minimum contract, including when CI supplies
+            # an immutable coordinated-candidate constraint before publication.
             subprocess.run(
                 [
                     str(python), "-m", "pip", "install",
-                    "actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@v1.0.0",
+                    "actenon-protocol>=1.5.0,<2",
                 ],
                 check=True,
                 cwd=REPO_ROOT,

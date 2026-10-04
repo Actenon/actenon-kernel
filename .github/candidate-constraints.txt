@@ -1,0 +1,2 @@
+# Coordinated candidate testing only. Remove before registry release.
+actenon-protocol @ git+https://github.com/Actenon/actenon-protocol.git@eba78d3dbd41a0b6c86166ece0f34cc8d7b7a002

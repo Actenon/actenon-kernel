@@ -114,6 +114,39 @@
         "reason_code": "AUTHORITY_REVOKED",
         "message": "The proof authority's revocation status could not be established."
       }
+    },
+    {
+      "id": "authority_missing_issuer",
+      "pccb": "edge_authority_missing_issuer_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "authority_missing_grant_id",
+      "pccb": "edge_authority_missing_grant_id_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
+    },
+    {
+      "id": "authority_missing_revocable",
+      "pccb": "edge_authority_missing_revocable_pccb.json",
+      "revocation_source": "not_revoked",
+      "clock_skew_tolerance_ms": 0,
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "AUTHORITY_REVOKED",
+        "message": "The proof authority's revocation status could not be established."
+      }
     }
   ]
 }

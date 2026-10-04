@@ -8,7 +8,7 @@ behind one call.
 ## Local development
 
 ```python
-from actenon-kernel import ActenonGate
+from actenon.gate import ActenonGate
 
 gate = ActenonGate.local_dev(audience="service:protected-endpoint")
 proof = gate.mint_proof(action_intent)
@@ -27,7 +27,7 @@ A production protected endpoint needs a trusted `SignatureVerifier`; it does
 not need proof-minting authority:
 
 ```python
-from actenon-kernel import ActenonGate
+from actenon.gate import ActenonGate
 
 gate = ActenonGate(
     verifier=well_known_or_managed_verifier,
@@ -41,6 +41,36 @@ gate = ActenonGate(
 )
 outcome = gate.protect(action_intent, supplied_proof, execute_payment)
 ```
+
+`capabilities` is optional. When it is set, `protect()` refuses an intent
+whose capability is not in that tuple (`SCOPE_CAPABILITY_MISMATCH`) after
+the signature verifies and before the side effect. When it is omitted, the
+gate checks the proof against the presented intent and does not apply a
+second allow-list.
+
+## Airlock
+
+Airlock calls this constructor, then `protect(intent, proof, side_effect)`.
+The snippet is the one in `src/actenon_airlock/broker.py` on
+[actenon-airlock#3](https://github.com/Actenon/actenon-airlock/pull/3):
+
+```python
+self.edge = ActenonGate(
+    verifier=Ed25519PublicKeyVerifier([key.public_key_jwk]),
+    audience="service:actenon-permit-gateway",
+    issuer="service:actenon-permit",
+    capabilities=tuple(sorted(self.allowed)) or ("airlock.none",),
+    replay_protector=ReplayProtector(SqliteReplayStore(state.local / "replay.sqlite3")),
+    revocation_checker=StoreRevocationChecker(self.store),
+)
+outcome = self.edge.protect(intent, proof, dispatch.run)
+```
+
+`revocation_checker` is `callable(pccb, context) -> bool`. False, or any
+exception, refuses with `AUTHORITY_REVOKED` and does not run the side
+effect. `Ed25519PublicKeyVerifier` and `StoreRevocationChecker` are provided
+by actenon-permit; any object that satisfies `SignatureVerifier.verify` and
+the checker callable works here.
 
 If the same process is authorized to issue proofs, pass a separate
 `Signer`-compatible KMS/HSM signer with `signer=...`. `mint_proof()` is
@@ -74,7 +104,7 @@ Configure the same `CapabilityEscrow` on the gate that mints and protects the
 action:
 
 ```python
-from actenon-kernel import ActenonGate
+from actenon.gate import ActenonGate
 from actenon.escrow import InMemoryCapabilityEscrow
 
 gate = ActenonGate.local_dev(

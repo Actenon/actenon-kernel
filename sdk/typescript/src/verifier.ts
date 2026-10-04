@@ -558,11 +558,14 @@ export class VerifierSDK {
     if (pccb.scope.mode !== "exact" || pccb.scope.single_use !== true) {
       throw new VerificationError("SCOPE_MODE_INVALID", "The proof scope mode is not supported.");
     }
-    if (!pccb.scope.capabilities.includes(intent.action.capability)) {
+    const concrete = (value: string) => value.length > 0 && !/[\*?\[\]]/.test(value);
+    const capabilityInScope = (capability: string, declared: string[]) =>
+      concrete(capability) && declared.every(concrete) && declared.includes(capability);
+    if (!capabilityInScope(intent.action.capability, pccb.scope.capabilities)) {
       throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The proof scope does not allow this capability.");
     }
     // E1: the capability must be one this endpoint declares it performs.
-    if (!context.scope_capabilities.includes(intent.action.capability)) {
+    if (!capabilityInScope(intent.action.capability, context.scope_capabilities)) {
       throw new VerificationError("SCOPE_CAPABILITY_MISMATCH", "The action capability is not one this endpoint performs.");
     }
     if (pccb.intent_id !== undefined && pccb.intent_id !== intent.intent_id) {
@@ -616,8 +619,11 @@ export class VerifierSDK {
     if (Object.prototype.hasOwnProperty.call(extensions, "authority")) {
       const authority = extensions.authority;
       if (authority === null || typeof authority !== "object" || Array.isArray(authority)) throw unknown();
-      const flag = (authority as Record<string, JsonValue>).revocable;
-      if (flag !== undefined && typeof flag !== "boolean") throw unknown();
+      const reference = authority as Record<string, JsonValue>;
+      const flag = reference.revocable;
+      if (typeof reference.issuer !== "string" || reference.issuer.length === 0 ||
+          typeof reference.grant_id !== "string" || reference.grant_id.length === 0 ||
+          typeof flag !== "boolean") throw unknown();
       revocable = flag === true;
     }
     if (this.revocationChecker === undefined) {

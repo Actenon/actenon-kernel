@@ -186,6 +186,12 @@ class ActenonGate:
     trust configuration. Pass a separate signer only when this process is also
     authorized to mint proofs, such as a KMS/HSM-backed issuer. Verifier-only
     protected endpoints can omit ``signer`` and still call :meth:`protect`.
+
+    ``capabilities`` is the allow-list of actions this edge will perform.
+    ``revocation_checker`` is ``callable(pccb, context) -> bool`` and must
+    return true only when the proof's authority is not revoked; an exception
+    or a false result refuses the attempt. Airlock constructs the gate this
+    way (see the README section "How Airlock calls the Kernel").
     """
 
     def __init__(
@@ -406,6 +412,8 @@ class ActenonGate:
         request_id_factory: Callable[[], str] | None = None,
         escrow_id_factory: Callable[[], str] | None = None,
         disclosure_mode: VerifierDisclosureMode | None = None,
+        revocation_checker: Callable[[PCCB, Any], bool] | None = None,
+        capabilities: tuple[str, ...] | list[str] | None = None,
     ) -> "ActenonGate":
         """Build a local-only HMAC gate for demos and development.
 
@@ -433,6 +441,8 @@ class ActenonGate:
                 request_id_factory=request_id_factory,
                 escrow_id_factory=escrow_id_factory,
                 disclosure_mode=disclosure_mode,
+                revocation_checker=revocation_checker,
+                capabilities=capabilities,
             )
 
     @classmethod
@@ -454,6 +464,8 @@ class ActenonGate:
         request_id_factory,
         escrow_id_factory,
         disclosure_mode,
+        revocation_checker,
+        capabilities,
     ) -> "ActenonGate":
         signer = build_local_proof_signer()
         return cls(
@@ -474,6 +486,8 @@ class ActenonGate:
             request_id_factory=request_id_factory,
             escrow_id_factory=escrow_id_factory,
             disclosure_mode=disclosure_mode,
+            revocation_checker=revocation_checker,
+            capabilities=capabilities,
         )
 
     def mint_proof(

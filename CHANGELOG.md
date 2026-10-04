@@ -6,6 +6,16 @@ under any later version.
 
 ## [1.3.0]
 
+### Capability provenance — Protocol 1.5.0 / wire 1.2.0
+
+- Combine the production candidate and Airlock provenance histories without
+  regressing replay, signing, edge declarations or published refusal semantics.
+- Reject empty or wildcard proof issuance scopes using the Protocol contract.
+  Signed authority references retain issuer, grant id and explicit revocable status.
+- Airlock contract tests exercise the actual gate; local_dev also accepts explicit
+  capability and revocation declarations within its development-only boundary.
+
+
 ### Security — insecure development behaviour requires explicit development intent
 
 Two defects, reproduced against the released 1.2.1 wheel

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-
 import logging
 import os
 from dataclasses import dataclass, field
@@ -11,16 +10,24 @@ from secrets import token_urlsafe
 from typing import Any, Callable, Mapping
 from uuid import uuid4
 
+from actenon_protocol import (
+    CapabilityError,
+    capability_in_scope,
+    parse_authority_extension,
+    scope_capabilities_for_mint,
+)
+
 from actenon.core.errors import ProofVerificationError
 from actenon.models.contracts import (
+    PCCB,
     ActionHashSpec,
     ActionIntent,
-    PCCB,
     PartyRef,
     ScopeSpec,
     SignatureSpec,
 )
 from actenon.models.runtime import DynamicContextInput, PolicyDecision
+
 from .audit import AuditLogSink, PCCBMintAuditRecord
 from .canonical import (
     ACCEPTED_CANONICALIZATION_PROFILES,
@@ -28,9 +35,11 @@ from .canonical import (
     canonicalize_bytes,
     sha256_hex,
 )
-from .refusal_messages import EDGE_BINDING_REFUSAL_MESSAGES, public_proof_refusal_message
+from .refusal_messages import (
+    EDGE_BINDING_REFUSAL_MESSAGES,
+    public_proof_refusal_message,
+)
 from .signing import SignatureVerifier, Signer
-
 
 DEFAULT_CLOCK_SKEW_TOLERANCE = timedelta(0)
 
@@ -164,7 +173,7 @@ class PCCBMinter:
         issued_at = context.now
         scope = ScopeSpec(
             mode="exact",
-            capabilities=tuple(sorted(set(context.scope_capabilities or (intent.action.capability,)))),
+            capabilities=tuple(sorted(set(scope_capabilities_for_mint(context.scope_capabilities)))),
             single_use=True,
             resource_selectors=context.resource_selectors,
             parameter_constraints=context.parameter_constraints,
@@ -468,7 +477,7 @@ class PCCBVerifier:
                 pccb=pccb,
                 context=context,
             )
-        if intent.action.capability not in pccb.scope.capabilities:
+        if not capability_in_scope(intent.action.capability, pccb.scope.capabilities):
             self._raise_post_auth_failure(
                 "SCOPE_CAPABILITY_MISMATCH",
                 pccb=pccb,
@@ -476,7 +485,7 @@ class PCCBVerifier:
             )
         # E1: the capability must be one this edge declares it performs
         # (exact strings; an empty declaration performs nothing).
-        if intent.action.capability not in tuple(context.scope_capabilities or ()):
+        if not capability_in_scope(intent.action.capability, context.scope_capabilities):
             self._raise_post_auth_failure(
                 "SCOPE_CAPABILITY_MISMATCH",
                 pccb=pccb,
@@ -580,12 +589,13 @@ class PCCBVerifier:
         # that cannot be consulted all fail closed.
         authority_revocable = False
         if "authority" in (pccb.extensions or {}):
-            authority = pccb.extensions["authority"]
-            if not isinstance(authority, dict) or not isinstance(authority.get("revocable", False), bool):
+            try:
+                authority = parse_authority_extension(pccb.extensions)
+            except CapabilityError:
                 self._raise_post_auth_failure(
                     "AUTHORITY_REVOKED", pccb=pccb, context=context, message=AUTHORITY_STATUS_UNKNOWN_MESSAGE
                 )
-            authority_revocable = authority.get("revocable", False) is True
+            authority_revocable = authority["revocable"] is True
         if self.revocation_checker is None:
             if authority_revocable:
                 self._raise_post_auth_failure(

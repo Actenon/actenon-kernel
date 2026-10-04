@@ -363,6 +363,60 @@
         "message": "The proof scope mode is not supported."
       },
       "note": "validly signed proof whose scope.single_use is false"
+    },
+    {
+      "id": "mixed_edge_scope_star",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "*"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "mixed_edge_scope_question",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "?"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
+    },
+    {
+      "id": "mixed_edge_scope_brackets",
+      "clock_skew_tolerance_ms": 0,
+      "context_mutation": {
+        "path": [
+          "scope_capabilities"
+        ],
+        "value": [
+          "protected_resource.read",
+          "resource[id]"
+        ]
+      },
+      "expected": {
+        "outcome": "refused",
+        "reason_code": "SCOPE_CAPABILITY_MISMATCH",
+        "message": "The action capability is not one this endpoint performs."
+      }
     }
   ]
 }

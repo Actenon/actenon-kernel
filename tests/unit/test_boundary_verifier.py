@@ -1,4 +1,4 @@
-"""Tests for the Kernel BoundaryVerifier (Phase 1.1).
+"""Tests for the Kernel BoundaryVerifier.
 
 Covers:
   * Valid proof verifies
@@ -17,6 +17,7 @@ exact Action Intent it authorises. Adversarial cases live in
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 import pytest
 
@@ -100,11 +101,6 @@ def test_missing_proof_refuses(verifier, valid_request):
     assert result.refusal_code == "PROOF_MISSING"
 
 
-# ---------------------------------------------------------------------------
-# 3. Malformed proof refuses
-# ---------------------------------------------------------------------------
-
-
 def test_malformed_proof_refuses(verifier, valid_request):
     request = _proof_request(proof_token="short")
     result = verifier.verify_boundary(request)
@@ -112,25 +108,13 @@ def test_malformed_proof_refuses(verifier, valid_request):
     assert result.refusal_code == "PROOF_INVALID"
 
 
-# ---------------------------------------------------------------------------
-# 4. Replay refuses
-# ---------------------------------------------------------------------------
-
-
 def test_replay_refuses(verifier, valid_request):
-    # First use succeeds.
     result1 = verifier.verify_boundary(valid_request)
     assert result1.valid is True
 
-    # Second use with same token is replay.
     result2 = verifier.verify_boundary(valid_request)
     assert result2.valid is False
     assert result2.refusal_code == "REPLAY_DETECTED"
-
-
-# ---------------------------------------------------------------------------
-# 5. Different proofs both verify
-# ---------------------------------------------------------------------------
 
 
 def test_different_proofs_both_verify(verifier, valid_request):
@@ -141,11 +125,6 @@ def test_different_proofs_both_verify(verifier, valid_request):
     assert result1.valid is True
     assert result2.valid is True
     assert result1.proof_id != result2.proof_id
-
-
-# ---------------------------------------------------------------------------
-# 6. Receipt construction
-# ---------------------------------------------------------------------------
 
 
 def test_receipt_construction(verifier, valid_request):
@@ -160,9 +139,10 @@ def test_receipt_construction(verifier, valid_request):
     assert receipt["proof_id"] == result.proof_id
 
 
-# ---------------------------------------------------------------------------
-# 7. Health check
-# ---------------------------------------------------------------------------
+def test_receipt_requires_a_verified_result(verifier, valid_request):
+    refused = verifier.verify_boundary(replace(valid_request, proof_token=""))
+    with pytest.raises(ValueError):
+        verifier.construct_receipt(valid_request, refused)
 
 
 def test_health_check(verifier):
@@ -170,6 +150,7 @@ def test_health_check(verifier):
     assert health["ok"] is True
     assert health["pccb_verifier_configured"] is True
     assert "replay_keys_tracked" in health
+    assert "process_local_replay" in health["security_downgrades"]
 
 
 def test_health_check_reports_unconfigured_trust_root():

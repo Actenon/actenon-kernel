@@ -25,6 +25,10 @@ permissions:
   id-token: write
   attestations: write
 
+# Temporary immutable input while Protocol 1.5.0 awaits registry publication.
+env:
+  PIP_CONSTRAINT: ${{ github.workspace }}/.github/candidate-constraints.txt
+
 jobs:
   sbom:
     name: Generate SBOM (CycloneDX)
@@ -44,7 +48,7 @@ jobs:
 
       - name: Install kernel package (with all extras)
         run: |
-          pip install "actenon-protocol>=1.1.0,<2"
+          pip install "actenon-protocol>=1.5.0,<2"
           pip install -e ".[asymmetric,aws,dev]"
 
       - name: Generate SBOM
@@ -90,7 +94,7 @@ jobs:
 
       - name: Install kernel package
         run: |
-          pip install "actenon-protocol>=1.1.0,<2"
+          pip install "actenon-protocol>=1.5.0,<2"
           pip install -e ".[asymmetric,aws,dev]"
 
       - name: Audit dependencies for known vulnerabilities

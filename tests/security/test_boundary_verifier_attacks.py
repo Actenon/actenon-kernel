@@ -71,6 +71,7 @@ class ArbitraryTokenTests(unittest.TestCase):
             )
         )
         self.assertFalse(result.valid)
+        self.assertEqual("ISSUER_UNTRUSTED", result.refusal_code)
 
     def test_arbitrary_string_is_refused_even_with_a_trust_root(self) -> None:
         result = _verifier().verify_boundary(_request(token="valid_proof_token_at_least_16_chars"))

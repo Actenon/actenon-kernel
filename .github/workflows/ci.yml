@@ -11,6 +11,10 @@ defaults:
   run:
     shell: bash
 
+# Temporary immutable input while Protocol 1.5.0 awaits registry publication.
+env:
+  PIP_CONSTRAINT: ${{ github.workspace }}/.github/candidate-constraints.txt
+
 jobs:
   test:
     name: Python tests (${{ matrix.python-version }})
@@ -33,8 +37,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Install the protocol package first so the kernel's pyproject
-          # constraint `actenon-protocol>=1.1.0,<2` resolves cleanly.
-          python -m pip install "actenon-protocol>=1.1.0,<2"
+          # constraint `actenon-protocol>=1.5.0,<2` resolves cleanly.
+          python -m pip install "actenon-protocol>=1.5.0,<2"
           # Every optional integration the suite exercises is installed, so
           # its tests execute instead of skipping (see the skip gate below).
           python -m pip install -e ".[asymmetric,mcp,dev,langchain,fastapi]"
@@ -107,7 +111,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "actenon-protocol>=1.1.0,<2"
+          python -m pip install "actenon-protocol>=1.5.0,<2"
           python -m pip install -e ".[asymmetric,postgres,dev]"
       - name: Real-server tests
         run: python -m pytest tests/integration/test_postgres_real_server.py -v -rs --junitxml=junit-postgres.xml
