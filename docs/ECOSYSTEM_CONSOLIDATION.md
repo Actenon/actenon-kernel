@@ -33,8 +33,8 @@ consumer verification. No package or tag on this candidate is authorized yet.
 SDK vector pins are frozen after the Kernel core is committed, then the Kernel
 pins those tested SDK commits. This avoids a circular commit-pin dependency.
 
-Old PRs remain open until the unified candidate demonstrates parity and its full
-required CI matrix is green. The historical North Star evidence is preserved;
+PR #44 merged after parity and its complete required CI matrix passed. Both original
+PR heads are preserved as ancestors; GitHub has marked those incorporated PRs merged. The historical North Star evidence is preserved;
 its old candidate/artifact hashes are not claims about this new candidate.
 
 ## Final verifier pins
@@ -42,3 +42,9 @@ its old candidate/artifact hashes are not claims about this new candidate.
 Kernel core `c6564b90be8bdb7a871c176df5673d5b3a4ab5fc` freezes the unified proof/vector implementation. The coordinated Go candidate is `bf9fbc15a32cdb49fbd6f308cb5d4b154d94591a`; Rust is `e7984d4df5534b4a7f0cb40c554b94ba3480c8fa`. They vendor that core lock. Kernel then pins those SDK commits without changing the vector/core bytes, avoiding a circular commit-hash dependency. This is one ancestor-descendant candidate line, not alternative Kernel implementations.
 
 Protocol contract documentation and its canonical source pin are finalized at `4cbd8f04e0db331b2ffd490d50c0a7aede2d35ff` ([Protocol #22](https://github.com/Actenon/actenon-protocol/pull/22)); source integration still does not imply registry publication.
+
+## Locked environment repair
+
+The previous `uv.lock` still identified Kernel 0.1.0 and Protocol 1.1.0, although the source and pip-based CI use the unified 1.3/1.5 contract. It also pinned vulnerable cryptography 49.0.0, PyJWT 2.13.0 and urllib3 2.7.0. The coordinated lock now resolves Kernel 1.3.0, Protocol 1.5.0 at the canonical source freeze, cryptography 50.0.0, PyJWT 2.15.1 and urllib3 2.8.0. The base and compatibility-extra cryptography floors are >=50, preserving Python 3.10 support.
+
+The locked environment is audited and tested independently of fresh pip resolution in the existing supply-chain gate. The source mapping exists only until Protocol 1.5.0 is public; publication refuses either remaining pip constraints or `tool.uv.sources`. Dependabot's automatic public-registry update still cannot resolve the project before Protocol publication; its failure is preserved and is not a substitute for the locked-environment audit.

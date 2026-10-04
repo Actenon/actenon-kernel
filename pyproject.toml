@@ -32,20 +32,24 @@ dependencies = [
   # artifacts undercuts the core claim that any party can verify without
   # trusting Actenon — so Ed25519 support is part of the base install,
   # not an extra (1.1.0; previously the [asymmetric] extra).
-  "cryptography>=42",
+  "cryptography>=50",
 ]
 
 [project.optional-dependencies]
 # Retained for backward compatibility: actenon-permit and other consumers
 # declare `actenon-kernel[asymmetric]`, and removing the extra would break
 # those specs. Since 1.1.0 it restates the base cryptography dependency.
-asymmetric = ["cryptography>=42"]
+asymmetric = ["cryptography>=50"]
 aws = ["boto3>=1.34"]  # for actenon.proof.signers.aws_kms (AWS KMS signing backend)
 dev = ["build", "ruff>=0.8", "pytest>=8.0", "httpx>=0.27", "boto3>=1.34", "tomli>=2; python_version<'3.11'"]
 fastapi = ["fastapi>=0.115,<1"]
 langchain = ["langchain-core>=0.3,<2"]
 mcp = ["mcp>=1.9,<2; python_version>='3.10'"]
 postgres = ["psycopg[binary]>=3.1"]
+
+[tool.uv.sources]
+# Coordinated source testing only; remove before registry publication.
+actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "4cbd8f04e0db331b2ffd490d50c0a7aede2d35ff" }
 
 [project.scripts]
 # The kernel's CLI is `actenon-kernel`. The unified developer CLI `actenon`

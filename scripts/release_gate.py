@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release gate shared by every Actenon repository (identical copy in each).
+"""Shared release-check gate with Kernel's registry-input safeguard.
 
 Single source of truth: .github/required-checks.json
   {
@@ -118,6 +118,16 @@ def gate(version: str, tag_prefix: str) -> int:
     if (ROOT / ".github/candidate-constraints.txt").exists():
         print("::error::registry release refuses coordinated source constraints: publish and verify Protocol 1.5.0, remove candidate-constraints.txt, and rerun the required suite first")
         return 1
+    project_file = ROOT / "pyproject.toml"
+    if project_file.exists():
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        project = tomllib.loads(project_file.read_text())
+        if project.get("tool", {}).get("uv", {}).get("sources"):
+            print("::error::registry release refuses tool.uv.sources: remove source overrides and regenerate the public-registry lock first")
+            return 1
     branch = cfg.get("branch", "main")
     fetched = subprocess.run(["git", "fetch", "--no-tags", "--quiet", "origin", branch], cwd=ROOT)
     on_branch = fetched.returncode == 0 and subprocess.run(
