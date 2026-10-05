@@ -115,7 +115,7 @@ class Parser {
       if (c !== ",") this.fail("expected ',' or '}'");
     }
     // A plain object: callers index members by name; no prototype keys.
-    return Object.assign({}, out);
+    return { ...out };
   }
 
   array(depth: number): unknown[] {

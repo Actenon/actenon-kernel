@@ -1,0 +1,17 @@
+{
+  "revision": "protocol-canonical-depth-correction-v1",
+  "authority": "Actenon/actenon-protocol@8e5bc9e342f694767508bae9a392749c6a8df2cc canonicalisation/ACTENON-JCS-STRICT-1.md section3.1",
+  "rationale": "The old Kernel1.2.1 fixture accepted depth120/124 and its128-level profile contradicted Protocol32(root0). Original fixture bytes are retained; current Kernel and SDKs must now refuse these proofs.",
+  "cases": {
+    "hs256/depth_params_120": {
+      "original_outcome": "verified",
+      "outcome": "refused",
+      "reason_code": "INVALID_INPUT"
+    },
+    "hs256/depth_params_124": {
+      "original_outcome": "verified",
+      "outcome": "refused",
+      "reason_code": "INVALID_INPUT"
+    }
+  }
+}

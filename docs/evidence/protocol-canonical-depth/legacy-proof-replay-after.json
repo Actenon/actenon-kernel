@@ -1,0 +1,28 @@
+[
+  {
+    "id": "hs256/depth_params_120",
+    "old_expected": {
+      "outcome": "verified"
+    },
+    "current_kernel": {
+      "outcome": "refused",
+      "stage": "verify",
+      "code": "PROOF_PAYLOAD_INVALID",
+      "exception": "ProofVerificationError",
+      "message": "PROOF_PAYLOAD_INVALID: The proof payload could not be canonicalized safely."
+    }
+  },
+  {
+    "id": "hs256/depth_params_124",
+    "old_expected": {
+      "outcome": "verified"
+    },
+    "current_kernel": {
+      "outcome": "refused",
+      "stage": "verify",
+      "code": "PROOF_PAYLOAD_INVALID",
+      "exception": "ProofVerificationError",
+      "message": "PROOF_PAYLOAD_INVALID: The proof payload could not be canonicalized safely."
+    }
+  }
+]

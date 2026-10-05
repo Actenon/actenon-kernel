@@ -146,21 +146,20 @@ class CanonicalizationStrictConformanceTests(unittest.TestCase):
         self.assertEqual(case["expected_output"], result)
 
     def test_04_maximum_accepted_depth(self) -> None:
-        """Nesting at the maximum depth (128) must be accepted.
-        validate_json_depth counts the root level as depth 1, so 128
-        levels means 127 nested dicts (root + 127 = 128).
-        """
+        """Protocol owns depth32 (root0); old128 fixture is preserved as evidence."""
         value: object = "leaf"
-        for _ in range(127):  # 127 nested dicts + root = 128 total
+        for _ in range(32):
             value = {"k": value}
-        result = canonicalize_json(value)
-        self.assertIsInstance(result, str)
-        self.assertGreater(len(result), 0)
+        self.assertIsInstance(canonicalize_json(value), str)
+        for _ in range(95):
+            value = {"k": value}
+        with self.assertRaises(JSONNestingDepthError):
+            canonicalize_json(value)
 
     def test_05_excessive_depth_rejection(self) -> None:
-        """Nesting deeper than 128 levels must be rejected."""
+        """Nesting deeper than Protocol32 (root0) must be rejected."""
         value: object = "leaf"
-        for _ in range(129):
+        for _ in range(33):
             value = {"k": value}
         with self.assertRaises(JSONNestingDepthError):
             canonicalize_json(value)

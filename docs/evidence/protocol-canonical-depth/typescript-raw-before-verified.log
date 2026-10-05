@@ -1,0 +1,37 @@
+✖ frozen Protocol raw corpus: exact decisions and canonical bytes (6.7225ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 297.677625
+
+✖ failing tests:
+
+test at tests/protocol-raw-parity.test.ts:1:253
+✖ frozen Protocol raw corpus: exact decisions and canonical bytes (6.7225ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'above_js_safe',
+  +   'below_i64',
+  +   'above_u64',
+  +   'utf8_order'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (/Users/ross/Documents/Codex/2026-10-03/referenced-chatgpt-conversation-this-is-an/work/actenon-kernel-parity/sdk/typescript/tests/protocol-raw-parity.test.ts:25:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'above_js_safe', 'below_i64', 'above_u64', 'utf8_order' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

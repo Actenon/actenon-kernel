@@ -1,0 +1,227 @@
+{
+  "revision": "canonical-wire-differential-v1",
+  "protocol_commit": "8e5bc9e342f694767508bae9a392749c6a8df2cc",
+  "operation": "strict raw JSON -> canonical bytes (not whole proof validation)",
+  "cases": [
+    {
+      "id": "zero",
+      "raw_base64": "MA==",
+      "raw_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "0",
+      "canonical_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "negative_zero",
+      "raw_base64": "LTA=",
+      "raw_sha256": "ed79f26d03f412bde3db206601a698e0bb451bea9e3cc25289636ac17ea74b0a",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "0",
+      "canonical_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "safe_rejection_profiles": [
+        "rust-i64-u64"
+      ]
+    },
+    {
+      "id": "safe_integer",
+      "raw_base64": "OTAwNzE5OTI1NDc0MDk5MQ==",
+      "raw_sha256": "f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "9007199254740991",
+      "canonical_sha256": "f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "above_js_safe",
+      "raw_base64": "OTAwNzE5OTI1NDc0MDk5Mw==",
+      "raw_sha256": "a1c367c29158357e62a3ff5d3e800fb7698a22396439dbc0a9d4929322afd35d",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "9007199254740993",
+      "canonical_sha256": "a1c367c29158357e62a3ff5d3e800fb7698a22396439dbc0a9d4929322afd35d",
+      "safe_rejection_profiles": [
+        "typescript-safe-integer"
+      ]
+    },
+    {
+      "id": "below_i64",
+      "raw_base64": "LTkyMjMzNzIwMzY4NTQ3NzU4MDk=",
+      "raw_sha256": "a11b7b6918ba4e84f8e3ab75638e7325e9f891fcf575dd801756523d4bc8a966",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "-9223372036854775809",
+      "canonical_sha256": "a11b7b6918ba4e84f8e3ab75638e7325e9f891fcf575dd801756523d4bc8a966",
+      "safe_rejection_profiles": [
+        "rust-i64-u64",
+        "typescript-safe-integer"
+      ]
+    },
+    {
+      "id": "above_u64",
+      "raw_base64": "MTg0NDY3NDQwNzM3MDk1NTE2MTY=",
+      "raw_sha256": "8b292fc2d32f1fd491784610c61b90dc4632a6e4add19261eca4c3979e4ea6d2",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "18446744073709551616",
+      "canonical_sha256": "8b292fc2d32f1fd491784610c61b90dc4632a6e4add19261eca4c3979e4ea6d2",
+      "safe_rejection_profiles": [
+        "rust-i64-u64",
+        "typescript-safe-integer"
+      ]
+    },
+    {
+      "id": "rounded_fraction",
+      "raw_base64": "eyJuIjowLjk5OTk5OTk5OTk5OTk5OTk5OTl9",
+      "raw_sha256": "edef9f2d1a81b047a017a288b8425bc01c8e7d9c1f1623de4ddd5e5e5a89291d",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "float_one",
+      "raw_base64": "eyJuIjoxLjB9",
+      "raw_sha256": "3b6b06ecd1c968c8e738e0f11c4bb361fca80a9a694de22fe66a05286afbd081",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "exponent_one",
+      "raw_base64": "eyJuIjoxZTB9",
+      "raw_sha256": "1499d8ce7727c52f249d9b8cd88eae2162f228881be4d8e91720e482848b5153",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "duplicate_member",
+      "raw_base64": "eyJ4IjoxLCJ4IjoyfQ==",
+      "raw_sha256": "d38245cfdb5d2239d67fe2a719312768b668a6928d8d97d04fbce83215e50b44",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "escaped_duplicate_member",
+      "raw_base64": "eyJ4IjoxLCJcdTAwNzgiOjJ9",
+      "raw_sha256": "9b76ab5d01163a68899e361838ef85cf791c1a4aee792d8c714db00237a32647",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "case_distinct_members",
+      "raw_base64": "eyJ4IjoxLCJYIjoyfQ==",
+      "raw_sha256": "05b133314f40b8ae652f62bbb8d6b3544fe1f3104762eb0496c970b78465a7c7",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "{\"X\":2,\"x\":1}",
+      "canonical_sha256": "a2d36af3ac8dc63535ad9a3cbb769256dad6107e1ffb241b92d41c9f986bfc02",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "utf8_order",
+      "raw_base64": "eyLwn5iAIjoxLCJcdWUwMDAiOjJ9",
+      "raw_sha256": "f1b641bd080496075ed190893bc88f35af101377bbf4df79816bba1a38074b47",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "{\"\":2,\"😀\":1}",
+      "canonical_sha256": "cddbdeacace14eb6923e88dfafb2a3e7df21ec908682f50a886b7b9567692d02",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "unpaired_surrogate",
+      "raw_base64": "Ilx1ZDgwMCI=",
+      "raw_sha256": "8c0c59dd0d275aadcd462a5fe12eb352cbdfeaf961eae4f85a4660521df7d2f5",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "prototype_data",
+      "raw_base64": "eyJfX3Byb3RvX18iOnsiYW1vdW50IjoyfSwieCI6MX0=",
+      "raw_sha256": "3010e3819dd8a1fa12e4cad614551e44a1e7804b282c73f427511b093710ca8f",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "{\"__proto__\":{\"amount\":2},\"x\":1}",
+      "canonical_sha256": "3010e3819dd8a1fa12e4cad614551e44a1e7804b282c73f427511b093710ca8f",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "serde_private_data",
+      "raw_base64": "eyIkc2VyZGVfanNvbjo6cHJpdmF0ZTo6TnVtYmVyIjoiMTIzIn0=",
+      "raw_sha256": "e58b4ca829fcc2f09541677e1ba53eb32d39278d18ec74bda7168419a9a29f60",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "{\"$serde_json::private::Number\":\"123\"}",
+      "canonical_sha256": "e58b4ca829fcc2f09541677e1ba53eb32d39278d18ec74bda7168419a9a29f60",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "depth_32",
+      "raw_base64": "W1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1swXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV0=",
+      "raw_sha256": "4e04cac422d9ecd4a5f6221653eeb4eaf29077cf3f588cd36bf6dc8ead76971f",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "canonical_sha256": "4e04cac422d9ecd4a5f6221653eeb4eaf29077cf3f588cd36bf6dc8ead76971f",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "depth_33",
+      "raw_base64": "W1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbMF1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXQ==",
+      "raw_sha256": "eac9bf029c22e177c74309fb891e3351dccfb04f055127ea82dc2dc3136cd899",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "depth_127",
+      "raw_base64": "W1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbWzBdXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1d",
+      "raw_sha256": "4a4b332ecdf55e888291f75aa4995102b57a3139a60317913bccac1ef2c2a6df",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "empty_array",
+      "raw_base64": "W10=",
+      "raw_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "[]",
+      "canonical_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "null_value",
+      "raw_base64": "bnVsbA==",
+      "raw_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "null",
+      "canonical_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "trailing_value",
+      "raw_base64": "MCAx",
+      "raw_sha256": "5cc3a6551605a0b4e9c3334f5eb5554c404973daf0b1a58655fa29c0ba3d47b0",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "valid_unicode",
+      "raw_base64": "eyJjYWbDqSI6IsOpIiwiZGVjb21wb3NlZCI6ImXMgSJ9",
+      "raw_sha256": "adec37e5ffaf1e48c5b51a63abac743a1d6bc30da6640b836bbbb76c5e319288",
+      "expected_decision": "ACCEPT",
+      "canonical_utf8": "{\"café\":\"é\",\"decomposed\":\"é\"}",
+      "canonical_sha256": "adec37e5ffaf1e48c5b51a63abac743a1d6bc30da6640b836bbbb76c5e319288",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "malformed_utf8",
+      "raw_base64": "eyJzIjoi/yJ9",
+      "raw_sha256": "3a13a24dfddf7dcdd57091ebad8659032661d3e1eedd78c50d015e70fc8b546b",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "utf16_json",
+      "raw_base64": "ewAiAG4AIgA6ADEAfQA=",
+      "raw_sha256": "0a641d6ebe2abb8f57022cb92cf4f7d1d379a74687f17c1602943181277cad4a",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    },
+    {
+      "id": "utf8_bom",
+      "raw_base64": "77u/eyJuIjoxfQ==",
+      "raw_sha256": "b3d25488ed9ea6e70a73fe64ba347cc987ab9867b317d4f8172a6ae23f79994e",
+      "expected_decision": "REFUSE",
+      "safe_rejection_profiles": []
+    }
+  ]
+}
