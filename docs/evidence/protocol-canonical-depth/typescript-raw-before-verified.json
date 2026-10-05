@@ -1,0 +1,143 @@
+[
+  {
+    "id": "zero",
+    "decision": "ACCEPT",
+    "canonical_utf8": "0",
+    "canonical_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  {
+    "id": "negative_zero",
+    "decision": "ACCEPT",
+    "canonical_utf8": "0",
+    "canonical_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  {
+    "id": "safe_integer",
+    "decision": "ACCEPT",
+    "canonical_utf8": "9007199254740991",
+    "canonical_sha256": "f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26"
+  },
+  {
+    "id": "above_js_safe",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: integer outside the safe range at offset 16"
+  },
+  {
+    "id": "below_i64",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: integer outside the safe range at offset 20"
+  },
+  {
+    "id": "above_u64",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: integer outside the safe range at offset 20"
+  },
+  {
+    "id": "rounded_fraction",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: non-integer number lexeme at offset 5"
+  },
+  {
+    "id": "float_one",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: non-integer number lexeme at offset 5"
+  },
+  {
+    "id": "exponent_one",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: non-integer number lexeme at offset 5"
+  },
+  {
+    "id": "duplicate_member",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: duplicate object member at offset 10"
+  },
+  {
+    "id": "escaped_duplicate_member",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: duplicate object member at offset 15"
+  },
+  {
+    "id": "case_distinct_members",
+    "decision": "ACCEPT",
+    "canonical_utf8": "{\"X\":2,\"x\":1}",
+    "canonical_sha256": "a2d36af3ac8dc63535ad9a3cbb769256dad6107e1ffb241b92d41c9f986bfc02"
+  },
+  {
+    "id": "utf8_order",
+    "decision": "ACCEPT",
+    "canonical_utf8": "{\"😀\":1,\"\":2}",
+    "canonical_sha256": "04208f6cdb854e2ab1b07dd3633a39dec854344fe72824cf7f2fdb4e2e33129e"
+  },
+  {
+    "id": "unpaired_surrogate",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: string contains a lone surrogate at offset 8"
+  },
+  {
+    "id": "prototype_data",
+    "decision": "ACCEPT",
+    "canonical_utf8": "{\"__proto__\":{\"amount\":2},\"x\":1}",
+    "canonical_sha256": "3010e3819dd8a1fa12e4cad614551e44a1e7804b282c73f427511b093710ca8f"
+  },
+  {
+    "id": "serde_private_data",
+    "decision": "ACCEPT",
+    "canonical_utf8": "{\"$serde_json::private::Number\":\"123\"}",
+    "canonical_sha256": "e58b4ca829fcc2f09541677e1ba53eb32d39278d18ec74bda7168419a9a29f60"
+  },
+  {
+    "id": "depth_32",
+    "decision": "ACCEPT",
+    "canonical_utf8": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+    "canonical_sha256": "4e04cac422d9ecd4a5f6221653eeb4eaf29077cf3f588cd36bf6dc8ead76971f"
+  },
+  {
+    "id": "depth_33",
+    "decision": "REFUSE",
+    "error": "TypeError: canonical JSON depth exceeds 32"
+  },
+  {
+    "id": "depth_127",
+    "decision": "REFUSE",
+    "error": "TypeError: canonical JSON depth exceeds 32"
+  },
+  {
+    "id": "empty_array",
+    "decision": "ACCEPT",
+    "canonical_utf8": "[]",
+    "canonical_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  {
+    "id": "null_value",
+    "decision": "ACCEPT",
+    "canonical_utf8": "null",
+    "canonical_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  {
+    "id": "trailing_value",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: unexpected content after the JSON value"
+  },
+  {
+    "id": "valid_unicode",
+    "decision": "ACCEPT",
+    "canonical_utf8": "{\"café\":\"é\",\"decomposed\":\"é\"}",
+    "canonical_sha256": "adec37e5ffaf1e48c5b51a63abac743a1d6bc30da6640b836bbbb76c5e319288"
+  },
+  {
+    "id": "malformed_utf8",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: JSON input is not valid UTF-8"
+  },
+  {
+    "id": "utf16_json",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: expected a member name at offset 1"
+  },
+  {
+    "id": "utf8_bom",
+    "decision": "REFUSE",
+    "error": "StrictJsonError: JSON input starts with a byte-order mark"
+  }
+]

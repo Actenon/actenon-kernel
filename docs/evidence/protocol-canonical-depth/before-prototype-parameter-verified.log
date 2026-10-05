@@ -1,0 +1,30 @@
+bun test v1.3.14 (0d9b296a)
+
+sdk/typescript/tests/strict-input.test.ts:
+(pass) verifyJSON accepts the raw shared vector [15.23ms]
+(pass) verifyJSON refuses duplicate object members in the intent and the proof [1.68ms]
+(pass) verifyJSON refuses non-integer number lexemes that JSON.parse would collapse [0.80ms]
+(pass) verifyJSON refuses malformed and non-JSON-text input [3.61ms]
+(pass) signature values must be canonical unpadded base64url [12.39ms]
+21 |   const pccb = (await readFile(path.join(vectorRoot, manifest.base.pccb), "utf-8")).trim();
+22 |   return { intent, pccb, context: manifest.base.context as VerificationContext };
+23 | }
+24 | 
+25 | function refusedWith(fn: () => unknown, code: string): void {
+26 |   assert.throws(fn, (error: unknown) => error instanceof VerificationError && error.code === code);
+              ^
+AssertionError: Missing expected exception.
+ generatedMessage: false,
+     actual: undefined,
+   expected: [Function],
+   operator: "throws",
+       code: "ERR_ASSERTION"
+
+      at refusedWith (/Users/ross/Documents/Codex/2026-10-03/referenced-chatgpt-conversation-this-is-an/work/actenon-kernel-parity/sdk/typescript/tests/strict-input.test.ts:26:10)
+      at /Users/ross/Documents/Codex/2026-10-03/referenced-chatgpt-conversation-this-is-an/work/actenon-kernel-parity/sdk/typescript/tests/strict-input.test.ts:81:3
+      at processTicksAndRejections (native:7:39)
+(fail) verifyJSON does not discard an injected __proto__ parameter [4.50ms]
+
+ 5 pass
+ 1 fail
+Ran 6 tests across 1 file. [318.00ms]

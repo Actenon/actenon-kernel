@@ -60,6 +60,9 @@ def loads_no_duplicate_keys(
         raise ValueError("max_bytes must be positive")
     if _input_size(raw) > max_bytes:
         raise JSONInputTooLargeError(f"JSON input exceeds maximum size {max_bytes} bytes")
+    # The wire contract is UTF-8, not json.loads auto-detected UTF-16/32.
+    if isinstance(raw, (bytes, bytearray)):
+        raw = raw.decode("utf-8", errors="strict")
     try:
         payload = _json.loads(raw, object_pairs_hook=reject_duplicate_object_pairs)
     except RecursionError as exc:

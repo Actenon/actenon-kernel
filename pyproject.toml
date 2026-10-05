@@ -49,7 +49,7 @@ postgres = ["psycopg[binary]>=3.1"]
 
 [tool.uv.sources]
 # Coordinated source testing only; remove before registry publication.
-actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "3442bf3cffe0b55ac7d531e66ca0355d2c0784e5" }
+actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "8e5bc9e342f694767508bae9a392749c6a8df2cc" }
 
 [project.scripts]
 # The kernel's CLI is `actenon-kernel`. The unified developer CLI `actenon`

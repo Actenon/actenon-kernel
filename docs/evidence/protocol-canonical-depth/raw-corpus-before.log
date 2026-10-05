@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_protocol_raw_canonical_corpus ______________________
+
+    def test_protocol_raw_canonical_corpus():
+        root = Path(__file__).resolve().parents[2]
+        corpus = json.loads((root / 'fixtures/protocol_canonicalisation/raw-corpus.json').read_text())
+        rows = []
+        failures = []
+        for case in corpus['cases']:
+            row = {'id': case['id'], 'decision': 'REFUSE'}
+            try:
+                canonical = canonicalize_bytes(loads_no_duplicate_keys(base64.b64decode(case['raw_base64'])))
+                row.update(decision='ACCEPT', canonical_utf8=canonical.decode('utf-8'), canonical_sha256=hashlib.sha256(canonical).hexdigest())
+            except Exception as exc:
+                row['error'] = type(exc).__name__ + ': ' + str(exc)
+            rows.append(row)
+            if row['decision'] != case['expected_decision']:
+                failures.append(row)
+            elif row['decision'] == 'ACCEPT' and (row['canonical_utf8'] != case['canonical_utf8'] or row['canonical_sha256'] != case['canonical_sha256']):
+                failures.append(row)
+        if output := os.environ.get('ACTENON_PARITY_RESULTS'):
+            Path(output).write_text(json.dumps(rows, indent=2, ensure_ascii=False) + '\n')
+>       assert failures == []
+E       assert [{'id': 'utf1...aad655e71bd'}] == []
+E         
+E         Left contains 2 more items, first extra item: {'id': 'utf16_json', 'decision': 'ACCEPT', 'canonical_utf8': '{"n":1}', 'canonical_sha256': '2bfd14f43d17fc7cea24e0917a8879b4b2f880b8baeec1b9d90fbaad655e71bd'}
+E         Use -v to get more diff
+
+tests/unit/test_protocol_raw_parity.py:32: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_protocol_raw_parity.py::test_protocol_raw_canonical_corpus
+1 failed in 0.21s

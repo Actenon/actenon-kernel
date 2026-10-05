@@ -1,0 +1,8 @@
+{
+  "name": "deeply_nested_exceeds_limit",
+  "description": "Object nested 33 levels deep (exceeds the 32-level limit). Language-neutral: the input is embedded as literal JSON.",
+  "input_json": "{\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": {\"a\": 1}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}",
+  "expected_error": "CanonicalisationError",
+  "expected_refusal_code": "CANONICALISATION_FAILURE",
+  "note": "The input_json field contains a 33-level nested object. Any language's JSON parser can parse it; the canonicaliser must reject it because depth 33 > 32."
+}
