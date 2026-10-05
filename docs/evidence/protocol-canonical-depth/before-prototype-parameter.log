@@ -1,0 +1,23 @@
+bun test v1.3.14 (0d9b296a)
+
+sdk/typescript/tests/strict-input.test.ts:
+(pass) verifyJSON accepts the raw shared vector [24.49ms]
+(pass) verifyJSON refuses duplicate object members in the intent and the proof [5.51ms]
+(pass) verifyJSON refuses non-integer number lexemes that JSON.parse would collapse [0.85ms]
+(pass) verifyJSON refuses malformed and non-JSON-text input [3.23ms]
+(pass) signature values must be canonical unpadded base64url [2.56ms]
+71 |     refusedWith(() => sdk.verifyJSON({ intent, pccb: mutated, context }), "SIGNATURE_INVALID");
+72 |   }
+73 | });
+74 | 
+75 | test("verifyJSON does not discard an injected __proto__ parameter", async () => {
+76 |   const { intent, pccb, context } = await base();
+                                               ^
+ReferenceError: base is not defined
+      at <anonymous> (/Users/ross/Documents/Codex/2026-10-03/referenced-chatgpt-conversation-this-is-an/work/actenon-kernel-parity/sdk/typescript/tests/strict-input.test.ts:76:43)
+      at fn (node:test:215:18)
+(fail) verifyJSON does not discard an injected __proto__ parameter [1.25ms]
+
+ 5 pass
+ 1 fail
+Ran 6 tests across 1 file. [771.00ms]

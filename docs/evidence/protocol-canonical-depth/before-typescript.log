@@ -1,0 +1,24 @@
+bun test v1.3.14 (0d9b296a)
+
+sdk/typescript/tests/protocol-canonical-depth.test.ts:
+3 | import { test } from "node:test";
+4 | import { canonicalizeJson, type CanonicalValue } from "../src/canonical.js";
+5 | 
+6 | test("Protocol's frozen invalid depth vector is refused", () => {
+7 |   const vector = JSON.parse(readFileSync(new URL("../../../../actenon-protocol-effects/conformance/vectors/canonicalisation/invalid/deeply_nested_exceeds_limit.json", import.meta.url), "utf8"));
+8 |   assert.throws(() => canonicalizeJson(JSON.parse(vector.input_json)), /depth/);
+             ^
+AssertionError: Missing expected exception.
+ generatedMessage: false,
+     actual: undefined,
+   expected: /depth/,
+   operator: "throws",
+       code: "ERR_ASSERTION"
+
+      at /Users/ross/Documents/Codex/2026-10-03/referenced-chatgpt-conversation-this-is-an/work/actenon-kernel-parity/sdk/typescript/tests/protocol-canonical-depth.test.ts:8:10
+      at fn (node:test:215:18)
+(fail) Protocol's frozen invalid depth vector is refused [6.42ms]
+
+ 0 pass
+ 1 fail
+Ran 1 test across 1 file. [275.00ms]

@@ -4,9 +4,12 @@ import json
 from hashlib import sha256
 from typing import Any
 
-from actenon_protocol.canonicalisation import CanonicalisationError
+from actenon_protocol.canonicalisation import (
+    MAX_JSON_DEPTH as DEFAULT_MAX_CANONICAL_DEPTH,
+    CanonicalisationError,
+)
 
-from actenon.core.json import DEFAULT_MAX_JSON_DEPTH, JSONInputTooLargeError, validate_json_depth
+from actenon.core.json import JSONInputTooLargeError, validate_json_depth
 
 
 DEFAULT_MAX_CANONICAL_OUTPUT_BYTES = 1_048_576
@@ -91,15 +94,17 @@ def _canonicalize_json(value: Any) -> str:
     raise TypeError(f"unsupported value type for canonicalization: {type(value)!r}")
 
 
-def canonicalize_json(value: Any, *, max_depth: int = DEFAULT_MAX_JSON_DEPTH) -> str:
-    validate_json_depth(value, max_depth=max_depth)
+def canonicalize_json(value: Any, *, max_depth: int = DEFAULT_MAX_CANONICAL_DEPTH) -> str:
+    # Protocol counts the root at 0; the shared transport validator counts it
+    # at 1. Transport's 128-level envelope limit is not the signing profile.
+    validate_json_depth(value, max_depth=max_depth + 1)
     return _canonicalize_json(value)
 
 
 def canonicalize_bytes(
     value: Any,
     *,
-    max_depth: int = DEFAULT_MAX_JSON_DEPTH,
+    max_depth: int = DEFAULT_MAX_CANONICAL_DEPTH,
     max_output_bytes: int = DEFAULT_MAX_CANONICAL_OUTPUT_BYTES,
 ) -> bytes:
     if max_output_bytes <= 0:

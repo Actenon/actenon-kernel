@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/Actenon/actenon-protocol",
+  "commit": "8e5bc9e342f694767508bae9a392749c6a8df2cc",
+  "path": "conformance/vectors/canonicalisation/invalid/deeply_nested_exceeds_limit.json",
+  "sha256": "acfe1c6f825f5417a3fb0708fc804329e5611562e5c19b75b8a662618d90b4fb",
+  "canonical_depth": 32,
+  "root_depth": 0
+}

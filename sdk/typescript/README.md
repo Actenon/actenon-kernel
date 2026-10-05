@@ -233,3 +233,13 @@ The canonical public specs and schemas remain in the repository root:
 - [`../../schemas/issuer_status.v1.json`](../../schemas/issuer_status.v1.json)
 - [`../../spec/approval-artifact/SPEC.md`](../../spec/approval-artifact/SPEC.md)
 - [`../../schemas/approval_artifact.v1.json`](../../schemas/approval_artifact.v1.json)
+
+### Canonical profile compatibility
+
+The signing profile is Protocol `ACTENON-JCS-STRICT-1`: root depth zero, maximum
+32, UTF-8 key ordering, duplicate-free UTF-8 JSON, integer numbers only. The
+legacy `RFC8785-JCS` label uses these same restrictions. This verifier safely
+rejects integers outside JavaScript's safe integer range; Protocol Python/Go
+support a wider integer domain. The transport envelope limit remains separate.
+See the [candidate evidence](../../docs/evidence/protocol-canonical-depth/README.md)
+for per-case decisions and preserved contradictory historical depth fixtures.

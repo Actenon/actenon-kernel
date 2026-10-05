@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_frozen_protocol_invalid_depth_is_refused _________________
+
+    def test_frozen_protocol_invalid_depth_is_refused():
+        path = Path(__file__).resolve().parents[3] / "actenon-protocol-effects/conformance/vectors/canonicalisation/invalid/deeply_nested_exceeds_limit.json"
+        value = json.loads(json.loads(path.read_text())["input_json"])
+        with pytest.raises(ValueError):
+            reference(value)
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_protocol_canonical_depth.py:17: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_protocol_canonical_depth.py::test_frozen_protocol_invalid_depth_is_refused
+1 failed in 0.39s
