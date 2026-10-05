@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-10-05T10:07:13.935646+00:00",
+  "protocol": "8e5bc9e342f694767508bae9a392749c6a8df2cc",
+  "kernel_implementation": "4bae9252666a71361be4374316dd151b924815a8",
+  "sdk_go": "c3d07ef535e04b4a981a921f1430c58397d0dbc4",
+  "sdk_rust": "cc317fbd2cf971630451af07042bbe2d6dbea724",
+  "candidate_only": true,
+  "fixture_check_exit_codes": {
+    "go": 0,
+    "rust": 0
+  },
+  "raw_corpus_sha256": "cb3f54c89497fb42ea443d7fd8aada4f07fceb3cae84bd1f9e40ec4dd2bbe1dd",
+  "note": "Historical KERNEL_PIN fixture provenance is preserved; the CI graph now tests the exact new SDK candidates. Their safe numeric rejection domains remain explicit."
+}
