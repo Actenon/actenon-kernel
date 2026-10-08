@@ -343,6 +343,30 @@ class UniversalScannerTests(unittest.TestCase):
         self.assertEqual("yes", finding.agent_control_context)
         self.assertIn("missing proof gate", finding.control_gaps)
 
+    def test_browser_submit_fixture_is_reported_as_an_advisory_candidate(self) -> None:
+        fixture = (
+            Path(__file__).resolve().parents[2]
+            / "examples"
+            / "scanner_browser_submit"
+            / "browser_submit.py"
+        )
+        report = self._scan_source(
+            "controller/browser_submit.py",
+            fixture.read_text(encoding="utf-8"),
+        )
+        finding = self._finding_for(report, "S6")
+        payload = report.to_dict()
+        markdown = render_markdown_report(report, mode="developer").lower()
+
+        self.assertEqual("BROWSER_AGENT_SIDE_EFFECT", finding.category)
+        self.assertEqual("yes", finding.agent_control_context)
+        self.assertEqual("RUNTIME_CODE", finding.context_classification)
+        self.assertIn("candidate", payload["consequence_class_label"].lower())
+        self.assertIs(False, payload["vulnerability_claim"])
+        self.assertIsNone(payload["vulnerability_severity"])
+        self.assertIn("runtime reachability", markdown)
+        self.assertTrue(all(term not in markdown for term in UNSAFE_DEFINITIVE_TERMS))
+
     def test_computer_use_desktop_actions_are_detected(self) -> None:
         report = self._scan_source(
             "desktop/bytebot_worker.py",
