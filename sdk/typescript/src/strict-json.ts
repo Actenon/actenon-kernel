@@ -114,8 +114,10 @@ class Parser {
       if (c === "}") break;
       if (c !== ",") this.fail("expected ',' or '}'");
     }
-    // A plain object: callers index members by name; no prototype keys.
-    return Object.assign({}, out);
+    // Object spread creates own data properties, including "__proto__".
+    // Object.assign invokes the inherited __proto__ setter and silently
+    // changes the parsed object instead of preserving the JSON member.
+    return { ...out };
   }
 
   array(depth: number): unknown[] {
