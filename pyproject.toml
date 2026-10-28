@@ -70,7 +70,7 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["actenon*", "conformance*", "examples*", "schemas*"]
+include = ["actenon*", "actenon_kernel*", "conformance*", "examples*", "schemas*"]
 
 [tool.setuptools.package-data]
 "actenon" = ["scanner_capability_registry.v1.json"]

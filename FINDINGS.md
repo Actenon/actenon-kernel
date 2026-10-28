@@ -84,8 +84,20 @@ invariants unchanged.
 
 ## Coordinated ecosystem staging for `1.3.0` (2026-10-28 run)
 
-**Severity:** NOTE — intentional staged bump across the topological DAG.
+**Severity:** NOTE — staged candidate version (`RELEASE_BLOCKED` until tag `v1.3.0` and PyPI publication).
 **Where:** `pyproject.toml` (`version = "1.3.0"`) and `scripts/check_version_coherence.py`
-**Observed:** `1.3.0` was staged while `actenon-protocol` (`1.6.0`), `sdk-go`, `sdk-rust`, `actenon-permit` (`2.0.0rc1`), and `actenon-airlock` completed cross-repo conformance verification against `ACTENON-JCS-STRICT-1` and `ACTENON-EFFECT-1` before cutting public registry tags (`v1.3.0`).
-**Action taken:** `scripts/check_version_coherence.py` checks `FINDINGS.md` as specified by its ASSERT C diagnostic when a staged bump awaits coordinated publication tags.
+**Observed:** `1.3.0` is staged on `main` while downstream candidate verification completes. This structured candidate waiver permits `check_version_coherence.py --mode main` to record `CANDIDATE_STAGE_OK [RELEASE_BLOCKED]`, while `--mode release` / `--stage release` hard-fails until `actenon-protocol==1.6.0` is published on PyPI, `[tool.uv.sources]` is removed, and tag `v1.3.0` is published to PyPI.
+
+```version-waiver
+{
+  "package": "actenon-kernel",
+  "staged_version": "1.3.0",
+  "published_version": "1.2.1",
+  "status": "RELEASE_BLOCKED",
+  "owner": "rossbuckley1990-hash",
+  "reason": "Staged candidate awaiting actenon-protocol 1.6.0 PyPI publication, uv.sources removal, and real-agent acceptance sign-off before tagging v1.3.0.",
+  "expires_at": "2026-11-08"
+}
+```
+
 
