@@ -1,0 +1,21 @@
+bun test v1.3.14 (0d9b296a)
+
+sdk/typescript/tests/strict-input.test.ts:
+(pass) verifyJSON accepts the raw shared vector [37.24ms]
+(pass) verifyJSON refuses duplicate object members in the intent and the proof [14.77ms]
+(pass) verifyJSON refuses non-integer number lexemes that JSON.parse would collapse [4.97ms]
+(pass) verifyJSON refuses malformed and non-JSON-text input [6.13ms]
+(pass) signature values must be canonical unpadded base64url [12.89ms]
+(pass) verifyJSON does not discard an injected __proto__ parameter [19.26ms]
+
+sdk/typescript/tests/protocol-canonical-depth.test.ts:
+(pass) Protocol's frozen invalid depth vector is refused [6.51ms]
+(pass) Protocol depth 0 [0.74ms]
+(pass) Protocol depth 31 [0.60ms]
+(pass) Protocol depth 32 [0.01ms]
+(pass) Protocol depth 33 [0.42ms]
+(pass) Protocol depth 127 [0.03ms]
+
+ 12 pass
+ 0 fail
+Ran 12 tests across 2 files. [589.00ms]

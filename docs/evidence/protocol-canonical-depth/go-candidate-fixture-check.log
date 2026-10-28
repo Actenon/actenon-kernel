@@ -1,0 +1,6 @@
+ok   fixtures/kernel_vector_lock.json == conformance/vector-lock.json
+ok   fixtures/canonicalization_strict_v1/cases.json == actenon/conformance/vectors/canonicalization_strict_v1/cases.json
+ok   fixtures/canonicalization_strict_v1/profile.json == actenon/conformance/vectors/canonicalization_strict_v1/profile.json
+ok   fixtures/trust_artifacts_v1/README.md == conformance/vectors/trust_artifacts_v1/README.md
+ok   fixtures/verifier_sdk_v1/README.md == actenon/conformance/vectors/verifier_sdk_v1/README.md
+sdk-go-parity: 5 vendored kernel files match this kernel

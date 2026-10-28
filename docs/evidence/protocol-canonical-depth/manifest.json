@@ -1,0 +1,39 @@
+{
+  "schema": "actenon-candidate-evidence/v1",
+  "generated_at": "2026-10-05T10:01:07.452781+00:00",
+  "base_kernel": "9dd6af89622f070e3131c39d335be44e3f30149d",
+  "protocol": "8e5bc9e342f694767508bae9a392749c6a8df2cc",
+  "environment": {
+    "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O",
+    "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]"
+  },
+  "scope": "canonical wire parity; signed prototype-key mutation",
+  "files": {
+    "docs/evidence/protocol-canonical-depth/README.md": "1e43e307c4f3f2ca79678d1014f7c791927cda51b7759b975ff54756812ae439",
+    "docs/evidence/protocol-canonical-depth/before-prototype-parameter-verified.log": "c918277e8e74f2363d5456b6765453dcc024d71c3a2a9a27b5e43efd8ef520ac",
+    "docs/evidence/protocol-canonical-depth/before-prototype-parameter.log": "615db2a21fab1418f19c33ede555f3138b867644a4a529ccb4a1358c753522b4",
+    "docs/evidence/protocol-canonical-depth/before-python.log": "31bd3185040c63a0d05511bfcc0ce9e38d215a7a953c7c00bb6cb7d5d852b142",
+    "docs/evidence/protocol-canonical-depth/before-typescript.log": "22b57b6fafcfffe7fa7282b670e842501a49fbab5ec12be802ed14e34f18afbc",
+    "docs/evidence/protocol-canonical-depth/full-after-pinned.log": "8e1bc0bf09c0b81a349769933a0b20d57be24946a10136e933cc5287212ad602",
+    "docs/evidence/protocol-canonical-depth/full-after-pinned.xml": "d50b1e08adc5a5a240eb18c8f81652a03529e70cd2a1b3bd1daee1e5fb23956c",
+    "docs/evidence/protocol-canonical-depth/full-after.log": "7d9a95ca9f6847eaf0527d8a6ee51c1319addcb6130a910f5e6ffc7e05fce1f7",
+    "docs/evidence/protocol-canonical-depth/full-after.xml": "8fddb2dcbd985b48dbbaabfc37c2619d9a1e6cc376e6849142079143efd8debd",
+    "docs/evidence/protocol-canonical-depth/legacy-proof-replay-after.json": "5d33d3bcb689362a272f732eb20213b27f3b09672f010fdaed8359b259f46a9c",
+    "docs/evidence/protocol-canonical-depth/raw-corpus-after.json": "427d844bf76aa043e56c0ccb7e321786f5e80319cb2f61f10d2577668303a348",
+    "docs/evidence/protocol-canonical-depth/raw-corpus-before.json": "5409ba1a3aa527aec16142eec0116394a9c011a92dd80a5094f905caf4a1ebcb",
+    "docs/evidence/protocol-canonical-depth/raw-corpus-before.log": "0f4095b221745bcdb04a54d2ba7e6f8ba75304eea4046026228bdc5a42f3ae4f",
+    "docs/evidence/protocol-canonical-depth/targeted-after.log": "62bca71f086cc01f4041f6d359ff4414a66ff87a85ff4abeb222de0cf4ef677d",
+    "docs/evidence/protocol-canonical-depth/targeted-after.xml": "066f5d231380090991865a4d9921837835087b875c50bcd1f50c87df71ddaaf9",
+    "docs/evidence/protocol-canonical-depth/typescript-after.log": "373c52ce019fab30e844141ef0a48ee23e97ed17fec30a70c512c4863cf7722d",
+    "docs/evidence/protocol-canonical-depth/typescript-full-after.log": "5121835be4caf8f371031f071c6f78a51c64b56c04c7f3f199fb77b40d353de2",
+    "docs/evidence/protocol-canonical-depth/typescript-full-parity-after.log": "ce39a7941dc1daf5b221e2d5392360d0e1556a8e8b409343b1dd1b1f88f60bec",
+    "docs/evidence/protocol-canonical-depth/typescript-raw-after.json": "5febe046dd68572203f34abf3c417be61707db34c5c580cc83a9d57eea7a7710",
+    "docs/evidence/protocol-canonical-depth/typescript-raw-before-verified.json": "9e1b41ed444c7080a84c991016e3f3eba6d90b4ab436fe3ae6bd8051a8d2382e",
+    "docs/evidence/protocol-canonical-depth/typescript-raw-before-verified.log": "ebfe64ebdaf037b9a1ccf1ed05b10c391f694d4cb75e682f7e9cad34ae2e3147",
+    "docs/evidence/protocol-canonical-depth/typescript-raw-before.log": "527ec23b816514dddbb68c79850535de6f436bac80a346906fe7d7bed596578e",
+    "fixtures/protocol_canonicalisation/deeply_nested_exceeds_limit.json": "acfe1c6f825f5417a3fb0708fc804329e5611562e5c19b75b8a662618d90b4fb",
+    "fixtures/protocol_canonicalisation/legacy-expectation-correction.json": "28f4ca4deacd29321130511f13fbf9e62e223e9764710d16fb89265a9f95b66a",
+    "fixtures/protocol_canonicalisation/raw-corpus.json": "cb3f54c89497fb42ea443d7fd8aada4f07fceb3cae84bd1f9e40ec4dd2bbe1dd",
+    "fixtures/protocol_canonicalisation/source.json": "52e340a61ebdb16685b6d4bbacb3e1222eca948fa44f2ffb7a117e1b211ea546"
+  }
+}

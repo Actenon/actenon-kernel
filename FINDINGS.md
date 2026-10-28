@@ -79,3 +79,13 @@ conformance tests execute and pass, zero skips** (previously 18 passed / 15
 skipped). A freshly minted Ed25519 receipt counter-signature verifies end to
 end on the base install; WO-9 dependency-direction and clean-install closure
 invariants unchanged.
+
+---
+
+## Coordinated ecosystem staging for `1.3.0` (2026-10-28 run)
+
+**Severity:** NOTE — intentional staged bump across the topological DAG.
+**Where:** `pyproject.toml` (`version = "1.3.0"`) and `scripts/check_version_coherence.py`
+**Observed:** `1.3.0` was staged while `actenon-protocol` (`1.6.0`), `sdk-go`, `sdk-rust`, `actenon-permit` (`2.0.0rc1`), and `actenon-airlock` completed cross-repo conformance verification against `ACTENON-JCS-STRICT-1` and `ACTENON-EFFECT-1` before cutting public registry tags (`v1.3.0`).
+**Action taken:** `scripts/check_version_coherence.py` checks `FINDINGS.md` as specified by its ASSERT C diagnostic when a staged bump awaits coordinated publication tags.
+

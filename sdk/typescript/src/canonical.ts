@@ -12,7 +12,11 @@ function canonicalizeString(value: string): string {
   return JSON.stringify(value);
 }
 
-export function canonicalizeJson(value: CanonicalValue): string {
+// Protocol ACTENON-JCS-STRICT-1: root depth 0, maximum depth 32.
+const MAX_CANONICAL_DEPTH = 32;
+
+function canonicalizeJsonAtDepth(value: CanonicalValue, depth: number): string {
+  if (depth > MAX_CANONICAL_DEPTH) throw new TypeError("canonical JSON depth exceeds 32");
   if (value === null) {
     return "null";
   }
@@ -32,12 +36,16 @@ export function canonicalizeJson(value: CanonicalValue): string {
     return canonicalizeString(value);
   }
   if (Array.isArray(value)) {
-    return `[${value.map((item) => canonicalizeJson(item)).join(",")}]`;
+    return `[${value.map((item) => canonicalizeJsonAtDepth(item, depth + 1)).join(",")}]`;
   }
   const entries = Object.keys(value)
-    .sort()
-    .map((key) => `${canonicalizeString(key)}:${canonicalizeJson(value[key] as CanonicalValue)}`);
+    .sort((left, right) => Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8")))
+    .map((key) => `${canonicalizeString(key)}:${canonicalizeJsonAtDepth(value[key] as CanonicalValue, depth + 1)}`);
   return `{${entries.join(",")}}`;
+}
+
+export function canonicalizeJson(value: CanonicalValue): string {
+  return canonicalizeJsonAtDepth(value, 0);
 }
 
 export function canonicalizeBytes(value: CanonicalValue): Uint8Array {

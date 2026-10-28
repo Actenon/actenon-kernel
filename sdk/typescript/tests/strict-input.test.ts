@@ -71,3 +71,12 @@ test("signature values must be canonical unpadded base64url", async () => {
     refusedWith(() => sdk.verifyJSON({ intent, pccb: mutated, context }), "SIGNATURE_INVALID");
   }
 });
+
+test("verifyJSON does not discard an injected __proto__ parameter", async () => {
+  const { intent, pccb, context } = await materials();
+  const mutatedIntent = intent.replace('"parameters": {', '"parameters": {"__proto__":{"injected":true},');
+  const mutatedPccb = pccb.replace('"parameters": {', '"parameters": {"__proto__":{"injected":true},');
+  assert.notEqual(mutatedIntent, intent);
+  assert.notEqual(mutatedPccb, pccb);
+  refusedWith(() => sdk.verifyJSON({ intent: mutatedIntent, pccb: mutatedPccb, context }), "SIGNATURE_INVALID");
+});
