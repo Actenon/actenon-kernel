@@ -42,6 +42,7 @@ allowed_dirs = (
 
 allowed_root_files = {
     "ADOPTION_DECISION_RECORD_TEMPLATE.md",
+    "ARCHITECTURE.md",
     "CATEGORY.md",
     "CODE_OF_CONDUCT.md",
     "COMPLIANCE_MAPPING.md",

@@ -112,6 +112,15 @@ def version_bump_age_seconds(version: Version) -> int | None:
     return int(time.time()) - int(out)
 
 
+def findings_explains_version(version: Version) -> bool:
+    """Return True if FINDINGS.md documents the staged untagged bump for `version`."""
+    try:
+        with open("FINDINGS.md", encoding="utf-8") as f:
+            return str(version) in f.read()
+    except OSError:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -183,7 +192,11 @@ def main() -> int:
         else:
             age = version_bump_age_seconds(py_version)
             age_days = (age / 86400) if age is not None else None
-            if age is not None and age > STALE_BUMP_SECONDS:
+            if (
+                age is not None
+                and age > STALE_BUMP_SECONDS
+                and not findings_explains_version(py_version)
+            ):
                 print(
                     f"::error::ASSERT C FAILED: pyproject ({py_version}) != newest tag "
                     f"(v{effective_tag}) and the bump commit is {age_days:.1f} days "
@@ -191,6 +204,12 @@ def main() -> int:
                     f"— tag and publish {py_version}, or explain in FINDINGS.md."
                 )
                 failed = True
+            elif age is not None and age > STALE_BUMP_SECONDS:
+                print(
+                    f"::warning::ASSERT C: pyproject ({py_version}) != newest tag "
+                    f"(v{effective_tag}) — bump is {age_days:.1f} days old, "
+                    f"explained in FINDINGS.md pending coordinated release tag."
+                )
             else:
                 age_note = (
                     f"bump is {age_days:.1f} days old"
