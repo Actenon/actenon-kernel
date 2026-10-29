@@ -51,7 +51,7 @@ postgres = [
 
 [package.metadata]
 requires-dist = [
-    { name = "actenon-protocol", git = "https://github.com/Actenon/actenon-protocol?rev=d79af481be6badc99b13e15118026b96883fa171" },
+    { name = "actenon-protocol", git = "https://github.com/Actenon/actenon-protocol?rev=a2e0e08fcd24b71eb1668204ba6bed00e4c63551" },
     { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.34" },
     { name = "boto3", marker = "extra == 'dev'", specifier = ">=1.34" },
     { name = "build", marker = "extra == 'dev'" },
@@ -72,7 +72,7 @@ provides-extras = ["asymmetric", "aws", "dev", "fastapi", "langchain", "mcp", "p
 [[package]]
 name = "actenon-protocol"
 version = "1.6.0"
-source = { git = "https://github.com/Actenon/actenon-protocol?rev=d79af481be6badc99b13e15118026b96883fa171#d79af481be6badc99b13e15118026b96883fa171" }
+source = { git = "https://github.com/Actenon/actenon-protocol?rev=a2e0e08fcd24b71eb1668204ba6bed00e4c63551#a2e0e08fcd24b71eb1668204ba6bed00e4c63551" }
 
 [[package]]
 name = "annotated-doc"

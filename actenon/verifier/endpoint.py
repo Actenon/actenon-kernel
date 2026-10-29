@@ -133,6 +133,7 @@ class PythonProtectedEndpoint:
     outcome_writer: OutcomeWriter
     receipt_factory: ReceiptFactory = field(default_factory=ReceiptFactory)
     refusal_factory: RefusalFactory = field(default_factory=RefusalFactory)
+    scope_capabilities: tuple[str, ...] = ()
 
     def build_context(
         self,
@@ -143,12 +144,22 @@ class PythonProtectedEndpoint:
         now: datetime,
         scope_capabilities: tuple[str, ...] | None = None,
     ) -> DynamicContextInput:
+        effective_capabilities = tuple(
+            scope_capabilities if scope_capabilities is not None else self.scope_capabilities
+        )
+        if not effective_capabilities:
+            raise ValueError(
+                "PythonProtectedEndpoint requires explicit non-empty trusted "
+                "scope_capabilities (configure scope_capabilities on the endpoint "
+                "or pass scope_capabilities=(...) per request); edge capability "
+                "scope must never be derived from the untrusted intent."
+            )
         sdk = VerifierSDK(self.signer)
         return sdk.build_context(
             request_id=request_id,
             audience=audience,
             now=now,
-            scope_capabilities=scope_capabilities or (intent.action.capability,),
+            scope_capabilities=effective_capabilities,
         )
 
     def build_request(

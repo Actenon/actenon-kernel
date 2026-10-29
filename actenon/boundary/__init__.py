@@ -76,6 +76,7 @@ class BoundaryVerificationRequest:
     target: str = ""
     intent: ActionIntent | Mapping[str, Any] | None = None
     now: datetime | None = None
+    scope_capabilities: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -199,9 +200,11 @@ class BoundaryVerifier:
         pccb_verifier: PCCBVerifier | None = None,
         replay_store: ReplayStore | None = None,
         effect_protector: EffectProtector | None = None,
+        scope_capabilities: tuple[str, ...] = (),
     ) -> None:
         self._pccb_verifier = pccb_verifier
         self._effect_protector = effect_protector
+        self._scope_capabilities = tuple(scope_capabilities)
         self._security_downgrades: tuple[str, ...] = ()
         if replay_store is None and pccb_verifier is not None:
             # No trust root means every proof is refused, so there is no
@@ -281,9 +284,24 @@ class BoundaryVerifier:
             )
 
         # Step 5: The route's declared action and target bind the intent.
+        if not request.action_type or not str(request.action_type).strip():
+            return BoundaryVerificationResult.failure(
+                "no boundary action_type declared",
+                "MALFORMED_REQUEST",
+            )
+        trusted_capabilities = tuple(
+            request.scope_capabilities
+            or self._scope_capabilities
+            or (request.action_type,)
+        )
         if intent.action.name != request.action_type:
             return BoundaryVerificationResult.failure(
                 "the intent's action does not match this boundary's action",
+                "ACTION_MISMATCH",
+            )
+        if intent.action.capability not in trusted_capabilities:
+            return BoundaryVerificationResult.failure(
+                "the intent's capability is not permitted by this boundary's trusted scope",
                 "ACTION_MISMATCH",
             )
         if request.target and intent.target.resource_id != request.target:
@@ -296,7 +314,7 @@ class BoundaryVerifier:
         context = DynamicContextInput(
             request_id=f"req_boundary_{uuid4().hex}",
             audience=audience,
-            scope_capabilities=(intent.action.capability,),
+            scope_capabilities=trusted_capabilities,
             now=request.now or datetime.now(timezone.utc),
         )
         try:

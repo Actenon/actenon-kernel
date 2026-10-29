@@ -150,6 +150,7 @@ class ProductionProtectedEndpointTests(unittest.TestCase):
                 escrow=InMemoryCapabilityEscrow(),
                 replay_store=SqliteReplayStore(Path(tempdir) / "replay.sqlite3"),
                 outcome_writer=InMemoryOutcomeWriter(),
+                scope_capabilities=context.scope_capabilities,
             )
             request = endpoint.build_request(
                 intent=intent,

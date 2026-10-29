@@ -49,7 +49,7 @@ postgres = ["psycopg[binary]>=3.1"]
 
 [tool.uv.sources]
 # Coordinated source testing only; remove before registry publication.
-actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "d79af481be6badc99b13e15118026b96883fa171" }
+actenon-protocol = { git = "https://github.com/Actenon/actenon-protocol", rev = "a2e0e08fcd24b71eb1668204ba6bed00e4c63551" }
 
 [project.scripts]
 # The kernel's CLI is `actenon-kernel`. The unified developer CLI `actenon`
@@ -70,7 +70,7 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["actenon*", "conformance*", "examples*", "schemas*"]
+include = ["actenon*", "actenon_kernel*", "conformance*", "examples*", "schemas*"]
 
 [tool.setuptools.package-data]
 "actenon" = ["scanner_capability_registry.v1.json"]
