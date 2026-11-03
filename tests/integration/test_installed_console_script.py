@@ -15,6 +15,30 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 _SKIP_PROTOCOL_INSTALL = sys.version_info < (3, 10)
 
 
+def _coordinated_protocol_resolvable(python: Path) -> bool:
+    """True when actenon-protocol>=1.6.0,<2 can be installed right now.
+
+    The coordinated candidate package (1.6.0) is unpublished; CI installs it
+    by exporting PIP_CONSTRAINT=.github/candidate-constraints.txt, which
+    redirects the requirement to the pinned commit. From a clean clone
+    without that constraint the registry cannot satisfy the requirement, and
+    this integration check is BLOCKED on an unpublished external artefact —
+    it must report that, not fail as a regression.
+    """
+    probe = subprocess.run(
+        [
+            str(python), "-m", "pip", "install",
+            "--dry-run", "--quiet",
+            "actenon-protocol>=1.6.0,<2",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        timeout=180,
+    )
+    return probe.returncode == 0
+
+
 @unittest.skipIf(_SKIP_PROTOCOL_INSTALL, "actenon-protocol requires Python >= 3.10")
 class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
     def test_installed_actenon_kernel_console_script_and_packaged_viewer_work(self) -> None:
@@ -25,6 +49,13 @@ class InstalledConsoleScriptIntegrationTests(unittest.TestCase):
 
             bin_dir = venv_dir / ("Scripts" if os.name == "nt" else "bin")
             python = bin_dir / ("python.exe" if os.name == "nt" else "python")
+            if not _coordinated_protocol_resolvable(python):
+                raise unittest.SkipTest(
+                    "coordinated actenon-protocol>=1.6.0,<2 is not installable "
+                    "from the configured index; the candidate package is "
+                    "unpublished. Run the suite with "
+                    "PIP_CONSTRAINT=.github/candidate-constraints.txt"
+                )
             # The kernel's CLI is `actenon-kernel`. The `actenon` console script
             # is owned by actenon-permit (which depends on this package) to
             # avoid the install-order-dependent binary collision flagged in
