@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any, Callable
 
@@ -43,12 +45,12 @@ class DbApiReplayStore(ReplayStore):
         self._mutation_lock = threading.RLock()
         self._last_observed_counter = 0
         self.ensure_schema()
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             self._last_observed_counter = self._read_mutation_counter(cursor)
 
     def ensure_schema(self) -> None:
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             if self.schema_lock_statement:
                 cursor.execute(self.schema_lock_statement)
@@ -117,7 +119,7 @@ class DbApiReplayStore(ReplayStore):
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
         with self._mutation_lock:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 cursor = connection.cursor()
                 self._prepare_transaction(cursor)
                 self._assert_store_monotonic(cursor)
@@ -206,7 +208,7 @@ class DbApiReplayStore(ReplayStore):
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
         with self._mutation_lock:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 cursor = connection.cursor()
                 self._prepare_transaction(cursor)
                 self._assert_store_monotonic(cursor)
@@ -241,7 +243,7 @@ class DbApiReplayStore(ReplayStore):
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
         with self._mutation_lock:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 cursor = connection.cursor()
                 self._prepare_transaction(cursor)
                 self._assert_store_monotonic(cursor)
@@ -290,7 +292,7 @@ class DbApiReplayStore(ReplayStore):
     def inspect(self, replay_key: str, *, now: datetime | None = None) -> ActionConsumptionState | None:
         now_utc = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
         with self._mutation_lock:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 cursor = connection.cursor()
                 self._prepare_transaction(cursor)
                 self._assert_store_monotonic(cursor)
@@ -322,7 +324,7 @@ class DbApiReplayStore(ReplayStore):
     def purge_expired(self, *, now: datetime) -> int:
         now_raw = format_timestamp(now.astimezone(timezone.utc))
         with self._mutation_lock:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 cursor = connection.cursor()
                 self._prepare_transaction(cursor)
                 self._assert_store_monotonic(cursor)
@@ -348,6 +350,26 @@ class DbApiReplayStore(ReplayStore):
 
     def _connect(self):
         return self._connection_factory()
+
+    @contextmanager
+    def _connection(self) -> Iterator[Any]:
+        """Open a connection for one operation and close it afterwards.
+
+        Leaving ``with connection`` ends the transaction, but only some drivers
+        (psycopg 3) also close the connection. sqlite3 and psycopg2 leave it open,
+        and a dropped sqlite3 connection is reclaimed only by the cyclic garbage
+        collector, so a long-lived process accumulated open file descriptors until
+        it reached its limit. The factory must therefore return a connection this
+        store may close.
+        """
+        connection = self._connect()
+        try:
+            with connection:
+                yield connection
+        finally:
+            close = getattr(connection, "close", None)
+            if close is not None:
+                close()
 
     def _sql(self, statement: str) -> str:
         if self.parameter_placeholder == "?":

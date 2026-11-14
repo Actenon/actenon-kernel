@@ -16,6 +16,30 @@ under any later version.
   capability and revocation declarations within its development-only boundary.
 
 
+### Fixed — replay and escrow stores close every connection they open
+
+`DbApiReplayStore` and `SqliteCapabilityEscrow` opened a connection per operation
+inside `with connection:` and never closed it. For sqlite3 (and psycopg2) that
+block only ends the transaction, and a dropped sqlite3 connection is reclaimed
+only by the cyclic garbage collector, so open file descriptors accumulated
+between collections. A process making one claim per request reached its
+descriptor limit and then failed every request: under `ulimit -n 256` an Airlock
+broker stopped after 12,663 requests.
+
+- Every operation now closes its connection when it finishes, including when it
+  is refused. With the garbage collector disabled, 50 claim/consume rounds
+  previously left about 800 descriptors open; they now leave none.
+- A `connection_factory` passed to `DbApiReplayStore` or `PostgresReplayStore`
+  must return a connection the store may close. psycopg 3 already closed it on
+  leaving the block; psycopg2 connections are now closed as well.
+- Closing the last connection to a WAL database checkpoints it and deletes the
+  WAL, so with nothing left open a SQLite claim plus consume now takes about
+  four times as long (1.0 ms to 4.1 ms on the macOS machine that reproduced the
+  leak). `SqliteReplayStore(path, keep_open=True)` holds one idle connection for
+  the life of the store and restores the previous speed (0.9 ms); it is opt-in
+  because the caller must own that connection's lifetime (`close()`) and must
+  not carry it across `fork()`.
+
 ### Security — insecure development behaviour requires explicit development intent
 
 Two defects, reproduced against the released 1.2.1 wheel

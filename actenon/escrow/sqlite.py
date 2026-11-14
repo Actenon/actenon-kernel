@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -38,7 +40,7 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         self.ensure_schema()
 
     def ensure_schema(self) -> None:
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             cursor.execute(
                 """
@@ -73,7 +75,7 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         metadata: dict[str, Any] | None = None,
     ) -> EscrowRecord:
         now_raw = format_timestamp(datetime.now(timezone.utc))
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             try:
                 self._prepare_transaction(cursor)
@@ -115,7 +117,7 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         return issued
 
     def inspect(self, escrow_id: str) -> EscrowRecord | None:
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             row = self._select_row(cursor, escrow_id)
             if row is None:
@@ -125,7 +127,7 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
     def consume(self, *, escrow_id: str, pccb_id: str, capability: str, now: datetime) -> EscrowRecord:
         now_utc = now.astimezone(timezone.utc)
         now_raw = format_timestamp(now_utc)
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             self._prepare_transaction(cursor)
             row = self._select_row(cursor, escrow_id)
@@ -188,7 +190,7 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         return consumed
 
     def revoke(self, escrow_id: str, *, reason: str) -> EscrowRecord:
-        with self._connect() as connection:
+        with self._connection() as connection:
             cursor = connection.cursor()
             self._prepare_transaction(cursor)
             row = self._select_row(cursor, escrow_id)
@@ -218,6 +220,20 @@ class SqliteCapabilityEscrow(CapabilityEscrow):
         if revoked is None:  # pragma: no cover - defensive consistency check
             raise RuntimeError(f"escrow record {escrow_id!r} was revoked but could not be reloaded")
         return revoked
+
+    @contextmanager
+    def _connection(self) -> Iterator[sqlite3.Connection]:
+        """Open a connection for one operation and close it afterwards.
+
+        ``with connection`` only ends the transaction; left open, each connection
+        held its file descriptors until the cyclic garbage collector ran.
+        """
+        connection = self._connect()
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(

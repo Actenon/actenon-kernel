@@ -78,6 +78,22 @@ class _PercentStyleSqliteConnection:
         self._connection.rollback()
 
 
+class _TransactionOnlyConnection(_PercentStyleSqliteConnection):
+    """psycopg2 semantics: leaving the block ends the transaction and keeps the connection open."""
+
+    closed = False
+
+    def __exit__(self, exc_type, exc, traceback) -> None:
+        if exc_type is None:
+            self._connection.commit()
+        else:
+            self._connection.rollback()
+
+    def close(self) -> None:
+        self.closed = True
+        self._connection.close()
+
+
 class PostgresReplayStoreTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tempdir = TemporaryDirectory()
@@ -144,6 +160,25 @@ class PostgresReplayStoreTests(unittest.TestCase):
 
         self.assertEqual(1, purged)
         self.assertEqual("claimed", reclaimed.status)
+
+    def test_connections_are_closed_when_the_driver_only_ends_the_transaction(self) -> None:
+        opened: list[_TransactionOnlyConnection] = []
+
+        def factory() -> _TransactionOnlyConnection:
+            connection = _TransactionOnlyConnection(self.database_path, self.sql_log)
+            opened.append(connection)
+            return connection
+
+        store = PostgresReplayStore(connection_factory=factory)
+        now = datetime.now(timezone.utc)
+        claim = build_claim(replay_key="rpk_pg_closed")
+        store.claim_once(claim, now=now)
+        with self.assertRaises(ReplayValidationError):
+            store.claim_once(claim, now=now)
+        store.mark_consumed(claim.replay_key, now=now)
+
+        self.assertTrue(opened)
+        self.assertEqual([], [index for index, connection in enumerate(opened) if not connection.closed])
 
     def test_adapter_uses_postgresql_parameter_style_for_claims(self) -> None:
         self.store.claim_once(build_claim(replay_key="rpk_pg_parameter_style"), now=datetime.now(timezone.utc))
