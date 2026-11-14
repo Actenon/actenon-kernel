@@ -10,11 +10,40 @@ from .dbapi import DbApiReplayStore
 class SqliteReplayStore(DbApiReplayStore):
     """Durable local/dev replay store backed by SQLite."""
 
-    def __init__(self, database_path: str | Path, *, timeout_seconds: float = 30.0) -> None:
+    def __init__(
+        self,
+        database_path: str | Path,
+        *,
+        timeout_seconds: float = 30.0,
+        keep_open: bool = False,
+    ) -> None:
+        """Open the store, creating the database if needed.
+
+        Every operation opens its own connection and closes it. Closing the last
+        connection to a WAL database checkpoints it and deletes the WAL, so a
+        process that is the database's only user pays for that on every operation
+        (a claim plus consume measured about four times slower).
+
+        ``keep_open=True`` holds one idle connection for the life of the store so
+        an operation's close is never the last one. It is meant for a single
+        long-lived owner: call :meth:`close` when finished, and do not carry the
+        store across ``fork()``.
+        """
         self.database_path = Path(database_path)
         self.timeout_seconds = timeout_seconds
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
+        self._held_open: sqlite3.Connection | None = None
         super().__init__(self._create_connection)
+        if keep_open:
+            self._held_open = self._create_connection()
+            # A read takes the shared lock that tells other connections the WAL is in use.
+            self._held_open.execute("SELECT COUNT(*) FROM sqlite_master").fetchone()
+
+    def close(self) -> None:
+        """Release the connection held by ``keep_open``. The store stays usable."""
+        held, self._held_open = self._held_open, None
+        if held is not None:
+            held.close()
 
     def _create_connection(self) -> sqlite3.Connection:
         """Create a configured SQLite connection.
